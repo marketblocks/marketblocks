@@ -1,9 +1,15 @@
 ﻿#include <iostream>
 
-using namespace std;
+#include "runner.h"
+#include "strategies/test_strategy.h"
+#include "strategies/tri_arb.h"
 
 int main()
 {
-	cout << "Hello CMake." << endl;
+	TestStrategy s;
+	TriArbStrategy triArb = TriArbStrategy::create();
+
+	CryptoBot::runner::run(triArb);
+
 	return 0;
 }
