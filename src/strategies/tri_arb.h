@@ -28,15 +28,15 @@ public:
 class TriArbExchangeSpec
 {
 private:
-	const std::shared_ptr<CryptoBot::Exchange> _pexchange;
+	const std::shared_ptr<Exchange> _pexchange;
 	const std::vector<TriArbSequence> _sequences;
 
 public:
-	explicit TriArbExchangeSpec(std::shared_ptr<CryptoBot::Exchange> pexchange, std::vector<TriArbSequence>&& sequences)
+	explicit TriArbExchangeSpec(std::shared_ptr<Exchange> pexchange, std::vector<TriArbSequence>&& sequences)
 		: _pexchange{pexchange}, _sequences{std::move(sequences)}
 	{}
 
-	const std::shared_ptr<CryptoBot::Exchange> exchange() const { return _pexchange; }
+	const std::shared_ptr<Exchange> exchange() const { return _pexchange; }
 	const std::vector<TriArbSequence>& sequences() const { return _sequences; }
 };
 
@@ -50,7 +50,7 @@ public:
 		: _specs{specs}
 	{}
 
-	static TriArbStrategy create();
+	static TriArbStrategy create(const std::vector<std::shared_ptr<Exchange>>& exchanges);
 
 	void operator()();
 };

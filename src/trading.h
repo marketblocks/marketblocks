@@ -3,7 +3,10 @@
 enum class AssetSymbol
 {
 	GBP,
-	BTC
+	USD,
+	BTC,
+	ETH,
+	LTC
 };
 
 enum class TradeAction
@@ -25,7 +28,24 @@ public:
 
 	AssetSymbol asset() const { return _asset; }
 	AssetSymbol price_unit() const { return _priceUnit; }
+
+	bool operator==(const TradablePair& other)
+	{
+		return _asset == other._asset && _priceUnit == other._priceUnit;
+	}
 };
+
+namespace std
+{
+	template<>
+	struct hash<TradablePair>
+	{
+		size_t operator()(const TradablePair& pair) const
+		{
+			return std::hash<AssetSymbol>()(pair.asset()) ^ std::hash<AssetSymbol>()(pair.price_unit());
+		}
+	};
+}
 
 class TradeDescription
 {
