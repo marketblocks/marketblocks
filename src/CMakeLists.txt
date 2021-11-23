@@ -7,3 +7,4 @@ cmake_minimum_required (VERSION 3.8)
 add_executable (CryptoBot "main.cpp"   "runner.h"   "exchanges/exchange.h" "data.h" "trading.h"   "strategies/tri_arb.cpp" "utils/vectorutils.h"     "exchanges/dummy_exchange.h" "exchanges/dummy_exchange.cpp")
 
 # TODO: Add tests and install targets if needed.
+include_directories("../thirdparty")
