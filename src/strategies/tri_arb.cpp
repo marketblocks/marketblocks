@@ -65,11 +65,67 @@ TriArbStrategy TriArbStrategy::create(const std::vector<std::shared_ptr<Exchange
 	return s;
 }
 
+void print_pair(const TradablePair& pair)
+{
+	std::cout << static_cast<int>(pair.asset()) << "/" << static_cast<int>(pair.price_unit());
+}
+
+void print_sequence(const TriArbSequence& sequence)
+{
+	print_pair(sequence.first().pair());
+	std::cout << "->";
+	print_pair(sequence.middle().pair());
+	std::cout << "->";
+	print_pair(sequence.last().pair());
+}
+
 void TriArbStrategy::operator()()
 {
-	for (auto& seq : _specs[0].sequences())
+	for (auto& spec : _specs)
 	{
-		std::cout << "Sequence: " << static_cast<int>(seq.first().pair().asset()) << std::endl;
+		for (auto& sequence : spec.sequences())
+		{
+			std::unordered_map<TradablePair, PriceData> prices = spec.exchange()->get_price_data(sequence.pairs());
 
+			PriceData firstPrices = prices.at(sequence.first().pair());
+			PriceData middlePrices = prices.at(sequence.middle().pair());
+			PriceData lastPrices = prices.at(sequence.last().pair());
+
+			double effectivePrice;
+			double actualPrice;
+			double middlePrice;
+
+			if (sequence.middle().action() == TradeAction::BUY)
+			{
+				middlePrice = middlePrices.ask();
+				effectivePrice = lastPrices.bid() / firstPrices.ask();
+				actualPrice = middlePrice;
+			}
+			else
+			{
+				middlePrice = middlePrices.bid();
+				effectivePrice = middlePrice * lastPrices.bid();
+				actualPrice = firstPrices.ask();
+			}
+
+			double percentageDiff = (effectivePrice - actualPrice) * 100 / actualPrice;
+			double totalFee = spec.exchange()->get_fee() * 3;
+
+			if (percentageDiff > 1e-4)
+			{
+				std::cout << "Sequence: ";
+				print_sequence(sequence);
+				std::cout << std::endl;
+
+				std::cout << "Percentage Difference: " << percentageDiff << "%" << std::endl;
+				std::cout << "Total Fee: " << totalFee << "%" << std::endl;
+				std::cout << "Potential Profit: " << percentageDiff - totalFee << "%" << std::endl;
+			}
+
+			//if (percentageDiff > totalFee)
+			//{
+			//	// trade
+			//}
+		}
 	}
 }

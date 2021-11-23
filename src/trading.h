@@ -29,7 +29,7 @@ public:
 	AssetSymbol asset() const { return _asset; }
 	AssetSymbol price_unit() const { return _priceUnit; }
 
-	bool operator==(const TradablePair& other)
+	bool operator==(const TradablePair& other) const
 	{
 		return _asset == other._asset && _priceUnit == other._priceUnit;
 	}

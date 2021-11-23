@@ -45,11 +45,11 @@ class TriArbStrategy
 private:
 	const std::vector<TriArbExchangeSpec> _specs;
 
-public:
 	explicit TriArbStrategy(std::vector<TriArbExchangeSpec>&& specs)
 		: _specs{specs}
 	{}
 
+public:
 	static TriArbStrategy create(const std::vector<std::shared_ptr<Exchange>>& exchanges);
 
 	void operator()();

@@ -7,6 +7,10 @@ private:
 	const double _ask;
 
 public:
+	explicit PriceData()
+		: _bid{0}, _ask{0}
+	{}
+
 	explicit PriceData(double bid, double ask)
 		: _bid{bid}, _ask{ask}
 	{}

@@ -2,7 +2,7 @@
 
 double DummyExchange::get_fee() const
 {
-	return 0.01;
+	return 0.1;
 }
 
 const std::vector<TradablePair> DummyExchange::get_tradable_pairs() const
