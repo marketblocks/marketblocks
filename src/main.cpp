@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <curl/curl.h>
 
 #include "runner.h"
 #include "exchanges/exchange.h"
