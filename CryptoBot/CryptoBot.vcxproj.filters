@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{996e5f6f-4819-4b89-a1bc-f3e2044a1600}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\exchanges">
+      <UniqueIdentifier>{4c5f822f-e07e-44b7-a766-caea7b0ffb62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\misc">
+      <UniqueIdentifier>{a1b090a3-468a-40e9-8a23-6f216feba592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\networking">
+      <UniqueIdentifier>{4923c7f9-88e4-43ef-a302-41b00456b73d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\strategies">
+      <UniqueIdentifier>{8547ed1d-bb01-45de-9713-66a2ed680a71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{aaf311e9-510e-4267-baa9-476e6267db15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\exchanges\kraken">
+      <UniqueIdentifier>{a941c867-7d48-4276-84f5-2a936cf7bb14}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\exchanges\kraken\kraken.cpp">
+      <Filter>src\exchanges\kraken</Filter>
+    </ClCompile>
+    <ClCompile Include="src\networking\httpservice.cpp">
+      <Filter>src\networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\networking\json.cpp">
+      <Filter>src\networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\stringutils.cpp">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\strategies\tri_arb.cpp">
+      <Filter>src\strategies</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\runner.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exchanges\exchange.h">
+      <Filter>src\exchanges</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exchanges\kraken\kraken.h">
+      <Filter>src\exchanges\kraken</Filter>
+    </ClInclude>
+    <ClInclude Include="src\misc\data.h">
+      <Filter>src\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\misc\trading.h">
+      <Filter>src\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\networking\httpconstants.h">
+      <Filter>src\networking</Filter>
+    </ClInclude>
+    <ClInclude Include="src\networking\httpservice.h">
+      <Filter>src\networking</Filter>
+    </ClInclude>
+    <ClInclude Include="src\networking\json.h">
+      <Filter>src\networking</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\stringutils.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\vectorutils.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\strategies\tri_arb.h">
+      <Filter>src\strategies</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
