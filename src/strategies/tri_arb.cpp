@@ -17,7 +17,7 @@ TriArbStrategy TriArbStrategy::create(const std::vector<std::shared_ptr<Exchange
 		
 		for (auto& firstPair : gbpTradables)
 		{
-			AssetSymbol purchasedAsset = firstPair.asset();
+			const std::string_view& purchasedAsset = firstPair.asset();
 			
 			std::vector<TradablePair> possibleMiddles = copy_where(tradablePairs, [purchasedAsset](const TradablePair& pair)
 			{ 
@@ -26,7 +26,7 @@ TriArbStrategy TriArbStrategy::create(const std::vector<std::shared_ptr<Exchange
 
 			for (auto& middlePair : possibleMiddles)
 			{
-				AssetSymbol middleOtherAsset;
+				std::string_view middleOtherAsset;
 				TradeAction middleAction;
 
 				if (middlePair.asset() == purchasedAsset)
@@ -67,7 +67,7 @@ TriArbStrategy TriArbStrategy::create(const std::vector<std::shared_ptr<Exchange
 
 void print_pair(const TradablePair& pair)
 {
-	std::cout << static_cast<int>(pair.asset()) << "/" << static_cast<int>(pair.price_unit());
+	std::cout << pair.asset() << "/" << pair.price_unit();
 }
 
 void print_sequence(const TriArbSequence& sequence)

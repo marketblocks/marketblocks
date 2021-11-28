@@ -12,3 +12,16 @@ std::vector<T> copy_where(const std::vector<T>& source, Predicate p)
 
 	return copied;
 }
+
+template<typename Key, typename Value, typename Source, typename KeySelector, typename ValueSelector>
+std::unordered_map<Key, Value> to_unordered_map(const std::vector<Source>& source, KeySelector keySelector, ValueSelector valueSelector)
+{
+	std::unordered_map<Key, Value> map;
+	map.reserve(source.size());
+
+	for (const Source& item : source)
+	{
+		map.emplace(keySelector(item), valueSelector(item));
+	}
+	return map;
+}

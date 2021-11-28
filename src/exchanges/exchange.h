@@ -3,8 +3,8 @@
 #include <vector>
 #include <unordered_map>
 
-#include "..\data.h"
-#include "..\trading.h"
+#include "..\misc\data.h"
+#include "..\misc\trading.h"
 
 class Exchange
 {

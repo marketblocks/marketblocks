@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "..\trading.h"
+#include "..\misc\trading.h"
 #include "..\exchanges\exchange.h"
 
 class TriArbSequence
