@@ -73,3 +73,16 @@ public:
 	const TradablePair pair() const { return _pair; }
 	const TradeAction action() const { return _action; }
 };
+
+class TradeResult
+{
+private:
+	bool _success;
+
+public:
+	explicit TradeResult(bool success)
+		: _success{success}
+	{}
+
+	bool success() const { return _success; }
+};

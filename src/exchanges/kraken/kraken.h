@@ -4,7 +4,7 @@
 #include "..\exchange.h"
 #include "..\..\networking\httpservice.h"
 
-class KrakenExchange final : public Exchange
+class KrakenMarketData final : public MarketData
 {
 private:
 	HttpService httpService;
@@ -14,9 +14,16 @@ private:
 	const std::unordered_map<TradablePair, PriceData> read_price_data(const std::string& jsonResult, const std::vector<TradablePair>& tradablePairs) const;
 
 public:
-	KrakenExchange();
+	KrakenMarketData();
 
-	virtual double get_fee() const override;
-	virtual const std::vector<TradablePair> get_tradable_pairs() const override;
-	virtual const std::unordered_map<TradablePair, PriceData> get_price_data(const std::vector<TradablePair>& tradablePairs) const override;
+	double get_fee() const override;
+	const std::vector<TradablePair> get_tradable_pairs() const override;
+	const std::unordered_map<TradablePair, PriceData> get_price_data(const std::vector<TradablePair>& tradablePairs) const override;
+};
+
+class KrakenTrader final : public Trader
+{
+	const std::unordered_map<std::string, double> get_all_balances() const override;
+	double get_balance(const std::string& tickerId) const override;
+	const TradeResult trade(const TradeDescription& description, double volume, double price) override;
 };

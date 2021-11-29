@@ -4,14 +4,14 @@
 #include "tri_arb.h"
 #include "..\utils\vectorutils.h"
 
-TriArbStrategy TriArbStrategy::create(const std::vector<std::shared_ptr<Exchange>>& exchanges)
+TriArbStrategy TriArbStrategy::create(std::vector<Exchange>& exchanges)
 {
 	std::vector<TriArbExchangeSpec> specs;
 	specs.reserve(exchanges.size());
 
 	for (auto& exchange : exchanges)
 	{
-		const std::vector<TradablePair> tradablePairs = exchange->get_tradable_pairs();
+		const std::vector<TradablePair> tradablePairs = exchange.get_tradable_pairs();
 		std::vector<TriArbSequence> sequences;
 		std::vector<TradablePair> gbpTradables = copy_where(tradablePairs, [](const TradablePair& pair) { return pair.price_unit() == AssetSymbol::GBP; });
 		
@@ -85,7 +85,7 @@ void TriArbStrategy::operator()()
 	{
 		for (auto& sequence : spec.sequences())
 		{
-			std::unordered_map<TradablePair, PriceData> prices = spec.exchange()->get_price_data(sequence.pairs());
+			const std::unordered_map<TradablePair, PriceData> prices = spec.exchange().get_price_data(sequence.pairs());
 
 			PriceData firstPrices = prices.at(sequence.first().pair());
 			PriceData middlePrices = prices.at(sequence.middle().pair());
@@ -109,7 +109,7 @@ void TriArbStrategy::operator()()
 			}
 
 			double percentageDiff = (effectivePrice - actualPrice) * 100 / actualPrice;
-			double totalFee = spec.exchange()->get_fee() * 3;
+			double totalFee = spec.exchange().get_fee() * 3;
 
 			if (percentageDiff > 1e-4)
 			{
@@ -120,6 +120,11 @@ void TriArbStrategy::operator()()
 				std::cout << "Percentage Difference: " << percentageDiff << "%" << std::endl;
 				std::cout << "Total Fee: " << totalFee << "%" << std::endl;
 				std::cout << "Potential Profit: " << percentageDiff - totalFee << "%" << std::endl;
+
+				if (percentageDiff - totalFee > 1)
+				{
+					std::cout << "profit";
+				}
 			}
 
 			//if (percentageDiff > totalFee)

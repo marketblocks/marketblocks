@@ -3,12 +3,12 @@
 #include "..\..\utils\stringutils.h"
 #include "..\..\utils\vectorutils.h"
 
-KrakenExchange::KrakenExchange()
+KrakenMarketData::KrakenMarketData()
 	: httpService{}
 {
 }
 
-const std::string KrakenExchange::build_price_data_uri(const std::vector<TradablePair>& tradablePairs) const
+const std::string KrakenMarketData::build_price_data_uri(const std::vector<TradablePair>& tradablePairs) const
 {
 	std::string uri = "https://api.kraken.com/0/public/Ticker?pair=";
 
@@ -28,7 +28,7 @@ const std::string KrakenExchange::build_price_data_uri(const std::vector<Tradabl
 	return uri;
 }
 
-const std::vector<TradablePair> KrakenExchange::read_tradable_pairs(const std::string& jsonResult) const
+const std::vector<TradablePair> KrakenMarketData::read_tradable_pairs(const std::string& jsonResult) const
 {
 	JsonWrapper json{ jsonResult };
 	auto resultObject = json.document()["result"].GetObject();
@@ -46,7 +46,7 @@ const std::vector<TradablePair> KrakenExchange::read_tradable_pairs(const std::s
 	return pairs;
 }
 
-const std::unordered_map<TradablePair, PriceData> KrakenExchange::read_price_data(const std::string& jsonResult, const std::vector<TradablePair>& tradablePairs) const
+const std::unordered_map<TradablePair, PriceData> KrakenMarketData::read_price_data(const std::string& jsonResult, const std::vector<TradablePair>& tradablePairs) const
 {
 	JsonWrapper json{ jsonResult };
 	auto resultObject = json.document()["result"].GetObject();
@@ -71,20 +71,35 @@ const std::unordered_map<TradablePair, PriceData> KrakenExchange::read_price_dat
 	return priceDataMap;
 }
 
-double KrakenExchange::get_fee() const
+double KrakenMarketData::get_fee() const
 {
 	return 0.27; // Temporary
 }
 
-const std::vector<TradablePair> KrakenExchange::get_tradable_pairs() const
+const std::vector<TradablePair> KrakenMarketData::get_tradable_pairs() const
 {
 	std::string result = httpService.get("https://api.kraken.com/0/public/AssetPairs");
 	return read_tradable_pairs(result);
 }
 
-const std::unordered_map<TradablePair, PriceData> KrakenExchange::get_price_data(const std::vector<TradablePair>& tradablePairs) const
+const std::unordered_map<TradablePair, PriceData> KrakenMarketData::get_price_data(const std::vector<TradablePair>& tradablePairs) const
 {
 	std::string uri = build_price_data_uri(tradablePairs);
 	std::string result = httpService.get(uri);
 	return read_price_data(result, tradablePairs);
+}
+
+const std::unordered_map<std::string, double> KrakenTrader::get_all_balances() const
+{
+	return std::unordered_map<std::string, double>();
+}
+
+double KrakenTrader::get_balance(const std::string& tickerId) const
+{
+	return 0.0;
+}
+
+const TradeResult KrakenTrader::trade(const TradeDescription& description, double volume, double price)
+{
+	return TradeResult(true);
 }

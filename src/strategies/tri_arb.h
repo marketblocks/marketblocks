@@ -28,29 +28,29 @@ public:
 class TriArbExchangeSpec
 {
 private:
-	const std::shared_ptr<Exchange> _pexchange;
+	Exchange& _exchange;
 	const std::vector<TriArbSequence> _sequences;
 
 public:
-	explicit TriArbExchangeSpec(std::shared_ptr<Exchange> pexchange, std::vector<TriArbSequence>&& sequences)
-		: _pexchange{pexchange}, _sequences{std::move(sequences)}
+	explicit TriArbExchangeSpec(Exchange& exchange, std::vector<TriArbSequence>&& sequences)
+		: _exchange{exchange}, _sequences{std::move(sequences)}
 	{}
 
-	const std::shared_ptr<Exchange> exchange() const { return _pexchange; }
+	Exchange& exchange() { return _exchange; }
 	const std::vector<TriArbSequence>& sequences() const { return _sequences; }
 };
 
 class TriArbStrategy
 {
 private:
-	const std::vector<TriArbExchangeSpec> _specs;
+	std::vector<TriArbExchangeSpec> _specs;
 
 	explicit TriArbStrategy(std::vector<TriArbExchangeSpec>&& specs)
 		: _specs{specs}
 	{}
 
 public:
-	static TriArbStrategy create(const std::vector<std::shared_ptr<Exchange>>& exchanges);
+	static TriArbStrategy create(std::vector<Exchange>& exchanges);
 
 	void operator()();
 };
