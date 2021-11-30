@@ -83,6 +83,8 @@ void TriArbStrategy::operator()()
 {
 	for (auto& spec : _specs)
 	{
+		double tradeValue = 0.05 * spec.exchange().get_balance("GBP");
+
 		for (auto& sequence : spec.sequences())
 		{
 			const std::unordered_map<TradablePair, PriceData> prices = spec.exchange().get_price_data(sequence.pairs());
@@ -113,24 +115,37 @@ void TriArbStrategy::operator()()
 
 			if (percentageDiff > 1e-4)
 			{
-				std::cout << "Sequence: ";
-				print_sequence(sequence);
-				std::cout << std::endl;
-
-				std::cout << "Percentage Difference: " << percentageDiff << "%" << std::endl;
-				std::cout << "Total Fee: " << totalFee << "%" << std::endl;
-				std::cout << "Potential Profit: " << percentageDiff - totalFee << "%" << std::endl;
-
-				if (percentageDiff - totalFee > 1)
+				if (percentageDiff > totalFee)
 				{
-					std::cout << "profit";
+					double tradeVolume = tradeValue / firstPrices.ask();
+					spec.exchange().trade(sequence.first(), tradeVolume, firstPrices.ask());
+
+					double finalTradeVolume;
+					if (sequence.middle().action() == TradeAction::BUY)
+					{
+						tradeVolume /= middlePrice;
+						finalTradeVolume = tradeVolume;
+					}
+					else
+					{
+						finalTradeVolume = tradeVolume * middlePrice;
+					}
+					
+					spec.exchange().trade(sequence.middle(), tradeVolume, middlePrice);
+					spec.exchange().trade(sequence.last(), finalTradeVolume, lastPrices.bid());
+
+					std::cout << "TRADE:" << std::endl;
+					std::cout << "Sequence: ";
+					print_sequence(sequence);
+					std::cout << std::endl;
+
+					std::cout << "Percentage Difference: " << percentageDiff << "%" << std::endl;
+					std::cout << "Total Fee: " << totalFee << "%" << std::endl;
+					std::cout << "Potential Profit: " << percentageDiff - totalFee << "%" << std::endl;
+
+					std::cout << "New GBP Balance: " << spec.exchange().get_balance("GBP") << std::endl;
 				}
 			}
-
-			//if (percentageDiff > totalFee)
-			//{
-			//	// trade
-			//}
 		}
 	}
 }

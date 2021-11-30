@@ -10,7 +10,11 @@
 int main()
 {
 	std::vector<Exchange> exchanges;
-	exchanges.emplace_back(std::make_unique<KrakenMarketData>(), std::make_unique<PaperTrader>());
+	std::unordered_map<std::string, double> initialBalance
+	{
+		{"GBP", 1000.0}
+	};
+	exchanges.emplace_back(std::make_unique<KrakenMarketData>(), std::make_unique<PaperTrader>(initialBalance));
 
 	TriArbStrategy triArb = TriArbStrategy::create(exchanges);
 
