@@ -7,6 +7,7 @@ using testing::Return;
 using testing::Matcher;
 using testing::AllOf;
 using testing::Property;
+using testing::Contains;
 
 auto IsTradeDescription(const TradeDescription& description)
 {
@@ -17,14 +18,66 @@ auto IsTradeDescription(const TradeDescription& description)
 		Property(&TradeDescription::volume, description.volume()));
 }
 
+auto IsTriArbSequence(const TriArbSequence& sequence)
+{
+	return AllOf(
+		Property(&TriArbSequence::first, sequence.first()),
+		Property(&TriArbSequence::middle, sequence.middle()),
+		Property(&TriArbSequence::last, sequence.last()));
+}
+
+std::string to_string(const TradeAction& action)
+{
+	return action == TradeAction::BUY ? "BUY" : "SELL";
+}
+
 void PrintTo(const TradeDescription& description, std::ostream* os)
 {
-	std::string action = description.action() == TradeAction::BUY ? "BUY" : "SELL";
-
 	*os << "Tradable Pair: " << description.pair().asset() << "/" << description.pair().price_unit() << std::endl;
-	*os << "Action: " << action << std::endl;
+	*os << "Action: " << to_string(description.action()) << std::endl;
 	*os << "Asset Price: " << description.asset_price() << std::endl;
 	*os << "Volume: " << description.volume() << std::endl;
+}
+
+void PrintTo(const SequenceStep& step, std::ostream* os)
+{
+	*os << "Tradable Pair: " << step.pair().asset() << "/" << step.pair().price_unit() << std::endl;
+	*os << "Action: " << to_string(step.action()) << std::endl;
+}
+
+std::vector<TriArbExchangeSpec> execute_create_exchange_specs(std::vector<TradablePair> tradablePairs)
+{
+	auto mockMarketData = std::make_unique<testing::NiceMock<MockMarketData>>();
+
+	EXPECT_CALL(*mockMarketData, get_tradable_pairs).WillOnce(Return(tradablePairs));
+
+	std::vector<std::shared_ptr<Exchange>> exchanges
+	{
+		std::make_shared<Exchange>(std::move(mockMarketData), std::make_unique<MockTrader>())
+	};
+
+	std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges);
+
+	return specs;
+}
+
+void execute_create_specs_test(
+	std::vector<TradablePair> tradablePairs,
+	std::vector<TradeAction> expectedActions)
+{
+	std::vector<TriArbExchangeSpec> specs = execute_create_exchange_specs(tradablePairs);
+
+	TriArbExchangeSpec& spec = specs[0];
+
+	TriArbSequence expectedSequence
+	{
+		SequenceStep{ tradablePairs[0], expectedActions[0] },
+		SequenceStep{ tradablePairs[1], expectedActions[1] },
+		SequenceStep{ tradablePairs[2], expectedActions[2] },
+		tradablePairs
+	};
+
+	EXPECT_THAT(spec.sequences(), Contains(IsTriArbSequence(expectedSequence)));
 }
 
 void execute_trade_sequence_test(
@@ -70,6 +123,173 @@ void execute_trade_sequence_test(
 	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0 } };
 
 	strategy.run_iteration();
+}
+
+TEST(TriArb, CreateSpecFindsBothSequences)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "BTC", "GBP" },
+		TradablePair{ "ETH", "BTC" },
+		TradablePair{ "ETH", "GBP" },
+	};
+
+	std::vector<TriArbExchangeSpec> specs = execute_create_exchange_specs(tradablePairs);
+
+	ASSERT_EQ(specs.size(), 1);
+	ASSERT_EQ(specs[0].sequences().size(), 2);
+}
+
+TEST(TriArb, CreateSpecsFindsBBB)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "EUR", "GBP" },
+		TradablePair{ "USD", "EUR" },
+		TradablePair{ "GBP", "USD" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::BUY,
+		TradeAction::BUY,
+		TradeAction::BUY
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsBBS)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "BTC", "GBP" },
+		TradablePair{ "ETH", "BTC" },
+		TradablePair{ "ETH", "GBP" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::BUY,
+		TradeAction::BUY,
+		TradeAction::SELL
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsBSB)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "BTC", "GBP" },
+		TradablePair{ "BTC", "USD" },
+		TradablePair{ "GBP", "USD" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::BUY,
+		TradeAction::SELL,
+		TradeAction::BUY
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsBSS)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "BTC", "GBP" },
+		TradablePair{ "BTC", "EUR" },
+		TradablePair{ "EUR", "GBP" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::BUY,
+		TradeAction::SELL,
+		TradeAction::SELL
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsSBB)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "GBP", "EUR" },
+		TradablePair{ "USD", "EUR" },
+		TradablePair{ "GBP", "USD" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::SELL,
+		TradeAction::BUY,
+		TradeAction::BUY
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsSBS)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "GBP", "USD" },
+		TradablePair{ "BTC", "USD" },
+		TradablePair{ "BTC", "GBP" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::SELL,
+		TradeAction::BUY,
+		TradeAction::SELL
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsSSB)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "GBP", "EUR" },
+		TradablePair{ "EUR", "USD" },
+		TradablePair{ "GBP", "USD" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::SELL,
+		TradeAction::SELL,
+		TradeAction::BUY
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
+}
+
+TEST(TriArb, CreateSpecsFindsSSS)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "GBP", "EUR" },
+		TradablePair{ "EUR", "USD" },
+		TradablePair{ "USD", "GBP" },
+	};
+
+	std::vector<TradeAction> expectedActions
+	{
+		TradeAction::SELL,
+		TradeAction::SELL,
+		TradeAction::SELL
+	};
+
+	execute_create_specs_test(tradablePairs, expectedActions);
 }
 
 TEST(TriArb, IterationExecutesTradesBBB)

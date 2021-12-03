@@ -21,6 +21,11 @@ public:
 
 	const TradablePair& pair() const { return _pair; }
 	const TradeAction& action() const { return _action; }
+
+	bool operator==(const SequenceStep& other) const
+	{
+		return _action == other._action && _pair == other._pair;
+	}
 };
 
 class TriArbSequence
@@ -90,4 +95,5 @@ public:
 	void run_iteration();
 };
 
+std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges);
 TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options);

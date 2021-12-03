@@ -6,7 +6,7 @@
 #include "utils\mathutils.h"
 #include "utils\financeutils.h"
 
-TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options)
+std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges)
 {
 	std::vector<TriArbExchangeSpec> specs;
 	specs.reserve(exchanges.size());
@@ -16,15 +16,15 @@ TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchang
 		const std::vector<TradablePair> tradablePairs = exchange->get_tradable_pairs();
 		std::vector<TriArbSequence> sequences;
 		std::vector<TradablePair> gbpTradables = copy_where(tradablePairs, [](const TradablePair& pair) { return pair.price_unit() == AssetSymbol::GBP; });
-		
+
 		for (auto& firstPair : gbpTradables)
 		{
 			const std::string_view& purchasedAsset = firstPair.asset();
-			
+
 			std::vector<TradablePair> possibleMiddles = copy_where(tradablePairs, [purchasedAsset](const TradablePair& pair)
-			{ 
-				return (pair.asset() == purchasedAsset && pair.price_unit() != AssetSymbol::GBP) || pair.price_unit() == purchasedAsset;
-			});
+				{
+					return (pair.asset() == purchasedAsset && pair.price_unit() != AssetSymbol::GBP) || pair.price_unit() == purchasedAsset;
+				});
 
 			for (auto& middlePair : possibleMiddles)
 			{
@@ -62,8 +62,13 @@ TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchang
 		specs.emplace_back(exchange, std::move(sequences));
 	}
 
-	TriArbStrategy s{ std::move(specs), std::move(options) };
-	return s;
+	return specs;
+}
+
+TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options)
+{
+	std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges);
+	return TriArbStrategy{ std::move(specs), std::move(options) };
 }
 
 static void print_pair(const TradablePair& pair)
