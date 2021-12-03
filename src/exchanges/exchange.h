@@ -4,10 +4,8 @@
 #include <unordered_map>
 #include <memory>
 
-#include "..\misc\data.h"
-#include "..\misc\trading.h"
-
-#include <iostream>
+#include "misc\data.h"
+#include "misc\trading.h"
 
 class MarketData
 {
@@ -26,8 +24,7 @@ public:
 
 	virtual const std::unordered_map<std::string, double> get_all_balances() const = 0;
 	virtual double get_balance(const std::string& tickerId) const = 0;
-
-	virtual const TradeResult trade(const TradeDescription& description, double volume, double price) = 0;
+	virtual void trade(const TradeDescription& description) = 0;
 };
 
 class Exchange final
@@ -66,8 +63,8 @@ public:
 		return _trader->get_balance(tickerId);
 	}
 
-	const TradeResult trade(const TradeDescription& description, double volume, double price)
+	void trade(const TradeDescription& description)
 	{
-		return _trader->trade(description, volume, price);
+		return _trader->trade(description);
 	}
 };

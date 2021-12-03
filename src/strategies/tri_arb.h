@@ -3,54 +3,91 @@
 #include <memory>
 #include <vector>
 
-#include "..\misc\trading.h"
-#include "..\exchanges\exchange.h"
+#include "misc/trading.h"
+#include "misc/options.h"
+#include "exchanges/exchange.h"
+
+
+class SequenceStep
+{
+private:
+	TradablePair _pair;
+	TradeAction _action;
+
+public:
+	explicit SequenceStep(TradablePair pair, TradeAction action)
+		: _pair{ std::move(pair) }, _action{ std::move(action) }
+	{}
+
+	const TradablePair& pair() const { return _pair; }
+	const TradeAction& action() const { return _action; }
+};
 
 class TriArbSequence
 {
 private:
-	const TradeDescription _first;
-	const TradeDescription _middle;
-	const TradeDescription _last;
-	const std::vector<TradablePair> _pairs;
+	SequenceStep _first;
+	SequenceStep _middle;
+	SequenceStep _last;
+	std::vector<TradablePair> _pairs;
 
 public:
-	explicit TriArbSequence(const TradeDescription first, const TradeDescription middle, const TradeDescription last, std::vector<TradablePair>&& pairs)
-		: _first{first}, _middle{middle}, _last{last}, _pairs{std::move(pairs)}
+	explicit TriArbSequence(SequenceStep first, SequenceStep middle, SequenceStep last, std::vector<TradablePair> pairs)
+		: _first{std::move(first)}, _middle{std::move(middle)}, _last{std::move(last)}, _pairs{std::move(pairs)}
 	{}
 
-	const TradeDescription& first() const { return _first; }
-	const TradeDescription& middle() const { return _middle; }
-	const TradeDescription& last() const { return _last; }
+	const SequenceStep& first() const { return _first; }
+	const SequenceStep& middle() const { return _middle; }
+	const SequenceStep& last() const { return _last; }
 	const std::vector<TradablePair>& pairs() const { return _pairs; }
 };
 
 class TriArbExchangeSpec
 {
 private:
-	Exchange& _exchange;
-	const std::vector<TriArbSequence> _sequences;
+	std::shared_ptr<Exchange> _exchange;
+	std::vector<TriArbSequence> _sequences;
 
 public:
-	explicit TriArbExchangeSpec(Exchange& exchange, std::vector<TriArbSequence>&& sequences)
+	explicit TriArbExchangeSpec(std::shared_ptr<Exchange> exchange, std::vector<TriArbSequence> sequences)
 		: _exchange{exchange}, _sequences{std::move(sequences)}
 	{}
 
-	Exchange& exchange() { return _exchange; }
+	Exchange& exchange() const { return *(_exchange.get()); }
 	const std::vector<TriArbSequence>& sequences() const { return _sequences; }
+};
+
+class TriArbSequenceTrades
+{
+private:
+	TradeDescription _first;
+	TradeDescription _middle;
+	TradeDescription _last;
+
+public:
+	TriArbSequenceTrades(TradeDescription first, TradeDescription middle, TradeDescription last)
+		: _first{ std::move(first) }, _middle{ std::move(middle) }, _last{ std::move(last) }
+	{}
+
+	const TradeDescription& first() const { return _first; }
+	const TradeDescription& middle() const { return _middle; }
+	const TradeDescription& last() const { return _last; }
 };
 
 class TriArbStrategy
 {
 private:
 	std::vector<TriArbExchangeSpec> _specs;
+	TradingOptions _options;
 
-	explicit TriArbStrategy(std::vector<TriArbExchangeSpec>&& specs)
-		: _specs{specs}
-	{}
+	TriArbSequenceTrades calculate_trades(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, double initialTradeCost);
 
 public:
-	static TriArbStrategy create(std::vector<Exchange>& exchanges);
+	explicit TriArbStrategy(std::vector<TriArbExchangeSpec> specs, TradingOptions options)
+		: _specs{ std::move(specs) }, _options{ std::move(options) }
+	{}
 
-	void operator()();
+	void run_iteration();
 };
+
+TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options);

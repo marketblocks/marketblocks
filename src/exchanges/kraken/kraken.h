@@ -25,5 +25,5 @@ class KrakenTrader final : public Trader
 {
 	const std::unordered_map<std::string, double> get_all_balances() const override;
 	double get_balance(const std::string& tickerId) const override;
-	const TradeResult trade(const TradeDescription& description, double volume, double price) override;
+	void trade(const TradeDescription& description) override;
 };

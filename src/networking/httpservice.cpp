@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include "httpservice.h"
 #include "httpconstants.h"
-#include <iostream>
 
 static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
@@ -12,7 +13,7 @@ static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdat
 }
 
 HttpService::HttpService()
-	: easyHandle { curl_easy_init() }
+	: easyHandle{ curl_easy_init() }
 {}
 
 HttpService::~HttpService()

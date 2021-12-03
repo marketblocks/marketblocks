@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "data.h"
 
 namespace AssetSymbol
 {
@@ -20,21 +21,22 @@ enum class TradeAction
 class TradablePair
 {
 private:
-	const std::string _exchangeId;
-	const std::string _asset;
-	const std::string _priceUnit;
+	std::string _exchangeId;
+	std::string _asset;
+	std::string _priceUnit;
 
 public:
 	TradablePair()
-		: _exchangeId{}, _asset{}, _priceUnit{}
-	{}
+		:_exchangeId{}, _asset{}, _priceUnit{}
+	{
+	}
 
-	explicit TradablePair(std::string asset, std::string priceUnit)
-		: _exchangeId{}, _asset{ std::move(asset) }, _priceUnit{ std::move(priceUnit) }
+	TradablePair(std::string asset, std::string priceUnit)
+		: _exchangeId{ asset + priceUnit }, _asset {std::move(asset)}, _priceUnit{ std::move(priceUnit)}
 	{}
 
 	explicit TradablePair(std::string exchangeId, std::string asset, std::string priceUnit)
-		: _exchangeId{ std::move(exchangeId) }, _asset{std::move(asset)}, _priceUnit{std::move(priceUnit)}
+		: _exchangeId{std::move(exchangeId)}, _asset{std::move(asset)}, _priceUnit{std::move(priceUnit)}
 	{}
 
 	const std::string& exchange_identifier() const { return _exchangeId; }
@@ -62,16 +64,20 @@ namespace std
 class TradeDescription
 {
 private:
-	const TradablePair _pair;
-	const TradeAction _action;
+	TradablePair _pair;
+	TradeAction _action;
+	double _assetPrice;
+	double _volume;
 
 public:
-	explicit TradeDescription(TradablePair pair, TradeAction action)
-		: _pair{pair}, _action{action}
+	explicit TradeDescription(TradablePair pair, TradeAction action, double assetPrice, double volume)
+		: _pair{ std::move(pair) }, _action{ std::move(action) }, _assetPrice{ assetPrice }, _volume{ volume }
 	{}
 
-	const TradablePair pair() const { return _pair; }
-	const TradeAction action() const { return _action; }
+	const TradablePair& pair() const { return _pair; }
+	const TradeAction& action() const { return _action; }
+	double asset_price() const { return _assetPrice; }
+	double volume() const { return _volume; }
 };
 
 class TradeResult
@@ -86,3 +92,6 @@ public:
 
 	bool success() const { return _success; }
 };
+
+TradeDescription create_trade_by_cost(TradablePair pair, TradeAction action, PriceData prices, double tradeCost);
+TradeDescription create_trade_by_volume(TradablePair pair, TradeAction action, PriceData prices, double tradeVolume);

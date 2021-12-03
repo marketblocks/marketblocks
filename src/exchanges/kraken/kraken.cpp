@@ -1,7 +1,7 @@
 #include "kraken.h"
-#include "..\..\networking\json.h"
-#include "..\..\utils\stringutils.h"
-#include "..\..\utils\vectorutils.h"
+#include "networking\json.h"
+#include "utils\stringutils.h"
+#include "utils\vectorutils.h"
 
 KrakenMarketData::KrakenMarketData()
 	: httpService{}
@@ -99,7 +99,7 @@ double KrakenTrader::get_balance(const std::string& tickerId) const
 	return 0.0;
 }
 
-const TradeResult KrakenTrader::trade(const TradeDescription& description, double volume, double price)
+void KrakenTrader::trade(const TradeDescription& description)
 {
-	return TradeResult(true);
+
 }

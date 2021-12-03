@@ -9,7 +9,7 @@ namespace CryptoBot
 		{
 			while (true)
 			{
-				s();
+				s.run_iteration();
 			}
 		}
 	}
