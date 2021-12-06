@@ -107,36 +107,35 @@ static void print_sequence(const TriArbSequence& sequence)
 	print_pair(sequence.last().pair());
 }
 
-static void log_trade(const TriArbSequence& sequence, double percentageDiff, double fee, double newBalance)
+static void log_trade(const TriArbSequence& sequence, double percentageProfit, double newBalance)
 {
 	std::cout << "TRADE:" << std::endl;
 	std::cout << "Sequence: ";
 	print_sequence(sequence);
 	std::cout << std::endl;
 
-	std::cout << "Percentage Difference: " << percentageDiff << "%" << std::endl;
-	std::cout << "Total Fee: " << fee << "%" << std::endl;
-	std::cout << "Potential Profit: " << percentageDiff - fee << "%" << std::endl;
-
+	std::cout << "Profit: " << percentageProfit << "%" << std::endl;
 	std::cout << "New Balance: " << newBalance << std::endl;
 }
 
-TriArbSequenceTradeStep TriArbStrategy::create_sequence_trade_step(const SequenceStep& sequenceStep, const PriceData& priceData, double previousTradeGain)
+TriArbSequenceTradeStep TriArbStrategy::create_sequence_trade_step(const SequenceStep& sequenceStep, const PriceData& priceData, double fee, double previousTradeGain)
 {
 	if (sequenceStep.action() == TradeAction::BUY)
 	{
-		TradeDescription description = create_trade_by_cost(sequenceStep.pair(), TradeAction::BUY, priceData, previousTradeGain);
+		double cost = previousTradeGain - calculate_fee(previousTradeGain, fee);
+		TradeDescription description = create_trade_by_cost(sequenceStep.pair(), TradeAction::BUY, priceData, cost);
 		return TriArbSequenceTradeStep{ std::move(description), description.volume() };
 	}
 	else
 	{
 		TradeDescription description = create_trade_by_volume(sequenceStep.pair(), TradeAction::SELL, priceData, previousTradeGain);
 		double newTradeGain = calculate_cost(description.asset_price(), description.volume());
+		newTradeGain -= calculate_fee(newTradeGain, fee);
 		return TriArbSequenceTradeStep{ std::move(description), newTradeGain };
 	}
 }
 
-TriArbSequenceTrades TriArbStrategy::calculate_trades(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, double initialTradeValue)
+TriArbSequenceTrades TriArbStrategy::calculate_trades(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, const std::unordered_map<TradablePair, double>& fees, double initialTradeValue)
 {
 	const SequenceStep& firstStep = sequence.first();
 	const SequenceStep& middleStep = sequence.middle();
@@ -146,14 +145,18 @@ TriArbSequenceTrades TriArbStrategy::calculate_trades(const TriArbSequence& sequ
 	const PriceData& middlePrices = prices.at(middleStep.pair());
 	const PriceData& lastPrices = prices.at(lastStep.pair());
 
-	TriArbSequenceTradeStep firstTrade = create_sequence_trade_step(firstStep, firstPrices, initialTradeValue);
-	TriArbSequenceTradeStep middleTrade = create_sequence_trade_step(middleStep, middlePrices, firstTrade.gain_value());
-	TriArbSequenceTradeStep lastTrade = create_sequence_trade_step(lastStep, lastPrices, middleTrade.gain_value());
+	double firstFee = fees.at(firstStep.pair());
+	double middleFee = fees.at(middleStep.pair());
+	double lastFee = fees.at(lastStep.pair());
+		
+	TriArbSequenceTradeStep firstTrade = create_sequence_trade_step(firstStep, firstPrices, firstFee, initialTradeValue);
+	TriArbSequenceTradeStep middleTrade = create_sequence_trade_step(middleStep, middlePrices, middleFee, firstTrade.gain_value());
+	TriArbSequenceTradeStep lastTrade = create_sequence_trade_step(lastStep, lastPrices, lastFee, middleTrade.gain_value());
 	
 	return TriArbSequenceTrades{ firstTrade.description(), middleTrade.description(), lastTrade.description() };
 }
 
-double TriArbStrategy::calculate_gross_profit(const TriArbSequenceTrades& trades)
+double TriArbStrategy::calculate_profit(const TriArbSequenceTrades& trades)
 {
 	double beforeBalance = simulator.get_balance(_options.fiat_currency());
 
@@ -176,18 +179,18 @@ void TriArbStrategy::run_iteration()
 		for (auto& sequence : spec.sequences())
 		{
 			const std::unordered_map<TradablePair, PriceData> prices = exchange.get_price_data(sequence.pairs());
-			TriArbSequenceTrades trades = calculate_trades(sequence, prices, tradeValue);
+			const std::unordered_map<TradablePair, double> fees = exchange.get_fees(sequence.pairs());
 
-			double percentageDiff = calculate_gross_profit(trades);
-			double totalFee = spec.exchange().get_fee() * 3;
+			TriArbSequenceTrades trades = calculate_trades(sequence, prices, fees, tradeValue);
+			double percentageProfit = calculate_profit(trades);
 
-			if (percentageDiff > totalFee)
+			if (percentageProfit > 0)
 			{
 				exchange.trade(trades.first());
 				exchange.trade(trades.middle());
 				exchange.trade(trades.last());
 				
-				log_trade(sequence, percentageDiff, totalFee, spec.exchange().get_balance(_options.fiat_currency()));
+				log_trade(sequence, percentageProfit, spec.exchange().get_balance(_options.fiat_currency()));
 			}
 		}
 	}

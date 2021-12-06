@@ -16,13 +16,14 @@ private:
 public:
 	KrakenMarketData();
 
-	double get_fee() const override;
 	const std::vector<TradablePair> get_tradable_pairs() const override;
 	const std::unordered_map<TradablePair, PriceData> get_price_data(const std::vector<TradablePair>& tradablePairs) const override;
 };
 
 class KrakenTrader final : public Trader
 {
+	double get_fee(const TradablePair& tradablePair) const override;
+	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override;
 	const std::unordered_map<std::string, double> get_all_balances() const override;
 	double get_balance(const std::string& tickerId) const override;
 	void trade(const TradeDescription& description) override;

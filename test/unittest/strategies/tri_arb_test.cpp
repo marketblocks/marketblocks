@@ -2,6 +2,7 @@
 
 #include "../mocks.h"
 #include "strategies/tri_arb.h"
+#include "utils/vectorutils.h"
 
 using testing::Return;
 using testing::Matcher;
@@ -85,7 +86,8 @@ void execute_trade_sequence_test(
 	std::vector<TradeAction> actions,
 	std::vector<PriceData> priceData,
 	std::vector<double> expectedAssetPrices,
-	std::vector<double> expectedVolumes)
+	std::vector<double> expectedVolumes,
+	double fee = 0.0)
 {
 	std::vector<TriArbSequence> sequences
 	{
@@ -113,6 +115,15 @@ void execute_trade_sequence_test(
 
 	EXPECT_CALL(*mockTrader, get_balance("GBP"))
 		.WillRepeatedly(Return(5.0));
+
+	EXPECT_CALL(*mockTrader, get_fee)
+		.WillRepeatedly(Return(fee));
+
+	EXPECT_CALL(*mockTrader, get_fees)
+		.WillRepeatedly(Return(to_unordered_map<TradablePair, double>(
+			tradablePairs,
+			[](const TradablePair& pair) { return pair; },
+			[fee](const TradablePair&) {return fee; })));
 
 	EXPECT_CALL(*mockTrader, trade(IsTradeDescription(TradeDescription{ tradablePairs[0], actions[0], expectedAssetPrices[0], expectedVolumes[0] }))).Times(1);
 	EXPECT_CALL(*mockTrader, trade(IsTradeDescription(TradeDescription{ tradablePairs[1], actions[1], expectedAssetPrices[1], expectedVolumes[1] }))).Times(1);

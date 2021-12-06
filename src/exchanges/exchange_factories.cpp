@@ -4,5 +4,5 @@
 
 std::shared_ptr<Exchange> make_kraken()
 {
-	return std::make_shared<Exchange>(std::make_unique<KrakenMarketData>(), std::make_unique<PaperTrader>());
+	return std::make_shared<Exchange>(std::make_unique<KrakenMarketData>(), std::make_unique<PaperTrader>(0.26));
 }

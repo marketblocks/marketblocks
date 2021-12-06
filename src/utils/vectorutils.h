@@ -3,6 +3,7 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
+#include <iterator>
 
 template<typename T, typename Predicate>
 std::vector<T> copy_where(const std::vector<T>& source, Predicate p)

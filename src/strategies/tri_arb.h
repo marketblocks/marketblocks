@@ -102,13 +102,13 @@ private:
 	TradingOptions _options;
 	PaperTrader simulator;
 
-	TriArbSequenceTradeStep create_sequence_trade_step(const SequenceStep& sequenceStep, const PriceData& priceData, double previousTradeGain);
-	TriArbSequenceTrades calculate_trades(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, double initialTradeCost);
-	double calculate_gross_profit(const TriArbSequenceTrades& trades);
+	TriArbSequenceTradeStep create_sequence_trade_step(const SequenceStep& sequenceStep, const PriceData& priceData, double fee, double previousTradeGain);
+	TriArbSequenceTrades calculate_trades(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, const std::unordered_map<TradablePair, double>& fees, double initialTradeCost);
+	double calculate_profit(const TriArbSequenceTrades& trades);
 
 public:
 	explicit TriArbStrategy(std::vector<TriArbExchangeSpec> specs, TradingOptions options)
-		: _specs{ std::move(specs) }, _options{ std::move(options) }, simulator{}
+		: _specs{ std::move(specs) }, _options{ std::move(options) }, simulator{ 0.26 }
 	{}
 
 	void run_iteration();

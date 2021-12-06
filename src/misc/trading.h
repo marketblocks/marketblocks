@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <map>
+
 #include "data.h"
 
 namespace AssetSymbol
@@ -93,6 +95,30 @@ public:
 	{}
 
 	bool success() const { return _success; }
+};
+
+class FeeSchedule
+{
+private:
+	std::map<double, double> _fees;
+
+public:
+	FeeSchedule(std::map<double, double> fees);
+
+	double get_fee(double tradingVolume) const;
+};
+
+class FeeScheduleBuilder
+{
+private:
+	std::map<double, double> fees;
+
+public :
+	FeeScheduleBuilder();
+
+	FeeScheduleBuilder add_tier(double tierUpperLimit, double fee);
+
+	FeeSchedule build();
 };
 
 TradeDescription create_trade_by_cost(TradablePair pair, TradeAction action, PriceData prices, double tradeCost);

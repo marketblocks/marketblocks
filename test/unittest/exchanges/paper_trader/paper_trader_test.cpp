@@ -10,7 +10,7 @@ TEST(PaperTrader, TradeBuy)
 		{ "BTC", 1.5 }
 	};
 
-	PaperTrader trader{ initialBalances };
+	PaperTrader trader{ 0, initialBalances };
 	TradablePair pair{ "BTC", "GBP" };
 	TradeDescription tradeDescription
 	{
@@ -34,7 +34,7 @@ TEST(PaperTrader, TradeSell)
 		{ "BTC", 1.5 }
 	};
 
-	PaperTrader trader{ initialBalances };
+	PaperTrader trader{ 0, initialBalances };
 	TradablePair pair{ "BTC", "GBP" };
 	TradeDescription tradeDescription
 	{
