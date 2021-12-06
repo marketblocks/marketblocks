@@ -1,7 +1,7 @@
 #include "kraken.h"
-#include "networking\json.h"
-#include "utils\stringutils.h"
-#include "utils\vectorutils.h"
+#include "networking/json_wrapper.h"
+#include "utils/stringutils.h"
+#include "utils/vectorutils.h"
 
 KrakenMarketData::KrakenMarketData()
 	: httpService{}

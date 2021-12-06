@@ -1,6 +1,9 @@
+#pragma once
+
 #include <gmock/gmock.h>
 
-#include "exchanges/exchange.h"
+#include "exchanges/market_data.h"
+#include "exchanges/trader.h"
 
 class MockMarketData : public MarketData
 {

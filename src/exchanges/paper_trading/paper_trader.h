@@ -1,6 +1,9 @@
 #pragma once
 
-#include "exchanges/exchange.h"
+#include <unordered_map>
+#include <string>
+
+#include "exchanges/trader.h"
 
 class PaperTrader final : public Trader
 {
@@ -9,7 +12,7 @@ private:
 	std::unordered_map<std::string, double> balances;
 
 public:
-	PaperTrader(double fee);
+	explicit PaperTrader(double fee);
 	explicit PaperTrader(double fee, std::unordered_map<std::string, double> initialBalances);
 
 	double get_fee(const TradablePair& tradablePair) const;

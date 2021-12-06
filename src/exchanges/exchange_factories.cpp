@@ -1,6 +1,6 @@
 #include "exchange_factories.h"
 #include "kraken/kraken.h"
-#include "paper_trader/paper_trader.h"
+#include "paper_trading/paper_trader.h"
 
 std::shared_ptr<Exchange> make_kraken()
 {

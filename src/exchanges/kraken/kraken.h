@@ -1,8 +1,13 @@
 #pragma once
 
 #include <memory>
-#include "..\exchange.h"
-#include "..\..\networking\httpservice.h"
+#include <vector>
+#include <unordered_map>
+#include <string>
+
+#include "exchanges/market_data.h"
+#include "exchanges/trader.h"
+#include "networking/httpservice.h"
 
 class KrakenMarketData final : public MarketData
 {

@@ -1,5 +1,38 @@
 ﻿# Add source to this project's executable.
-add_library(CryptoBot_lib "runner.h" "exchanges/exchange.h" "misc/data.h" "misc/trading.h" "utils/vectorutils.h"   "networking/httpconstants.h" "exchanges/kraken/kraken.h" "exchanges/kraken/kraken.cpp"  "networking/json.h" "networking/json.cpp"  "utils/stringutils.h" "utils/stringutils.cpp"  "exchanges/paper_trader/paper_trader.h"   "exchanges/paper_trader/paper_trader.cpp" "utils/mathutils.h" "utils/financeutils.h"  "networking/httpservice.h" "networking/httpservice.cpp" "networking/httpconstants.h" "exchanges/exchange_factories.h" "exchanges/exchange_factories.cpp"  "strategies/tri_arb.h" "strategies/tri_arb.cpp" "misc/trading.cpp" "misc/options.h" )
+add_library(CryptoBot_lib 
+"runner.h" 
+"common/data/data.h" 
+"common/trading/fee_schedule.cpp" 
+"common/trading/fee_schedule.h" 
+"common/trading/tradable_pair.cpp" 
+"common/trading/tradable_pair.h" 
+"common/trading/trade_description.h"
+"common/trading/trade_description.cpp"
+"common/trading/trading_constants.h"
+"common/trading/trading_options.cpp"
+"common/trading/trading_options.h"
+"exchanges/exchange.cpp"
+"exchanges/exchange.h"
+"exchanges/exchange_factories.cpp"
+"exchanges/exchange_factories.h"
+"exchanges/market_data.h"
+"exchanges/trader.h"
+"exchanges/kraken/kraken.cpp"
+"exchanges/kraken/kraken.h"
+"exchanges/paper_trading/paper_trader.cpp"
+"exchanges/paper_trading/paper_trader.h"
+"networking/httpconstants.h"
+"networking/httpservice.cpp"
+"networking/httpservice.h"
+"networking/json_wrapper.cpp"
+"networking/json_wrapper.h"
+"strategies/tri_arb.cpp"
+"strategies/tri_arb.h"
+"utils/financeutils.h"
+"utils/mathutils.h"
+"utils/stringutils.cpp"
+"utils/stringutils.h"
+"utils/vectorutils.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)

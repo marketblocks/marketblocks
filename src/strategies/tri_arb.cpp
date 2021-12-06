@@ -2,9 +2,9 @@
 #include <algorithm>
 
 #include "tri_arb.h"
-#include "utils\vectorutils.h"
-#include "utils\mathutils.h"
-#include "utils\financeutils.h"
+#include "utils/vectorutils.h"
+#include "utils/mathutils.h"
+#include "utils/financeutils.h"
 
 std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const std::string& fiatCurrency)
 {

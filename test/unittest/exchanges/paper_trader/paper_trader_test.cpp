@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "exchanges/paper_trader/paper_trader.h"
+#include "exchanges/paper_trading/paper_trader.h"
 
 TEST(PaperTrader, TradeBuy)
 {
