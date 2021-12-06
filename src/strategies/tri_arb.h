@@ -6,6 +6,7 @@
 #include "misc/trading.h"
 #include "misc/options.h"
 #include "exchanges/exchange.h"
+#include "exchanges/paper_trader/paper_trader.h"
 
 
 class SequenceStep
@@ -79,21 +80,39 @@ public:
 	const TradeDescription& last() const { return _last; }
 };
 
+class TriArbSequenceTradeStep
+{
+private:
+	TradeDescription _description;
+	double _gainValue;
+
+public:
+	TriArbSequenceTradeStep(TradeDescription description, double gainValue)
+		: _description{std::move(description)}, _gainValue{gainValue}
+	{}
+
+	TradeDescription description() const { return _description; }
+	double gain_value() const { return _gainValue; }
+};
+
 class TriArbStrategy
 {
 private:
 	std::vector<TriArbExchangeSpec> _specs;
 	TradingOptions _options;
+	PaperTrader simulator;
 
+	TriArbSequenceTradeStep create_sequence_trade_step(const SequenceStep& sequenceStep, const PriceData& priceData, double previousTradeGain);
 	TriArbSequenceTrades calculate_trades(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, double initialTradeCost);
+	double calculate_gross_profit(const TriArbSequenceTrades& trades);
 
 public:
 	explicit TriArbStrategy(std::vector<TriArbExchangeSpec> specs, TradingOptions options)
-		: _specs{ std::move(specs) }, _options{ std::move(options) }
+		: _specs{ std::move(specs) }, _options{ std::move(options) }, simulator{}
 	{}
 
 	void run_iteration();
 };
 
-std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges);
+std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const std::string& fiatCurrency);
 TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options);

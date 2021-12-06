@@ -56,7 +56,7 @@ std::vector<TriArbExchangeSpec> execute_create_exchange_specs(std::vector<Tradab
 		std::make_shared<Exchange>(std::move(mockMarketData), std::make_unique<MockTrader>())
 	};
 
-	std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges);
+	std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges, "GBP");
 
 	return specs;
 }
@@ -120,7 +120,7 @@ void execute_trade_sequence_test(
 
 	std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
 	TriArbExchangeSpec spec{ exchange, sequences };
-	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0 } };
+	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, "GBP" }};
 
 	strategy.run_iteration();
 }
@@ -138,6 +138,21 @@ TEST(TriArb, CreateSpecFindsBothSequences)
 
 	ASSERT_EQ(specs.size(), 1);
 	ASSERT_EQ(specs[0].sequences().size(), 2);
+}
+
+TEST(TriArb, CreateSpecDoesNotTakeNonGbpPairs)
+{
+	std::vector<TradablePair> tradablePairs
+	{
+		TradablePair{ "BTC", "USD" },
+		TradablePair{ "ETH", "BTC" },
+		TradablePair{ "ETH", "USD" },
+	};
+
+	std::vector<TriArbExchangeSpec> specs = execute_create_exchange_specs(tradablePairs);
+
+	ASSERT_EQ(specs.size(), 1);
+	ASSERT_EQ(specs[0].sequences().size(), 0);
 }
 
 TEST(TriArb, CreateSpecsFindsBBB)
@@ -487,10 +502,10 @@ TEST(TriArb, IterationExecutesTradesSBS)
 	{
 		PriceData{ 1.25, 0.0 },
 		PriceData{ 0.0, 10.0 },
-		PriceData{ 0.625, 0.0 }
+		PriceData{ 10.0, 0.0 }
 	};
 
-	std::vector<double> expectedAssetPrices{ 1.25, 10.0, 0.625 };
+	std::vector<double> expectedAssetPrices{ 1.25, 10.0, 10 };
 
 	std::vector<double> expectedVolumes{ 5.0, 0.625, 0.625 };
 

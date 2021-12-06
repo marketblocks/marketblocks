@@ -10,7 +10,7 @@ int main()
 	std::vector<std::shared_ptr<Exchange>> exchanges;
 	exchanges.emplace_back(make_kraken());
 
-	TradingOptions options{ 0.05 };
+	TradingOptions options{ 0.05, "GBP" };
 
 	TriArbStrategy triArb = create_tri_arb_strategy(exchanges, options);
 

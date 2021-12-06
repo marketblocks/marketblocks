@@ -43,6 +43,8 @@ public:
 	const std::string& asset() const { return _asset; }
 	const std::string& price_unit() const { return _priceUnit; }
 	
+	bool contains(const std::string& assetTicker) const { return _asset == assetTicker || _priceUnit == assetTicker; };
+
 	bool operator==(const TradablePair& other) const
 	{
 		return _asset == other._asset && _priceUnit == other._priceUnit;
