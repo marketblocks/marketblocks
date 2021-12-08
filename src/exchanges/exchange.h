@@ -18,12 +18,13 @@ public:
 		: _marketData{std::move(marketData)}, _trader{std::move(trader)}
 	{}
 
+	// Market Data
 	const std::vector<TradablePair> get_tradable_pairs() const;
-	const std::unordered_map<TradablePair, PriceData> get_price_data(const std::vector<TradablePair>& tradablePairs) const;
+	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const;
 
-	double get_fee(const TradablePair& tradablePair) const;
+	// Trader
+	const std::unordered_map<std::string, double> get_balances() const;
 	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const;
-	const std::unordered_map<std::string, double> get_account_balance() const;
-	double get_balance(const std::string& tickerId) const;
+
 	void trade(const TradeDescription& description);
 };

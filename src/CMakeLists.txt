@@ -1,7 +1,7 @@
 ﻿# Add source to this project's executable.
 add_library(CryptoBot_lib 
 "runner.h" 
-"common/data/data.h" 
+ 
 "common/trading/fee_schedule.cpp" 
 "common/trading/fee_schedule.h" 
 "common/trading/tradable_pair.cpp" 
@@ -32,7 +32,7 @@ add_library(CryptoBot_lib
 "utils/mathutils.h"
 "utils/stringutils.cpp"
 "utils/stringutils.h"
-"utils/vectorutils.h" "utils/financeutils.cpp")
+"utils/vectorutils.h" "utils/financeutils.cpp" "common/data/order_book.h" "common/data/order_book.cpp" "utils/containerutils.h" "exchanges/exchange_helpers.h" "exchanges/exchange_helpers.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)

@@ -19,16 +19,3 @@ bool contains(const std::vector<T>& source, T element)
 {
 	return std::find(source.begin(), source.end(), element) != source.end();
 }
-
-template<typename Key, typename Value, typename Source, typename KeySelector, typename ValueSelector>
-std::unordered_map<Key, Value> to_unordered_map(const std::vector<Source>& source, KeySelector keySelector, ValueSelector valueSelector)
-{
-	std::unordered_map<Key, Value> map;
-	map.reserve(source.size());
-
-	for (const Source& item : source)
-	{
-		map.emplace(keySelector(item), valueSelector(item));
-	}
-	return map;
-}

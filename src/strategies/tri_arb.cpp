@@ -2,6 +2,8 @@
 #include <algorithm>
 
 #include "tri_arb.h"
+#include "common/data/order_book.h"
+#include "exchanges/exchange_helpers.h"
 #include "utils/vectorutils.h"
 #include "utils/mathutils.h"
 #include "utils/financeutils.h"
@@ -167,7 +169,7 @@ namespace
 
 	void log_trade(const TriArbSequence& sequence, const SequenceTrades& trades, const SequenceGains& gains, double initialTradeValue, double newBalance)
 	{
-		std::cout << "TRADE:" << std::endl;
+		std::cout << std::endl << "TRADE:" << std::endl;
 
 		print_sequence(sequence);
 
@@ -181,13 +183,23 @@ namespace
 		std::cout << "New Balance: " << newBalance << std::endl << std::endl;
 	}
 
-	TradeDescription create_trade(const SequenceStep& sequenceStep, const std::unordered_map<TradablePair, PriceData>& prices, double g1, double g0)
+	void log_sequence_checked(const TriArbSequence& sequence, double initialTradeValue, double g3)
 	{
-		double volume = sequenceStep.action() == TradeAction::BUY ? g1 : g0;
-		return create_trade_by_volume(sequenceStep.pair(), sequenceStep.action(), prices.at(sequenceStep.pair()), volume);
+		print_sequence(sequence);
+
+		double percentageDiff = calculate_percentage_diff(initialTradeValue, g3);
+		std::cout << "Price Diff: " << percentageDiff << "%" << std::endl;
 	}
 
-	SequenceTrades create_sequence_trades(const TriArbSequence& sequence, const SequenceGains& gains, const std::unordered_map<TradablePair, PriceData>& prices, double initialTradeValue)
+	TradeDescription create_trade(const SequenceStep& sequenceStep, const std::unordered_map<TradablePair, OrderBookLevel>& prices, double g1, double g0)
+	{
+		double volume = sequenceStep.action() == TradeAction::BUY ? g1 : g0;
+		double assetPrice = select_entry(prices.at(sequenceStep.pair()), sequenceStep.action()).price();
+
+		return TradeDescription(sequenceStep.pair(), sequenceStep.action(), assetPrice, volume);
+	}
+
+	SequenceTrades create_sequence_trades(const TriArbSequence& sequence, const SequenceGains& gains, const std::unordered_map<TradablePair, OrderBookLevel>& prices, double initialTradeValue)
 	{
 		TradeDescription firstTrade = create_trade(sequence.first(), prices, gains.g1, initialTradeValue);
 		TradeDescription middleTrade = create_trade(sequence.middle(), prices, gains.g2, gains.g1);
@@ -196,23 +208,23 @@ namespace
 		return SequenceTrades{ std::move(firstTrade), std::move(middleTrade), std::move(lastTrade) };
 	}
 
-	SequenceGains calculate_sequence_gains(const TriArbSequence& sequence, const std::unordered_map<TradablePair, PriceData>& prices, const std::unordered_map<TradablePair, double>& fees, double initialTradeValue)
+	SequenceGains calculate_sequence_gains(const TriArbSequence& sequence, const std::unordered_map<TradablePair, OrderBookLevel>& prices, const std::unordered_map<TradablePair, double>& fees, double initialTradeValue)
 	{
 		const SequenceStep& firstStep = sequence.first();
 		const SequenceStep& middleStep = sequence.middle();
 		const SequenceStep& lastStep = sequence.last();
 
-		const PriceData& firstPrices = prices.at(firstStep.pair());
-		const PriceData& middlePrices = prices.at(middleStep.pair());
-		const PriceData& lastPrices = prices.at(lastStep.pair());
+		const OrderBookEntry& firstOrderBookEntry = select_entry(prices.at(firstStep.pair()), firstStep.action());
+		const OrderBookEntry& middleOrderBookEntry = select_entry(prices.at(middleStep.pair()), middleStep.action());
+		const OrderBookEntry& lastOrderBookEntry = select_entry(prices.at(lastStep.pair()), lastStep.action());
 
 		double firstFee = fees.at(firstStep.pair());
 		double middleFee = fees.at(middleStep.pair());
 		double lastFee = fees.at(lastStep.pair());
 
-		double g1 = calculate_trade_gain(select_price(firstPrices, firstStep.action()), initialTradeValue, firstFee, firstStep.action());
-		double g2 = calculate_trade_gain(select_price(middlePrices, middleStep.action()), g1, middleFee, middleStep.action());
-		double g3 = calculate_trade_gain(select_price(lastPrices, lastStep.action()), g2, lastFee, lastStep.action());
+		double g1 = calculate_trade_gain(firstOrderBookEntry.price(), initialTradeValue, firstFee, firstStep.action());
+		double g2 = calculate_trade_gain(middleOrderBookEntry.price(), g1, middleFee, middleStep.action());
+		double g3 = calculate_trade_gain(lastOrderBookEntry.price(), g2, lastFee, lastStep.action());
 
 		return SequenceGains{ g1, g2, g3 };
 	}
@@ -232,12 +244,12 @@ void TriArbStrategy::run_iteration()
 {
 	for (auto& spec : _specs)
 	{
-		double tradeValue = _options.max_trade_percent() * spec.exchange().get_balance(_options.fiat_currency());
 		Exchange& exchange = spec.exchange();
+		double tradeValue = _options.max_trade_percent() * get_balance(exchange, _options.fiat_currency());
 
 		for (auto& sequence : spec.sequences())
 		{
-			const std::unordered_map<TradablePair, PriceData> prices = exchange.get_price_data(sequence.pairs());
+			const std::unordered_map<TradablePair, OrderBookLevel> prices = get_best_order_book_prices(exchange, sequence.pairs());
 			const std::unordered_map<TradablePair, double> fees = exchange.get_fees(sequence.pairs());
 
 			SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
@@ -250,7 +262,11 @@ void TriArbStrategy::run_iteration()
 				exchange.trade(trades.middle);
 				exchange.trade(trades.last);
 
-				log_trade(sequence, trades, gains, tradeValue, spec.exchange().get_balance(_options.fiat_currency()));
+				log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
+			}
+			else
+			{
+				log_sequence_checked(sequence, tradeValue, gains.g3);
 			}
 		}
 	}

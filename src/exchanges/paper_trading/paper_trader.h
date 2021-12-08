@@ -18,8 +18,7 @@ public:
 
 	double get_fee(const TradablePair& tradablePair) const;
 	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override;
-	const std::unordered_map<std::string, double> get_all_balances() const override { return _balances; }
-	double get_balance(const std::string& tickerId) const override { return _balances.at(tickerId); }
+	const std::unordered_map<std::string, double> get_balances() const override { return _balances; }
 
 	void trade(const TradeDescription& description) override;
 };

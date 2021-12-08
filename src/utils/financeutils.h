@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/trading/trading_constants.h"
-#include "common/data/data.h"
+#include "common/data/order_book.h"
 
 double calculate_cost(double assetPrice, double volume);
 
@@ -13,4 +13,4 @@ double calculate_fee(double amount, double feePercentage);
 
 double calculate_trade_gain(double assetPrice, double tradeValue, double feePercentage, TradeAction action);
 
-double select_price(const PriceData& prices, TradeAction action);
+OrderBookEntry select_entry(const OrderBookLevel& prices, TradeAction action);

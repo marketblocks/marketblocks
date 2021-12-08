@@ -1,26 +1,29 @@
 #include "kraken.h"
 #include "networking/json_wrapper.h"
 #include "utils/stringutils.h"
-#include "utils/vectorutils.h"
+#include "utils/containerutils.h"
 
 namespace 
 {
-	const std::string build_price_data_uri(const std::vector<TradablePair>& tradablePairs)
+	namespace Uris
 	{
-		std::string uri = "https://api.kraken.com/0/public/Ticker?pair=";
+		static const std::string BASE = "https://api.kraken.com/0/public/";
+		static const std::string TRADABLE_PAIRS = BASE + "AssetPairs";
+		static const std::string ORDER_BOOK = BASE + "Depth?pair=";
+	}
 
-		auto append_symbol = [&uri](const TradablePair& tradablePair)
+	const std::string build_pairs_uri(const std::string& resourceUri, const std::vector<TradablePair>& tradablePairs)
+	{
+		std::string uri = resourceUri;
+		int count = tradablePairs.size();
+		
+		for (int i = 0; i < count - 1; ++i)
 		{
-			uri += tradablePair.asset() + tradablePair.price_unit();
-		};
-
-		for (int i = 0; i < tradablePairs.size() - 1; ++i)
-		{
-			append_symbol(tradablePairs[i]);
+			uri += tradablePairs[i].exchange_identifier();
 			uri += ',';
 		}
 
-		append_symbol(tradablePairs[tradablePairs.size() - 1]);
+		uri += tradablePairs[count - 1].exchange_identifier();
 
 		return uri;
 	}
@@ -43,29 +46,33 @@ namespace
 		return pairs;
 	}
 
-	const std::unordered_map<TradablePair, PriceData> read_price_data(const std::string& jsonResult, const std::vector<TradablePair>& tradablePairs)
+	const OrderBookState read_order_book(const std::string& jsonResult, const TradablePair& pair, int depth)
 	{
 		JsonWrapper json{ jsonResult };
-		auto resultObject = json.document()["result"].GetObject();
-		std::unordered_map<TradablePair, PriceData> priceDataMap;
-		priceDataMap.reserve(resultObject.MemberCount());
 
-		std::unordered_map<std::string, TradablePair> tradablePairLookup = to_unordered_map<std::string, TradablePair>(
-			tradablePairs,
-			[](const TradablePair& pair) { return pair.exchange_identifier(); },
-			[](const TradablePair& pair) { return pair; });
+		auto resultObject = json
+			.document()["result"]
+			.GetObject()
+			.FindMember(pair.exchange_identifier().c_str());
 
-		for (auto it = resultObject.MemberBegin(); it != resultObject.MemberEnd(); ++it)
+		std::vector<OrderBookLevel> levels;
+		levels.reserve(depth);
+
+		auto asks = resultObject->value["asks"].GetArray();
+		auto bids = resultObject->value["bids"].GetArray();
+
+		for (int i = 0; i < depth; i++)
 		{
-			std::string name = it->name.GetString();
-			double askPrice = std::stod(it->value["a"].GetArray()[0].GetString());
-			double bidPrice = std::stod(it->value["b"].GetArray()[0].GetString());
-			PriceData data{ bidPrice, askPrice };
+			auto asks_i = asks[i].GetArray();
+			OrderBookEntry askEntry{ std::stod(asks_i[0].GetString()),	std::stod(asks_i[1].GetString()) };
 
-			priceDataMap.emplace(tradablePairLookup[name], std::move(data));
+			auto bids_i = bids[i].GetArray();
+			OrderBookEntry bidEntry{ std::stod(bids_i[0].GetString()),	std::stod(bids_i[1].GetString()) };
+
+			levels.emplace_back(std::move(askEntry), std::move(bidEntry));
 		}
 
-		return priceDataMap;
+		return OrderBookState{std::move(levels)};
 	}
 }
 
@@ -76,20 +83,24 @@ KrakenApi::KrakenApi(HttpService httpService)
 
 const std::vector<TradablePair> KrakenApi::get_tradable_pairs() const
 {
-	std::string result = _httpService.get("https://api.kraken.com/0/public/AssetPairs");
+	std::string result = _httpService.get(Uris::TRADABLE_PAIRS);
 	return read_tradable_pairs(result);
 }
 
-const std::unordered_map<TradablePair, PriceData> KrakenApi::get_price_data(const std::vector<TradablePair>& tradablePairs) const
+const std::unordered_map<TradablePair, OrderBookState> KrakenApi::get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const
 {
-	std::string uri = build_price_data_uri(tradablePairs);
-	std::string result = _httpService.get(uri);
-	return read_price_data(result, tradablePairs);
-}
+	std::unordered_map<TradablePair, OrderBookState> orderBooks;
+	orderBooks.reserve(depth);
 
-double KrakenApi::get_fee(const TradablePair& tradablePair) const
-{
-	return 0.26;
+	for (auto& pair : tradablePairs)
+	{
+		std::string uri =Uris::ORDER_BOOK + pair.exchange_identifier() + "&count=" + std::to_string(depth);
+		std::string result = _httpService.get(uri);
+		
+		orderBooks.emplace(pair, read_order_book(result, pair, depth));
+	}
+
+	return orderBooks;
 }
 
 const std::unordered_map<TradablePair, double> KrakenApi::get_fees(const std::vector<TradablePair>& tradablePairs) const
@@ -97,14 +108,9 @@ const std::unordered_map<TradablePair, double> KrakenApi::get_fees(const std::ve
 	return std::unordered_map<TradablePair, double>();
 }
 
-const std::unordered_map<std::string, double> KrakenApi::get_all_balances() const
+const std::unordered_map<std::string, double> KrakenApi::get_balances() const
 {
 	return std::unordered_map<std::string, double>();
-}
-
-double KrakenApi::get_balance(const std::string& tickerId) const
-{
-	return 0.0;
 }
 
 void KrakenApi::trade(const TradeDescription& description)

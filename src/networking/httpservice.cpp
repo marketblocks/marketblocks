@@ -29,7 +29,7 @@ HttpService::HttpService(const HttpService& other)
 HttpService::HttpService(HttpService&& other)
 	: easyHandle { other.easyHandle }
 {
-	other.easyHandle = 0;
+	other.easyHandle = nullptr;
 }
 
 HttpService& HttpService::operator=(const HttpService& other)
@@ -43,7 +43,7 @@ HttpService& HttpService::operator=(HttpService&& other)
 {
 	easyHandle = other.easyHandle;
 
-	other.easyHandle = 0;
+	other.easyHandle = nullptr;
 
 	return *this;
 }

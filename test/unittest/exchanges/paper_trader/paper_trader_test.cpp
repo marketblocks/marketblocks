@@ -33,8 +33,10 @@ TEST(PaperTrader, TradeBuy)
 
 	trader.trade(tradeDescription);
 
-	EXPECT_DOUBLE_EQ(trader.get_balance(pair.asset()), expectedBtcBalance);
-	EXPECT_DOUBLE_EQ(trader.get_balance(pair.price_unit()), expectedGbpBalance);
+	std::unordered_map<std::string, double> balances = trader.get_balances();
+
+	EXPECT_DOUBLE_EQ(balances.at(pair.asset()), expectedBtcBalance);
+	EXPECT_DOUBLE_EQ(balances.at(pair.price_unit()), expectedGbpBalance);
 }
 
 TEST(PaperTrader, TradeSell)
@@ -68,6 +70,8 @@ TEST(PaperTrader, TradeSell)
 
 	trader.trade(tradeDescription);
 
-	EXPECT_DOUBLE_EQ(trader.get_balance(pair.asset()), expectedBtcBalance);
-	EXPECT_DOUBLE_EQ(trader.get_balance(pair.price_unit()), expectedGbpBalance);
+	std::unordered_map<std::string, double> balances = trader.get_balances();
+
+	EXPECT_DOUBLE_EQ(balances.at(pair.asset()), expectedBtcBalance);
+	EXPECT_DOUBLE_EQ(balances.at(pair.price_unit()), expectedGbpBalance);
 }

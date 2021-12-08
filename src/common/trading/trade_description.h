@@ -2,7 +2,6 @@
 
 #include "tradable_pair.h"
 #include "trading_constants.h"
-#include "common/data/data.h"
 
 class TradeDescription
 {
@@ -21,5 +20,4 @@ public:
 	double volume() const { return _volume; }
 };
 
-TradeDescription create_trade_by_cost(TradablePair pair, TradeAction action, PriceData prices, double tradeCost);
-TradeDescription create_trade_by_volume(TradablePair pair, TradeAction action, PriceData prices, double tradeVolume);
+TradeDescription create_trade_by_cost(TradablePair pair, TradeAction action, double assetPrice, double tradeCost);

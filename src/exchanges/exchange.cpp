@@ -1,18 +1,14 @@
 #include "exchange.h"
+#include "utils/containerutils.h"
 
 const std::vector<TradablePair> Exchange::get_tradable_pairs() const
 {
 	return _marketData->get_tradable_pairs();
 }
 
-const std::unordered_map<TradablePair, PriceData> Exchange::get_price_data(const std::vector<TradablePair>& tradablePairs) const
+const std::unordered_map<TradablePair, OrderBookState> Exchange::get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const
 {
-	return _marketData->get_price_data(tradablePairs);
-}
-
-double Exchange::get_fee(const TradablePair& tradablePair) const
-{
-	return _trader->get_fee(tradablePair);
+	return _marketData->get_order_book(tradablePairs, depth);
 }
 
 const std::unordered_map<TradablePair, double> Exchange::get_fees(const std::vector<TradablePair>& tradablePairs) const
@@ -20,14 +16,9 @@ const std::unordered_map<TradablePair, double> Exchange::get_fees(const std::vec
 	return _trader->get_fees(tradablePairs);
 }
 
-const std::unordered_map<std::string, double> Exchange::get_account_balance() const
+const std::unordered_map<std::string, double> Exchange::get_balances() const
 {
-	return _trader->get_all_balances();
-}
-
-double Exchange::get_balance(const std::string& tickerId) const
-{
-	return _trader->get_balance(tickerId);
+	return _trader->get_balances();
 }
 
 void Exchange::trade(const TradeDescription& description)

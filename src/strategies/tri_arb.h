@@ -6,9 +6,7 @@
 #include "common/trading/tradable_pair.h"
 #include "common/trading/trading_constants.h"
 #include "common/trading/trading_options.h"
-#include "common/data/data.h"
 #include "exchanges/exchange.h"
-#include "exchanges/paper_trading/paper_trader.h"
 
 class SequenceStep
 {

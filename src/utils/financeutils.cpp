@@ -26,7 +26,7 @@ double calculate_trade_gain(double assetPrice, double tradeValue, double feePerc
 	return tradeValue * (1 - feePercentage * 0.01) * (a / assetPrice + assetPrice * (1 - a));
 }
 
-double select_price(const PriceData& prices, TradeAction action)
+OrderBookEntry select_entry(const OrderBookLevel& prices, TradeAction action)
 {
 	return action == TradeAction::BUY ? prices.ask() : prices.bid();
 }

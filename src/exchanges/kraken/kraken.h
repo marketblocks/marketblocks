@@ -17,12 +17,13 @@ private:
 public:
 	KrakenApi(HttpService httpService);
 
+	// Market Data
 	const std::vector<TradablePair> get_tradable_pairs() const override;
-	const std::unordered_map<TradablePair, PriceData> get_price_data(const std::vector<TradablePair>& tradablePairs) const override;
+	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override;
 
-	double get_fee(const TradablePair& tradablePair) const override;
+	// Trader
 	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override;
-	double get_balance(const std::string& tickerId) const override;
-	const std::unordered_map<std::string, double> get_all_balances() const override;
+	const std::unordered_map<std::string, double> get_balances() const override;
+
 	void trade(const TradeDescription& description) override;
 };

@@ -2,7 +2,7 @@
 
 #include "../mocks.h"
 #include "strategies/tri_arb.h"
-#include "utils/vectorutils.h"
+#include "utils/containerutils.h"
 
 using testing::Return;
 using testing::Matcher;
@@ -35,20 +35,6 @@ namespace
 		return action == TradeAction::BUY ? "BUY" : "SELL";
 	}
 
-	void PrintTo(const TradeDescription& description, std::ostream* os)
-	{
-		*os << "Tradable Pair: " << description.pair().asset() << "/" << description.pair().price_unit() << std::endl;
-		*os << "Action: " << to_string(description.action()) << std::endl;
-		*os << "Asset Price: " << description.asset_price() << std::endl;
-		*os << "Volume: " << description.volume() << std::endl;
-	}
-
-	void PrintTo(const SequenceStep& step, std::ostream* os)
-	{
-		*os << "Tradable Pair: " << step.pair().asset() << "/" << step.pair().price_unit() << std::endl;
-		*os << "Action: " << to_string(step.action()) << std::endl;
-	}
-
 	std::vector<TriArbExchangeSpec> execute_create_exchange_specs(std::vector<TradablePair> tradablePairs)
 	{
 		auto mockMarketData = std::make_unique<testing::NiceMock<MockMarketData>>();
@@ -68,15 +54,15 @@ namespace
 	void setup_market_data_mock(
 		MockMarketData* mockMarketData,
 		const std::vector<TradablePair>& tradablePairs,
-		const std::vector<PriceData>& priceData)
+		const std::vector<OrderBookLevel>& prices)
 	{
-		EXPECT_CALL(*mockMarketData, get_price_data)
+		EXPECT_CALL(*mockMarketData, get_order_book)
 			.WillRepeatedly(Return(
-				std::unordered_map<TradablePair, PriceData>
+				std::unordered_map<TradablePair, OrderBookState>
 		{
-			{ tradablePairs[0], priceData[0] },
-			{ tradablePairs[1], priceData[1] },
-			{ tradablePairs[2], priceData[2] },
+			{ tradablePairs[0], OrderBookState{{ prices[0] }} },
+			{ tradablePairs[1], OrderBookState{{ prices[1] }} },
+			{ tradablePairs[2], OrderBookState{{ prices[2] }} },
 		}));
 	}
 
@@ -85,11 +71,12 @@ namespace
 		const std::vector<TradablePair>& tradablePairs,
 		double fee)
 	{
-		EXPECT_CALL(*mockTrader, get_balance("GBP"))
-			.WillRepeatedly(Return(5.0));
-
-		EXPECT_CALL(*mockTrader, get_fee)
-			.WillRepeatedly(Return(fee));
+		EXPECT_CALL(*mockTrader, get_balances)
+			.WillRepeatedly(Return(
+				std::unordered_map<std::string, double>
+			{
+				{ "GBP", 5.0 }
+			}));
 
 		EXPECT_CALL(*mockTrader, get_fees)
 			.WillRepeatedly(Return(to_unordered_map<TradablePair, double>(
@@ -120,7 +107,7 @@ namespace
 	void execute_trade_sequence_test(
 		const std::vector<TradablePair>& tradablePairs,
 		const std::vector<TradeAction>& actions,
-		const std::vector<PriceData>& priceData,
+		const std::vector<OrderBookLevel>& prices,
 		const std::vector<double>& expectedAssetPrices,
 		const std::vector<double>& expectedVolumes,
 		double fee = 0.0)
@@ -140,7 +127,7 @@ namespace
 		auto mockTrader = std::make_unique<testing::NiceMock<MockTrader>>();
 
 		// Setup Mocks
-		setup_market_data_mock(mockMarketData.get(), tradablePairs, priceData);
+		setup_market_data_mock(mockMarketData.get(), tradablePairs, prices);
 		setup_trader_mock(mockTrader.get(), tradablePairs, fee);
 
 		EXPECT_CALL(*mockTrader, trade(IsTradeDescription(TradeDescription{ tradablePairs[0], actions[0], expectedAssetPrices[0], expectedVolumes[0] }))).Times(1);
@@ -155,6 +142,19 @@ namespace
 	}
 }
 
+void PrintTo(const TradeDescription& description, std::ostream* os)
+{
+	*os << "Tradable Pair: " << description.pair().asset() << "/" << description.pair().price_unit() << std::endl;
+	*os << "Action: " << to_string(description.action()) << std::endl;
+	*os << "Asset Price: " << description.asset_price() << std::endl;
+	*os << "Volume: " << description.volume() << std::endl;
+}
+
+void PrintTo(const SequenceStep& step, std::ostream* os)
+{
+	*os << "Tradable Pair: " << step.pair().asset() << "/" << step.pair().price_unit() << std::endl;
+	*os << "Action: " << to_string(step.action()) << std::endl;
+}
 TEST(TriArb, CreateSpecFindsBothSequences)
 {
 	std::vector<TradablePair> tradablePairs
@@ -353,11 +353,11 @@ TEST(TriArb, IterationExecutesTradesBBB)
 		TradeAction::BUY
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 0.8 },
-		PriceData{ 0.0, 0.5 },
-		PriceData{ 0.0, 1.25 }
+		OrderBookLevel{ OrderBookEntry{0.8, 6.25}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.5, 12.5}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{1.25, 10.0}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 0.8, 0.5, 1.25 };
@@ -367,7 +367,7 @@ TEST(TriArb, IterationExecutesTradesBBB)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -388,13 +388,13 @@ TEST(TriArb, IterationExecutesTradesBBS)
 		TradeAction::SELL
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 5.0 },
-		PriceData{ 0.0, 0.5 },
-		PriceData{ 3.0, 0.0 }
+		OrderBookLevel{ OrderBookEntry{5.0, 1.0}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.5, 2.0}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{3.0, 2.0} }
 	};
-
+	
 	std::vector<double> expectedAssetPrices{ 5.0, 0.5, 3.0 };
 
 	std::vector<double> expectedVolumes{ 1.0, 2.0, 2.0 };
@@ -402,7 +402,7 @@ TEST(TriArb, IterationExecutesTradesBBS)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -423,11 +423,11 @@ TEST(TriArb, IterationExecutesTradesBSB)
 		TradeAction::BUY
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 10.0 },
-		PriceData{ 12.0, 0.0 },
-		PriceData{ 0.0, 0.8 }
+		OrderBookLevel{ OrderBookEntry{10.0, 0.5}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{12.0, 0.5} },
+		OrderBookLevel{ OrderBookEntry{0.8, 7.5}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 10.0, 12.0, 0.8 };
@@ -437,7 +437,7 @@ TEST(TriArb, IterationExecutesTradesBSB)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -458,11 +458,11 @@ TEST(TriArb, IterationExecutesTradesBSS)
 		TradeAction::SELL
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 10.0 },
-		PriceData{ 12.0, 0.0 },
-		PriceData{ 1.5, 0.0 }
+		OrderBookLevel{ OrderBookEntry{10.0, 0.5}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{12.0, 0.5} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 6} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 10.0, 12.0, 1.5 };
@@ -472,7 +472,7 @@ TEST(TriArb, IterationExecutesTradesBSS)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -493,11 +493,11 @@ TEST(TriArb, IterationExecutesTradesSBB)
 		TradeAction::BUY
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 1.5, 0.0 },
-		PriceData{ 0.0, 1.25 },
-		PriceData{ 0.0, 0.8 }
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 5.0} },
+		OrderBookLevel{ OrderBookEntry{1.25, 6.0}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.8, 7.5}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 1.5, 1.25, 0.8 };
@@ -507,7 +507,7 @@ TEST(TriArb, IterationExecutesTradesSBB)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -528,11 +528,11 @@ TEST(TriArb, IterationExecutesTradesSBS)
 		TradeAction::SELL
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 1.25, 0.0 },
-		PriceData{ 0.0, 10.0 },
-		PriceData{ 10.0, 0.0 }
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.25, 5.0} },
+		OrderBookLevel{ OrderBookEntry{10.0, 0.625}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{10.0, 0.625} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 1.25, 10.0, 10 };
@@ -542,7 +542,7 @@ TEST(TriArb, IterationExecutesTradesSBS)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -563,11 +563,11 @@ TEST(TriArb, IterationExecutesTradesSSB)
 		TradeAction::BUY
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 1.5, 0.0 },
-		PriceData{ 1.25, 0.0 },
-		PriceData{ 0.0, 1.0 }
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 5.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.25, 7.5} },
+		OrderBookLevel{ OrderBookEntry{1.0, 9.375}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 1.5, 1.25, 1.0 };
@@ -577,7 +577,7 @@ TEST(TriArb, IterationExecutesTradesSSB)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -598,11 +598,11 @@ TEST(TriArb, IterationExecutesTradesSSS)
 		TradeAction::SELL
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 1.5, 0.0 },
-		PriceData{ 1.5, 0.0 },
-		PriceData{ 0.8, 0.0 }
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 5.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 7.5} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{0.8, 11.25} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 1.5, 1.5, 0.8 };
@@ -612,7 +612,7 @@ TEST(TriArb, IterationExecutesTradesSSS)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes);
 }
@@ -633,11 +633,11 @@ TEST(TriArb, CalculateCorrectTradesWithFeesBSS)
 		TradeAction::SELL
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 10.0 },
-		PriceData{ 12.0, 0.0 },
-		PriceData{ 1.5, 0.0 }
+		OrderBookLevel{ OrderBookEntry{10.0, 0.495}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{12.0, 0.495} },
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 5.8806} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 10.0, 12.0, 1.5 };
@@ -647,7 +647,7 @@ TEST(TriArb, CalculateCorrectTradesWithFeesBSS)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes,
 		1.0);
@@ -669,11 +669,11 @@ TEST(TriArb, CalculateCorrectTradesWithFeesSBB)
 		TradeAction::BUY
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 1.5, 0.0 },
-		PriceData{ 0.0, 1.25 },
-		PriceData{ 0.0, 0.8 }
+		OrderBookLevel{ OrderBookEntry{0.0, 0.0}, OrderBookEntry{1.5, 5.0} },
+		OrderBookLevel{ OrderBookEntry{1.25, 5.8806}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.8, 7.2772425}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<double> expectedAssetPrices{ 1.5, 1.25, 0.8 };
@@ -683,7 +683,7 @@ TEST(TriArb, CalculateCorrectTradesWithFeesSBB)
 	execute_trade_sequence_test(
 		tradablePairs,
 		actions,
-		priceData,
+		prices,
 		expectedAssetPrices,
 		expectedVolumes,
 		1.0);
@@ -698,11 +698,11 @@ TEST(TriArb, DoesNotTradeIfProfitLessThan0)
 		TradablePair{ "ETH", "GBP" },
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 5.0 },
-		PriceData{ 0.0, 0.5 },
-		PriceData{ 2.0, 0.0 }
+		OrderBookLevel{ OrderBookEntry{5.0, 1.0}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.5, 2.0}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{2.0, 2.0}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<TriArbSequence> sequences
@@ -720,7 +720,7 @@ TEST(TriArb, DoesNotTradeIfProfitLessThan0)
 	auto mockTrader = std::make_unique<testing::NiceMock<MockTrader>>();
 
 	// Setup Mocks
-	setup_market_data_mock(mockMarketData.get(), tradablePairs, priceData);
+	setup_market_data_mock(mockMarketData.get(), tradablePairs, prices);
 	setup_trader_mock(mockTrader.get(), tradablePairs, 0.0);
 
 	EXPECT_CALL(*mockTrader, trade).Times(0);
@@ -741,11 +741,11 @@ TEST(TriArb, DoesNotTradeIfProfitLessThanFees)
 		TradablePair{ "ETH", "GBP" },
 	};
 
-	std::vector<PriceData> priceData
+	std::vector<OrderBookLevel> prices
 	{
-		PriceData{ 0.0, 5.0 },
-		PriceData{ 0.0, 0.5 },
-		PriceData{ 2.55, 0.0 }
+		OrderBookLevel{ OrderBookEntry{5.0, 0.5}, OrderBookEntry{0.0, 0.0} },
+		OrderBookLevel{ OrderBookEntry{0.5, 2.0}, OrderBookEntry{12.0, 0.5} },
+		OrderBookLevel{ OrderBookEntry{2.55, 2.0}, OrderBookEntry{0.0, 0.0} }
 	};
 
 	std::vector<TriArbSequence> sequences
@@ -765,7 +765,7 @@ TEST(TriArb, DoesNotTradeIfProfitLessThanFees)
 	// Setup Mocks
 	constexpr double fee = 1.0;
 
-	setup_market_data_mock(mockMarketData.get(), tradablePairs, priceData);
+	setup_market_data_mock(mockMarketData.get(), tradablePairs, prices);
 	setup_trader_mock(mockTrader.get(), tradablePairs, fee);
 
 	EXPECT_CALL(*mockTrader, trade).Times(0);

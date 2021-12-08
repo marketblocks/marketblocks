@@ -1,6 +1,6 @@
 #include "paper_trader.h"
 #include "utils/financeutils.h"
-#include "utils/vectorutils.h"
+#include "utils/containerutils.h"
 
 PaperTrader::PaperTrader()
 	: _feeSchedule{ std::map<double, double>() }, _balances{{"GBP", 1000}}
