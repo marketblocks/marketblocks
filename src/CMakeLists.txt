@@ -32,7 +32,7 @@ add_library(CryptoBot_lib
 "utils/mathutils.h"
 "utils/stringutils.cpp"
 "utils/stringutils.h"
-"utils/vectorutils.h")
+"utils/vectorutils.h" "utils/financeutils.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)

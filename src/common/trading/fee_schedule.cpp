@@ -8,7 +8,7 @@ double FeeSchedule::get_fee(double tradingVolume) const
 {
 	for (auto& [tierLimit, fee] : _fees)
 	{
-		if (tradingVolume < tierLimit)
+		if (tradingVolume <= tierLimit)
 		{
 			return fee;
 		}

@@ -13,6 +13,6 @@ namespace AssetSymbol
 
 enum class TradeAction
 {
-	BUY,
-	SELL
+	SELL = 0,
+	BUY = 1
 };

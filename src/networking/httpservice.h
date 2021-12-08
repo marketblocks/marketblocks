@@ -13,5 +13,11 @@ public:
 	HttpService();
 	~HttpService();
 
-	std::string get(const std::string_view& uri) const;
+	HttpService(const HttpService& other);
+	HttpService(HttpService&& other);
+
+	HttpService& operator=(const HttpService& other);
+	HttpService& operator=(HttpService&& other);
+
+	std::string get(const std::string& uri) const;
 };

@@ -3,27 +3,14 @@
 #include "common/trading/trading_constants.h"
 #include "common/data/data.h"
 
-inline double calculate_cost(double assetPrice, double volume)
-{
-	return assetPrice * volume;
-}
+double calculate_cost(double assetPrice, double volume);
 
-inline double calculate_volume(double assetPrice, double cost)
-{
-	return cost / assetPrice;
-}
+double calculate_volume(double assetPrice, double cost);
 
-inline double calculate_asset_price(double cost, double volume)
-{
-	return cost / volume;
-}
+double calculate_asset_price(double cost, double volume);
 
-inline double calculate_fee(double amount, double feePercentage)
-{
-	return amount * feePercentage * 0.01;
-}
+double calculate_fee(double amount, double feePercentage);
 
-inline double select_price(const PriceData& prices, TradeAction action)
-{
-	return action == TradeAction::BUY ? prices.ask() : prices.bid();
-}
+double calculate_trade_gain(double assetPrice, double tradeValue, double feePercentage, TradeAction action);
+
+double select_price(const PriceData& prices, TradeAction action);

@@ -2,17 +2,17 @@
 #include "utils/financeutils.h"
 #include "utils/vectorutils.h"
 
-PaperTrader::PaperTrader(double fee)
-	: _fee{ fee }, balances{ {"GBP", 1000} }
+PaperTrader::PaperTrader()
+	: _feeSchedule{ std::map<double, double>() }, _balances{{"GBP", 1000}}
 {}
 
-PaperTrader::PaperTrader(double fee, std::unordered_map<std::string, double> initialBalances)
-	: _fee{ fee }, balances{ initialBalances }
+PaperTrader::PaperTrader(FeeSchedule feeSchedule, std::unordered_map<std::string, double> initialBalances)
+	: _feeSchedule{ std::move(feeSchedule) }, _balances{ std::move(initialBalances) }
 {}
 
 double PaperTrader::get_fee(const TradablePair& tradablePair) const
 {
-	return _fee;
+	return _feeSchedule.get_fee(0);
 }
 
 const std::unordered_map<TradablePair, double> PaperTrader::get_fees(const std::vector<TradablePair>& tradablePairs) const
@@ -20,7 +20,7 @@ const std::unordered_map<TradablePair, double> PaperTrader::get_fees(const std::
 	return to_unordered_map<TradablePair, double>(
 		tradablePairs, 
 		[](const TradablePair& pair) { return pair; }, 
-		[this](const TradablePair& pair) { return _fee; });
+		[this](const TradablePair& pair) { return get_fee(pair); });
 }
 
 void PaperTrader::trade(const TradeDescription& description)
@@ -30,12 +30,12 @@ void PaperTrader::trade(const TradeDescription& description)
 
 	if (description.action() == TradeAction::BUY)
 	{
-		balances[description.pair().asset()] += description.volume();
-		balances[description.pair().price_unit()] -= cost + fee;
+		_balances[description.pair().asset()] += description.volume();
+		_balances[description.pair().price_unit()] -= cost + fee;
 	}
 	else
 	{
-		balances[description.pair().asset()] -= description.volume();
-		balances[description.pair().price_unit()] += cost - fee;
+		_balances[description.pair().asset()] -= description.volume();
+		_balances[description.pair().price_unit()] += cost - fee;
 	}
 }

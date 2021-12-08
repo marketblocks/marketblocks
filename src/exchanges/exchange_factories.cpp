@@ -4,5 +4,16 @@
 
 std::shared_ptr<Exchange> make_kraken()
 {
-	return std::make_shared<Exchange>(std::make_unique<KrakenMarketData>(), std::make_unique<PaperTrader>(0.26));
+	FeeSchedule fees = FeeScheduleBuilder{}
+		.add_tier(1000, 0.26)
+		.build();
+
+	std::unordered_map<std::string, double> initialBalances
+	{
+		{ "GBP", 1000 }
+	};
+
+	return std::make_shared<Exchange>(
+		std::make_unique<KrakenApi>(HttpService{}),
+		std::make_unique<PaperTrader>(fees, initialBalances));
 }

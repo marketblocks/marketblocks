@@ -21,11 +21,38 @@ HttpService::~HttpService()
 	curl_easy_cleanup(easyHandle);
 }
 
-std::string HttpService::get(const std::string_view& uri) const
+HttpService::HttpService(const HttpService& other)
+	: easyHandle { other.easyHandle }
+{
+}
+
+HttpService::HttpService(HttpService&& other)
+	: easyHandle { other.easyHandle }
+{
+	other.easyHandle = 0;
+}
+
+HttpService& HttpService::operator=(const HttpService& other)
+{
+	easyHandle = other.easyHandle;
+
+	return *this;
+}
+
+HttpService& HttpService::operator=(HttpService&& other)
+{
+	easyHandle = other.easyHandle;
+
+	other.easyHandle = 0;
+
+	return *this;
+}
+
+std::string HttpService::get(const std::string& uri) const
 {
 	std::string readBuffer;
 
-	curl_easy_setopt(easyHandle, CURLOPT_URL, uri.data());
+	curl_easy_setopt(easyHandle, CURLOPT_URL, uri.c_str());
 	curl_easy_setopt(easyHandle, CURLOPT_CUSTOMREQUEST, HttpVerbs::GET.data());
 	curl_easy_setopt(easyHandle, CURLOPT_WRITEFUNCTION, &write_callback);
 	curl_easy_setopt(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
