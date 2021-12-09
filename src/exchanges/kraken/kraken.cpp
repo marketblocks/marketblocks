@@ -113,7 +113,7 @@ const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 	return std::unordered_map<AssetSymbol, double>();
 }
 
-void KrakenApi::trade(const TradeDescription& description)
+TradeResult KrakenApi::trade(const TradeDescription& description)
 {
-
+	return TradeResult::SUCCESS;
 }

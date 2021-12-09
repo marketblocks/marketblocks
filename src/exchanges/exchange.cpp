@@ -21,7 +21,7 @@ const std::unordered_map<AssetSymbol, double> Exchange::get_balances() const
 	return _trader->get_balances();
 }
 
-void Exchange::trade(const TradeDescription& description)
+TradeResult Exchange::trade(const TradeDescription& description)
 {
 	return _trader->trade(description);
 }

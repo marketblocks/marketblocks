@@ -6,9 +6,22 @@ PaperTrader::PaperTrader(FeeSchedule feeSchedule, std::unordered_map<AssetSymbol
 	: _feeSchedule{ std::move(feeSchedule) }, _balances{ std::move(initialBalances) }
 {}
 
-double PaperTrader::get_fee(const TradablePair& tradablePair) const
+bool PaperTrader::has_sufficient_funds(const AssetSymbol& asset, double amount) const
 {
-	return _feeSchedule.get_fee(0);
+	return _balances.at(asset) >= amount;
+}
+
+TradeResult PaperTrader::execute_trade(AssetSymbol gainedAsset, double gainValue, AssetSymbol soldAsset, double soldValue)
+{
+	if (!has_sufficient_funds(soldAsset, soldValue))
+	{
+		return TradeResult::INSUFFICENT_FUNDS;
+	}
+
+	_balances[gainedAsset] += gainValue;
+	_balances[soldAsset] -= soldValue;
+
+	return TradeResult::SUCCESS;
 }
 
 const std::unordered_map<TradablePair, double> PaperTrader::get_fees(const std::vector<TradablePair>& tradablePairs) const
@@ -16,22 +29,28 @@ const std::unordered_map<TradablePair, double> PaperTrader::get_fees(const std::
 	return to_unordered_map<TradablePair, double>(
 		tradablePairs, 
 		[](const TradablePair& pair) { return pair; }, 
-		[this](const TradablePair& pair) { return get_fee(pair); });
+		[this](const TradablePair& pair) { return _feeSchedule.get_fee(0); });
 }
 
-void PaperTrader::trade(const TradeDescription& description)
+TradeResult PaperTrader::trade(const TradeDescription& description)
 {
 	double cost = calculate_cost(description.asset_price(), description.volume());
-	double fee = cost * get_fee(description.pair()) * 0.01;
+	double fee = cost * _feeSchedule.get_fee(0) * 0.01;
 
 	if (description.action() == TradeAction::BUY)
 	{
-		_balances[description.pair().asset()] += description.volume();
-		_balances[description.pair().price_unit()] -= cost + fee;
+		return execute_trade(
+			description.pair().asset(), 
+			description.volume(), 
+			description.pair().price_unit(), 
+			cost + fee);
 	}
 	else
 	{
-		_balances[description.pair().asset()] -= description.volume();
-		_balances[description.pair().price_unit()] += cost - fee;
+		return execute_trade(
+			description.pair().price_unit(), 
+			cost - fee, 
+			description.pair().asset(), 
+			description.volume());
 	}
 }
