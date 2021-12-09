@@ -23,7 +23,7 @@ public:
 
 	// Trader
 	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override;
-	const std::unordered_map<std::string, double> get_balances() const override;
+	const std::unordered_map<AssetSymbol, double> get_balances() const override;
 
 	void trade(const TradeDescription& description) override;
 };

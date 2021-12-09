@@ -65,5 +65,5 @@ public:
 	void run_iteration();
 };
 
-std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const std::string& fiatCurrency);
+std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const AssetSymbol& fiatCurrency);
 TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options);

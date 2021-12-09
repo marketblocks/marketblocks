@@ -40,7 +40,7 @@ namespace
 			std::string name = it->name.GetString();
 			std::string wsName = it->value["wsname"].GetString();
 			std::vector<std::string> assetSymbols = split(wsName, '/');
-			pairs.emplace_back(name, assetSymbols[0], assetSymbols[1]);
+			pairs.emplace_back(name, AssetSymbol{ assetSymbols[0] }, AssetSymbol{ assetSymbols[1] });
 		}
 
 		return pairs;
@@ -108,9 +108,9 @@ const std::unordered_map<TradablePair, double> KrakenApi::get_fees(const std::ve
 	return std::unordered_map<TradablePair, double>();
 }
 
-const std::unordered_map<std::string, double> KrakenApi::get_balances() const
+const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 {
-	return std::unordered_map<std::string, double>();
+	return std::unordered_map<AssetSymbol, double>();
 }
 
 void KrakenApi::trade(const TradeDescription& description)

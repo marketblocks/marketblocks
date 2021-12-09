@@ -11,7 +11,7 @@ public:
 	virtual ~Trader() = default;
 
 	virtual const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const = 0;
-	virtual const std::unordered_map<std::string, double> get_balances() const = 0;
+	virtual const std::unordered_map<AssetSymbol, double> get_balances() const = 0;
 
 	virtual void trade(const TradeDescription& description) = 0;
 };

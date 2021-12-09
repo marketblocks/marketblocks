@@ -3,23 +3,24 @@
 #include <string>
 #include <string_view>
 
+#include "asset_symbol.h"
+
 class TradablePair
 {
 private:
 	std::string _exchangeId;
-	std::string _asset;
-	std::string _priceUnit;
+	AssetSymbol _asset;
+	AssetSymbol _priceUnit;
 
 public:
-	explicit TradablePair();
-	explicit TradablePair(std::string asset, std::string priceUnit);
-	explicit TradablePair(std::string exchangeId, std::string asset, std::string priceUnit);
+	explicit TradablePair(AssetSymbol asset, AssetSymbol priceUnit);
+	explicit TradablePair(std::string exchangeId, AssetSymbol asset, AssetSymbol priceUnit);
 
 	const std::string& exchange_identifier() const { return _exchangeId; }
-	const std::string& asset() const { return _asset; }
-	const std::string& price_unit() const { return _priceUnit; }
+	const AssetSymbol& asset() const { return _asset; }
+	const AssetSymbol& price_unit() const { return _priceUnit; }
 
-	bool contains(const std::string& assetTicker) const;
+	bool contains(const AssetSymbol& assetTicker) const;
 
 	bool operator==(const TradablePair& other) const;
 };
@@ -31,7 +32,7 @@ namespace std
 	{
 		size_t operator()(const TradablePair& pair) const
 		{
-			return std::hash<std::string_view>()(pair.asset()) ^ std::hash<std::string_view>()(pair.price_unit());
+			return std::hash<AssetSymbol>()(pair.asset()) ^ std::hash<AssetSymbol>()(pair.price_unit());
 		}
 	};
 }

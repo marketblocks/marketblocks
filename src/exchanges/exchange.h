@@ -23,7 +23,7 @@ public:
 	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const;
 
 	// Trader
-	const std::unordered_map<std::string, double> get_balances() const;
+	const std::unordered_map<AssetSymbol, double> get_balances() const;
 	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const;
 
 	void trade(const TradeDescription& description);

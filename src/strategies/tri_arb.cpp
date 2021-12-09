@@ -25,7 +25,7 @@ TriArbExchangeSpec::TriArbExchangeSpec(std::shared_ptr<Exchange> exchange, std::
 	: _exchange{ exchange }, _sequences{ std::move(sequences) }
 {}
 
-std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const std::string& fiatCurrency)
+std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const AssetSymbol& fiatCurrency)
 {
 	std::vector<TriArbExchangeSpec> specs;
 	specs.reserve(exchanges.size());
@@ -46,46 +46,46 @@ std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::sha
 		for (auto& firstPair : fiatTradables)
 		{
 			TradeAction firstAction;
-			std::string firstGainedAsset;
+			std::unique_ptr<AssetSymbol> firstGainedAsset;
 
 			if (firstPair.price_unit() == fiatCurrency)
 			{
 				firstAction = TradeAction::BUY;
-				firstGainedAsset = firstPair.asset();
+				firstGainedAsset = std::make_unique<AssetSymbol>(firstPair.asset());
 			}
 			else
 			{
 				firstAction = TradeAction::SELL;
-				firstGainedAsset = firstPair.price_unit();
+				firstGainedAsset = std::make_unique<AssetSymbol>(firstPair.price_unit());
 			}
 
 			std::vector<TradablePair> possibleMiddles = copy_where(
 				nonFiatTradables,
-				[&firstGainedAsset](const TradablePair& pair) { return pair.contains(firstGainedAsset); });
+				[&firstGainedAsset](const TradablePair& pair) { return pair.contains(*firstGainedAsset); });
 
 			for (auto& middlePair : possibleMiddles)
 			{
 				TradeAction middleAction;
-				std::string middleGainedAsset;
+				std::unique_ptr<AssetSymbol> middleGainedAsset;
 
-				if (middlePair.price_unit() == firstGainedAsset)
+				if (middlePair.price_unit() == *firstGainedAsset)
 				{
 					middleAction = TradeAction::BUY;
-					middleGainedAsset = middlePair.asset();
+					middleGainedAsset = std::make_unique<AssetSymbol>(middlePair.asset());
 				}
 				else
 				{
 					middleAction = TradeAction::SELL;
-					middleGainedAsset = middlePair.price_unit();
+					middleGainedAsset = std::make_unique<AssetSymbol>(middlePair.price_unit());
 				}
 
 				std::vector<TradablePair> finals = copy_where(
 					fiatTradables,
-					[&middleGainedAsset](const TradablePair& pair) { return pair.contains(middleGainedAsset); });
+					[&middleGainedAsset](const TradablePair& pair) { return pair.contains(*middleGainedAsset); });
 
 				for (auto& finalPair : finals)
 				{
-					TradeAction finalAction = finalPair.price_unit() == middleGainedAsset
+					TradeAction finalAction = finalPair.price_unit() == *middleGainedAsset
 						? TradeAction::BUY
 						: TradeAction::SELL;
 
@@ -130,7 +130,7 @@ namespace
 
 	void print_pair(const TradablePair& pair)
 	{
-		std::cout << pair.asset() << "/" << pair.price_unit();
+		std::cout << pair.asset().get() << "/" << pair.price_unit().get();
 	}
 
 	void print_sequence(const TriArbSequence& sequence)

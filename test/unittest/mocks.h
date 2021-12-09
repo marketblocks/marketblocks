@@ -17,6 +17,6 @@ class MockTrader : public Trader
 public:
 
 	MOCK_METHOD((const std::unordered_map<TradablePair, double>), get_fees, (const std::vector<TradablePair>& tradablePairs), (const, override));
-	MOCK_METHOD((const std::unordered_map<std::string, double>), get_balances, (), (const, override));
+	MOCK_METHOD((const std::unordered_map<AssetSymbol, double>), get_balances, (), (const, override));
 	MOCK_METHOD(void, trade, (const TradeDescription& description), (override));
 };

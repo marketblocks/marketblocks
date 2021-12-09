@@ -46,7 +46,7 @@ namespace
 			std::make_shared<Exchange>(std::move(mockMarketData), std::make_unique<MockTrader>())
 		};
 
-		std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges, "GBP");
+		std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges, AssetSymbol{ "GBP" });
 
 		return specs;
 	}
@@ -73,9 +73,9 @@ namespace
 	{
 		EXPECT_CALL(*mockTrader, get_balances)
 			.WillRepeatedly(Return(
-				std::unordered_map<std::string, double>
+				std::unordered_map<AssetSymbol, double>
 			{
-				{ "GBP", 5.0 }
+				{ AssetSymbol{ "GBP" }, 5.0 }
 			}));
 
 		EXPECT_CALL(*mockTrader, get_fees)
@@ -136,7 +136,7 @@ namespace
 
 		std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
 		TriArbExchangeSpec spec{ exchange, sequences };
-		TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, "GBP" } };
+		TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, AssetSymbol{"GBP"} } };
 
 		strategy.run_iteration();
 	}
@@ -144,7 +144,7 @@ namespace
 
 void PrintTo(const TradeDescription& description, std::ostream* os)
 {
-	*os << "Tradable Pair: " << description.pair().asset() << "/" << description.pair().price_unit() << std::endl;
+	*os << "Tradable Pair: " << description.pair().asset().get() << "/" << description.pair().price_unit().get() << std::endl;
 	*os << "Action: " << to_string(description.action()) << std::endl;
 	*os << "Asset Price: " << description.asset_price() << std::endl;
 	*os << "Volume: " << description.volume() << std::endl;
@@ -152,16 +152,16 @@ void PrintTo(const TradeDescription& description, std::ostream* os)
 
 void PrintTo(const SequenceStep& step, std::ostream* os)
 {
-	*os << "Tradable Pair: " << step.pair().asset() << "/" << step.pair().price_unit() << std::endl;
+	*os << "Tradable Pair: " << step.pair().asset().get() << "/" << step.pair().price_unit().get() << std::endl;
 	*os << "Action: " << to_string(step.action()) << std::endl;
 }
 TEST(TriArb, CreateSpecFindsBothSequences)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "ETH", "BTC" },
-		TradablePair{ "ETH", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"BTC"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TriArbExchangeSpec> specs = execute_create_exchange_specs(tradablePairs);
@@ -174,9 +174,9 @@ TEST(TriArb, CreateSpecDoesNotTakeNonGbpPairs)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "USD" },
-		TradablePair{ "ETH", "BTC" },
-		TradablePair{ "ETH", "USD" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"BTC"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TriArbExchangeSpec> specs = execute_create_exchange_specs(tradablePairs);
@@ -189,9 +189,9 @@ TEST(TriArb, CreateSpecsFindsBBB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "EUR", "GBP" },
-		TradablePair{ "USD", "EUR" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -208,9 +208,9 @@ TEST(TriArb, CreateSpecsFindsBBS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "ETH", "BTC" },
-		TradablePair{ "ETH", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"BTC"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -227,9 +227,9 @@ TEST(TriArb, CreateSpecsFindsBSB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "BTC", "USD" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -246,9 +246,9 @@ TEST(TriArb, CreateSpecsFindsBSS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "BTC", "EUR" },
-		TradablePair{ "EUR", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -265,9 +265,9 @@ TEST(TriArb, CreateSpecsFindsSBB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "USD", "EUR" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -284,9 +284,9 @@ TEST(TriArb, CreateSpecsFindsSBS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "USD" },
-		TradablePair{ "BTC", "USD" },
-		TradablePair{ "BTC", "GBP" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -303,9 +303,9 @@ TEST(TriArb, CreateSpecsFindsSSB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "EUR", "USD" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -322,9 +322,9 @@ TEST(TriArb, CreateSpecsFindsSSS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "EUR", "USD" },
-		TradablePair{ "USD", "GBP" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> expectedActions
@@ -341,9 +341,9 @@ TEST(TriArb, IterationExecutesTradesBBB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "EUR", "GBP" },
-		TradablePair{ "USD", "EUR" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -376,9 +376,9 @@ TEST(TriArb, IterationExecutesTradesBBS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "ETH", "BTC" },
-		TradablePair{ "ETH", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"BTC"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -411,9 +411,9 @@ TEST(TriArb, IterationExecutesTradesBSB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "BTC", "USD" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -446,9 +446,9 @@ TEST(TriArb, IterationExecutesTradesBSS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "BTC", "EUR" },
-		TradablePair{ "EUR", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -481,9 +481,9 @@ TEST(TriArb, IterationExecutesTradesSBB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "USD", "EUR" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -516,9 +516,9 @@ TEST(TriArb, IterationExecutesTradesSBS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "USD" },
-		TradablePair{ "BTC", "USD" },
-		TradablePair{ "BTC", "GBP" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -551,9 +551,9 @@ TEST(TriArb, IterationExecutesTradesSSB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "EUR", "USD" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -586,9 +586,9 @@ TEST(TriArb, IterationExecutesTradesSSS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "EUR", "USD" },
-		TradablePair{ "USD", "GBP" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"USD"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -621,9 +621,9 @@ TEST(TriArb, CalculateCorrectTradesWithFeesBSS)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "BTC", "EUR" },
-		TradablePair{ "EUR", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"EUR"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -657,9 +657,9 @@ TEST(TriArb, CalculateCorrectTradesWithFeesSBB)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "GBP", "EUR" },
-		TradablePair{ "USD", "EUR" },
-		TradablePair{ "GBP", "USD" },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"USD"}, AssetSymbol{"EUR"} },
+		TradablePair{ AssetSymbol{"GBP"}, AssetSymbol{"USD"} },
 	};
 
 	std::vector<TradeAction> actions
@@ -693,9 +693,9 @@ TEST(TriArb, DoesNotTradeIfProfitLessThan0)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "ETH", "BTC" },
-		TradablePair{ "ETH", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"BTC"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<OrderBookLevel> prices
@@ -727,7 +727,7 @@ TEST(TriArb, DoesNotTradeIfProfitLessThan0)
 
 	std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
 	TriArbExchangeSpec spec{ exchange, sequences };
-	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, "GBP" } };
+	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, AssetSymbol{"GBP"} } };
 
 	strategy.run_iteration();
 }
@@ -736,9 +736,9 @@ TEST(TriArb, DoesNotTradeIfProfitLessThanFees)
 {
 	std::vector<TradablePair> tradablePairs
 	{
-		TradablePair{ "BTC", "GBP" },
-		TradablePair{ "ETH", "BTC" },
-		TradablePair{ "ETH", "GBP" },
+		TradablePair{ AssetSymbol{"BTC"}, AssetSymbol{"GBP"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"BTC"} },
+		TradablePair{ AssetSymbol{"ETH"}, AssetSymbol{"GBP"} },
 	};
 
 	std::vector<OrderBookLevel> prices
@@ -772,7 +772,7 @@ TEST(TriArb, DoesNotTradeIfProfitLessThanFees)
 
 	std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
 	TriArbExchangeSpec spec{ exchange, sequences };
-	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, "GBP" } };
+	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, AssetSymbol{"GBP"} } };
 
 	strategy.run_iteration();
 }

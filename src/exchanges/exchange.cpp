@@ -16,7 +16,7 @@ const std::unordered_map<TradablePair, double> Exchange::get_fees(const std::vec
 	return _trader->get_fees(tradablePairs);
 }
 
-const std::unordered_map<std::string, double> Exchange::get_balances() const
+const std::unordered_map<AssetSymbol, double> Exchange::get_balances() const
 {
 	return _trader->get_balances();
 }

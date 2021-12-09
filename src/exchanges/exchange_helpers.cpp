@@ -11,7 +11,7 @@ std::unordered_map<TradablePair, OrderBookLevel> get_best_order_book_prices(cons
 		[&orderBook](const TradablePair& pair) { return orderBook.at(pair).level(0); });
 }
 
-double get_balance(const Exchange& exchange, const std::string& tickerId)
+double get_balance(const Exchange& exchange, const AssetSymbol& tickerId)
 {
 	return exchange.get_balances().at(tickerId);
 }

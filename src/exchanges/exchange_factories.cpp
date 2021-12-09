@@ -8,9 +8,9 @@ std::shared_ptr<Exchange> make_kraken()
 		.add_tier(1000, 0.26)
 		.build();
 
-	std::unordered_map<std::string, double> initialBalances
+	std::unordered_map<AssetSymbol, double> initialBalances
 	{
-		{ "GBP", 1000 }
+		{ AssetSymbol { "GBP" }, 1000 }
 	};
 
 	return std::make_shared<Exchange>(

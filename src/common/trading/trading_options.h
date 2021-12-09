@@ -2,15 +2,17 @@
 
 #include <string>
 
+#include "asset_symbol.h"
+
 class TradingOptions
 {
 private:
 	double _maxTradePercent;
-	std::string _fiatCurrency;
+	AssetSymbol _fiatCurrency;
 
 public:
-	explicit TradingOptions(double maxTradePercent, std::string fiatCurrency);
+	explicit TradingOptions(double maxTradePercent, AssetSymbol fiatCurrency);
 
 	double max_trade_percent() const { return _maxTradePercent; }
-	const std::string& fiat_currency() const { return _fiatCurrency; }
+	const AssetSymbol& fiat_currency() const { return _fiatCurrency; }
 };

@@ -7,10 +7,10 @@ TEST(PaperTrader, TradeBuy)
 	constexpr double initialGbpBalance = 100.0;
 	constexpr double initialBtcBalance = 1.5;
 
-	std::unordered_map<std::string, double> initialBalances
+	std::unordered_map<AssetSymbol, double> initialBalances
 	{
-		{ "GBP", initialGbpBalance },
-		{ "BTC", initialBtcBalance }
+		{ AssetSymbol{ "GBP" }, initialGbpBalance },
+		{ AssetSymbol{ "BTC" }, initialBtcBalance }
 	};
 
 	FeeSchedule fees = FeeScheduleBuilder{}
@@ -18,7 +18,7 @@ TEST(PaperTrader, TradeBuy)
 		.build();
 
 	PaperTrader trader{ fees, initialBalances };
-	TradablePair pair{ "BTC", "GBP" };
+	TradablePair pair{ AssetSymbol{ "BTC" }, AssetSymbol{ "GBP" } };
 	TradeDescription tradeDescription
 	{
 		pair,
@@ -33,7 +33,7 @@ TEST(PaperTrader, TradeBuy)
 
 	trader.trade(tradeDescription);
 
-	std::unordered_map<std::string, double> balances = trader.get_balances();
+	std::unordered_map<AssetSymbol, double> balances = trader.get_balances();
 
 	EXPECT_DOUBLE_EQ(balances.at(pair.asset()), expectedBtcBalance);
 	EXPECT_DOUBLE_EQ(balances.at(pair.price_unit()), expectedGbpBalance);
@@ -44,10 +44,10 @@ TEST(PaperTrader, TradeSell)
 	constexpr double initialGbpBalance = 100.0;
 	constexpr double initialBtcBalance = 1.5;
 
-	std::unordered_map<std::string, double> initialBalances
+	std::unordered_map<AssetSymbol, double> initialBalances
 	{
-		{ "GBP", initialGbpBalance },
-		{ "BTC", initialBtcBalance }
+		{ AssetSymbol{ "GBP" }, initialGbpBalance },
+		{ AssetSymbol{ "BTC" }, initialBtcBalance }
 	};
 
 	FeeSchedule fees = FeeScheduleBuilder{}
@@ -55,7 +55,7 @@ TEST(PaperTrader, TradeSell)
 		.build();
 
 	PaperTrader trader{ fees, initialBalances };
-	TradablePair pair{ "BTC", "GBP" };
+	TradablePair pair{ AssetSymbol{ "BTC" }, AssetSymbol{ "GBP" } };
 	TradeDescription tradeDescription
 	{
 		pair,
@@ -70,7 +70,7 @@ TEST(PaperTrader, TradeSell)
 
 	trader.trade(tradeDescription);
 
-	std::unordered_map<std::string, double> balances = trader.get_balances();
+	std::unordered_map<AssetSymbol, double> balances = trader.get_balances();
 
 	EXPECT_DOUBLE_EQ(balances.at(pair.asset()), expectedBtcBalance);
 	EXPECT_DOUBLE_EQ(balances.at(pair.price_unit()), expectedGbpBalance);
