@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "common/trading/tradable_pair.h"
 #include "common/trading/trade_description.h"

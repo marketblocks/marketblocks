@@ -10,4 +10,5 @@ namespace HttpResponseCodes
 namespace HttpVerbs
 {
 	constexpr std::string_view GET = "GET";
+	constexpr std::string_view POST = "POST";
 }

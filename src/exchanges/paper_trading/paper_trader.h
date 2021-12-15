@@ -12,8 +12,8 @@ private:
 	FeeSchedule _feeSchedule;
 	std::unordered_map<AssetSymbol, double> _balances;
 
-	TradeResult execute_trade(AssetSymbol gainedAsset, double gainValue, AssetSymbol soldAsset, double soldValue);
 	bool has_sufficient_funds(const AssetSymbol& asset, double amount) const;
+	TradeResult execute_trade(AssetSymbol gainedAsset, double gainValue, AssetSymbol soldAsset, double soldValue);
 
 public:
 	explicit PaperTrader(FeeSchedule feeSchedule, std::unordered_map<AssetSymbol, double> initialBalances);

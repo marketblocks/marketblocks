@@ -9,10 +9,13 @@
 #include "exchanges/trader.h"
 #include "networking/httpservice.h"
 
-class KrakenApi final : public MarketData, Trader
+class KrakenApi final : public MarketData, public Trader
 {
 private:
+	std::vector<unsigned char> decodedSecret;
 	HttpService _httpService;
+	std::string get_nonce() const;
+	std::string compute_api_sign(const std::string& uriPath, const std::string& postData, const std::string& nonce) const;
 
 public:
 	KrakenApi(HttpService httpService);
