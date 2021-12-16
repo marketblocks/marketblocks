@@ -15,6 +15,6 @@ std::shared_ptr<Exchange> make_kraken()
 
 	return std::make_shared<Exchange>(
 		std::make_unique<KrakenApi>(HttpService{}),
-		//std::make_unique<PaperTrader>(fees, initialBalances));
-		std::make_unique<KrakenApi>(HttpService{}));
+		std::make_unique<PaperTrader>(fees, initialBalances));
+		//std::make_unique<KrakenApi>(HttpService{}));
 }

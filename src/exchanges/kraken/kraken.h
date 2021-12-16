@@ -7,7 +7,7 @@
 
 #include "exchanges/market_data.h"
 #include "exchanges/trader.h"
-#include "networking/httpservice.h"
+#include "networking/http/http_service.h"
 
 class KrakenApi final : public MarketData, public Trader
 {

@@ -6,6 +6,9 @@
 #include <string_view>
 #include <utility>
 
+#include "http_response.h"
+#include "http_request.h"
+
 class HttpService
 {
 private:
@@ -21,6 +24,5 @@ public:
 	HttpService& operator=(const HttpService& other);
 	HttpService& operator=(HttpService&& other);
 
-	std::string get(const std::string& uri) const;
-	std::string post(const std::string& uri, const std::string& postData, const std::vector<std::pair<std::string, std::string>>& headers) const;
+	HttpResponse send(const HttpRequest& request) const;
 };

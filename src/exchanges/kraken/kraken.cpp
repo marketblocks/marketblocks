@@ -114,8 +114,9 @@ std::string KrakenApi::compute_api_sign(const std::string& uriPath, const std::s
 
 const std::vector<TradablePair> KrakenApi::get_tradable_pairs() const
 {
-	std::string result = _httpService.get(Uris::TRADABLE_PAIRS);
-	return read_tradable_pairs(result);
+	HttpRequest request{ HttpVerb::GET, Uris::TRADABLE_PAIRS };
+	HttpResponse result = _httpService.send(request);
+	return read_tradable_pairs(result.message());
 }
 
 const std::unordered_map<TradablePair, OrderBookState> KrakenApi::get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const
@@ -125,10 +126,11 @@ const std::unordered_map<TradablePair, OrderBookState> KrakenApi::get_order_book
 
 	for (auto& pair : tradablePairs)
 	{
-		std::string uri =Uris::ORDER_BOOK + "?pair=" + pair.exchange_identifier() + "&count=" + std::to_string(depth);
-		std::string result = _httpService.get(uri);
+		Uri uri{ Uris::ORDER_BOOK + "?pair=" + pair.exchange_identifier() + "&count=" + std::to_string(depth) };
+		HttpRequest request{ HttpVerb::GET, std::move(uri) };
+		HttpResponse result = _httpService.send(request);
 		
-		orderBooks.emplace(pair, read_order_book(result, pair, depth));
+		orderBooks.emplace(pair, read_order_book(result.message(), pair, depth));
 	}
 
 	return orderBooks;
@@ -146,16 +148,15 @@ const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 
 	std::string apiSign = compute_api_sign("/0/private/Balance", postData, nonce);
 
-	std::vector<std::pair<std::string, std::string>> headers
-	{
-		std::make_pair("API-Key", publicApiKey),
-		std::make_pair("API-Sign", apiSign),
-		std::make_pair("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
-	};
+	HttpRequest request{ HttpVerb::POST, Uris::BALANCE };
+	request.add_header("API-Key", publicApiKey);
+	request.add_header("API-Sign", apiSign);
+	request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+	request.set_content(postData);
 
-	std::string result = _httpService.post(Uris::BALANCE, postData, headers);
+	HttpResponse result = _httpService.send(request);
 
-	return std::unordered_map<AssetSymbol, double>();
+	return read_balances(result.message());
 }
 
 TradeResult KrakenApi::trade(const TradeDescription& description)

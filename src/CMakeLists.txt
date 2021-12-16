@@ -3,6 +3,10 @@ add_library(CryptoBot_lib
 "runner.h" 
 "common/data/order_book.cpp"
 "common/data/order_book.h"
+"common/security/hash.cpp"
+"common/security/hash.h" 
+"common/security/encoding.cpp"
+"common/security/encoding.h" 
 "common/trading/asset_symbol.cpp"
 "common/trading/asset_symbol.h"
 "common/trading/fee_schedule.cpp" 
@@ -26,9 +30,17 @@ add_library(CryptoBot_lib
 "exchanges/kraken/kraken.h"
 "exchanges/paper_trading/paper_trader.cpp"
 "exchanges/paper_trading/paper_trader.h"
-"networking/httpconstants.h"
-"networking/httpservice.cpp"
-"networking/httpservice.h"
+"networking/http/http_constants.h"
+"networking/http/http_service.cpp"
+"networking/http/http_service.h"
+"networking/http/http_request.cpp"
+"networking/http/http_request.h"
+"networking/http/http_header.cpp"
+"networking/http/http_header.h"
+"networking/http/http_response.cpp"
+"networking/http/http_response.h" 
+"networking/uri.cpp"
+"networking/uri.h"
 "networking/json_wrapper.cpp"
 "networking/json_wrapper.h"
 "strategies/tri_arb.cpp"
@@ -39,7 +51,7 @@ add_library(CryptoBot_lib
 "utils/mathutils.h"
 "utils/stringutils.cpp"
 "utils/stringutils.h"
-"utils/vectorutils.h" "common/security/hash.h" "common/security/hash.cpp" "common/security/encoding.h" "common/security/encoding.cpp")
+"utils/vectorutils.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)
