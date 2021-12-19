@@ -1,7 +1,7 @@
 #include "http_request.h"
 
-HttpRequest::HttpRequest(HttpVerb verb, Uri uri)
-	: _verb{ verb }, _uri{ std::move(uri) }, _content{}, _headers{}
+HttpRequest::HttpRequest(HttpVerb verb, std::string uri)
+	: _verb{ verb }, _url{ std::move(uri) }, _content{}, _headers{}
 {}
 
 void HttpRequest::set_content(const std::string& content)

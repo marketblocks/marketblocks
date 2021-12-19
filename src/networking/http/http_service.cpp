@@ -80,7 +80,7 @@ HttpResponse HttpService::send(const HttpRequest& request) const
 {
 	std::string readBuffer;
 
-	curl_easy_setopt(easyHandle, CURLOPT_URL, request.uri().value().c_str());
+	curl_easy_setopt(easyHandle, CURLOPT_URL, request.url().c_str());
 	curl_easy_setopt(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
 	curl_easy_setopt(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
 

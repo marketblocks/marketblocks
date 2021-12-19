@@ -2,7 +2,7 @@
 #include <algorithm>
 
 #include "tri_arb.h"
-#include "common/data/order_book.h"
+#include "common/trading/order_book.h"
 #include "exchanges/exchange_helpers.h"
 #include "utils/vectorutils.h"
 #include "utils/mathutils.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/trading/tradable_pair.h"
-#include "common/data/order_book.h"
+#include "common/trading/order_book.h"
 
 class MarketData
 {

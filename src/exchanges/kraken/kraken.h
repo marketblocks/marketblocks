@@ -14,8 +14,15 @@ class KrakenApi final : public MarketData, public Trader
 private:
 	std::vector<unsigned char> decodedSecret;
 	HttpService _httpService;
+
 	std::string get_nonce() const;
 	std::string compute_api_sign(const std::string& uriPath, const std::string& postData, const std::string& nonce) const;
+
+	std::string send_public_request(const std::string& method, const std::string& query) const;
+	std::string send_public_request(const std::string& method) const;
+
+	std::string send_private_request(const std::string& method, const std::string& query) const;
+	std::string send_private_request(const std::string& method) const;
 
 public:
 	KrakenApi(HttpService httpService);

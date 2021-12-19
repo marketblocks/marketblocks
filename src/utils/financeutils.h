@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/trading/trading_constants.h"
-#include "common/data/order_book.h"
+#include "common/trading/order_book.h"
 
 double calculate_cost(double assetPrice, double volume);
 
