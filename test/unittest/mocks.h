@@ -1,22 +1,16 @@
 #pragma once
 
 #include <gmock/gmock.h>
+#include <vector>
 
-#include "exchanges/market_data.h"
-#include "exchanges/trader.h"
+#include "exchanges/exchange.h"
 
-class MockMarketData : public MarketData
+class MockExchange : public Exchange
 {
 public:
 	MOCK_METHOD(const std::vector<TradablePair>, get_tradable_pairs, (), (const, override));
 	MOCK_METHOD((const std::unordered_map<TradablePair, OrderBookState>), get_order_book, (const std::vector<TradablePair>& tradablePairs, int depth), (const, override));
-};
-
-class MockTrader : public Trader
-{
-public:
-
-	MOCK_METHOD((const std::unordered_map<TradablePair, double>), get_fees, (const std::vector<TradablePair>& tradablePairs), (const, override));
 	MOCK_METHOD((const std::unordered_map<AssetSymbol, double>), get_balances, (), (const, override));
+	MOCK_METHOD((const std::unordered_map<TradablePair, double>), get_fees, (const std::vector<TradablePair>& tradablePairs), (const, override));
 	MOCK_METHOD(TradeResult, trade, (const TradeDescription& description), (override));
 };

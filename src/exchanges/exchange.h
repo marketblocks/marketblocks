@@ -4,27 +4,58 @@
 #include <unordered_map>
 #include <memory>
 
-#include "market_data.h"
-#include "trader.h"
+#include "common/trading/tradable_pair.h"
+#include "common/trading/asset_symbol.h"
+#include "common/trading/trading_constants.h"
+#include "common/trading/order_book.h"
+#include <common/trading/trade_description.h>
 
-class Exchange final
+class Exchange
+{
+public:
+	virtual ~Exchange() = default;
+
+	virtual const std::vector<TradablePair> get_tradable_pairs() const = 0;
+	virtual const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const = 0;
+	virtual const std::unordered_map<AssetSymbol, double> get_balances() const = 0;
+	virtual const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const = 0;
+	virtual TradeResult trade(const TradeDescription& description) = 0;
+};
+
+template<typename MarketApi, typename TradeApi>
+class MultiComponentExchange final : public Exchange
 {
 private:
-	std::unique_ptr<MarketData> _marketData;
-	std::unique_ptr<Trader> _trader;
+	MarketApi _marketApi;
+	TradeApi _tradeApi;
 
 public:
-	Exchange(std::unique_ptr<MarketData> marketData, std::unique_ptr<Trader> trader)
-		: _marketData{std::move(marketData)}, _trader{std::move(trader)}
+	MultiComponentExchange(MarketApi&& dataApi, TradeApi&& tradeApi)
+		: _marketApi{ std::forward<MarketApi>(dataApi) }, _tradeApi{ std::forward<TradeApi>(tradeApi) }
 	{}
 
-	// Market Data
-	const std::vector<TradablePair> get_tradable_pairs() const;
-	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const;
+	virtual const std::vector<TradablePair> get_tradable_pairs() const override
+	{
+		return _marketApi.get_tradable_pairs();
+	}
 
-	// Trader
-	const std::unordered_map<AssetSymbol, double> get_balances() const;
-	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const;
+	virtual const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override
+	{
+		return _marketApi.get_order_book(tradablePairs, depth);
+	}
 
-	TradeResult trade(const TradeDescription& description);
+	virtual const std::unordered_map<AssetSymbol, double> get_balances() const override
+	{
+		return _tradeApi.get_balances();
+	}
+
+	virtual const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override
+	{
+		return _tradeApi.get_fees(tradablePairs);
+	}
+
+	virtual TradeResult trade(const TradeDescription& description) override
+	{
+		return _tradeApi.trade(description);
+	}
 };

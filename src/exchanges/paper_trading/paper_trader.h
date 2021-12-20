@@ -3,10 +3,13 @@
 #include <unordered_map>
 #include <string>
 
-#include "exchanges/trader.h"
+#include "common/trading/asset_symbol.h"
+#include "common/trading/trading_constants.h"
+#include "common/trading/tradable_pair.h"
+#include "common/trading/trade_description.h"
 #include "common/trading/fee_schedule.h"
 
-class PaperTrader final : public Trader
+class PaperTrader
 {
 private:
 	FeeSchedule _feeSchedule;
@@ -18,8 +21,8 @@ private:
 public:
 	explicit PaperTrader(FeeSchedule feeSchedule, std::unordered_map<AssetSymbol, double> initialBalances);
 
-	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override;
-	const std::unordered_map<AssetSymbol, double> get_balances() const override { return _balances; }
+	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const;
+	const std::unordered_map<AssetSymbol, double> get_balances() const { return _balances; }
 
-	TradeResult trade(const TradeDescription& description) override;
+	TradeResult trade(const TradeDescription& description);
 };

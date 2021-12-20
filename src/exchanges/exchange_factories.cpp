@@ -13,8 +13,7 @@ std::shared_ptr<Exchange> make_kraken()
 		{ AssetSymbol { "GBP" }, 1000 }
 	};
 
-	return std::make_shared<Exchange>(
-		std::make_unique<KrakenApi>(HttpService{}),
-		std::make_unique<PaperTrader>(fees, initialBalances));
-		//std::make_unique<KrakenApi>(HttpService{}));
+	return std::make_shared<MultiComponentExchange<KrakenApi, PaperTrader>>(
+		KrakenApi{ HttpService{} },
+		PaperTrader{ fees, initialBalances });
 }

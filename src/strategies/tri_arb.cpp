@@ -3,6 +3,7 @@
 
 #include "tri_arb.h"
 #include "common/trading/order_book.h"
+#include <common/trading/trade_description.h>
 #include "exchanges/exchange_helpers.h"
 #include "utils/vectorutils.h"
 #include "utils/mathutils.h"

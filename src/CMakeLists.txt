@@ -18,14 +18,14 @@ add_library(CryptoBot_lib
 "common/trading/trading_constants.h"
 "common/trading/trading_options.cpp"
 "common/trading/trading_options.h"
-"exchanges/exchange.cpp"
+
 "exchanges/exchange.h"
 "exchanges/exchange_factories.cpp"
 "exchanges/exchange_factories.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
-"exchanges/market_data.h"
-"exchanges/trader.h"
+
+
 "exchanges/kraken/kraken.cpp"
 "exchanges/kraken/kraken.h"
 "exchanges/kraken/kraken_results.cpp"

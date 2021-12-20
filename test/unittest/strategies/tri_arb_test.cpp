@@ -37,13 +37,13 @@ namespace
 
 	std::vector<TriArbExchangeSpec> execute_create_exchange_specs(std::vector<TradablePair> tradablePairs)
 	{
-		auto mockMarketData = std::make_unique<testing::NiceMock<MockMarketData>>();
+		auto mockExchange = std::make_shared<testing::NiceMock<MockExchange>>();
 
-		EXPECT_CALL(*mockMarketData, get_tradable_pairs).WillOnce(Return(tradablePairs));
+		EXPECT_CALL(*mockExchange, get_tradable_pairs).WillOnce(Return(tradablePairs));
 
 		std::vector<std::shared_ptr<Exchange>> exchanges
 		{
-			std::make_shared<Exchange>(std::move(mockMarketData), std::make_unique<MockTrader>())
+			mockExchange
 		};
 
 		std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges, AssetSymbol{ "GBP" });
@@ -51,12 +51,13 @@ namespace
 		return specs;
 	}
 
-	void setup_market_data_mock(
-		MockMarketData* mockMarketData,
+	void setup_exchange_mock(
+		const MockExchange& mockExchange,
 		const std::vector<TradablePair>& tradablePairs,
-		const std::vector<OrderBookLevel>& prices)
+		const std::vector<OrderBookLevel>& prices,
+		double fee)
 	{
-		EXPECT_CALL(*mockMarketData, get_order_book)
+		EXPECT_CALL(mockExchange, get_order_book)
 			.WillRepeatedly(Return(
 				std::unordered_map<TradablePair, OrderBookState>
 		{
@@ -64,21 +65,15 @@ namespace
 			{ tradablePairs[1], OrderBookState{{ prices[1] }} },
 			{ tradablePairs[2], OrderBookState{{ prices[2] }} },
 		}));
-	}
 
-	void setup_trader_mock(
-		MockTrader* mockTrader,
-		const std::vector<TradablePair>& tradablePairs,
-		double fee)
-	{
-		EXPECT_CALL(*mockTrader, get_balances)
+		EXPECT_CALL(mockExchange, get_balances)
 			.WillRepeatedly(Return(
 				std::unordered_map<AssetSymbol, double>
-			{
-				{ AssetSymbol{ "GBP" }, 5.0 }
-			}));
+		{
+			{ AssetSymbol{ "GBP" }, 5.0 }
+		}));
 
-		EXPECT_CALL(*mockTrader, get_fees)
+		EXPECT_CALL(mockExchange, get_fees)
 			.WillRepeatedly(Return(to_unordered_map<TradablePair, double>(
 				tradablePairs,
 				[](const TradablePair& pair) { return pair; },
@@ -123,19 +118,16 @@ namespace
 			}
 		};
 
-		auto mockMarketData = std::make_unique<testing::NiceMock<MockMarketData>>();
-		auto mockTrader = std::make_unique<testing::NiceMock<MockTrader>>();
+		auto mockExchange = std::make_shared<testing::NiceMock<MockExchange>>();
 
 		// Setup Mocks
-		setup_market_data_mock(mockMarketData.get(), tradablePairs, prices);
-		setup_trader_mock(mockTrader.get(), tradablePairs, fee);
+		setup_exchange_mock(*mockExchange, tradablePairs, prices, fee);
 
-		EXPECT_CALL(*mockTrader, trade(IsTradeDescription(TradeDescription{ tradablePairs[0], actions[0], expectedAssetPrices[0], expectedVolumes[0] }))).Times(1);
-		EXPECT_CALL(*mockTrader, trade(IsTradeDescription(TradeDescription{ tradablePairs[1], actions[1], expectedAssetPrices[1], expectedVolumes[1] }))).Times(1);
-		EXPECT_CALL(*mockTrader, trade(IsTradeDescription(TradeDescription{ tradablePairs[2], actions[2], expectedAssetPrices[2], expectedVolumes[2] }))).Times(1);
+		EXPECT_CALL(*mockExchange, trade(IsTradeDescription(TradeDescription{ tradablePairs[1], actions[1], expectedAssetPrices[1], expectedVolumes[1] }))).Times(1);
+		EXPECT_CALL(*mockExchange, trade(IsTradeDescription(TradeDescription{ tradablePairs[2], actions[2], expectedAssetPrices[2], expectedVolumes[2] }))).Times(1);
+		EXPECT_CALL(*mockExchange, trade(IsTradeDescription(TradeDescription{ tradablePairs[0], actions[0], expectedAssetPrices[0], expectedVolumes[0] }))).Times(1);
 
-		std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
-		TriArbExchangeSpec spec{ exchange, sequences };
+		TriArbExchangeSpec spec{ mockExchange, sequences };
 		TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, AssetSymbol{"GBP"} } };
 
 		strategy.run_iteration();
@@ -716,17 +708,14 @@ TEST(TriArb, DoesNotTradeIfProfitLessThan0)
 		}
 	};
 
-	auto mockMarketData = std::make_unique<testing::NiceMock<MockMarketData>>();
-	auto mockTrader = std::make_unique<testing::NiceMock<MockTrader>>();
+	auto mockExchange = std::make_shared<testing::NiceMock<MockExchange>>();
 
 	// Setup Mocks
-	setup_market_data_mock(mockMarketData.get(), tradablePairs, prices);
-	setup_trader_mock(mockTrader.get(), tradablePairs, 0.0);
+	setup_exchange_mock(*mockExchange, tradablePairs, prices, 0.0);
 
-	EXPECT_CALL(*mockTrader, trade).Times(0);
+	EXPECT_CALL(*mockExchange, trade).Times(0);
 
-	std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
-	TriArbExchangeSpec spec{ exchange, sequences };
+	TriArbExchangeSpec spec{ mockExchange, sequences };
 	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, AssetSymbol{"GBP"} } };
 
 	strategy.run_iteration();
@@ -759,19 +748,16 @@ TEST(TriArb, DoesNotTradeIfProfitLessThanFees)
 		}
 	};
 
-	auto mockMarketData = std::make_unique<testing::NiceMock<MockMarketData>>();
-	auto mockTrader = std::make_unique<testing::NiceMock<MockTrader>>();
+	auto mockExchange = std::make_shared<testing::NiceMock<MockExchange>>();
 
 	// Setup Mocks
 	constexpr double fee = 1.0;
 
-	setup_market_data_mock(mockMarketData.get(), tradablePairs, prices);
-	setup_trader_mock(mockTrader.get(), tradablePairs, fee);
+	setup_exchange_mock(*mockExchange, tradablePairs, prices, fee);
 
-	EXPECT_CALL(*mockTrader, trade).Times(0);
+	EXPECT_CALL(*mockExchange, trade).Times(0);
 
-	std::shared_ptr<Exchange> exchange = std::make_shared<Exchange>(std::move(mockMarketData), std::move(mockTrader));
-	TriArbExchangeSpec spec{ exchange, sequences };
+	TriArbExchangeSpec spec{ mockExchange, sequences };
 	TriArbStrategy strategy{ std::vector<TriArbExchangeSpec>{spec}, TradingOptions{ 1.0, AssetSymbol{"GBP"} } };
 
 	strategy.run_iteration();
