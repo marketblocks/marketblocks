@@ -3,7 +3,6 @@
 #include "kraken.h"
 #include "kraken_results.h"
 #include "exchanges/exchange_constants.h"
-#include "networking/json_wrapper.h"
 #include "networking/url.h"
 #include "utils/stringutils.h"
 #include "utils/containerutils.h"
@@ -55,10 +54,6 @@ namespace
 		return url;
 	}
 }
-
-KrakenConfig::KrakenConfig(std::string publicKey, std::string privateKey)
-	: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
-{}
 
 KrakenApi::KrakenApi(KrakenConfig config, HttpService httpService)
 	: Exchange{ exchange_identifiers::Kraken },
@@ -162,9 +157,4 @@ const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 TradeResult KrakenApi::trade(const TradeDescription& description)
 {
 	return TradeResult::SUCCESS;
-}
-
-std::unique_ptr<Exchange> make_kraken()
-{
-	return std::make_unique<KrakenApi>(KrakenConfig{ "","" }, HttpService{});
 }

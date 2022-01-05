@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "common/trading/trading_options.h"
+#include "configs.h"
 #include "exchanges/exchange.h"
 
 class StrategyInitialiser

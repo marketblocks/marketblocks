@@ -2,27 +2,28 @@
 
 #include <stdexcept>
 
-#include "runner_initialise.h"
+#include "initialise/runner_initialise.h"
 
 template<typename Strategy>
 class Runner
 {
 private:
-	Strategy _strategy;
+	RunMode _runMode;
 	bool _initialised;
+	Strategy _strategy;
 
 public:
 	template<typename... Args>
-	explicit Runner(Args&&... args)
-		: _strategy{ std::forward<Args>(args)... }, _initialised{ false }
+	explicit Runner(RunMode runMode, Args&&... args)
+		: _runMode{ runMode }, _initialised{ false }, _strategy { std::forward<Args>(args)... }
 	{
 	}
 
 	void initialise()
 	{
-		RunnerConfig runnerConfig = load_runner_config();
-		TradingOptions tradingOptions = load_trading_options();
-		std::vector<std::shared_ptr<Exchange>> exchanges = create_exchanges(runnerConfig);
+		RunnerConfig runnerConfig = get_runner_config();
+		TradingOptions tradingOptions = get_trading_options();
+		std::vector<std::shared_ptr<Exchange>> exchanges = create_exchanges(runnerConfig, _runMode);
 
 		StrategyInitialiser strategyInitialiser
 		{

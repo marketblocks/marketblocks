@@ -1,9 +1,9 @@
 ﻿# Add source to this project's executable.
 add_library(CryptoBot_lib 
 "runner/runner.h" 
-"runner/runner_initialise.cpp"
-"runner/runner_initialise.h"
-"runner/strategy_initialiser.h"
+"runner/initialise/runner_initialise.cpp"
+"runner/initialise/runner_initialise.h"
+"runner/initialise/strategy_initialiser.h"
 "common/trading/order_book.cpp"
 "common/trading/order_book.h"
 "common/security/hash.cpp"
@@ -19,8 +19,8 @@ add_library(CryptoBot_lib
 "common/trading/trade_description.h"
 "common/trading/trade_description.cpp"
 "common/trading/trading_constants.h"
-"common/trading/trading_options.cpp"
-"common/trading/trading_options.h"
+
+
 "exchanges/exchange.h"
 "exchanges/exchange_assemblers.cpp"  
 "exchanges/exchange_assemblers.h" 
@@ -44,8 +44,8 @@ add_library(CryptoBot_lib
 "networking/http/http_response.h" 
 "networking/url.cpp"
 "networking/url.h"
-"networking/json_wrapper.cpp"
-"networking/json_wrapper.h"
+"common/file/json_wrapper.cpp"
+"common/file/json_wrapper.h"
 "strategies/tri_arb.cpp"
 "strategies/tri_arb.h"
 "utils/containerutils.h"
@@ -54,7 +54,7 @@ add_library(CryptoBot_lib
 "utils/mathutils.h"
 "utils/stringutils.cpp"
 "utils/stringutils.h"
-"utils/vectorutils.h")
+"utils/vectorutils.h" "common/file/file.h" "common/file/file.cpp" "runner/initialise/exchange_factories.h" "runner/initialise/exchange_factories.cpp" "runner/initialise/config_file_readers.h" "runner/initialise/configs.h" "runner/initialise/configs.cpp" "runner/initialise/config_file_readers.cpp"  "exchanges/kraken/kraken_config.h" "exchanges/kraken/kraken_config.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)

@@ -5,24 +5,12 @@
 #include <unordered_map>
 #include <string>
 
+#include "kraken_config.h"
 #include "exchanges/exchange.h"
 #include "networking/http/http_service.h"
 #include "common/trading/trade_description.h"
 #include "common/trading/trading_constants.h"
 #include "common/trading/order_book.h"
-
-class KrakenConfig
-{
-private:
-	std::string _publicKey;
-	std::string _privateKey;
-
-public:
-	KrakenConfig(std::string publicKey, std::string privateKey);
-
-	const std::string& public_key() const { return _publicKey; }
-	const std::string& private_key() const { return _privateKey; }
-};
 
 class KrakenApi final : public Exchange
 {
@@ -49,5 +37,3 @@ public:
 	const std::unordered_map<AssetSymbol, double> get_balances() const override;
 	TradeResult trade(const TradeDescription& description) override;
 };
-
-std::unique_ptr<Exchange> make_kraken();

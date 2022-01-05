@@ -5,7 +5,7 @@
 
 int main()
 {
-	Runner<TriArbStrategy> runner;
+	Runner<TriArbStrategy> runner {RunMode::LIVETEST};
 	runner.initialise();
 	runner.run();
 

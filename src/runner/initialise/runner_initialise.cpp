@@ -2,9 +2,12 @@
 #include <functional>
 
 #include "runner_initialise.h"
+#include "config_file_readers.h"
+#include "exchange_factories.h"
 #include "exchanges/exchange_constants.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/exchange_assemblers.h"
+#include "common/file/file.h"
 
 namespace
 {
@@ -40,28 +43,22 @@ namespace
 	}
 }
 
-RunnerConfig::RunnerConfig(
-	RunMode runMode,
-	std::vector<std::string> exchangeIds)
-	:
-	_runMode{ runMode },
-	_exchangeIds{ std::move(exchangeIds) }
-{}
-
-RunnerConfig load_runner_config()
+RunnerConfig get_runner_config()
 {
-	return RunnerConfig{ RunMode::LIVETEST, std::vector<std::string>{"kraken"}};
+	return load_runner_config();
+
+	// if doesn't exist, create
 }
 
-TradingOptions load_trading_options() 
+TradingOptions get_trading_options() 
 {
-	return TradingOptions { 0.05, AssetSymbol{ "GBP" } };
+	return load_trading_options();
 }
 
-std::vector<std::shared_ptr<Exchange>> create_exchanges(const RunnerConfig& runnerConfig)
+std::vector<std::shared_ptr<Exchange>> create_exchanges(const RunnerConfig& runnerConfig, RunMode runMode)
 {
 	std::vector<std::shared_ptr<Exchange>> exchanges;
-	ExchangeAssembler assembler = select_assembler(runnerConfig.run_mode());
+	ExchangeAssembler assembler = select_assembler(runMode);
 	ExchangeIdLookup idLookup;
 
 	for (auto& exchangeId : runnerConfig.exchange_ids())
