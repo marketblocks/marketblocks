@@ -2,6 +2,7 @@
 
 #include "kraken.h"
 #include "kraken_results.h"
+#include "exchanges/exchange_constants.h"
 #include "networking/json_wrapper.h"
 #include "networking/url.h"
 #include "utils/stringutils.h"
@@ -11,9 +12,6 @@
 
 namespace 
 {
-	const std::string publicApiKey = "";
-	const std::string privateApiKey = "";
-
 	namespace Urls
 	{
 		static const std::string BASE = "https://api.kraken.com";
@@ -58,10 +56,16 @@ namespace
 	}
 }
 
-KrakenApi::KrakenApi(HttpService httpService)
-	: _httpService{ std::move(httpService) }, decodedSecret { b64_decode(privateApiKey) }
-{
-}
+KrakenConfig::KrakenConfig(std::string publicKey, std::string privateKey)
+	: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
+{}
+
+KrakenApi::KrakenApi(KrakenConfig config, HttpService httpService)
+	: Exchange{ exchange_identifiers::Kraken },
+	_publicKey{ config.public_key() },
+	_decodedPrivateKey{ b64_decode(config.private_key()) },
+	_httpService{ std::move(httpService) }
+{}
 
 std::string KrakenApi::get_nonce() const
 {
@@ -78,7 +82,7 @@ std::string KrakenApi::compute_api_sign(const std::string& uriPath, const std::s
 	std::vector<unsigned char> message{ uriPath.begin(), uriPath.end() };
 	message.insert(message.end(), nonce_postData.begin(), nonce_postData.end());
 
-	return b64_encode(hmac_sha512(message, decodedSecret));
+	return b64_encode(hmac_sha512(message, _decodedPrivateKey));
 }
 
 std::string KrakenApi::send_public_request(const std::string& method, const std::string& _query) const
@@ -102,7 +106,7 @@ std::string KrakenApi::send_private_request(const std::string& method, const std
 	std::string apiSign = compute_api_sign(apiPath, postData, nonce);
 
 	HttpRequest request{ HttpVerb::POST, build_url(apiPath, query) };
-	request.add_header("API-Key", publicApiKey);
+	request.add_header("API-Key", _publicKey);
 	request.add_header("API-Sign", apiSign);
 	request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 	request.set_content(postData);
@@ -158,4 +162,9 @@ const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 TradeResult KrakenApi::trade(const TradeDescription& description)
 {
 	return TradeResult::SUCCESS;
+}
+
+std::unique_ptr<Exchange> make_kraken()
+{
+	return std::make_unique<KrakenApi>(KrakenConfig{ "","" }, HttpService{});
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string_view>
-
 enum class TradeAction
 {
 	SELL = 0,

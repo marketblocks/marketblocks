@@ -7,6 +7,7 @@
 #include "common/trading/trading_constants.h"
 #include "common/trading/trading_options.h"
 #include "exchanges/exchange.h"
+#include "runner/strategy_initialiser.h"
 
 class SequenceStep
 {
@@ -60,10 +61,10 @@ private:
 	TradingOptions _options;
 
 public:
-	explicit TriArbStrategy(std::vector<TriArbExchangeSpec> specs, TradingOptions options);
+	TriArbStrategy() {}
 
+	void initialise(const StrategyInitialiser& initialiser);
 	void run_iteration();
 };
 
 std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const AssetSymbol& fiatCurrency);
-TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options);

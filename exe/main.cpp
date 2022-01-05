@@ -1,20 +1,13 @@
 ﻿#include <iostream>
 
-#include "runner.h"
-#include "exchanges/exchange.h"
-#include "exchanges/exchange_factories.h"
+#include "runner/runner.h"
 #include "strategies/tri_arb.h"
 
 int main()
 {
-	std::vector<std::shared_ptr<Exchange>> exchanges;
-	exchanges.emplace_back(make_kraken());
-
-	TradingOptions options{ 0.05, AssetSymbol{ "GBP" } };
-
-	TriArbStrategy triArb = create_tri_arb_strategy(exchanges, options);
-
-	CryptoBot::runner::run(triArb);
+	Runner<TriArbStrategy> runner;
+	runner.initialise();
+	runner.run();
 
 	return 0;
 }

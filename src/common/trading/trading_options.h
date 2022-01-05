@@ -11,6 +11,7 @@ private:
 	AssetSymbol _fiatCurrency;
 
 public:
+	TradingOptions();
 	explicit TradingOptions(double maxTradePercent, AssetSymbol fiatCurrency);
 
 	double max_trade_percent() const { return _maxTradePercent; }

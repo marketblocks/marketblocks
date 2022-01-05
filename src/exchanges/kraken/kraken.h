@@ -11,10 +11,24 @@
 #include "common/trading/trading_constants.h"
 #include "common/trading/order_book.h"
 
+class KrakenConfig
+{
+private:
+	std::string _publicKey;
+	std::string _privateKey;
+
+public:
+	KrakenConfig(std::string publicKey, std::string privateKey);
+
+	const std::string& public_key() const { return _publicKey; }
+	const std::string& private_key() const { return _privateKey; }
+};
+
 class KrakenApi final : public Exchange
 {
 private:
-	std::vector<unsigned char> decodedSecret;
+	std::string _publicKey;
+	std::vector<unsigned char> _decodedPrivateKey;
 	HttpService _httpService;
 
 	std::string get_nonce() const;
@@ -27,7 +41,7 @@ private:
 	std::string send_private_request(const std::string& method) const;
 
 public:
-	KrakenApi(HttpService httpService);
+	KrakenApi(KrakenConfig config, HttpService httpService);
 
 	const std::vector<TradablePair> get_tradable_pairs() const override;
 	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override;
@@ -35,3 +49,5 @@ public:
 	const std::unordered_map<AssetSymbol, double> get_balances() const override;
 	TradeResult trade(const TradeDescription& description) override;
 };
+
+std::unique_ptr<Exchange> make_kraken();

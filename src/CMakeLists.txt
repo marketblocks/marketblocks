@@ -1,6 +1,9 @@
 ﻿# Add source to this project's executable.
 add_library(CryptoBot_lib 
-"runner.h" 
+"runner/runner.h" 
+"runner/runner_initialise.cpp"
+"runner/runner_initialise.h"
+"runner/strategy_initialiser.h"
 "common/trading/order_book.cpp"
 "common/trading/order_book.h"
 "common/security/hash.cpp"
@@ -18,14 +21,12 @@ add_library(CryptoBot_lib
 "common/trading/trading_constants.h"
 "common/trading/trading_options.cpp"
 "common/trading/trading_options.h"
-
 "exchanges/exchange.h"
-"exchanges/exchange_factories.cpp"
-"exchanges/exchange_factories.h"
+"exchanges/exchange_assemblers.cpp"  
+"exchanges/exchange_assemblers.h" 
+"exchanges/exchange_constants.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
-
-
 "exchanges/kraken/kraken.cpp"
 "exchanges/kraken/kraken.h"
 "exchanges/kraken/kraken_results.cpp"

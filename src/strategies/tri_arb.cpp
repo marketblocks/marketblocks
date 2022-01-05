@@ -231,15 +231,11 @@ namespace
 	}
 }
 
-TriArbStrategy create_tri_arb_strategy(const std::vector<std::shared_ptr<Exchange>>& exchanges, TradingOptions options)
+void TriArbStrategy::initialise(const StrategyInitialiser& initaliser)
 {
-	std::vector<TriArbExchangeSpec> specs = create_exchange_specs(exchanges, options.fiat_currency());
-	return TriArbStrategy{ std::move(specs), std::move(options) };
+	_options = initaliser.options();
+	_specs = create_exchange_specs(initaliser.exchanges(), _options.fiat_currency());
 }
-
-TriArbStrategy::TriArbStrategy(std::vector<TriArbExchangeSpec> specs, TradingOptions options)
-	: _specs{ std::move(specs) }, _options{ std::move(options) }
-{}
 
 void TriArbStrategy::run_iteration()
 {
