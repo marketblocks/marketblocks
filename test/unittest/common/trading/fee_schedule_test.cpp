@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "common/trading/fee_schedule.h"
+#include "trading/fee_schedule.h"
 
 TEST(FeeSchedule, BuilderAddsTiersInOrder)
 {

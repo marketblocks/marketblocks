@@ -2,12 +2,12 @@
 #include <algorithm>
 
 #include "tri_arb.h"
-#include "common/trading/order_book.h"
-#include <common/trading/trade_description.h>
+#include "trading/order_book.h"
+#include "trading/trade_description.h"
 #include "exchanges/exchange_helpers.h"
-#include "utils/vectorutils.h"
-#include "utils/mathutils.h"
-#include "utils/financeutils.h"
+#include "common/utils/vectorutils.h"
+#include "common/utils/mathutils.h"
+#include "common/utils/financeutils.h"
 
 SequenceStep::SequenceStep(TradablePair pair, TradeAction action)
 	: _pair{ std::move(pair) }, _action{ std::move(action) }

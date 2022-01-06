@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "utils/mathutils.h"
+#include "common/utils/mathutils.h"
 
 TEST(MathUtils, CalculatePercentageDiffValidArgs)
 {

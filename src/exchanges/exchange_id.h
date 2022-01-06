@@ -1,11 +1,7 @@
 #pragma once
 
 #include <string>
-
-namespace exchange_identifiers
-{
-	static const std::string Kraken = "kraken";
-}
+#include <unordered_map>
 
 enum class ExchangeId
 {
@@ -18,12 +14,7 @@ private:
 	std::unordered_map<std::string, ExchangeId> _map;
 
 public:
-	ExchangeIdLookup()
-		: _map
-	{
-		{ exchange_identifiers::Kraken, ExchangeId::KRAKEN }
-	}
-	{}
+	ExchangeIdLookup();
 
 	const std::unordered_map<std::string, ExchangeId>& map() const { return _map; }
 };

@@ -4,7 +4,7 @@
 #include "runner_initialise.h"
 #include "config_file_readers.h"
 #include "exchange_factories.h"
-#include "exchanges/exchange_constants.h"
+#include "exchanges/exchange_id.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/exchange_assemblers.h"
 #include "common/file/file.h"

@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "common/trading/tradable_pair.h"
-#include "common/trading/trading_constants.h"
+#include "trading/tradable_pair.h"
+#include "trading/trading_constants.h"
 #include "exchanges/exchange.h"
 #include "runner/initialise/strategy_initialiser.h"
 

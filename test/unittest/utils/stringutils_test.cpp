@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "utils/stringutils.h"
+#include "common/utils/stringutils.h"
 
 using testing::ElementsAre;
 using testing::IsEmpty;

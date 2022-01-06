@@ -1,6 +1,6 @@
 #include "kraken_results.h"
 #include "common/file/json_wrapper.h"
-#include "utils/stringutils.h"
+#include "common/utils/stringutils.h"
 
 const std::vector<TradablePair> read_tradable_pairs(const std::string& jsonResult)
 {

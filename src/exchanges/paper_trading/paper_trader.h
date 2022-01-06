@@ -3,11 +3,11 @@
 #include <unordered_map>
 #include <string>
 
-#include "common/trading/asset_symbol.h"
-#include "common/trading/trading_constants.h"
-#include "common/trading/tradable_pair.h"
-#include "common/trading/trade_description.h"
-#include "common/trading/fee_schedule.h"
+#include "trading/asset_symbol.h"
+#include "trading/trading_constants.h"
+#include "trading/tradable_pair.h"
+#include "trading/trade_description.h"
+#include "trading/fee_schedule.h"
 
 class PaperTrader
 {

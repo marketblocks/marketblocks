@@ -4,26 +4,28 @@
 #include <unordered_map>
 #include <memory>
 
-#include "common/trading/tradable_pair.h"
-#include "common/trading/asset_symbol.h"
-#include "common/trading/trading_constants.h"
-#include "common/trading/order_book.h"
-#include <common/trading/trade_description.h>
+#include "trading/tradable_pair.h"
+#include "trading/asset_symbol.h"
+#include "trading/trading_constants.h"
+#include "trading/order_book.h"
+#include "trading/trade_description.h"
 #include "paper_trading/paper_trader.h"
+
+#include "exchange_id.h"
 
 class Exchange
 {
 private:
-	std::string _identifier;
+	ExchangeId _id;
 
 public:
-	Exchange(std::string identifier)
-		: _identifier{ std::move(identifier) }
+	Exchange(ExchangeId id)
+		: _id{ id }
 	{}
 
 	virtual ~Exchange() = default;
 
-	const std::string& identifier() const { return _identifier; }
+	ExchangeId id() const { return _id; }
 
 	virtual const std::vector<TradablePair> get_tradable_pairs() const = 0;
 	virtual const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const = 0;
@@ -40,8 +42,8 @@ private:
 	std::unique_ptr<TradeApi> _tradeApi;
 
 public:
-	MultiComponentExchange(std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
-		: Exchange{ "Multi-Component" }, _marketApi{ std::move(dataApi) }, _tradeApi{std::move(tradeApi)}
+	MultiComponentExchange(ExchangeId id, std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
+		: Exchange{ id }, _marketApi{ std::move(dataApi) }, _tradeApi{std::move(tradeApi)}
 	{}
 
 	virtual const std::vector<TradablePair> get_tradable_pairs() const override

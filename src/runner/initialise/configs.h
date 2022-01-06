@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "common/trading/asset_symbol.h"
+#include "trading/asset_symbol.h"
 #include "common/file/json_wrapper.h"
 
 enum class RunMode

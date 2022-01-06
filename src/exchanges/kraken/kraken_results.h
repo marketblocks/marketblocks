@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "common/trading/order_book.h"
-#include "common/trading/tradable_pair.h"
+#include "trading/order_book.h"
+#include "trading/tradable_pair.h"
 
 const std::vector<TradablePair> read_tradable_pairs(const std::string& jsonResult);
 const OrderBookState read_order_book(const std::string& jsonResult, const TradablePair& pair, int depth);

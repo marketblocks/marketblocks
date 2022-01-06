@@ -18,6 +18,7 @@ std::shared_ptr<Exchange> assemble_live_test(std::unique_ptr<Exchange> api)
 	};
 
 	return std::make_shared<LiveTestExchange>(
+		api->id(),
 		std::move(api),
 		std::make_unique<PaperTrader>(std::move(fees), std::move(initialBalances)));
 }

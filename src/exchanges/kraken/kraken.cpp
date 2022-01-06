@@ -2,65 +2,31 @@
 
 #include "kraken.h"
 #include "kraken_results.h"
-#include "exchanges/exchange_constants.h"
 #include "networking/url.h"
-#include "utils/stringutils.h"
-#include "utils/containerutils.h"
+#include "common/utils/stringutils.h"
+#include "common/utils/containerutils.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 
-namespace 
-{
-	namespace Urls
-	{
-		static const std::string BASE = "https://api.kraken.com";
-		static const std::string VERSION = "0";
-		static const std::string PUBLIC = "public";
-		static const std::string PRIVATE = "private";
-
-		static const std::string TRADABLE_PAIRS = "AssetPairs";
-		static const std::string ORDER_BOOK = "Depth";
-		static const std::string BALANCE = "Balance";
-	}
-
-	std::string build_path(const std::string& access, const std::string& method)
-	{
-		return "/" + Urls::VERSION + "/" + access + "/" + method;
-	}
-	
-	void append_query(std::string& url, const std::string& _query)
-	{
-		if (!_query.empty())
-		{
-			url += "?" + _query;
-		}
-	}
-
-	std::string build_url(const std::string& path, const std::string& _query)
-	{
-		std::string url = Urls::BASE + path;
-		
-		append_query(url, _query);
-
-		return url;
-	}
-
-	std::string build_url(const std::string& access, const std::string& method, const std::string& _query)
-	{
-		std::string url = Urls::BASE + build_path(access, method);
-
-		append_query(url, _query);
-
-		return url;
-	}
-}
-
 KrakenApi::KrakenApi(KrakenConfig config, HttpService httpService)
-	: Exchange{ exchange_identifiers::Kraken },
+	: Exchange{ ExchangeId::KRAKEN },
+	_constants{},
 	_publicKey{ config.public_key() },
 	_decodedPrivateKey{ b64_decode(config.private_key()) },
 	_httpService{ std::move(httpService) }
 {}
+
+std::string KrakenApi::build_url_path(const std::string& access, const std::string& method) const
+{
+	return "/" + _constants.VERSION + "/" + access + "/" + method;
+}
+
+std::string KrakenApi::build_kraken_url(const std::string& access, const std::string& method, const std::string& query) const
+{
+	std::string path = build_url_path(access, method);
+
+	return build_url(_constants.BASEURL, path, query);
+}
 
 std::string KrakenApi::get_nonce() const
 {
@@ -82,7 +48,7 @@ std::string KrakenApi::compute_api_sign(const std::string& uriPath, const std::s
 
 std::string KrakenApi::send_public_request(const std::string& method, const std::string& _query) const
 {
-	HttpRequest request{ HttpVerb::GET, build_url(Urls::PUBLIC, method, _query) };
+	HttpRequest request{ HttpVerb::GET, build_kraken_url(_constants.PUBLIC, method, _query) };
 	HttpResponse result = _httpService.send(request);
 
 	return result.message();
@@ -97,10 +63,10 @@ std::string KrakenApi::send_private_request(const std::string& method, const std
 {
 	std::string nonce = get_nonce();
 	std::string postData = "nonce=" + nonce;
-	std::string apiPath = build_path(Urls::PRIVATE, method);
+	std::string apiPath = build_url_path(_constants.PRIVATE, method);
 	std::string apiSign = compute_api_sign(apiPath, postData, nonce);
 
-	HttpRequest request{ HttpVerb::POST, build_url(apiPath, query) };
+	HttpRequest request{ HttpVerb::POST, build_url(_constants.BASEURL, apiPath, query) };
 	request.add_header("API-Key", _publicKey);
 	request.add_header("API-Sign", apiSign);
 	request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
@@ -117,7 +83,7 @@ std::string KrakenApi::send_private_request(const std::string& method) const
 
 const std::vector<TradablePair> KrakenApi::get_tradable_pairs() const
 {
-	std::string response = send_public_request(Urls::TRADABLE_PAIRS);
+	std::string response = send_public_request(_constants.TRADABLE_PAIRS);
 
 	return read_tradable_pairs(response);
 }
@@ -134,7 +100,7 @@ const std::unordered_map<TradablePair, OrderBookState> KrakenApi::get_order_book
 			.add_parameter("count", std::to_string(depth))
 			.to_string();
 
-		std::string response = send_public_request(Urls::ORDER_BOOK, _query);
+		std::string response = send_public_request(_constants.ORDER_BOOK, _query);
 		
 		orderBooks.emplace(pair, read_order_book(response, pair, depth));
 	}
@@ -149,7 +115,7 @@ const std::unordered_map<TradablePair, double> KrakenApi::get_fees(const std::ve
 
 const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 {
-	std::string response = send_private_request(Urls::BALANCE);
+	std::string response = send_private_request(_constants.BALANCE);
 
 	return read_balances(response);
 }

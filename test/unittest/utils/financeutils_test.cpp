@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "utils/financeutils.h"
+#include "common/utils/financeutils.h"
 
 TEST(FinanceUtils, CalculateCost)
 {

@@ -1,6 +1,6 @@
 #include "paper_trader.h"
-#include "utils/financeutils.h"
-#include "utils/containerutils.h"
+#include "common/utils/financeutils.h"
+#include "common/utils/containerutils.h"
 
 PaperTrader::PaperTrader(FeeSchedule feeSchedule, std::unordered_map<AssetSymbol, double> initialBalances)
 	: _feeSchedule{ std::move(feeSchedule) }, _balances{ std::move(initialBalances) }
