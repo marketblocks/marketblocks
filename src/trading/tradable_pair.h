@@ -8,6 +8,7 @@
 class TradablePair
 {
 private:
+	std::string _iso4217_a3;
 	std::string _exchangeId;
 	AssetSymbol _asset;
 	AssetSymbol _priceUnit;
@@ -16,6 +17,7 @@ public:
 	explicit TradablePair(AssetSymbol asset, AssetSymbol priceUnit);
 	explicit TradablePair(std::string exchangeId, AssetSymbol asset, AssetSymbol priceUnit);
 
+	const std::string& iso_4217_a3() const { return _iso4217_a3; }
 	const std::string& exchange_identifier() const { return _exchangeId; }
 	const AssetSymbol& asset() const { return _asset; }
 	const AssetSymbol& price_unit() const { return _priceUnit; }

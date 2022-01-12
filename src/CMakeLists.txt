@@ -19,20 +19,30 @@ add_library(CryptoBot_lib
 "common/utils/stringutils.h"
 "common/utils/vectorutils.h"
 
+"common/types/containers/size_limited_map.h"
+
 "exchanges/exchange.h"
 "exchanges/exchange_assemblers.cpp"  
 "exchanges/exchange_assemblers.h" 
+"exchanges/exchange_id.cpp"
 "exchanges/exchange_id.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
+
 "exchanges/kraken/kraken.cpp"
 "exchanges/kraken/kraken.h"
 "exchanges/kraken/kraken_results.cpp"
 "exchanges/kraken/kraken_results.h" 
 "exchanges/kraken/kraken_config.cpp"
 "exchanges/kraken/kraken_config.h"
+"exchanges/kraken/kraken_websocket.h"
+"exchanges/kraken/kraken_websocket.cpp"
 "exchanges/paper_trading/paper_trader.cpp"
 "exchanges/paper_trading/paper_trader.h"
+
+"exchanges/websockets/websocket_stream.cpp"
+"exchanges/websockets/order_book_cache.h"  
+"exchanges/websockets/order_book_cache.cpp"
 
 "networking/http/http_constants.h"
 "networking/http/http_service.cpp"
@@ -43,6 +53,10 @@ add_library(CryptoBot_lib
 "networking/http/http_header.h"
 "networking/http/http_response.cpp"
 "networking/http/http_response.h" 
+"networking/websocket/websocket_connection.cpp" 
+"networking/websocket/websocket_connection.h" 
+"networking/websocket/websocket_client.cpp"
+"networking/websocket/websocket_client.h" 
 "networking/url.cpp"
 "networking/url.h"
 
@@ -70,7 +84,7 @@ add_library(CryptoBot_lib
 "trading/tradable_pair.h" 
 "trading/trade_description.h"
 "trading/trade_description.cpp"
-"trading/trading_constants.h" "exchanges/exchange_id.cpp")
+"trading/trading_constants.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)
@@ -78,6 +92,9 @@ target_link_libraries(CryptoBot_lib PRIVATE rapidjson)
 
 find_package(CURL CONFIG REQUIRED)
 target_link_libraries(CryptoBot_lib PRIVATE CURL::libcurl)
+
+find_package(websocketpp CONFIG REQUIRED)
+target_link_libraries(CryptoBot_lib PRIVATE websocketpp::websocketpp)
 
 find_package(OpenSSL REQUIRED)
 target_link_libraries(CryptoBot_lib PRIVATE OpenSSL::SSL OpenSSL::Crypto)

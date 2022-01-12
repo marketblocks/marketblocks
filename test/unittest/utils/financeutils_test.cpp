@@ -37,7 +37,7 @@ TEST(FinanceUtils, CalculateTradeGain)
 
 TEST(FinanceUtils, SelectPrice)
 {
-	OrderBookLevel level{ OrderBookEntry {1.0, 0.0}, OrderBookEntry{2.0, 0.0} };
+	OrderBookLevel level{ OrderBookEntry {OrderBookSide::ASK, 1.0, 0.0, 0}, OrderBookEntry{OrderBookSide::BID, 2.0, 0.0, 0} };
 
 	EXPECT_DOUBLE_EQ(select_entry(level, TradeAction::BUY).price(), level.ask().price());
 	EXPECT_DOUBLE_EQ(select_entry(level, TradeAction::SELL).price(), level.bid().price());

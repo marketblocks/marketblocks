@@ -1,7 +1,7 @@
 #include "exchange_id.h"
 
 ExchangeIdLookup::ExchangeIdLookup()
-	: _map
+	: _container
 {
 	{ "kraken", ExchangeId::KRAKEN }
 }

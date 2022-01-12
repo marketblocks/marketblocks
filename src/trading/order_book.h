@@ -2,17 +2,27 @@
 
 #include <vector>
 
+enum class OrderBookSide
+{
+	ASK,
+	BID
+};
+
 class OrderBookEntry
 {
 private:
+	OrderBookSide _side;
 	double _price;
 	double _volume;
+	double _timeStamp;
 
 public:
-	OrderBookEntry(double price, double volume);
+	OrderBookEntry(OrderBookSide side, double price, double volume, double timeStamp);
 
+	OrderBookSide side() const { return _side; }
 	double price() const { return _price; }
 	double volume() const { return _volume; }
+	double time_stamp() const { return _timeStamp; }
 };
 
 class OrderBookLevel
@@ -35,6 +45,7 @@ private:
 
 public:
 	OrderBookState(std::vector<OrderBookLevel> levels);
+	OrderBookState(std::vector<OrderBookEntry> askEntries, std::vector<OrderBookEntry> bidEntries);
 
 	int depth() const;
 	const OrderBookLevel& level(int i) const;

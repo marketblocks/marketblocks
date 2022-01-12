@@ -1,11 +1,19 @@
 #include "tradable_pair.h"
 
 TradablePair::TradablePair(AssetSymbol asset, AssetSymbol priceUnit)
-	: _exchangeId{ asset.get() + priceUnit.get() }, _asset{std::move(asset)}, _priceUnit{std::move(priceUnit)}
+	: 
+	_iso4217_a3{ asset.get() + "/" + priceUnit.get() }, 
+	_exchangeId{ _iso4217_a3 },
+	_asset{ std::move(asset) }, 
+	_priceUnit{ std::move(priceUnit) }
 {}
 
 TradablePair::TradablePair(std::string exchangeId, AssetSymbol asset, AssetSymbol priceUnit)
-	: _exchangeId{ std::move(exchangeId) }, _asset{ std::move(asset) }, _priceUnit{ std::move(priceUnit) }
+	: 
+	_iso4217_a3{ asset.get() + "/" + priceUnit.get() }, 
+	_exchangeId{ std::move(exchangeId) },
+	_asset{ std::move(asset) }, 
+	_priceUnit{ std::move(priceUnit) }
 {}
 
 bool TradablePair::contains(const AssetSymbol& assetTicker) const

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <unordered_set>
 
 #include "tri_arb.h"
 #include "trading/order_book.h"
@@ -231,10 +232,28 @@ namespace
 	}
 }
 
+#include <chrono>
+#include <thread>
+
 void TriArbStrategy::initialise(const StrategyInitialiser& initaliser)
 {
 	_options = initaliser.options();
 	_specs = create_exchange_specs(initaliser.exchanges(), _options.fiat_currency());
+
+
+	for (auto& spec : _specs)
+	{
+		std::unordered_set<TradablePair> allPairs;
+
+		for (auto& sequence : spec.sequences())
+		{
+			allPairs.insert(sequence.pairs().begin(), sequence.pairs().end());
+		}
+
+		spec.exchange().get_or_connect_websocket().subscribe_order_book(std::vector<TradablePair>{ allPairs.begin(), allPairs.end() });
+	}
+
+	std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 void TriArbStrategy::run_iteration()
@@ -246,7 +265,7 @@ void TriArbStrategy::run_iteration()
 
 		for (auto& sequence : spec.sequences())
 		{
-			const std::unordered_map<TradablePair, OrderBookLevel> prices = get_best_order_book_prices(exchange, sequence.pairs());
+			const std::unordered_map<TradablePair, OrderBookLevel> prices = get_best_order_book_prices(exchange.get_or_connect_websocket(), sequence.pairs());
 			const std::unordered_map<TradablePair, double> fees = exchange.get_fees(sequence.pairs());
 
 			SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);

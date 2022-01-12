@@ -11,10 +11,10 @@ enum class ExchangeId
 class ExchangeIdLookup
 {
 private:
-	std::unordered_map<std::string, ExchangeId> _map;
+	std::unordered_map<std::string, ExchangeId> _container;
 
 public:
 	ExchangeIdLookup();
 
-	const std::unordered_map<std::string, ExchangeId>& map() const { return _map; }
+	const std::unordered_map<std::string, ExchangeId>& map() const { return _container; }
 };

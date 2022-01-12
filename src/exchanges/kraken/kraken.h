@@ -6,8 +6,10 @@
 #include <string>
 
 #include "kraken_config.h"
+#include "kraken_websocket.h"
 #include "exchanges/exchange.h"
 #include "networking/http/http_service.h"
+#include "networking/websocket/websocket_connection.h"
 #include "trading/trade_description.h"
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
@@ -32,6 +34,8 @@ private:
 	std::string _publicKey;
 	std::vector<unsigned char> _decodedPrivateKey;
 	HttpService _httpService;
+	KrakenWebsocketStream _websocketStream;
+	std::shared_ptr<WebsocketClient> _websocketClient;
 
 	std::string build_url_path(const std::string& access, const std::string& method) const;
 	std::string build_kraken_url(const std::string& access, const std::string& method, const std::string& query) const;
@@ -46,11 +50,13 @@ private:
 	std::string send_private_request(const std::string& method) const;
 
 public:
-	KrakenApi(KrakenConfig config, HttpService httpService);
+	KrakenApi(KrakenConfig config, HttpService httpService, std::shared_ptr<WebsocketClient> websocketClient);
 
 	const std::vector<TradablePair> get_tradable_pairs() const override;
 	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override;
 	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override;
 	const std::unordered_map<AssetSymbol, double> get_balances() const override;
 	TradeResult trade(const TradeDescription& description) override;
+
+	WebsocketStream& get_or_connect_websocket() override;
 };

@@ -8,6 +8,7 @@
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/exchange_assemblers.h"
 #include "common/file/file.h"
+#include "networking/websocket/websocket_client.h"
 
 namespace
 {
@@ -25,7 +26,7 @@ namespace
 		}
 	}
 
-	std::unique_ptr<Exchange> create_api_from_id(const std::string& identifier, const ExchangeIdLookup& idLookup)
+	std::unique_ptr<Exchange> create_api_from_id(const std::string& identifier, const ExchangeIdLookup& idLookup, std::shared_ptr<WebsocketClient> websocketClient)
 	{
 		auto it = idLookup.map().find(identifier);
 		if (it == idLookup.map().end())
@@ -38,7 +39,7 @@ namespace
 		switch (id)
 		{
 			case ExchangeId::KRAKEN:
-				return make_kraken();
+				return make_kraken(websocketClient);
 		}
 	}
 }
@@ -58,12 +59,16 @@ TradingOptions get_trading_options()
 std::vector<std::shared_ptr<Exchange>> create_exchanges(const RunnerConfig& runnerConfig, RunMode runMode)
 {
 	std::vector<std::shared_ptr<Exchange>> exchanges;
+	std::shared_ptr<WebsocketClient> websocketClient = std::make_shared<WebsocketClient>();
 	ExchangeAssembler assembler = select_assembler(runMode);
 	ExchangeIdLookup idLookup;
 
 	for (auto& exchangeId : runnerConfig.exchange_ids())
 	{
-		exchanges.emplace_back(assembler(create_api_from_id(exchangeId, idLookup)));
+		std::shared_ptr<Exchange> exchange = assembler(create_api_from_id(exchangeId, idLookup, websocketClient));
+		exchange->get_or_connect_websocket();
+
+		exchanges.push_back(exchange);
 	}
 
 	return exchanges;

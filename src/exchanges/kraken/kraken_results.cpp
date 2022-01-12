@@ -38,10 +38,22 @@ const OrderBookState read_order_book(const std::string& jsonResult, const Tradab
 	for (int i = 0; i < depth; i++)
 	{
 		auto asks_i = asks[i].GetArray();
-		OrderBookEntry askEntry{ std::stod(asks_i[0].GetString()),	std::stod(asks_i[1].GetString()) };
+		OrderBookEntry askEntry
+		{ 
+			OrderBookSide::ASK, 
+			std::stod(asks_i[0].GetString()),	
+			std::stod(asks_i[1].GetString()), 
+			asks_i[2].GetDouble() 
+		};
 
 		auto bids_i = bids[i].GetArray();
-		OrderBookEntry bidEntry{ std::stod(bids_i[0].GetString()),	std::stod(bids_i[1].GetString()) };
+		OrderBookEntry bidEntry
+		{ 
+			OrderBookSide::BID, 
+			std::stod(bids_i[0].GetString()),	
+			std::stod(bids_i[1].GetString()), 
+			bids_i[2].GetDouble() 
+		};
 
 		levels.emplace_back(std::move(askEntry), std::move(bidEntry));
 	}

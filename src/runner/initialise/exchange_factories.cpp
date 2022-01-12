@@ -2,10 +2,10 @@
 
 #include "config_file_readers.h"
 #include "exchanges/kraken/kraken.h"
+#include "networking/websocket/websocket_connection.h"
 
-std::unique_ptr<Exchange> make_kraken()
+std::unique_ptr<Exchange> make_kraken(std::shared_ptr<WebsocketClient> websocketClient)
 {
 	KrakenConfig config = load_kraken_config();
-
-	return std::make_unique<KrakenApi>(std::move(config), HttpService{});;
+	return std::make_unique<KrakenApi>(std::move(config), HttpService{}, websocketClient);
 }

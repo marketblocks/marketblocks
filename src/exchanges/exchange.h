@@ -12,6 +12,7 @@
 #include "paper_trading/paper_trader.h"
 
 #include "exchange_id.h"
+#include "exchanges/websockets/websocket_stream.h"
 
 class Exchange
 {
@@ -32,6 +33,8 @@ public:
 	virtual const std::unordered_map<AssetSymbol, double> get_balances() const = 0;
 	virtual const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const = 0;
 	virtual TradeResult trade(const TradeDescription& description) = 0;
+
+	virtual WebsocketStream& get_or_connect_websocket() = 0;
 };
 
 template<typename MarketApi, typename TradeApi>
@@ -46,27 +49,32 @@ public:
 		: Exchange{ id }, _marketApi{ std::move(dataApi) }, _tradeApi{std::move(tradeApi)}
 	{}
 
-	virtual const std::vector<TradablePair> get_tradable_pairs() const override
+	const std::vector<TradablePair> get_tradable_pairs() const override
 	{
 		return _marketApi->get_tradable_pairs();
 	}
 
-	virtual const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override
+	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override
 	{
 		return _marketApi->get_order_book(tradablePairs, depth);
 	}
 
-	virtual const std::unordered_map<AssetSymbol, double> get_balances() const override
+	WebsocketStream& get_or_connect_websocket()
+	{
+		return _marketApi->get_or_connect_websocket();
+	}
+
+	const std::unordered_map<AssetSymbol, double> get_balances() const override
 	{
 		return _tradeApi->get_balances();
 	}
 
-	virtual const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override
+	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override
 	{
 		return _tradeApi->get_fees(tradablePairs);
 	}
 
-	virtual TradeResult trade(const TradeDescription& description) override
+	TradeResult trade(const TradeDescription& description) override
 	{
 		return _tradeApi->trade(description);
 	}

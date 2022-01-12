@@ -2,18 +2,21 @@
 
 #include "kraken.h"
 #include "kraken_results.h"
+#include "kraken_websocket.h"
 #include "networking/url.h"
 #include "common/utils/stringutils.h"
 #include "common/utils/containerutils.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 
-KrakenApi::KrakenApi(KrakenConfig config, HttpService httpService)
+KrakenApi::KrakenApi(KrakenConfig config, HttpService httpService, std::shared_ptr<WebsocketClient> websocketClient)
 	: Exchange{ ExchangeId::KRAKEN },
 	_constants{},
 	_publicKey{ config.public_key() },
 	_decodedPrivateKey{ b64_decode(config.private_key()) },
-	_httpService{ std::move(httpService) }
+	_httpService{ std::move(httpService) },
+	_websocketClient{ websocketClient },
+	_websocketStream{}
 {}
 
 std::string KrakenApi::build_url_path(const std::string& access, const std::string& method) const
@@ -123,4 +126,14 @@ const std::unordered_map<AssetSymbol, double> KrakenApi::get_balances() const
 TradeResult KrakenApi::trade(const TradeDescription& description)
 {
 	return TradeResult::SUCCESS;
+}
+
+WebsocketStream& KrakenApi::get_or_connect_websocket()
+{
+	if (_websocketStream.connection_status() != WsConnectionStatus::OPEN)
+	{
+		_websocketStream.connect(_websocketClient);
+	}
+
+	return _websocketStream;
 }
