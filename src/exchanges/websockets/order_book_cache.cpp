@@ -23,7 +23,7 @@ OrderBookCache::OrderBookCache(const OrderBookCache& other)
 {}
 
 OrderBookCache::OrderBookCache(OrderBookCache&& other)
-	: _depth{ std::move(other._depth) }, _asks { std::move(other._asks) }, _bids{std::move(other._bids)}
+	: _depth{ std::move(other._depth) }, _asks{ std::move(other._asks) }, _bids{std::move(other._bids)}
 {
 }
 

@@ -9,19 +9,19 @@ class WebsocketStream
 private:
 	std::unique_ptr<WebsocketConnection> _connection;
 
-	virtual std::string stream_url() const = 0;
-	virtual void onMessage(const std::string& message) = 0;
-
 protected:
-	void send_message(const std::string& message)
-	{
-		_connection->send_message(message);
-	}
+	std::unordered_map<std::string, OrderBookCache> _orderBookCaches;
+
+	virtual std::string stream_url() const = 0;
+	virtual std::string get_subscribe_order_book_message(const std::vector<TradablePair>& tradablePairs) const = 0;
+	
+	virtual void on_message(const std::string& message) = 0;
 
 public:
 	void connect(std::shared_ptr<WebsocketClient> websocketClient);
+
 	WsConnectionStatus connection_status() const;
 
-	virtual void subscribe_order_book(const std::vector<TradablePair>& tradablePairs) = 0;
-	virtual OrderBookState get_current_order_book(const TradablePair& tradablePair) const = 0;
+	void subscribe_order_book(const std::vector<TradablePair>& tradablePairs);
+	OrderBookState get_order_book_snapshot(const TradablePair& tradablePair) const;
 };

@@ -16,7 +16,7 @@ std::unordered_map<TradablePair, OrderBookLevel> get_best_order_book_prices(cons
 	return to_unordered_map<TradablePair, OrderBookLevel>(
 		tradablePairs,
 		[](const TradablePair& pair) { return pair; },
-		[&websocketStream](const TradablePair& pair) { return websocketStream.get_current_order_book(pair).level(0); });
+		[&websocketStream](const TradablePair& pair) { return websocketStream.get_order_book_snapshot(pair).level(0); });
 }
 
 double get_balance(const Exchange& exchange, const AssetSymbol& tickerId)

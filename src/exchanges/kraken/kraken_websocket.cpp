@@ -17,8 +17,17 @@ namespace
 	}
 }
 
-void KrakenWebsocketStream::onMessage(const std::string& message)
+std::string KrakenWebsocketStream::get_subscribe_order_book_message(const std::vector<TradablePair>& tradablePairs) const
 {
+	std::string tradablePairList = join_tradable_pairs(tradablePairs);
+	std::string message = "{ \"event\": \"subscribe\", \"pair\": [" + std::move(tradablePairList) + "], \"subscription\": { \"name\": \"book\" } }";
+	return message;
+}
+
+void KrakenWebsocketStream::on_message(const std::string& message)
+{
+	std::cout << message << std::endl;
+	
 	JsonWrapper json{ message };
 	
 	if (json.document().IsObject())
@@ -26,7 +35,7 @@ void KrakenWebsocketStream::onMessage(const std::string& message)
 		//std::cout << message << std::endl;
 		return;
 	}
-	//std::cout << message << std::endl;
+		
 	auto messageArray = json.document().GetArray();
 
 	std::string channelName = messageArray[messageArray.Size() - 2].GetString();
@@ -119,22 +128,4 @@ void KrakenWebsocketStream::process_order_book_object(const std::string& pair, c
 			}
 		}
 	}
-}
-
-void KrakenWebsocketStream::subscribe_order_book(const std::vector<TradablePair>& tradablePairs)
-{
-	std::string tradablePairList = join_tradable_pairs(tradablePairs);
-	std::string message = "{ \"event\": \"subscribe\", \"pair\": [" + tradablePairList + "], \"subscription\": { \"name\": \"book\" } }";
-	
-	for (auto& pair : tradablePairs)
-	{
-		_orderBookCaches.emplace(pair.iso_4217_a3(), OrderBookCache{10});
-	}
-
-	send_message(message);
-}
-
-OrderBookState KrakenWebsocketStream::get_current_order_book(const TradablePair& tradablePair) const
-{
-	return _orderBookCaches.at(tradablePair.iso_4217_a3()).snapshot();
 }
