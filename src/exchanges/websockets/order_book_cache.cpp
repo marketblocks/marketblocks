@@ -1,21 +1,35 @@
 #include "order_book_cache.h"
 #include "common/utils/containerutils.h"
 
+namespace
+{
+	template<typename OrderBookMap>
+	void ensure_depth(OrderBookMap& map, int depth)
+	{
+		auto end = map.end();
+		while (map.size() > depth)
+		{
+			map.erase(--end);
+		}
+	}
+}
+
 OrderBookCache::OrderBookCache(int depth)
-	: _asks{ depth }, _bids{ depth }, _mutex{}, count{ 0 }
+	: _depth{ depth }, _asks {}, _bids{}, _mutex{}
 {}
 
 OrderBookCache::OrderBookCache(const OrderBookCache& other)
-	: _asks{ other._asks }, _bids{ other._bids }, _mutex{}, count{ 0 }
+	: _depth{ other._depth }, _asks { other._asks }, _bids{other._bids}, _mutex{}
 {}
 
 OrderBookCache::OrderBookCache(OrderBookCache&& other)
-	: _asks{ std::move(other._asks) }, _bids{ std::move(other._bids) }, count{ 0 }
+	: _depth{ std::move(other._depth) }, _asks { std::move(other._asks) }, _bids{std::move(other._bids)}
 {
 }
 
 OrderBookCache& OrderBookCache::operator=(const OrderBookCache& other)
 {
+	_depth = other._depth;
 	_asks = other._asks;
 	_bids = other._bids;
 
@@ -24,6 +38,7 @@ OrderBookCache& OrderBookCache::operator=(const OrderBookCache& other)
 
 OrderBookCache& OrderBookCache::operator=(OrderBookCache&& other)
 {
+	_depth = std::move(other._depth);
 	_asks = std::move(other._asks);
 	_bids = std::move(other._bids);
 
@@ -37,13 +52,29 @@ void OrderBookCache::cache(std::string price, OrderBookEntry entry)
 	if (entry.side() == OrderBookSide::ASK)
 	{
 		_asks.emplace(std::move(price), std::move(entry));
+		ensure_depth(_asks, _depth);
 	}
 	else
 	{
 		_bids.emplace(std::move(price), std::move(entry));
+		ensure_depth(_bids, _depth);
 	}
+}
 
-	count++;
+void OrderBookCache::replace(const std::string& oldPrice, std::string newPrice, OrderBookEntry newEntry)
+{
+	std::lock_guard<std::mutex> lock{ _mutex };
+
+	if (newEntry.side() == OrderBookSide::ASK)
+	{
+		_asks.erase(oldPrice);
+		_asks.emplace(std::move(newPrice), std::move(newEntry));
+	}
+	else
+	{
+		_bids.erase(oldPrice);
+		_bids.emplace(std::move(newPrice), std::move(newEntry));
+	}
 }
 
 OrderBookState OrderBookCache::snapshot() const

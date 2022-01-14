@@ -43,7 +43,7 @@ public:
 			throw std::runtime_error("Runner must be initialized");
 		}
 
-		for (int i = 0; i < 1000; i++)
+		while (true)
 		{
 			_strategy.run_iteration();
 		}

@@ -282,7 +282,7 @@ void TriArbStrategy::run_iteration()
 			}
 			else
 			{
-				log_sequence_checked(sequence, tradeValue, gains.g3);
+				//log_sequence_checked(sequence, tradeValue, gains.g3);
 			}
 		}
 	}

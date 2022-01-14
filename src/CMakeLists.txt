@@ -19,8 +19,6 @@ add_library(CryptoBot_lib
 "common/utils/stringutils.h"
 "common/utils/vectorutils.h"
 
-"common/types/containers/size_limited_map.h"
-
 "exchanges/exchange.h"
 "exchanges/exchange_assemblers.cpp"  
 "exchanges/exchange_assemblers.h" 

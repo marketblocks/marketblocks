@@ -85,6 +85,9 @@ void KrakenWebsocketStream::process_order_book_object(const std::string& pair, c
 
 		auto entriesArray = it->value.GetArray();
 
+		bool replace = false;
+		std::string priceToReplace;
+
 		for (auto it = entriesArray.Begin(); it < entriesArray.End(); it++)
 		{
 			auto entryArray = it->GetArray();
@@ -96,7 +99,24 @@ void KrakenWebsocketStream::process_order_book_object(const std::string& pair, c
 				std::stod(entryArray[1].GetString()),
 				std::stod(entryArray[2].GetString())
 			};
-			_orderBookCaches.at(pair).cache(price, entry);
+
+			if (entry.volume() == 0.0)
+			{
+				replace = true;
+				priceToReplace = std::move(price);
+				continue;
+			}
+			
+			auto cacheIt = _orderBookCaches.find(pair);
+
+			if (replace)
+			{
+				cacheIt->second.replace(priceToReplace, std::move(price), std::move(entry));
+			}
+			else
+			{
+				cacheIt->second.cache(std::move(price), std::move(entry));
+			}
 		}
 	}
 }
