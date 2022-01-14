@@ -4,6 +4,8 @@
 
 #include "exchange.h"
 
-std::shared_ptr<Exchange> assemble_live(std::unique_ptr<Exchange> api);
-
-std::shared_ptr<Exchange> assemble_live_test(std::unique_ptr<Exchange> api);
+namespace cb
+{
+	std::shared_ptr<exchange> assemble_live(std::unique_ptr<exchange> api);
+	std::shared_ptr<exchange> assemble_live_test(std::unique_ptr<exchange> api);
+}

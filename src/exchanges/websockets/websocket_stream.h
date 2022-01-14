@@ -4,24 +4,27 @@
 #include "networking/websocket/websocket_connection.h"
 #include "trading/tradable_pair.h"
 
-class WebsocketStream
+namespace cb
 {
-private:
-	std::unique_ptr<WebsocketConnection> _connection;
+	class websocket_stream
+	{
+	private:
+		std::unique_ptr<websocket_connection> _connection;
 
-protected:
-	std::unordered_map<std::string, OrderBookCache> _orderBookCaches;
+	protected:
+		std::unordered_map<std::string, order_book_cache> _orderBookCaches;
 
-	virtual std::string stream_url() const = 0;
-	virtual std::string get_subscribe_order_book_message(const std::vector<TradablePair>& tradablePairs) const = 0;
-	
-	virtual void on_message(const std::string& message) = 0;
+		virtual std::string stream_url() const = 0;
+		virtual std::string get_subscribe_order_book_message(const std::vector<tradable_pair>& tradablePairs) const = 0;
 
-public:
-	void connect(std::shared_ptr<WebsocketClient> websocketClient);
+		virtual void on_message(const std::string& message) = 0;
 
-	WsConnectionStatus connection_status() const;
+	public:
+		void connect(std::shared_ptr<websocket_client> websocketClient);
 
-	void subscribe_order_book(const std::vector<TradablePair>& tradablePairs);
-	OrderBookState get_order_book_snapshot(const TradablePair& tradablePair) const;
-};
+		ws_connection_status connection_status() const;
+
+		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs);
+		order_book_state get_order_book_snapshot(const tradable_pair& tradablePair) const;
+	};
+}

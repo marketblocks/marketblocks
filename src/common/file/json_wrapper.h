@@ -5,15 +5,18 @@
 #include <vector>
 #include <unordered_map>
 
-class JsonWrapper
+namespace cb
 {
-private:
-	rapidjson::Document _document;
+	class json_wrapper
+	{
+	private:
+		rapidjson::Document _document;
 
-public:
-	explicit JsonWrapper(const std::string_view& json);
+	public:
+		explicit json_wrapper(const std::string_view& json);
 
-	rapidjson::Document& document() { return _document; }
+		rapidjson::Document& document() { return _document; }
 
-	std::vector<std::string> get_string_array(const std::string_view& id) const;
-};
+		std::vector<std::string> get_string_array(const std::string_view& id) const;
+	};
+}

@@ -5,17 +5,20 @@
 #include "configs.h"
 #include "exchanges/exchange.h"
 
-class StrategyInitialiser
+namespace cb
 {
-private:
-	std::vector<std::shared_ptr<Exchange>> _exchanges;
-	TradingOptions _options;
+	class strategy_initialiser
+	{
+	private:
+		std::vector<std::shared_ptr<exchange>> _exchanges;
+		trading_options _options;
 
-public:
-	StrategyInitialiser(std::vector<std::shared_ptr<Exchange>> exchanges, TradingOptions options)
-		: _exchanges{ std::move(exchanges) }, _options{ std::move(options) }
-	{}
+	public:
+		strategy_initialiser(std::vector<std::shared_ptr<exchange>> exchanges, trading_options options)
+			: _exchanges{ std::move(exchanges) }, _options{ std::move(options) }
+		{}
 
-	std::vector<std::shared_ptr<Exchange>> exchanges() const { return _exchanges; }
-	TradingOptions options() const { return _options; }
-};
+		std::vector<std::shared_ptr<exchange>> exchanges() const { return _exchanges; }
+		trading_options options() const { return _options; }
+	};
+}

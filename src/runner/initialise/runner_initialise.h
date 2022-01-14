@@ -7,6 +7,9 @@
 #include "strategy_initialiser.h"
 #include "exchanges/exchange.h"
 
-RunnerConfig get_runner_config();
-TradingOptions get_trading_options();
-std::vector<std::shared_ptr<Exchange>> create_exchanges(const RunnerConfig& runnerConfig, RunMode runMode);
+namespace cb::internal
+{
+	runner_config get_runner_config();
+	trading_options get_trading_options();
+	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode);
+}

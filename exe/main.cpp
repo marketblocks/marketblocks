@@ -5,7 +5,7 @@
 
 int main()
 {
-	Runner<TriArbStrategy> runner {RunMode::LIVETEST};
+	cb::runner<tri_arb_strategy> runner { cb::run_mode::LIVETEST };
 	runner.initialise();
 	runner.run();
 

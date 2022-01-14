@@ -4,8 +4,11 @@
 #include "exchanges/kraken/kraken.h"
 #include "networking/websocket/websocket_connection.h"
 
-std::unique_ptr<Exchange> make_kraken(std::shared_ptr<WebsocketClient> websocketClient)
+namespace cb
 {
-	KrakenConfig config = load_kraken_config();
-	return std::make_unique<KrakenApi>(std::move(config), HttpService{}, websocketClient);
+	std::unique_ptr<exchange> make_kraken(std::shared_ptr<websocket_client> websocketClient)
+	{
+		kraken_config config = load_kraken_config();
+		return std::make_unique<kraken_api>(std::move(config), http_service{}, websocketClient);
+	}
 }

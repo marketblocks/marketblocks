@@ -5,36 +5,39 @@
 
 #include "asset_symbol.h"
 
-class TradablePair
+namespace cb
 {
-private:
-	std::string _iso4217_a3;
-	std::string _exchangeId;
-	AssetSymbol _asset;
-	AssetSymbol _priceUnit;
+	class tradable_pair
+	{
+	private:
+		std::string _iso4217_a3;
+		std::string _exchangeId;
+		asset_symbol _asset;
+		asset_symbol _priceUnit;
 
-public:
-	explicit TradablePair(AssetSymbol asset, AssetSymbol priceUnit);
-	explicit TradablePair(std::string exchangeId, AssetSymbol asset, AssetSymbol priceUnit);
+	public:
+		explicit tradable_pair(asset_symbol asset, asset_symbol priceUnit);
+		explicit tradable_pair(std::string exchangeId, asset_symbol asset, asset_symbol priceUnit);
 
-	const std::string& iso_4217_a3() const { return _iso4217_a3; }
-	const std::string& exchange_identifier() const { return _exchangeId; }
-	const AssetSymbol& asset() const { return _asset; }
-	const AssetSymbol& price_unit() const { return _priceUnit; }
+		const std::string& iso_4217_a3() const { return _iso4217_a3; }
+		const std::string& exchange_identifier() const { return _exchangeId; }
+		const asset_symbol& asset() const { return _asset; }
+		const asset_symbol& price_unit() const { return _priceUnit; }
 
-	bool contains(const AssetSymbol& assetTicker) const;
+		bool contains(const asset_symbol& assetTicker) const;
 
-	bool operator==(const TradablePair& other) const;
-};
+		bool operator==(const tradable_pair& other) const;
+	};
+}
 
 namespace std
 {
 	template<>
-	struct hash<TradablePair>
+	struct hash<cb::tradable_pair>
 	{
-		size_t operator()(const TradablePair& pair) const
+		size_t operator()(const cb::tradable_pair& pair) const
 		{
-			return std::hash<AssetSymbol>()(pair.asset()) ^ std::hash<AssetSymbol>()(pair.price_unit());
+			return std::hash<cb::asset_symbol>()(pair.asset()) ^ std::hash<cb::asset_symbol>()(pair.price_unit());
 		}
 	};
 }

@@ -3,21 +3,25 @@
 #include "tradable_pair.h"
 #include "trading_constants.h"
 
-class TradeDescription
+namespace cb
 {
-private:
-	TradablePair _pair;
-	TradeAction _action;
-	double _assetPrice;
-	double _volume;
+	class trade_description
+	{
+	private:
+		tradable_pair _pair;
+		trade_action _action;
+		double _assetPrice;
+		double _volume;
 
-public:
-	explicit TradeDescription(TradablePair pair, TradeAction action, double assetPrice, double volume);
+	public:
+		explicit trade_description(tradable_pair pair, trade_action action, double assetPrice, double volume);
 
-	const TradablePair& pair() const { return _pair; }
-	const TradeAction& action() const { return _action; }
-	double asset_price() const { return _assetPrice; }
-	double volume() const { return _volume; }
-};
+		const tradable_pair& pair() const { return _pair; }
+		const trade_action& action() const { return _action; }
+		double asset_price() const { return _assetPrice; }
+		double volume() const { return _volume; }
+	};
 
-TradeDescription create_trade_by_cost(TradablePair pair, TradeAction action, double assetPrice, double tradeCost);
+	trade_description create_trade_by_cost(tradable_pair pair, trade_action action, double assetPrice, double tradeCost);
+}
+

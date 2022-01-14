@@ -9,20 +9,23 @@
 #include "http_response.h"
 #include "http_request.h"
 
-class HttpService
+namespace cb
 {
-private:
-	CURL* easyHandle;
+	class http_service
+	{
+	private:
+		CURL* easyHandle;
 
-public:
-	HttpService();
-	~HttpService();
+	public:
+		http_service();
+		~http_service();
 
-	HttpService(const HttpService& other);
-	HttpService(HttpService&& other);
+		http_service(const http_service& other);
+		http_service(http_service&& other);
 
-	HttpService& operator=(const HttpService& other);
-	HttpService& operator=(HttpService&& other);
+		http_service& operator=(const http_service& other);
+		http_service& operator=(http_service&& other);
 
-	HttpResponse send(const HttpRequest& request) const;
-};
+		http_response send(const http_request& request) const;
+	};
+}

@@ -5,11 +5,14 @@
 #include "configs.h"
 #include "exchanges/kraken/kraken_config.h"
 
-RunnerConfig load_runner_config();
-void save_runner_config(const RunnerConfig& config);
+namespace cb
+{
+	runner_config load_runner_config();
+	void save_runner_config(const runner_config& config);
 
-TradingOptions load_trading_options();
-void save_trading_options(const TradingOptions& options);
+	trading_options load_trading_options();
+	void save_trading_options(const trading_options& options);
 
-KrakenConfig load_kraken_config();
-void save_kraken_config(const KrakenConfig& config);
+	kraken_config load_kraken_config();
+	void save_kraken_config(const kraken_config& config);
+}

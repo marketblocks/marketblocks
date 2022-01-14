@@ -5,39 +5,42 @@
 #include "trading/asset_symbol.h"
 #include "common/file/json_wrapper.h"
 
-enum class RunMode
+namespace cb
 {
-	LIVE, LIVETEST, BACKTEST
-};
+	enum class run_mode
+	{
+		LIVE, LIVETEST, BACKTEST
+	};
 
-class RunnerConfig
-{
-private:
-	std::vector<std::string> _exchangeIds;
+	class runner_config
+	{
+	private:
+		std::vector<std::string> _exchangeIds;
 
-public:
-	explicit RunnerConfig(
-		std::vector<std::string> exchangeIds);
+	public:
+		explicit runner_config(
+			std::vector<std::string> exchangeIds);
 
-	const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
+		const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
 
-	static RunnerConfig deserialize(JsonWrapper& json);
-	std::string serialize() const;
-};
+		static runner_config deserialize(json_wrapper& json);
+		std::string serialize() const;
+	};
 
-class TradingOptions
-{
-private:
-	double _maxTradePercent;
-	AssetSymbol _fiatCurrency;
+	class trading_options
+	{
+	private:
+		double _maxTradePercent;
+		asset_symbol _fiatCurrency;
 
-public:
-	TradingOptions();
-	explicit TradingOptions(double maxTradePercent, AssetSymbol fiatCurrency);
+	public:
+		trading_options();
+		explicit trading_options(double maxTradePercent, asset_symbol fiatCurrency);
 
-	double max_trade_percent() const { return _maxTradePercent; }
-	const AssetSymbol& fiat_currency() const { return _fiatCurrency; }
+		double max_trade_percent() const { return _maxTradePercent; }
+		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
 
-	static TradingOptions deserialize(JsonWrapper& json);
-	std::string serialize() const;
-};
+		static trading_options deserialize(json_wrapper& json);
+		std::string serialize() const;
+	};
+}

@@ -5,39 +5,42 @@
 
 #include "websocket_client.h"
 
-enum class WsConnectionStatus
+namespace cb
 {
-    CLOSED,
-    CLOSING,
-    CONNECTING,
-    OPEN
-};
+    enum class ws_connection_status
+    {
+        CLOSED,
+        CLOSING,
+        CONNECTING,
+        OPEN
+    };
 
-class WebsocketConnection
-{
-private:
-    std::shared_ptr<WebsocketClient> _client;
-    websocketpp::connection_hdl _connectionHandle;
+    class websocket_connection
+    {
+    private:
+        std::shared_ptr<websocket_client> _client;
+        websocketpp::connection_hdl _connectionHandle;
 
-public:
-    WebsocketConnection(std::shared_ptr<WebsocketClient> client, websocketpp::connection_hdl connectionHandle);
-    ~WebsocketConnection();
+    public:
+        websocket_connection(std::shared_ptr<websocket_client> client, websocketpp::connection_hdl connectionHandle);
+        ~websocket_connection();
 
-    WebsocketConnection(const WebsocketConnection& other) = delete;
-    WebsocketConnection(WebsocketConnection&& other) = default;
+        websocket_connection(const websocket_connection& other) = delete;
+        websocket_connection(websocket_connection&& other) = default;
 
-    WebsocketConnection& operator=(const WebsocketConnection& other) = delete;
-    WebsocketConnection& operator=(WebsocketConnection&& other) = default;
+        websocket_connection& operator=(const websocket_connection& other) = delete;
+        websocket_connection& operator=(websocket_connection&& other) = default;
 
-    void send_message(const std::string& message);
+        void send_message(const std::string& message);
 
-    WsConnectionStatus connection_status() const;
-};
+        ws_connection_status connection_status() const;
+    };
 
-struct WebsocketEventHandlers
-{
-public:
-    std::function<void(const std::string&)> onMessage;
-};
+    struct websocket_event_handlers
+    {
+    public:
+        std::function<void(const std::string&)> onMessage;
+    };
 
-WebsocketConnection create_websocket_connection(std::shared_ptr<WebsocketClient> client, const std::string& url, const WebsocketEventHandlers& eventHandlers);
+    websocket_connection create_websocket_connection(std::shared_ptr<websocket_client> client, const std::string& url, const websocket_event_handlers& eventHandlers);
+}

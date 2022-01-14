@@ -1,34 +1,37 @@
 #include "fee_schedule.h"
 
-FeeSchedule::FeeSchedule(std::map<double, double> fees)
-	: _fees{ std::move(fees) }
-{}
-
-double FeeSchedule::get_fee(double tradingVolume) const
+namespace cb
 {
-	for (auto& [tierLimit, fee] : _fees)
+	fee_schedule::fee_schedule(std::map<double, double> fees)
+		: _fees{ std::move(fees) }
+	{}
+
+	double fee_schedule::get_fee(double tradingVolume) const
 	{
-		if (tradingVolume <= tierLimit)
+		for (auto& [tierLimit, fee] : _fees)
 		{
-			return fee;
+			if (tradingVolume <= tierLimit)
+			{
+				return fee;
+			}
 		}
+
+		return 0.0;
 	}
 
-	return 0.0;
-}
+	fee_schedule_builder::fee_schedule_builder()
+		: fees{}
+	{}
 
-FeeScheduleBuilder::FeeScheduleBuilder()
-	: fees{}
-{}
+	fee_schedule_builder fee_schedule_builder::add_tier(double tierUpperLimit, double fee)
+	{
+		fees.emplace(tierUpperLimit, fee);
 
-FeeScheduleBuilder FeeScheduleBuilder::add_tier(double tierUpperLimit, double fee)
-{
-	fees.emplace(tierUpperLimit, fee);
+		return *this;
+	}
 
-	return *this;
-}
-
-FeeSchedule FeeScheduleBuilder::build()
-{
-	return FeeSchedule{ fees };
+	fee_schedule fee_schedule_builder::build()
+	{
+		return fee_schedule{ fees };
+	}
 }

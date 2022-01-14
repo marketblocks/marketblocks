@@ -1,39 +1,42 @@
 #include "configs.h"
 
-RunnerConfig::RunnerConfig(
-	std::vector<std::string> exchangeIds)
-	:
-	_exchangeIds{ std::move(exchangeIds) }
-{}
-
-RunnerConfig RunnerConfig::deserialize(JsonWrapper& json)
+namespace cb
 {
-	std::vector<std::string> exchangeIds = json.get_string_array("exchangeIds");
-	return RunnerConfig{ std::move(exchangeIds) };
-}
+	runner_config::runner_config(
+		std::vector<std::string> exchangeIds)
+		:
+		_exchangeIds{ std::move(exchangeIds) }
+	{}
 
-std::string RunnerConfig::serialize() const
-{
-	return "";
-}
+	runner_config runner_config::deserialize(json_wrapper& json)
+	{
+		std::vector<std::string> exchangeIds = json.get_string_array("exchangeIds");
+		return runner_config{ std::move(exchangeIds) };
+	}
 
-TradingOptions::TradingOptions()
-	: _maxTradePercent{ 1.0 }, _fiatCurrency{ "GBP" }
-{}
+	std::string runner_config::serialize() const
+	{
+		return "";
+	}
 
-TradingOptions::TradingOptions(double maxTradePercent, AssetSymbol fiatCurrency)
-	: _maxTradePercent{ maxTradePercent }, _fiatCurrency{ std::move(fiatCurrency) }
-{}
+	trading_options::trading_options()
+		: _maxTradePercent{ 1.0 }, _fiatCurrency{ "GBP" }
+	{}
 
-TradingOptions TradingOptions::deserialize(JsonWrapper& json)
-{
-	double maxTradePercent = json.document()["maxTradePercent"].GetDouble();
-	AssetSymbol fiatCurrency = AssetSymbol{ json.document()["fiatCurrency"].GetString() };
+	trading_options::trading_options(double maxTradePercent, asset_symbol fiatCurrency)
+		: _maxTradePercent{ maxTradePercent }, _fiatCurrency{ std::move(fiatCurrency) }
+	{}
 
-	return TradingOptions{ maxTradePercent, std::move(fiatCurrency) };
-}
+	trading_options trading_options::deserialize(json_wrapper& json)
+	{
+		double maxTradePercent = json.document()["maxTradePercent"].GetDouble();
+		asset_symbol fiatCurrency = asset_symbol{ json.document()["fiatCurrency"].GetString() };
 
-std::string TradingOptions::serialize() const
-{
-	return "";
+		return trading_options{ maxTradePercent, std::move(fiatCurrency) };
+	}
+
+	std::string trading_options::serialize() const
+	{
+		return "";
+	}
 }

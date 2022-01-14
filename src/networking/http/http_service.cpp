@@ -5,7 +5,7 @@
 
 namespace
 {
-	curl_slist* append_headers(curl_slist* chunk, const std::vector<HttpHeader>& headers)
+	curl_slist* append_headers(curl_slist* chunk, const std::vector<cb::http_header>& headers)
 	{
 		for (auto& header : headers)
 		{
@@ -15,13 +15,13 @@ namespace
 		return chunk;
 	}
 
-	std::string to_string(HttpVerb verb)
+	std::string to_string(cb::http_verb verb)
 	{
 		switch (verb)
 		{
-		case HttpVerb::GET:
+		case cb::http_verb::GET:
 			return "GET";
-		case HttpVerb::POST:
+		case cb::http_verb::POST:
 			return "POST";
 		}
 
@@ -38,65 +38,68 @@ static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdat
 	return realSize;
 }
 
-HttpService::HttpService()
-	: easyHandle{ curl_easy_init() }
+namespace cb
 {
-	curl_easy_setopt(easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
-}
-
-HttpService::~HttpService()
-{
-	curl_easy_cleanup(easyHandle);
-}
-
-HttpService::HttpService(const HttpService& other)
-	: easyHandle { other.easyHandle }
-{
-}
-
-HttpService::HttpService(HttpService&& other)
-	: easyHandle { other.easyHandle }
-{
-	other.easyHandle = nullptr;
-}
-
-HttpService& HttpService::operator=(const HttpService& other)
-{
-	easyHandle = other.easyHandle;
-
-	return *this;
-}
-
-HttpService& HttpService::operator=(HttpService&& other)
-{
-	easyHandle = other.easyHandle;
-
-	other.easyHandle = nullptr;
-
-	return *this;
-}
-
-HttpResponse HttpService::send(const HttpRequest& request) const
-{
-	std::string readBuffer;
-
-	curl_easy_setopt(easyHandle, CURLOPT_URL, request.url().c_str());
-	curl_easy_setopt(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
-	curl_easy_setopt(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
-
-	curl_slist* chunk = append_headers(NULL, request.headers());
-	curl_easy_setopt(easyHandle, CURLOPT_HTTPHEADER, chunk);
-
-	CURLcode result = curl_easy_perform(easyHandle);
-
-	if (result != CURLcode::CURLE_OK)
+	http_service::http_service()
+		: easyHandle{ curl_easy_init() }
 	{
-		std::string error = curl_easy_strerror(result);
-		return HttpResponse{ 0, error };
+		curl_easy_setopt(easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
 	}
 
-	long responseCode;
-	curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);
+	http_service::~http_service()
+	{
+		curl_easy_cleanup(easyHandle);
+	}
 
-	return HttpResponse{ responseCode, readBuffer };
+	http_service::http_service(const http_service& other)
+		: easyHandle{ other.easyHandle }
+	{
+	}
+
+	http_service::http_service(http_service&& other)
+		: easyHandle{ other.easyHandle }
+	{
+		other.easyHandle = nullptr;
+	}
+
+	http_service& http_service::operator=(const http_service& other)
+	{
+		easyHandle = other.easyHandle;
+
+		return *this;
+	}
+
+	http_service& http_service::operator=(http_service&& other)
+	{
+		easyHandle = other.easyHandle;
+
+		other.easyHandle = nullptr;
+
+		return *this;
+	}
+
+	http_response http_service::send(const http_request& request) const
+	{
+		std::string readBuffer;
+
+		curl_easy_setopt(easyHandle, CURLOPT_URL, request.url().c_str());
+		curl_easy_setopt(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
+		curl_easy_setopt(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
+
+		curl_slist* chunk = append_headers(NULL, request.headers());
+		curl_easy_setopt(easyHandle, CURLOPT_HTTPHEADER, chunk);
+
+		CURLcode result = curl_easy_perform(easyHandle);
+
+		if (result != CURLcode::CURLE_OK)
+		{
+			std::string error = curl_easy_strerror(result);
+			return http_response{ 0, error };
+		}
+
+		long responseCode;
+		curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);
+
+		return http_response{ responseCode, readBuffer };
+	}
 }

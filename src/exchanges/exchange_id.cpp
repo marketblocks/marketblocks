@@ -1,8 +1,11 @@
 #include "exchange_id.h"
 
-ExchangeIdLookup::ExchangeIdLookup()
-	: _container
+namespace cb
 {
-	{ "kraken", ExchangeId::KRAKEN }
+	exchange_id_lookup::exchange_id_lookup()
+		: _container
+	{
+		{ "kraken", exchange_id::KRAKEN }
+	}
+	{}
 }
-{}

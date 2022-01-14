@@ -3,18 +3,21 @@
 #include <string>
 #include <unordered_map>
 
-enum class ExchangeId
+namespace cb
 {
-	KRAKEN
-};
+	enum class exchange_id
+	{
+		KRAKEN
+	};
 
-class ExchangeIdLookup
-{
-private:
-	std::unordered_map<std::string, ExchangeId> _container;
+	class exchange_id_lookup
+	{
+	private:
+		std::unordered_map<std::string, exchange_id> _container;
 
-public:
-	ExchangeIdLookup();
+	public:
+		exchange_id_lookup();
 
-	const std::unordered_map<std::string, ExchangeId>& map() const { return _container; }
-};
+		const std::unordered_map<std::string, exchange_id>& map() const { return _container; }
+	};
+}

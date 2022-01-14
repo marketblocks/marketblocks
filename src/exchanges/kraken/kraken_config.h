@@ -4,18 +4,21 @@
 
 #include "common/file/json_wrapper.h"
 
-class KrakenConfig
+namespace cb
 {
-private:
-	std::string _publicKey;
-	std::string _privateKey;
+	class kraken_config
+	{
+	private:
+		std::string _publicKey;
+		std::string _privateKey;
 
-public:
-	KrakenConfig(std::string publicKey, std::string privateKey);
+	public:
+		kraken_config(std::string publicKey, std::string privateKey);
 
-	const std::string& public_key() const { return _publicKey; }
-	const std::string& private_key() const { return _privateKey; }
+		const std::string& public_key() const { return _publicKey; }
+		const std::string& private_key() const { return _privateKey; }
 
-	static KrakenConfig deserialize(JsonWrapper& json);
-	std::string serialize() const;
-};
+		static kraken_config deserialize(json_wrapper& json);
+		std::string serialize() const;
+	};
+}

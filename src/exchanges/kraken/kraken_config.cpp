@@ -1,18 +1,21 @@
 #include "kraken_config.h"
 
-KrakenConfig::KrakenConfig(std::string publicKey, std::string privateKey)
-	: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
-{}
-
-KrakenConfig KrakenConfig::deserialize(JsonWrapper& json)
+namespace cb
 {
-	std::string publicKey = json.document()["publicKey"].GetString();
-	std::string privateKey = json.document()["privateKey"].GetString();
+	kraken_config::kraken_config(std::string publicKey, std::string privateKey)
+		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
+	{}
 
-	return KrakenConfig{ std::move(publicKey), std::move(privateKey) };
-}
+	kraken_config kraken_config::deserialize(json_wrapper& json)
+	{
+		std::string publicKey = json.document()["publicKey"].GetString();
+		std::string privateKey = json.document()["privateKey"].GetString();
 
-std::string KrakenConfig::serialize() const
-{
-	return "";
+		return kraken_config{ std::move(publicKey), std::move(privateKey) };
+	}
+
+	std::string kraken_config::serialize() const
+	{
+		return "";
+	}
 }

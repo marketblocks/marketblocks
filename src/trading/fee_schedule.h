@@ -2,26 +2,29 @@
 
 #include <map>
 
-class FeeSchedule
+namespace cb
 {
-private:
-	std::map<double, double> _fees;
+	class fee_schedule
+	{
+	private:
+		std::map<double, double> _fees;
 
-public:
-	explicit FeeSchedule(std::map<double, double> fees);
+	public:
+		explicit fee_schedule(std::map<double, double> fees);
 
-	double get_fee(double tradingVolume) const;
-};
+		double get_fee(double tradingVolume) const;
+	};
 
-class FeeScheduleBuilder
-{
-private:
-	std::map<double, double> fees;
+	class fee_schedule_builder
+	{
+	private:
+		std::map<double, double> fees;
 
-public:
-	explicit FeeScheduleBuilder();
+	public:
+		explicit fee_schedule_builder();
 
-	FeeScheduleBuilder add_tier(double tierUpperLimit, double fee);
+		fee_schedule_builder add_tier(double tierUpperLimit, double fee);
 
-	FeeSchedule build();
-};
+		fee_schedule build();
+	};
+}

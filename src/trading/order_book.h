@@ -2,51 +2,54 @@
 
 #include <vector>
 
-enum class OrderBookSide
+namespace cb
 {
-	ASK,
-	BID
-};
+	enum class order_book_side
+	{
+		ASK,
+		BID
+	};
 
-class OrderBookEntry
-{
-private:
-	OrderBookSide _side;
-	double _price;
-	double _volume;
-	double _timeStamp;
+	class order_book_entry
+	{
+	private:
+		order_book_side _side;
+		double _price;
+		double _volume;
+		double _timeStamp;
 
-public:
-	OrderBookEntry(OrderBookSide side, double price, double volume, double timeStamp);
+	public:
+		order_book_entry(order_book_side side, double price, double volume, double timeStamp);
 
-	OrderBookSide side() const { return _side; }
-	double price() const { return _price; }
-	double volume() const { return _volume; }
-	double time_stamp() const { return _timeStamp; }
-};
+		order_book_side side() const { return _side; }
+		double price() const { return _price; }
+		double volume() const { return _volume; }
+		double time_stamp() const { return _timeStamp; }
+	};
 
-class OrderBookLevel
-{
-private:
-	OrderBookEntry _askEntry;
-	OrderBookEntry _bidEntry;
+	class order_book_level
+	{
+	private:
+		order_book_entry _askEntry;
+		order_book_entry _bidEntry;
 
-public:
-	OrderBookLevel(OrderBookEntry askEntry, OrderBookEntry bidEntry);
+	public:
+		order_book_level(order_book_entry askEntry, order_book_entry bidEntry);
 
-	const OrderBookEntry& ask() const { return _askEntry; }
-	const OrderBookEntry& bid() const { return _bidEntry; }
-};
+		const order_book_entry& ask() const { return _askEntry; }
+		const order_book_entry& bid() const { return _bidEntry; }
+	};
 
-class OrderBookState
-{
-private:
-	std::vector<OrderBookLevel> _levels;
+	class order_book_state
+	{
+	private:
+		std::vector<order_book_level> _levels;
 
-public:
-	OrderBookState(std::vector<OrderBookLevel> levels);
-	OrderBookState(std::vector<OrderBookEntry> askEntries, std::vector<OrderBookEntry> bidEntries);
+	public:
+		order_book_state(std::vector<order_book_level> levels);
+		order_book_state(std::vector<order_book_entry> askEntries, std::vector<order_book_entry> bidEntries);
 
-	int depth() const;
-	const OrderBookLevel& level(int i) const;
-};
+		int depth() const;
+		const order_book_level& level(int i) const;
+	};
+}

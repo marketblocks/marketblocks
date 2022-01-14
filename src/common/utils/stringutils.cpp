@@ -1,31 +1,34 @@
 #include "stringutils.h"
 
-std::vector<std::string> split(const std::string& source, const char delimiter)
+namespace cb
 {
-	std::stringstream stream{ source };
-	std::string segment;
-	std::vector<std::string> seglist;
-
-	while (std::getline(stream, segment, delimiter))
+	std::vector<std::string> split(const std::string& source, const char delimiter)
 	{
-		seglist.push_back(segment);
+		std::stringstream stream{ source };
+		std::string segment;
+		std::vector<std::string> seglist;
+
+		while (std::getline(stream, segment, delimiter))
+		{
+			seglist.push_back(segment);
+		}
+
+		return seglist;
 	}
 
-	return seglist;
-}
+	bool numeric_string_less::operator()(const std::string& l, const std::string& r) const
+	{
+		double numL = std::stod(l);
+		double numR = std::stod(r);
 
-bool numeric_string_less::operator()(const std::string& l, const std::string& r) const
-{
-	double numL = std::stod(l);
-	double numR = std::stod(r);
+		return numL < numR;
+	}
 
-	return numL < numR;
-}
+	bool numeric_string_greater::operator()(const std::string& l, const std::string& r) const
+	{
+		double numL = std::stod(l);
+		double numR = std::stod(r);
 
-bool numeric_string_greater::operator()(const std::string& l, const std::string& r) const
-{
-	double numL = std::stod(l);
-	double numR = std::stod(r);
-
-	return numL > numR;
+		return numL > numR;
+	}
 }

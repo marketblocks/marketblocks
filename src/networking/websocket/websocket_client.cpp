@@ -2,9 +2,9 @@
 
 #include <memory>
 
-static std::shared_ptr<sslContext> on_tls_init()
+static std::shared_ptr<cb::ssl_context> on_tls_init()
 {
-    std::shared_ptr<sslContext> context = std::make_shared<sslContext>(sslContext::sslv23);
+    std::shared_ptr<cb::ssl_context> context = std::make_shared<cb::ssl_context>(cb::ssl_context::sslv23);
 
     try
     {
@@ -22,21 +22,24 @@ static std::shared_ptr<sslContext> on_tls_init()
     return context;
 }
 
-WebsocketClient::WebsocketClient()
-    :_client{}, _thread{}
+namespace cb
 {
-    _client.set_access_channels(websocketpp::log::alevel::all);
-    _client.clear_access_channels(websocketpp::log::alevel::frame_payload);
+    websocket_client::websocket_client()
+        :_client{}, _thread{}
+    {
+        _client.set_access_channels(websocketpp::log::alevel::all);
+        _client.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
-    _client.init_asio();
-    _client.start_perpetual();
-    _client.set_tls_init_handler(bind(&on_tls_init));
+        _client.init_asio();
+        _client.start_perpetual();
+        _client.set_tls_init_handler(bind(&on_tls_init));
 
-    _thread = std::make_unique<std::thread>(&wsclient::run, &_client);
-}
+        _thread = std::make_unique<std::thread>(&client::run, &_client);
+    }
 
-WebsocketClient::~WebsocketClient()
-{
-    _client.stop_perpetual();
-    _thread->join();
+    websocket_client::~websocket_client()
+    {
+        _client.stop_perpetual();
+        _thread->join();
+    }
 }

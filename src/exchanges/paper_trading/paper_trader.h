@@ -9,20 +9,23 @@
 #include "trading/trade_description.h"
 #include "trading/fee_schedule.h"
 
-class PaperTrader
+namespace cb
 {
-private:
-	FeeSchedule _feeSchedule;
-	std::unordered_map<AssetSymbol, double> _balances;
+	class paper_trader
+	{
+	private:
+		fee_schedule _feeSchedule;
+		std::unordered_map<asset_symbol, double> _balances;
 
-	bool has_sufficient_funds(const AssetSymbol& asset, double amount) const;
-	TradeResult execute_trade(AssetSymbol gainedAsset, double gainValue, AssetSymbol soldAsset, double soldValue);
+		bool has_sufficient_funds(const asset_symbol& asset, double amount) const;
+		trade_result execute_trade(asset_symbol gainedAsset, double gainValue, asset_symbol soldAsset, double soldValue);
 
-public:
-	explicit PaperTrader(FeeSchedule feeSchedule, std::unordered_map<AssetSymbol, double> initialBalances);
+	public:
+		explicit paper_trader(fee_schedule feeSchedule, std::unordered_map<asset_symbol, double> initialBalances);
 
-	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const;
-	const std::unordered_map<AssetSymbol, double> get_balances() const { return _balances; }
+		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const;
+		const std::unordered_map<asset_symbol, double> get_balances() const { return _balances; }
 
-	TradeResult trade(const TradeDescription& description);
-};
+		trade_result trade(const trade_description& description);
+	};
+}

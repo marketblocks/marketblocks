@@ -26,8 +26,8 @@ namespace
 	{
 		std::filesystem::path path = get_path(fileName);
 
-		std::string json = read_file(path);
-		JsonWrapper wrapper { json };
+		std::string json = cb::read_file(path);
+		cb::json_wrapper wrapper { json };
 
 		return JsonObject::deserialize(wrapper);
 	}
@@ -37,36 +37,39 @@ namespace
 	{
 		std::filesystem::path path = get_path(fileName);
 		std::string json = jsonObject.serialize();
-		write_to_file(path, json);
+		cb::write_to_file(path, json);
 	}
 }
 
-RunnerConfig load_runner_config()
+namespace cb
 {
-	return load_config_file<RunnerConfig>(file_names::runner_config());
-}
+	runner_config load_runner_config()
+	{
+		return load_config_file<runner_config>(file_names::runner_config());
+	}
 
-void save_runner_config(const RunnerConfig& config)
-{
-	save_config_file(file_names::runner_config(), config);
-}
+	void save_runner_config(const runner_config& config)
+	{
+		save_config_file(file_names::runner_config(), config);
+	}
 
-TradingOptions load_trading_options()
-{
-	return load_config_file<TradingOptions>(file_names::trading_options());
-}
+	trading_options load_trading_options()
+	{
+		return load_config_file<trading_options>(file_names::trading_options());
+	}
 
-void save_trading_options(const TradingOptions& options)
-{
-	save_config_file(file_names::trading_options(), options);
-}
+	void save_trading_options(const trading_options& options)
+	{
+		save_config_file(file_names::trading_options(), options);
+	}
 
-KrakenConfig load_kraken_config()
-{
-	return load_config_file<KrakenConfig>(file_names::kraken_config());
-}
+	kraken_config load_kraken_config()
+	{
+		return load_config_file<kraken_config>(file_names::kraken_config());
+	}
 
-void save_kraken_config(const KrakenConfig& config)
-{
-	save_config_file(file_names::kraken_config(), config);
+	void save_kraken_config(const kraken_config& config)
+	{
+		save_config_file(file_names::kraken_config(), config);
+	}
 }

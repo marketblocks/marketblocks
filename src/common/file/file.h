@@ -5,23 +5,26 @@
 #include <fstream>
 #include <filesystem>
 
-class FileHandler
+namespace cb
 {
-private:
-	std::fstream _stream;
+	class file_handler
+	{
+	private:
+		std::fstream _stream;
 
-	FileHandler(const std::filesystem::path& path, std::ios_base::openmode openMode);
+		file_handler(const std::filesystem::path& path, std::ios_base::openmode openMode);
 
-public:
-	static FileHandler read(const std::filesystem::path& path);
-	static FileHandler write(const std::filesystem::path& path);
-	static FileHandler read_write(const std::filesystem::path& path);
+	public:
+		static file_handler read(const std::filesystem::path& path);
+		static file_handler write(const std::filesystem::path& path);
+		static file_handler read_write(const std::filesystem::path& path);
 
-	~FileHandler();
+		~file_handler();
 
-	std::fstream& stream() { return _stream; }
-};
+		std::fstream& stream() { return _stream; }
+	};
 
-std::string read_file(const std::filesystem::path& path);
+	std::string read_file(const std::filesystem::path& path);
 
-void write_to_file(const std::filesystem::path& path, const std::string& content);
+	void write_to_file(const std::filesystem::path& path, const std::string& content);
+}

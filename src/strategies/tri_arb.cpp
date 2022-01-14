@@ -10,92 +10,92 @@
 #include "common/utils/mathutils.h"
 #include "common/utils/financeutils.h"
 
-SequenceStep::SequenceStep(TradablePair pair, TradeAction action)
+sequence_step::sequence_step(cb::tradable_pair pair, cb::trade_action action)
 	: _pair{ std::move(pair) }, _action{ std::move(action) }
 {}
 
-bool SequenceStep::operator==(const SequenceStep& other) const
+bool sequence_step::operator==(const sequence_step& other) const
 {
 	return _action == other._action && _pair == other._pair;
 }
 
-TriArbSequence::TriArbSequence(SequenceStep first, SequenceStep middle, SequenceStep last, std::vector<TradablePair> pairs)
+tri_arb_sequence::tri_arb_sequence(sequence_step first, sequence_step middle, sequence_step last, std::vector<cb::tradable_pair> pairs)
 	: _first{ std::move(first) }, _middle{ std::move(middle) }, _last{ std::move(last) }, _pairs{ std::move(pairs) }
 {}
 
-TriArbExchangeSpec::TriArbExchangeSpec(std::shared_ptr<Exchange> exchange, std::vector<TriArbSequence> sequences)
+tri_arb_exchange_spec::tri_arb_exchange_spec(std::shared_ptr<cb::exchange> exchange, std::vector<tri_arb_sequence> sequences)
 	: _exchange{ exchange }, _sequences{ std::move(sequences) }
 {}
 
-std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const AssetSymbol& fiatCurrency)
+std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, const cb::asset_symbol& fiatCurrency)
 {
-	std::vector<TriArbExchangeSpec> specs;
+	std::vector<tri_arb_exchange_spec> specs;
 	specs.reserve(exchanges.size());
 
-	for (std::shared_ptr<Exchange> exchange : exchanges)
+	for (std::shared_ptr<cb::exchange> exchange : exchanges)
 	{
-		const std::vector<TradablePair> tradablePairs = exchange->get_tradable_pairs();
-		std::vector<TriArbSequence> sequences;
+		const std::vector<cb::tradable_pair> tradablePairs = exchange->get_tradable_pairs();
+		std::vector<tri_arb_sequence> sequences;
 
-		std::vector<TradablePair> fiatTradables = copy_where(
+		std::vector<cb::tradable_pair> fiatTradables = copy_where(
 			tradablePairs, 
-			[&fiatCurrency](const TradablePair& pair) { return pair.contains(fiatCurrency); });
+			[&fiatCurrency](const cb::tradable_pair& pair) { return pair.contains(fiatCurrency); });
 
-		std::vector<TradablePair> nonFiatTradables = copy_where(
+		std::vector<cb::tradable_pair> nonFiatTradables = copy_where(
 			tradablePairs,
-			[&fiatTradables](const TradablePair& pair) { return !contains(fiatTradables, pair); });
+			[&fiatTradables](const cb::tradable_pair& pair) { return !contains(fiatTradables, pair); });
 
 		for (auto& firstPair : fiatTradables)
 		{
-			TradeAction firstAction;
-			std::unique_ptr<AssetSymbol> firstGainedAsset;
+			cb::trade_action firstAction;
+			std::unique_ptr<cb::asset_symbol> firstGainedAsset;
 
 			if (firstPair.price_unit() == fiatCurrency)
 			{
-				firstAction = TradeAction::BUY;
-				firstGainedAsset = std::make_unique<AssetSymbol>(firstPair.asset());
+				firstAction = cb::trade_action::BUY;
+				firstGainedAsset = std::make_unique<cb::asset_symbol>(firstPair.asset());
 			}
 			else
 			{
-				firstAction = TradeAction::SELL;
-				firstGainedAsset = std::make_unique<AssetSymbol>(firstPair.price_unit());
+				firstAction = cb::trade_action::SELL;
+				firstGainedAsset = std::make_unique<cb::asset_symbol>(firstPair.price_unit());
 			}
 
-			std::vector<TradablePair> possibleMiddles = copy_where(
+			std::vector<cb::tradable_pair> possibleMiddles = copy_where(
 				nonFiatTradables,
-				[&firstGainedAsset](const TradablePair& pair) { return pair.contains(*firstGainedAsset); });
+				[&firstGainedAsset](const cb::tradable_pair& pair) { return pair.contains(*firstGainedAsset); });
 
 			for (auto& middlePair : possibleMiddles)
 			{
-				TradeAction middleAction;
-				std::unique_ptr<AssetSymbol> middleGainedAsset;
+				cb::trade_action middleAction;
+				std::unique_ptr<cb::asset_symbol> middleGainedAsset;
 
 				if (middlePair.price_unit() == *firstGainedAsset)
 				{
-					middleAction = TradeAction::BUY;
-					middleGainedAsset = std::make_unique<AssetSymbol>(middlePair.asset());
+					middleAction = cb::trade_action::BUY;
+					middleGainedAsset = std::make_unique<cb::asset_symbol>(middlePair.asset());
 				}
 				else
 				{
-					middleAction = TradeAction::SELL;
-					middleGainedAsset = std::make_unique<AssetSymbol>(middlePair.price_unit());
+					middleAction = cb::trade_action::SELL;
+					middleGainedAsset = std::make_unique<cb::asset_symbol>(middlePair.price_unit());
 				}
 
-				std::vector<TradablePair> finals = copy_where(
+				std::vector<cb::tradable_pair> finals = copy_where(
 					fiatTradables,
-					[&middleGainedAsset](const TradablePair& pair) { return pair.contains(*middleGainedAsset); });
+					[&middleGainedAsset](const cb::tradable_pair& pair) { return pair.contains(*middleGainedAsset); });
 
 				for (auto& finalPair : finals)
 				{
-					TradeAction finalAction = finalPair.price_unit() == *middleGainedAsset
-						? TradeAction::BUY
-						: TradeAction::SELL;
+					cb::trade_action finalAction = finalPair.price_unit() == *middleGainedAsset
+						? cb::trade_action::BUY
+						: cb::trade_action::SELL;
 
 					sequences.emplace_back(
-						SequenceStep{ firstPair, firstAction },
-						SequenceStep{ middlePair, middleAction },
-						SequenceStep{ finalPair, finalAction },
-						std::vector<TradablePair>{ firstPair, middlePair, finalPair });
+						sequence_step{ firstPair, firstAction },
+						sequence_step{ middlePair, middleAction },
+						sequence_step{ finalPair, finalAction },
+						std::vector<cb::tradable_pair>{ firstPair, middlePair, finalPair });
 
 					break;
 				}
@@ -112,14 +112,14 @@ namespace
 {
 	struct SequenceTrades
 	{
-		TradeDescription first;
-		TradeDescription middle;
-		TradeDescription last;
+		cb::trade_description first;
+		cb::trade_description middle;
+		cb::trade_description last;
 	};
 
 	struct SequenceTradeStep
 	{
-		TradeDescription description;
+		cb::trade_description description;
 		double gainValue;
 	};
 
@@ -130,12 +130,12 @@ namespace
 		double g3;
 	};
 
-	void print_pair(const TradablePair& pair)
+	void print_pair(const cb::tradable_pair& pair)
 	{
 		std::cout << pair.asset().get() << "/" << pair.price_unit().get();
 	}
 
-	void print_sequence(const TriArbSequence& sequence)
+	void print_sequence(const tri_arb_sequence& sequence)
 	{
 		std::cout << "Sequence: ";
 
@@ -148,15 +148,15 @@ namespace
 		std::cout << std::endl;
 	}
 
-	void print_trade(const TradeDescription& tradeDescription, double gain)
+	void print_trade(const cb::trade_description& tradeDescription, double gain)
 	{
 		char action;
 		double result;
 
-		if (tradeDescription.action() == TradeAction::BUY)
+		if (tradeDescription.action() == cb::trade_action::BUY)
 		{
 			action = 'B';
-			result = calculate_cost(tradeDescription.asset_price(), tradeDescription.volume());
+			result = cb::calculate_cost(tradeDescription.asset_price(), tradeDescription.volume());
 		}
 		else
 		{
@@ -169,7 +169,7 @@ namespace
 		std::cout << " @ " << tradeDescription.asset_price() << " = " << result << std::endl;
 	}
 
-	void log_trade(const TriArbSequence& sequence, const SequenceTrades& trades, const SequenceGains& gains, double initialTradeValue, double newBalance)
+	void log_trade(const tri_arb_sequence& sequence, const SequenceTrades& trades, const SequenceGains& gains, double initialTradeValue, double newBalance)
 	{
 		std::cout << std::endl << "TRADE:" << std::endl;
 
@@ -179,46 +179,46 @@ namespace
 		print_trade(trades.middle, gains.g2);
 		print_trade(trades.last, gains.g3);
 
-		double percentageProfit = calculate_percentage_diff(initialTradeValue, gains.g3);
+		double percentageProfit = cb::calculate_percentage_diff(initialTradeValue, gains.g3);
 		std::cout << "Profit: " << percentageProfit << "%" << std::endl;
 
 		std::cout << "New Balance: " << newBalance << std::endl << std::endl;
 	}
 
-	void log_sequence_checked(const TriArbSequence& sequence, double initialTradeValue, double g3)
+	void log_sequence_checked(const tri_arb_sequence& sequence, double initialTradeValue, double g3)
 	{
 		print_sequence(sequence);
 
-		double percentageDiff = calculate_percentage_diff(initialTradeValue, g3);
+		double percentageDiff = cb::calculate_percentage_diff(initialTradeValue, g3);
 		std::cout << "Price Diff: " << percentageDiff << "%" << std::endl;
 	}
 
-	TradeDescription create_trade(const SequenceStep& sequenceStep, const std::unordered_map<TradablePair, OrderBookLevel>& prices, double g1, double g0)
+	cb::trade_description create_trade(const sequence_step& sequenceStep, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, double g1, double g0)
 	{
-		double volume = sequenceStep.action() == TradeAction::BUY ? g1 : g0;
+		double volume = sequenceStep.action() == cb::trade_action::BUY ? g1 : g0;
 		double assetPrice = select_entry(prices.at(sequenceStep.pair()), sequenceStep.action()).price();
 
-		return TradeDescription(sequenceStep.pair(), sequenceStep.action(), assetPrice, volume);
+		return cb::trade_description(sequenceStep.pair(), sequenceStep.action(), assetPrice, volume);
 	}
 
-	SequenceTrades create_sequence_trades(const TriArbSequence& sequence, const SequenceGains& gains, const std::unordered_map<TradablePair, OrderBookLevel>& prices, double initialTradeValue)
+	SequenceTrades create_sequence_trades(const tri_arb_sequence& sequence, const SequenceGains& gains, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, double initialTradeValue)
 	{
-		TradeDescription firstTrade = create_trade(sequence.first(), prices, gains.g1, initialTradeValue);
-		TradeDescription middleTrade = create_trade(sequence.middle(), prices, gains.g2, gains.g1);
-		TradeDescription lastTrade = create_trade(sequence.last(), prices, gains.g3, gains.g2);
+		cb::trade_description firstTrade = create_trade(sequence.first(), prices, gains.g1, initialTradeValue);
+		cb::trade_description middleTrade = create_trade(sequence.middle(), prices, gains.g2, gains.g1);
+		cb::trade_description lastTrade = create_trade(sequence.last(), prices, gains.g3, gains.g2);
 
 		return SequenceTrades{ std::move(firstTrade), std::move(middleTrade), std::move(lastTrade) };
 	}
 
-	SequenceGains calculate_sequence_gains(const TriArbSequence& sequence, const std::unordered_map<TradablePair, OrderBookLevel>& prices, const std::unordered_map<TradablePair, double>& fees, double initialTradeValue)
+	SequenceGains calculate_sequence_gains(const tri_arb_sequence& sequence, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, const std::unordered_map<cb::tradable_pair, double>& fees, double initialTradeValue)
 	{
-		const SequenceStep& firstStep = sequence.first();
-		const SequenceStep& middleStep = sequence.middle();
-		const SequenceStep& lastStep = sequence.last();
+		const sequence_step& firstStep = sequence.first();
+		const sequence_step& middleStep = sequence.middle();
+		const sequence_step& lastStep = sequence.last();
 
-		const OrderBookEntry& firstOrderBookEntry = select_entry(prices.at(firstStep.pair()), firstStep.action());
-		const OrderBookEntry& middleOrderBookEntry = select_entry(prices.at(middleStep.pair()), middleStep.action());
-		const OrderBookEntry& lastOrderBookEntry = select_entry(prices.at(lastStep.pair()), lastStep.action());
+		const cb::order_book_entry& firstOrderBookEntry = select_entry(prices.at(firstStep.pair()), firstStep.action());
+		const cb::order_book_entry& middleOrderBookEntry = select_entry(prices.at(middleStep.pair()), middleStep.action());
+		const cb::order_book_entry& lastOrderBookEntry = select_entry(prices.at(lastStep.pair()), lastStep.action());
 
 		double firstFee = fees.at(firstStep.pair());
 		double middleFee = fees.at(middleStep.pair());
@@ -235,7 +235,7 @@ namespace
 #include <chrono>
 #include <thread>
 
-void TriArbStrategy::initialise(const StrategyInitialiser& initaliser)
+void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
 {
 	_options = initaliser.options();
 	_specs = create_exchange_specs(initaliser.exchanges(), _options.fiat_currency());
@@ -243,30 +243,30 @@ void TriArbStrategy::initialise(const StrategyInitialiser& initaliser)
 
 	for (auto& spec : _specs)
 	{
-		std::unordered_set<TradablePair> allPairs;
+		std::unordered_set<cb::tradable_pair> allPairs;
 
 		for (auto& sequence : spec.sequences())
 		{
 			allPairs.insert(sequence.pairs().begin(), sequence.pairs().end());
 		}
 
-		spec.exchange().get_or_connect_websocket().subscribe_order_book(std::vector<TradablePair>{ allPairs.begin(), allPairs.end() });
+		spec.exchange().get_or_connect_websocket().subscribe_order_book(std::vector<cb::tradable_pair>{ allPairs.begin(), allPairs.end() });
 	}
 
 	std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
-void TriArbStrategy::run_iteration()
+void tri_arb_strategy::run_iteration()
 {
 	for (auto& spec : _specs)
 	{
-		Exchange& exchange = spec.exchange();
+		cb::exchange& exchange = spec.exchange();
 		double tradeValue = _options.max_trade_percent() * get_balance(exchange, _options.fiat_currency());
 
 		for (auto& sequence : spec.sequences())
 		{
-			const std::unordered_map<TradablePair, OrderBookLevel> prices = get_best_order_book_prices(exchange.get_or_connect_websocket(), sequence.pairs());
-			const std::unordered_map<TradablePair, double> fees = exchange.get_fees(sequence.pairs());
+			const std::unordered_map<cb::tradable_pair, cb::order_book_level> prices = get_best_order_book_prices(exchange.get_or_connect_websocket(), sequence.pairs());
+			const std::unordered_map<cb::tradable_pair, double> fees = exchange.get_fees(sequence.pairs());
 
 			SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
 

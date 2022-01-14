@@ -2,66 +2,69 @@
 #include "common/file/json_wrapper.h"
 #include "common/utils/stringutils.h"
 
-const std::vector<TradablePair> read_tradable_pairs(const std::string& jsonResult)
+namespace cb::internal
 {
-	JsonWrapper json{ jsonResult };
-	auto resultObject = json.document()["result"].GetObject();
-	std::vector<TradablePair> pairs;
-	pairs.reserve(resultObject.MemberCount());
-
-	for (auto it = resultObject.MemberBegin(); it != resultObject.MemberEnd(); ++it)
+	const std::vector<tradable_pair> read_tradable_pairs(const std::string& jsonResult)
 	{
-		std::string name = it->name.GetString();
-		std::string wsName = it->value["wsname"].GetString();
-		std::vector<std::string> assetSymbols = split(wsName, '/');
-		pairs.emplace_back(name, AssetSymbol{ assetSymbols[0] }, AssetSymbol{ assetSymbols[1] });
+		json_wrapper json{ jsonResult };
+		auto resultObject = json.document()["result"].GetObject();
+		std::vector<tradable_pair> pairs;
+		pairs.reserve(resultObject.MemberCount());
+
+		for (auto it = resultObject.MemberBegin(); it != resultObject.MemberEnd(); ++it)
+		{
+			std::string name = it->name.GetString();
+			std::string wsName = it->value["wsname"].GetString();
+			std::vector<std::string> assetSymbols = split(wsName, '/');
+			pairs.emplace_back(name, asset_symbol{ assetSymbols[0] }, asset_symbol{ assetSymbols[1] });
+		}
+
+		return pairs;
 	}
 
-	return pairs;
-}
-
-const OrderBookState read_order_book(const std::string& jsonResult, const TradablePair& pair, int depth)
-{
-	JsonWrapper json{ jsonResult };
-
-	auto resultObject = json
-		.document()["result"]
-		.GetObject()
-		.FindMember(pair.exchange_identifier().c_str());
-
-	std::vector<OrderBookLevel> levels;
-	levels.reserve(depth);
-
-	auto asks = resultObject->value["asks"].GetArray();
-	auto bids = resultObject->value["bids"].GetArray();
-
-	for (int i = 0; i < depth; i++)
+	const order_book_state read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
 	{
-		auto asks_i = asks[i].GetArray();
-		OrderBookEntry askEntry
-		{ 
-			OrderBookSide::ASK, 
-			std::stod(asks_i[0].GetString()),	
-			std::stod(asks_i[1].GetString()), 
-			asks_i[2].GetDouble() 
-		};
+		json_wrapper json{ jsonResult };
 
-		auto bids_i = bids[i].GetArray();
-		OrderBookEntry bidEntry
-		{ 
-			OrderBookSide::BID, 
-			std::stod(bids_i[0].GetString()),	
-			std::stod(bids_i[1].GetString()), 
-			bids_i[2].GetDouble() 
-		};
+		auto resultObject = json
+			.document()["result"]
+			.GetObject()
+			.FindMember(pair.exchange_identifier().c_str());
 
-		levels.emplace_back(std::move(askEntry), std::move(bidEntry));
+		std::vector<order_book_level> levels;
+		levels.reserve(depth);
+
+		auto asks = resultObject->value["asks"].GetArray();
+		auto bids = resultObject->value["bids"].GetArray();
+
+		for (int i = 0; i < depth; i++)
+		{
+			auto asks_i = asks[i].GetArray();
+			order_book_entry askEntry
+			{
+				order_book_side::ASK,
+				std::stod(asks_i[0].GetString()),
+				std::stod(asks_i[1].GetString()),
+				asks_i[2].GetDouble()
+			};
+
+			auto bids_i = bids[i].GetArray();
+			order_book_entry bidEntry
+			{
+				order_book_side::BID,
+				std::stod(bids_i[0].GetString()),
+				std::stod(bids_i[1].GetString()),
+				bids_i[2].GetDouble()
+			};
+
+			levels.emplace_back(std::move(askEntry), std::move(bidEntry));
+		}
+
+		return order_book_state{ std::move(levels) };
 	}
 
-	return OrderBookState{ std::move(levels) };
-}
-
-const std::unordered_map<AssetSymbol, double> read_balances(const std::string& jsonResult)
-{
-	return std::unordered_map<AssetSymbol, double>();
+	const std::unordered_map<asset_symbol, double> read_balances(const std::string& jsonResult)
+	{
+		return std::unordered_map<asset_symbol, double>();
+	}
 }

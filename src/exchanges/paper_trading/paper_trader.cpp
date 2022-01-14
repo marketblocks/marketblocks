@@ -2,55 +2,58 @@
 #include "common/utils/financeutils.h"
 #include "common/utils/containerutils.h"
 
-PaperTrader::PaperTrader(FeeSchedule feeSchedule, std::unordered_map<AssetSymbol, double> initialBalances)
-	: _feeSchedule{ std::move(feeSchedule) }, _balances{ std::move(initialBalances) }
-{}
-
-bool PaperTrader::has_sufficient_funds(const AssetSymbol& asset, double amount) const
+namespace cb
 {
-	return _balances.at(asset) >= amount;
-}
+	paper_trader::paper_trader(fee_schedule feeSchedule, std::unordered_map<asset_symbol, double> initialBalances)
+		: _feeSchedule{ std::move(feeSchedule) }, _balances{ std::move(initialBalances) }
+	{}
 
-TradeResult PaperTrader::execute_trade(AssetSymbol gainedAsset, double gainValue, AssetSymbol soldAsset, double soldValue)
-{
-	if (!has_sufficient_funds(soldAsset, soldValue))
+	bool paper_trader::has_sufficient_funds(const asset_symbol& asset, double amount) const
 	{
-		return TradeResult::INSUFFICENT_FUNDS;
+		return _balances.at(asset) >= amount;
 	}
 
-	_balances[gainedAsset] += gainValue;
-	_balances[soldAsset] -= soldValue;
-
-	return TradeResult::SUCCESS;
-}
-
-const std::unordered_map<TradablePair, double> PaperTrader::get_fees(const std::vector<TradablePair>& tradablePairs) const
-{
-	return to_unordered_map<TradablePair, double>(
-		tradablePairs, 
-		[](const TradablePair& pair) { return pair; }, 
-		[this](const TradablePair& pair) { return _feeSchedule.get_fee(0); });
-}
-
-TradeResult PaperTrader::trade(const TradeDescription& description)
-{
-	double cost = calculate_cost(description.asset_price(), description.volume());
-	double fee = cost * _feeSchedule.get_fee(0) * 0.01;
-
-	if (description.action() == TradeAction::BUY)
+	trade_result paper_trader::execute_trade(asset_symbol gainedAsset, double gainValue, asset_symbol soldAsset, double soldValue)
 	{
-		return execute_trade(
-			description.pair().asset(), 
-			description.volume(), 
-			description.pair().price_unit(), 
-			cost + fee);
+		if (!has_sufficient_funds(soldAsset, soldValue))
+		{
+			return trade_result::INSUFFICENT_FUNDS;
+		}
+
+		_balances[gainedAsset] += gainValue;
+		_balances[soldAsset] -= soldValue;
+
+		return trade_result::SUCCESS;
 	}
-	else
+
+	const std::unordered_map<tradable_pair, double> paper_trader::get_fees(const std::vector<tradable_pair>& tradablePairs) const
 	{
-		return execute_trade(
-			description.pair().price_unit(), 
-			cost - fee, 
-			description.pair().asset(), 
-			description.volume());
+		return to_unordered_map<tradable_pair, double>(
+			tradablePairs,
+			[](const tradable_pair& pair) { return pair; },
+			[this](const tradable_pair& pair) { return _feeSchedule.get_fee(0); });
+	}
+
+	trade_result paper_trader::trade(const trade_description& description)
+	{
+		double cost = calculate_cost(description.asset_price(), description.volume());
+		double fee = cost * _feeSchedule.get_fee(0) * 0.01;
+
+		if (description.action() == trade_action::BUY)
+		{
+			return execute_trade(
+				description.pair().asset(),
+				description.volume(),
+				description.pair().price_unit(),
+				cost + fee);
+		}
+		else
+		{
+			return execute_trade(
+				description.pair().price_unit(),
+				cost - fee,
+				description.pair().asset(),
+				description.volume());
+		}
 	}
 }

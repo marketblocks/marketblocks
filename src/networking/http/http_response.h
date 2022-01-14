@@ -2,15 +2,18 @@
 
 #include <string>
 
-class HttpResponse
+namespace cb
 {
-private:
-	int _responseCode;
-	std::string _message;
+	class http_response
+	{
+	private:
+		int _responseCode;
+		std::string _message;
 
-public:
-	HttpResponse(int responseCode, std::string message);
+	public:
+		http_response(int responseCode, std::string message);
 
-	int response_code() const { return _responseCode; }
-	const std::string& message() const { return _message; }
-};
+		int response_code() const { return _responseCode; }
+		const std::string& message() const { return _message; }
+	};
+}

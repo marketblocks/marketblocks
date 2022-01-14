@@ -2,13 +2,16 @@
 
 #include <string>
 
-namespace HttpResponseCodes
+namespace cb
 {
-	constexpr int OK = 200;
-}
+	namespace HttpResponseCodes
+	{
+		constexpr int OK = 200;
+	}
 
-enum class HttpVerb
-{
-	GET,
-	POST
-};
+	enum class http_verb
+	{
+		GET,
+		POST
+	};
+}

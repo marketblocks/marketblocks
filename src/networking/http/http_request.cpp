@@ -1,15 +1,18 @@
 #include "http_request.h"
 
-HttpRequest::HttpRequest(HttpVerb verb, std::string uri)
-	: _verb{ verb }, _url{ std::move(uri) }, _content{}, _headers{}
-{}
-
-void HttpRequest::set_content(const std::string& content)
+namespace cb
 {
-	_content = content;
-}
+	http_request::http_request(http_verb verb, std::string uri)
+		: _verb{ verb }, _url{ std::move(uri) }, _content{}, _headers{}
+	{}
 
-void HttpRequest::add_header(const std::string& key, const std::string& value)
-{
-	_headers.emplace_back(key, value);
+	void http_request::set_content(const std::string& content)
+	{
+		_content = content;
+	}
+
+	void http_request::add_header(const std::string& key, const std::string& value)
+	{
+		_headers.emplace_back(key, value);
+	}
 }

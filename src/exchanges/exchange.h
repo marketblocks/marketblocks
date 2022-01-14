@@ -14,70 +14,73 @@
 #include "exchange_id.h"
 #include "exchanges/websockets/websocket_stream.h"
 
-class Exchange
+namespace cb
 {
-private:
-	ExchangeId _id;
-
-public:
-	Exchange(ExchangeId id)
-		: _id{ id }
-	{}
-
-	virtual ~Exchange() = default;
-
-	ExchangeId id() const { return _id; }
-
-	virtual const std::vector<TradablePair> get_tradable_pairs() const = 0;
-	virtual const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const = 0;
-	virtual const std::unordered_map<AssetSymbol, double> get_balances() const = 0;
-	virtual const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const = 0;
-	virtual TradeResult trade(const TradeDescription& description) = 0;
-
-	virtual WebsocketStream& get_or_connect_websocket() = 0;
-};
-
-template<typename MarketApi, typename TradeApi>
-class MultiComponentExchange final : public Exchange
-{
-private:
-	std::unique_ptr<MarketApi> _marketApi;
-	std::unique_ptr<TradeApi> _tradeApi;
-
-public:
-	MultiComponentExchange(ExchangeId id, std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
-		: Exchange{ id }, _marketApi{ std::move(dataApi) }, _tradeApi{std::move(tradeApi)}
-	{}
-
-	const std::vector<TradablePair> get_tradable_pairs() const override
+	class exchange
 	{
-		return _marketApi->get_tradable_pairs();
-	}
+	private:
+		exchange_id _id;
 
-	const std::unordered_map<TradablePair, OrderBookState> get_order_book(const std::vector<TradablePair>& tradablePairs, int depth) const override
+	public:
+		exchange(exchange_id id)
+			: _id{ id }
+		{}
+
+		virtual ~exchange() = default;
+
+		exchange_id id() const { return _id; }
+
+		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
+		virtual const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const = 0;
+		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
+		virtual const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const = 0;
+		virtual trade_result trade(const trade_description& description) = 0;
+
+		virtual websocket_stream& get_or_connect_websocket() = 0;
+	};
+
+	template<typename MarketApi, typename TradeApi>
+	class multi_component_exchange final : public exchange
 	{
-		return _marketApi->get_order_book(tradablePairs, depth);
-	}
+	private:
+		std::unique_ptr<MarketApi> _marketApi;
+		std::unique_ptr<TradeApi> _tradeApi;
 
-	WebsocketStream& get_or_connect_websocket()
-	{
-		return _marketApi->get_or_connect_websocket();
-	}
+	public:
+		multi_component_exchange(exchange_id id, std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
+			: exchange{ id }, _marketApi{ std::move(dataApi) }, _tradeApi{ std::move(tradeApi) }
+		{}
 
-	const std::unordered_map<AssetSymbol, double> get_balances() const override
-	{
-		return _tradeApi->get_balances();
-	}
+		const std::vector<tradable_pair> get_tradable_pairs() const override
+		{
+			return _marketApi->get_tradable_pairs();
+		}
 
-	const std::unordered_map<TradablePair, double> get_fees(const std::vector<TradablePair>& tradablePairs) const override
-	{
-		return _tradeApi->get_fees(tradablePairs);
-	}
+		const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const override
+		{
+			return _marketApi->get_order_book(tradablePairs, depth);
+		}
 
-	TradeResult trade(const TradeDescription& description) override
-	{
-		return _tradeApi->trade(description);
-	}
-};
+		websocket_stream& get_or_connect_websocket()
+		{
+			return _marketApi->get_or_connect_websocket();
+		}
 
-typedef MultiComponentExchange<Exchange, PaperTrader> LiveTestExchange;
+		const std::unordered_map<asset_symbol, double> get_balances() const override
+		{
+			return _tradeApi->get_balances();
+		}
+
+		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override
+		{
+			return _tradeApi->get_fees(tradablePairs);
+		}
+
+		trade_result trade(const trade_description& description) override
+		{
+			return _tradeApi->trade(description);
+		}
+	};
+
+	typedef multi_component_exchange<exchange, paper_trader> live_test_exchange;
+}

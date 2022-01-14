@@ -1,39 +1,42 @@
 #include "websocket_stream.h"
 
-void WebsocketStream::connect(std::shared_ptr<WebsocketClient> websocketClient)
+namespace cb
 {
-	WebsocketEventHandlers eventHandlers
+	void websocket_stream::connect(std::shared_ptr<websocket_client> websocketClient)
 	{
-		[this](const std::string& message) { on_message(message); }
-	};
+		websocket_event_handlers eventHandlers
+		{
+			[this](const std::string& message) { on_message(message); }
+		};
 
-	_connection = std::make_unique<WebsocketConnection>(
-		create_websocket_connection(websocketClient, stream_url(), eventHandlers));
-}
-
-WsConnectionStatus WebsocketStream::connection_status() const
-{
-	if (_connection)
-	{
-		return _connection->connection_status();
+		_connection = std::make_unique<websocket_connection>(
+			create_websocket_connection(websocketClient, stream_url(), eventHandlers));
 	}
 
-	return WsConnectionStatus::CLOSED;
-}
-
-void WebsocketStream::subscribe_order_book(const std::vector<TradablePair>& tradablePairs)
-{
-	std::string subscriptionMessage = get_subscribe_order_book_message(tradablePairs);
-
-	for (auto& pair : tradablePairs)
+	ws_connection_status websocket_stream::connection_status() const
 	{
-		_orderBookCaches.emplace(pair.iso_4217_a3(), OrderBookCache{ 10 });
+		if (_connection)
+		{
+			return _connection->connection_status();
+		}
+
+		return ws_connection_status::CLOSED;
 	}
 
-	_connection->send_message(subscriptionMessage);
-}
+	void websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	{
+		std::string subscriptionMessage = get_subscribe_order_book_message(tradablePairs);
 
-OrderBookState WebsocketStream::get_order_book_snapshot(const TradablePair& tradablePair) const
-{
-	return _orderBookCaches.at(tradablePair.iso_4217_a3()).snapshot();
+		for (auto& pair : tradablePairs)
+		{
+			_orderBookCaches.emplace(pair.iso_4217_a3(), order_book_cache{ 10 });
+		}
+
+		_connection->send_message(subscriptionMessage);
+	}
+
+	order_book_state websocket_stream::get_order_book_snapshot(const tradable_pair& tradablePair) const
+	{
+		return _orderBookCaches.at(tradablePair.iso_4217_a3()).snapshot();
+	}
 }

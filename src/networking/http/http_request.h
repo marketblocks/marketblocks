@@ -5,22 +5,25 @@
 #include "http_constants.h"
 #include "http_header.h"
 
-class HttpRequest
+namespace cb
 {
-private:
-	HttpVerb _verb;
-	std::string _url;
-	std::string _content;
-	std::vector<HttpHeader> _headers;
+	class http_request
+	{
+	private:
+		http_verb _verb;
+		std::string _url;
+		std::string _content;
+		std::vector<http_header> _headers;
 
-public:
-	explicit HttpRequest(HttpVerb verb, std::string url);
+	public:
+		explicit http_request(http_verb verb, std::string url);
 
-	HttpVerb verb() const { return _verb; }
-	const std::string& url() const { return _url; }
-	const std::string& content() const { return _content; }
-	const std::vector<HttpHeader>& headers() const { return _headers; }
+		http_verb verb() const { return _verb; }
+		const std::string& url() const { return _url; }
+		const std::string& content() const { return _content; }
+		const std::vector<http_header>& headers() const { return _headers; }
 
-	void set_content(const std::string& content);
-	void add_header(const std::string& key, const std::string& value);
-};
+		void set_content(const std::string& content);
+		void add_header(const std::string& key, const std::string& value);
+	};
+}

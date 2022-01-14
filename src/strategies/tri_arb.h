@@ -8,62 +8,62 @@
 #include "exchanges/exchange.h"
 #include "runner/initialise/strategy_initialiser.h"
 
-class SequenceStep
+class sequence_step
 {
 private:
-	TradablePair _pair;
-	TradeAction _action;
+	cb::tradable_pair _pair;
+	cb::trade_action _action;
 
 public:
-	explicit SequenceStep(TradablePair pair, TradeAction action);
+	explicit sequence_step(cb::tradable_pair pair, cb::trade_action action);
 
-	const TradablePair& pair() const { return _pair; }
-	const TradeAction& action() const { return _action; }
+	const cb::tradable_pair& pair() const { return _pair; }
+	const cb::trade_action& action() const { return _action; }
 
-	bool operator==(const SequenceStep& other) const;
+	bool operator==(const sequence_step& other) const;
 };
 
-class TriArbSequence
+class tri_arb_sequence
 {
 private:
-	SequenceStep _first;
-	SequenceStep _middle;
-	SequenceStep _last;
-	std::vector<TradablePair> _pairs;
+	sequence_step _first;
+	sequence_step _middle;
+	sequence_step _last;
+	std::vector<cb::tradable_pair> _pairs;
 
 public:
-	explicit TriArbSequence(SequenceStep first, SequenceStep middle, SequenceStep last, std::vector<TradablePair> pairs);
+	explicit tri_arb_sequence(sequence_step first, sequence_step middle, sequence_step last, std::vector<cb::tradable_pair> pairs);
 
-	const SequenceStep& first() const { return _first; }
-	const SequenceStep& middle() const { return _middle; }
-	const SequenceStep& last() const { return _last; }
-	const std::vector<TradablePair>& pairs() const { return _pairs; }
+	const sequence_step& first() const { return _first; }
+	const sequence_step& middle() const { return _middle; }
+	const sequence_step& last() const { return _last; }
+	const std::vector<cb::tradable_pair>& pairs() const { return _pairs; }
 };
 
-class TriArbExchangeSpec
+class tri_arb_exchange_spec
 {
 private:
-	std::shared_ptr<Exchange> _exchange;
-	std::vector<TriArbSequence> _sequences;
+	std::shared_ptr<cb::exchange> _exchange;
+	std::vector<tri_arb_sequence> _sequences;
 
 public:
-	explicit TriArbExchangeSpec(std::shared_ptr<Exchange> exchange, std::vector<TriArbSequence> sequences);
+	explicit tri_arb_exchange_spec(std::shared_ptr<cb::exchange> exchange, std::vector<tri_arb_sequence> sequences);
 
-	Exchange& exchange() const { return *(_exchange.get()); }
-	const std::vector<TriArbSequence>& sequences() const { return _sequences; }
+	cb::exchange& exchange() const { return *(_exchange.get()); }
+	const std::vector<tri_arb_sequence>& sequences() const { return _sequences; }
 };
 
-class TriArbStrategy
+class tri_arb_strategy
 {
 private:
-	std::vector<TriArbExchangeSpec> _specs;
-	TradingOptions _options;
+	std::vector<tri_arb_exchange_spec> _specs;
+	cb::trading_options _options;
 
 public:
-	TriArbStrategy() {}
+	tri_arb_strategy() {}
 
-	void initialise(const StrategyInitialiser& initialiser);
+	void initialise(const cb::strategy_initialiser& initialiser);
 	void run_iteration();
 };
 
-std::vector<TriArbExchangeSpec> create_exchange_specs(const std::vector<std::shared_ptr<Exchange>>& exchanges, const AssetSymbol& fiatCurrency);
+std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, const cb::asset_symbol& fiatCurrency);

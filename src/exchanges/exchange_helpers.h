@@ -2,7 +2,10 @@
 
 #include "exchange.h"
 
-std::unordered_map<TradablePair, OrderBookLevel> get_best_order_book_prices(const Exchange& exchange, const std::vector<TradablePair>& tradablePairs);
-std::unordered_map<TradablePair, OrderBookLevel> get_best_order_book_prices(const WebsocketStream& websocketStream, const std::vector<TradablePair>& tradablePairs);
+namespace cb
+{
+	std::unordered_map<tradable_pair, order_book_level> get_best_order_book_prices(const exchange& exchange, const std::vector<tradable_pair>& tradablePairs);
+	std::unordered_map<tradable_pair, order_book_level> get_best_order_book_prices(const websocket_stream& websocketStream, const std::vector<tradable_pair>& tradablePairs);
 
-double get_balance(const Exchange& exchange, const AssetSymbol& tickerId);
+	double get_balance(const exchange& exchange, const asset_symbol& tickerId);
+}
