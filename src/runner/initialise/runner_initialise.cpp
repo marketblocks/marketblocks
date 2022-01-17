@@ -83,8 +83,6 @@ namespace cb::internal
 		for (auto& exchangeId : runnerConfig.exchange_ids())
 		{
 			std::shared_ptr<exchange> exchange = assembler(create_api_from_id(exchangeId, idLookup, websocketClient));
-			exchange->get_or_connect_websocket();
-
 			exchanges.push_back(exchange);
 		}
 
