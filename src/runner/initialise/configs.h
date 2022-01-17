@@ -18,13 +18,15 @@ namespace cb
 		std::vector<std::string> _exchangeIds;
 
 	public:
-		explicit runner_config(
-			std::vector<std::string> exchangeIds);
+		explicit runner_config(std::vector<std::string> exchangeIds);
+
+		static runner_config create_default();
+		static std::string name() { return "runnerConfig"; }
+		static runner_config deserialize(json_wrapper& json);
+		std::string serialize() const;
 
 		const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
 
-		static runner_config deserialize(json_wrapper& json);
-		std::string serialize() const;
 	};
 
 	class trading_options
@@ -37,10 +39,13 @@ namespace cb
 		trading_options();
 		explicit trading_options(double maxTradePercent, asset_symbol fiatCurrency);
 
+		static trading_options create_default();
+		static std::string name() { return "tradingOptions"; }
+		static trading_options deserialize(json_wrapper& json);
+		std::string serialize() const;
+
 		double max_trade_percent() const { return _maxTradePercent; }
 		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
 
-		static trading_options deserialize(json_wrapper& json);
-		std::string serialize() const;
 	};
 }

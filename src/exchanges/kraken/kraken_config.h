@@ -15,6 +15,9 @@ namespace cb
 	public:
 		kraken_config(std::string publicKey, std::string privateKey);
 
+		static kraken_config create_default();
+		static std::string name() { return "krakenConfig"; }
+
 		const std::string& public_key() const { return _publicKey; }
 		const std::string& private_key() const { return _privateKey; }
 

@@ -2,18 +2,19 @@
 #include <functional>
 
 #include "runner_initialise.h"
-#include "config_file_readers.h"
+#include "initialisation_error.h"
 #include "exchange_factories.h"
 #include "exchanges/exchange_id.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/exchange_assemblers.h"
 #include "common/file/file.h"
+#include "common/exceptions/cb_exception.h"
 #include "networking/websocket/websocket_client.h"
 
 namespace
 {
-	typedef std::shared_ptr<cb::exchange>(*ExchangeAssembler)(std::unique_ptr<cb::exchange> api);
-	ExchangeAssembler select_assembler(cb::run_mode runMode)
+	typedef std::shared_ptr<cb::exchange>(*exchange_assembler)(std::unique_ptr<cb::exchange> api);
+	exchange_assembler select_assembler(cb::run_mode runMode)
 	{
 		switch (runMode)
 		{
@@ -48,21 +49,35 @@ namespace cb::internal
 {
 	runner_config get_runner_config()
 	{
-		return load_runner_config();
-
-		// if doesn't exist, create
+		try
+		{
+			runner_config config = load_or_create_config<runner_config>();
+			return config;
+		}
+		catch (const cb_exception& e)
+		{
+			throw initialisation_error{ std::format("Error occured reading runner config: {}", e.what()) };
+		}
 	}
 
 	trading_options get_trading_options()
 	{
-		return load_trading_options();
+		try
+		{
+			trading_options options = load_or_create_config<trading_options>();
+			return options;
+		}
+		catch (const cb_exception& e)
+		{
+			throw initialisation_error{ std::format("Error occured reading trading options: {}", e.what()) };
+		}
 	}
 
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode)
 	{
 		std::vector<std::shared_ptr<exchange>> exchanges;
 		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>();
-		ExchangeAssembler assembler = select_assembler(runMode);
+		exchange_assembler assembler = select_assembler(runMode);
 		exchange_id_lookup idLookup;
 
 		for (auto& exchangeId : runnerConfig.exchange_ids())

@@ -42,7 +42,7 @@ namespace cb
 		{
 			if (!_initialised)
 			{
-				throw std::runtime_error("Runner must be initialized");
+				throw cb_exception{ "Runner must be initialized" };
 			}
 
 			while (true)

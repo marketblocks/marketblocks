@@ -8,6 +8,11 @@ namespace cb
 		_exchangeIds{ std::move(exchangeIds) }
 	{}
 
+	runner_config runner_config::create_default()
+	{
+		return runner_config{ std::vector<std::string>{} };
+	}
+
 	runner_config runner_config::deserialize(json_wrapper& json)
 	{
 		std::vector<std::string> exchangeIds = json.get_string_array("exchangeIds");
@@ -26,6 +31,11 @@ namespace cb
 	trading_options::trading_options(double maxTradePercent, asset_symbol fiatCurrency)
 		: _maxTradePercent{ maxTradePercent }, _fiatCurrency{ std::move(fiatCurrency) }
 	{}
+
+	trading_options trading_options::create_default()
+	{
+		return trading_options{ 0.05, asset_symbol{ "GBP" } };
+	}
 
 	trading_options trading_options::deserialize(json_wrapper& json)
 	{

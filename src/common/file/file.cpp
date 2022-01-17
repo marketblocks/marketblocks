@@ -1,6 +1,8 @@
 #include <fstream>
 
 #include "file.h"
+#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/not_implemented_exception.h"
 
 namespace cb 
 {
@@ -37,13 +39,12 @@ namespace cb
 		{
 			return contents;
 		}
-
-		// return error
-		return "";
+	
+		throw cb_exception{ strerror(errno) };
 	}
 
 	void write_to_file(const std::filesystem::path& path, const std::string& content)
 	{
-
+		throw not_implemented_exception{"write_to_file"};
 	}
 }

@@ -6,6 +6,11 @@ namespace cb
 		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
 	{}
 
+	kraken_config kraken_config::create_default()
+	{
+		return kraken_config{ "", "" };
+	}
+
 	kraken_config kraken_config::deserialize(json_wrapper& json)
 	{
 		std::string publicKey = json.document()["publicKey"].GetString();

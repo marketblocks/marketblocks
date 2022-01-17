@@ -5,6 +5,8 @@ add_library(CryptoBot_lib
 "common/file/json_wrapper.h"
 "common/file/file.cpp"
 "common/file/file.h"
+"common/file/config_file_reader.cpp" 
+"common/file/config_file_reader.h" 
 
 "common/security/hash.cpp"
 "common/security/hash.h" 
@@ -18,6 +20,11 @@ add_library(CryptoBot_lib
 "common/utils/stringutils.cpp"
 "common/utils/stringutils.h"
 "common/utils/vectorutils.h"
+
+"common/exceptions/cb_exception.h" 
+"common/exceptions/not_implemented_exception.h" 
+
+"common/types/result.h"
 
 "exchanges/exchange.h"
 "exchanges/exchange_assemblers.cpp"  
@@ -64,10 +71,9 @@ add_library(CryptoBot_lib
 "runner/initialise/strategy_initialiser.h"
 "runner/initialise/exchange_factories.h" 
 "runner/initialise/exchange_factories.cpp" 
-"runner/initialise/config_file_readers.cpp" 
-"runner/initialise/config_file_readers.h" 
 "runner/initialise/configs.cpp" 
 "runner/initialise/configs.h"
+"runner/initialise/initialisation_error.h" 
 
 "strategies/tri_arb.cpp"
 "strategies/tri_arb.h"
