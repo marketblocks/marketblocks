@@ -56,7 +56,7 @@ namespace cb
 	{
 	}
 
-	http_service::http_service(http_service&& other)
+	http_service::http_service(http_service&& other) noexcept
 		: easyHandle{ other.easyHandle }
 	{
 		other.easyHandle = nullptr;
@@ -69,7 +69,7 @@ namespace cb
 		return *this;
 	}
 
-	http_service& http_service::operator=(http_service&& other)
+	http_service& http_service::operator=(http_service&& other) noexcept
 	{
 		easyHandle = other.easyHandle;
 

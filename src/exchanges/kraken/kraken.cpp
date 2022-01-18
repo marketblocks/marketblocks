@@ -139,4 +139,9 @@ namespace cb
 
 		return _websocketStream;
 	}
+
+	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)
+	{
+		return std::make_unique<kraken_api>(std::move(config), http_service{}, websocketClient);
+	}
 }

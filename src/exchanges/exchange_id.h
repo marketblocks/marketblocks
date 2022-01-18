@@ -19,5 +19,6 @@ namespace cb
 		exchange_id_lookup();
 
 		const std::unordered_map<std::string, exchange_id>& map() const { return _container; }
+		std::vector<std::string> all_ids() const;
 	};
 }

@@ -69,8 +69,6 @@ add_library(CryptoBot_lib
 "runner/initialise/runner_initialise.cpp"
 "runner/initialise/runner_initialise.h"
 "runner/initialise/strategy_initialiser.h"
-"runner/initialise/exchange_factories.h" 
-"runner/initialise/exchange_factories.cpp" 
 "runner/initialise/configs.cpp" 
 "runner/initialise/configs.h"
 "runner/initialise/initialisation_error.h" 

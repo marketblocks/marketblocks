@@ -65,4 +65,6 @@ namespace cb
 
 		websocket_stream& get_or_connect_websocket() override;
 	};
+
+	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient);
 }

@@ -21,10 +21,10 @@ namespace cb
 		~http_service();
 
 		http_service(const http_service& other);
-		http_service(http_service&& other);
+		http_service(http_service&& other) noexcept;
 
 		http_service& operator=(const http_service& other);
-		http_service& operator=(http_service&& other);
+		http_service& operator=(http_service&& other) noexcept;
 
 		http_response send(const http_request& request) const;
 	};

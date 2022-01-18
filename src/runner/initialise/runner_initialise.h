@@ -12,6 +12,19 @@
 
 namespace cb::internal
 {
+	template<typename Config>
+	Config get_config()
+	{
+		try
+		{
+			return load_or_create_config<Config>();
+		}
+		catch (const cb_exception& e)
+		{
+			throw initialisation_error{ std::format("Error occured reading {0}: {1}", Config::name(), e.what())};
+		}
+	}
+
 	runner_config get_runner_config();
 	trading_options get_trading_options();
 

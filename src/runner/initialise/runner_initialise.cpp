@@ -3,7 +3,6 @@
 
 #include "runner_initialise.h"
 #include "initialisation_error.h"
-#include "exchange_factories.h"
 #include "exchanges/exchange_id.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/exchange_assemblers.h"
@@ -13,35 +12,70 @@
 
 namespace
 {
-	typedef std::shared_ptr<cb::exchange>(*exchange_assembler)(std::unique_ptr<cb::exchange> api);
-	exchange_assembler select_assembler(cb::run_mode runMode)
+	using namespace cb;
+
+	typedef std::shared_ptr<exchange>(*exchange_assembler)(std::unique_ptr<exchange> api);
+	exchange_assembler select_assembler(run_mode runMode)
 	{
 		switch (runMode)
 		{
-			case cb::run_mode::LIVE:
-				return cb::assemble_live;
-			case cb::run_mode::LIVETEST:
-				return cb::assemble_live_test;
+			case run_mode::LIVE:
+				return assemble_live;
+			case run_mode::LIVETEST:
+				return assemble_live_test;
 			default:
-				throw std::invalid_argument("Invalid run mode");
+				throw initialisation_error{ "Run mode not supported" };
 		}
 	}
 
-	std::unique_ptr<cb::exchange> create_api_from_id(const std::string& identifier, const cb::exchange_id_lookup& idLookup, std::shared_ptr<cb::websocket_client> websocketClient)
+	std::unique_ptr<exchange> create_api_from_id(
+		const std::string& identifier,
+		const exchange_id_lookup& idLookup,
+		std::shared_ptr<websocket_client> websocketClient)
 	{
 		auto it = idLookup.map().find(identifier);
 		if (it == idLookup.map().end())
 		{
-			throw std::invalid_argument("Exchange identifier: " + identifier + "not recognised");
+			return nullptr;
 		}
 
-		cb::exchange_id id = it->second;
+		exchange_id id = it->second;
 
 		switch (id)
 		{
-			case cb::exchange_id::KRAKEN:
-				return cb::make_kraken(websocketClient);
+			case exchange_id::KRAKEN:
+			{
+				kraken_config config = internal::get_config<kraken_config>();
+				return make_kraken(std::move(config), websocketClient);
+			}
+			default:
+				return nullptr;
 		}
+	}
+
+	std::vector<std::shared_ptr<cb::exchange>> create_exchanges(
+		const std::vector<std::string>& exchangeIds, 
+		const cb::exchange_id_lookup& idLookup, 
+		const exchange_assembler& assembler,
+		std::shared_ptr<cb::websocket_client> websocketClient)
+	{
+		std::vector<std::shared_ptr<cb::exchange>> exchanges;
+		exchanges.reserve(exchangeIds.size());
+
+		for (auto& exchangeId : exchangeIds)
+		{
+			std::unique_ptr<cb::exchange> api = create_api_from_id(exchangeId, idLookup, websocketClient);
+
+			if (!api)
+			{
+				// log
+				continue;
+			}
+
+			exchanges.emplace_back(assembler(std::move(api)));
+		}
+
+		return exchanges;
 	}
 }
 
@@ -49,28 +83,12 @@ namespace cb::internal
 {
 	runner_config get_runner_config()
 	{
-		try
-		{
-			runner_config config = load_or_create_config<runner_config>();
-			return config;
-		}
-		catch (const cb_exception& e)
-		{
-			throw initialisation_error{ std::format("Error occured reading runner config: {}", e.what()) };
-		}
+		return get_config<runner_config>();
 	}
 
 	trading_options get_trading_options()
 	{
-		try
-		{
-			trading_options options = load_or_create_config<trading_options>();
-			return options;
-		}
-		catch (const cb_exception& e)
-		{
-			throw initialisation_error{ std::format("Error occured reading trading options: {}", e.what()) };
-		}
+		return get_config<trading_options>();
 	}
 
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode)
@@ -80,12 +98,14 @@ namespace cb::internal
 		exchange_assembler assembler = select_assembler(runMode);
 		exchange_id_lookup idLookup;
 
-		for (auto& exchangeId : runnerConfig.exchange_ids())
+		if (runnerConfig.exchange_ids().empty())
 		{
-			std::shared_ptr<exchange> exchange = assembler(create_api_from_id(exchangeId, idLookup, websocketClient));
-			exchanges.push_back(exchange);
+			// log
+			return ::create_exchanges(idLookup.all_ids(), idLookup, assembler, websocketClient);
 		}
-
-		return exchanges;
+		else
+		{
+			return ::create_exchanges(runnerConfig.exchange_ids(), idLookup, assembler, websocketClient);
+		}
 	}
 }

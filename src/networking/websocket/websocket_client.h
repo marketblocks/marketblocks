@@ -19,10 +19,10 @@ namespace cb
 		~websocket_client();
 
 		websocket_client(const websocket_client& other) = delete;
-		websocket_client(websocket_client&& other) = default;
+		websocket_client(websocket_client&& other) noexcept = default;
 
 		websocket_client& operator=(const websocket_client& other) = delete;
-		websocket_client& operator=(websocket_client&& other) = default;
+		websocket_client& operator=(websocket_client&& other) noexcept = default;
 
 		client::connection_ptr get_connection(const std::string& url, std::error_code errorCode)
 		{

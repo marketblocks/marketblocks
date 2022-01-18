@@ -26,10 +26,10 @@ namespace cb
         ~websocket_connection();
 
         websocket_connection(const websocket_connection& other) = delete;
-        websocket_connection(websocket_connection&& other) = default;
+        websocket_connection(websocket_connection&& other) noexcept = default;
 
         websocket_connection& operator=(const websocket_connection& other) = delete;
-        websocket_connection& operator=(websocket_connection&& other) = default;
+        websocket_connection& operator=(websocket_connection&& other) noexcept = default;
 
         void send_message(const std::string& message);
 
