@@ -5,6 +5,7 @@
 
 #include "common/file/file.h"
 #include "common/file/json_wrapper.h"
+#include "logging/logger.h"
 
 namespace cb
 {
@@ -36,6 +37,8 @@ namespace cb
 	{
 		if (!file_exists(Config::name()))
 		{
+			logger::instance().warning("Config file " + Config::name() + "does not exist, using default values");
+
 			Config config = Config::create_default();
 			save_config_file(config);
 

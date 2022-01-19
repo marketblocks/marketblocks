@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include "runner/runner.h"
+#include "logging/logger.h"
 #include "strategies/tri_arb.h"
 
 int main()
@@ -14,7 +15,7 @@ int main()
 	}
 	catch (const cb::initialisation_error& e)
 	{
-		std::cerr << "Initialisation failed: " << e.what() << std::endl;
+		cb::logger::instance().critical("Initialisation failed: {}", e.what());
 		abort();
 	}
 

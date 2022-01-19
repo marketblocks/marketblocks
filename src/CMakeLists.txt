@@ -49,6 +49,9 @@ add_library(CryptoBot_lib
 "exchanges/websockets/order_book_cache.h"  
 "exchanges/websockets/order_book_cache.cpp"
 
+"logging/logger.h"
+"logging/logger.cpp"
+
 "networking/http/http_constants.h"
 "networking/http/http_service.cpp"
 "networking/http/http_service.h"
@@ -100,5 +103,8 @@ target_link_libraries(CryptoBot_lib PRIVATE websocketpp::websocketpp)
 
 find_package(OpenSSL REQUIRED)
 target_link_libraries(CryptoBot_lib PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(CryptoBot_lib PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
 
 target_include_directories (CryptoBot_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

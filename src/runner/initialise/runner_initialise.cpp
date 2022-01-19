@@ -8,6 +8,7 @@
 #include "exchanges/exchange_assemblers.h"
 #include "common/file/file.h"
 #include "common/exceptions/cb_exception.h"
+#include "logging/logger.h"
 #include "networking/websocket/websocket_client.h"
 
 namespace
@@ -53,6 +54,18 @@ namespace
 		}
 	}
 
+	void log_exchange_list(const std::vector<std::string>& exchangeIds, logger& log)
+	{
+		std::string exchangeList;
+
+		for (auto& id : exchangeIds)
+		{
+			exchangeList += "\n" + id;
+		}
+
+		log.info("Found {0} exchange(s):{1}", exchangeIds.size(), exchangeList);
+	}
+
 	std::vector<std::shared_ptr<cb::exchange>> create_exchanges(
 		const std::vector<std::string>& exchangeIds, 
 		const cb::exchange_id_lookup& idLookup, 
@@ -62,16 +75,22 @@ namespace
 		std::vector<std::shared_ptr<cb::exchange>> exchanges;
 		exchanges.reserve(exchangeIds.size());
 
+		logger& log{ logger::instance() };
+		log_exchange_list(exchangeIds, log);
+
 		for (auto& exchangeId : exchangeIds)
 		{
+			log.info("Creating exchange API: {}", exchangeId);
+
 			std::unique_ptr<cb::exchange> api = create_api_from_id(exchangeId, idLookup, websocketClient);
 
 			if (!api)
 			{
-				// log
+				logger::instance().warning("Exchange '{}' is not supported", exchangeId);
 				continue;
 			}
 
+			log.info("{} API created successfully", exchangeId);
 			exchanges.emplace_back(assembler(std::move(api)));
 		}
 
@@ -98,9 +117,11 @@ namespace cb::internal
 		exchange_assembler assembler = select_assembler(runMode);
 		exchange_id_lookup idLookup;
 
+		logger::instance().info("Creating exchange APIs...");
+
 		if (runnerConfig.exchange_ids().empty())
 		{
-			// log
+			logger::instance().warning("No exchanges specified, using all supported exchanges");
 			return ::create_exchanges(idLookup.all_ids(), idLookup, assembler, websocketClient);
 		}
 		else

@@ -9,6 +9,7 @@
 #include "exchanges/exchange.h"
 #include "common/file/config_file_reader.h"
 #include "common/types/result.h"
+#include "logging/logger.h"
 
 namespace cb::internal
 {
@@ -17,7 +18,16 @@ namespace cb::internal
 	{
 		try
 		{
-			return load_or_create_config<Config>();
+			std::string configName{ Config::name() };
+			logger& log{ logger::instance() };
+
+			log.info("Reading config file: {}", configName);
+
+			Config config = load_or_create_config<Config>();
+
+			log.info("{} read successfully", configName);
+
+			return config;
 		}
 		catch (const cb_exception& e)
 		{
