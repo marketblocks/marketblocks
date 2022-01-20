@@ -86,6 +86,13 @@ namespace cb
 		return send_private_request(method, "");
 	}
 
+	exchange_status kraken_api::get_status() const
+	{
+		std::string response = send_public_request(_constants.SYSTEM_STATUS);
+
+		return internal::read_system_status(response);
+	}
+
 	const std::vector<tradable_pair> kraken_api::get_tradable_pairs() const
 	{
 		std::string response = send_public_request(_constants.TRADABLE_PAIRS);

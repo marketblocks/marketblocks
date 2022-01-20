@@ -28,6 +28,7 @@ namespace cb
 			inline static const std::string TRADABLE_PAIRS = "AssetPairs";
 			inline static const std::string ORDER_BOOK = "Depth";
 			inline static const std::string BALANCE = "Balance";
+			inline static const std::string SYSTEM_STATUS = "SystemStatus";
 		};
 	}
 	
@@ -57,6 +58,7 @@ namespace cb
 	public:
 		kraken_api(kraken_config config, http_service httpService, std::shared_ptr<websocket_client> websocketClient);
 
+		exchange_status get_status() const override;
 		const std::vector<tradable_pair> get_tradable_pairs() const override;
 		const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const override;
 		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override;

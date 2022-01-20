@@ -4,15 +4,16 @@
 #include <unordered_map>
 #include <memory>
 
+#include "exchange_id.h"
+#include "exchange_status.h"
+#include "websockets/websocket_stream.h"
+
 #include "trading/tradable_pair.h"
 #include "trading/asset_symbol.h"
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 #include "trading/trade_description.h"
 #include "paper_trading/paper_trader.h"
-
-#include "exchange_id.h"
-#include "exchanges/websockets/websocket_stream.h"
 
 namespace cb
 {
@@ -30,6 +31,7 @@ namespace cb
 
 		exchange_id id() const { return _id; }
 
+		virtual exchange_status get_status() const = 0;
 		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
 		virtual const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const = 0;
 		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
@@ -50,6 +52,11 @@ namespace cb
 		multi_component_exchange(exchange_id id, std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
 			: exchange{ id }, _marketApi{ std::move(dataApi) }, _tradeApi{ std::move(tradeApi) }
 		{}
+
+		exchange_status get_status() const override
+		{
+			return _marketApi->get_status();
+		}
 
 		const std::vector<tradable_pair> get_tradable_pairs() const override
 		{

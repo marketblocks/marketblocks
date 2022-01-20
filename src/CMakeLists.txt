@@ -33,6 +33,8 @@ add_library(CryptoBot_lib
 "exchanges/exchange_id.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
+ "exchanges/exchange_status.cpp"
+ "exchanges/exchange_status.h" 
 
 "exchanges/kraken/kraken.cpp"
 "exchanges/kraken/kraken.h"

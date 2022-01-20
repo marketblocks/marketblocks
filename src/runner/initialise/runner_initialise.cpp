@@ -6,6 +6,7 @@
 #include "exchanges/exchange_id.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/exchange_assemblers.h"
+#include "exchanges/exchange_status.h"
 #include "common/file/file.h"
 #include "common/exceptions/cb_exception.h"
 #include "logging/logger.h"
@@ -90,7 +91,20 @@ namespace
 				continue;
 			}
 
-			log.info("{} API created successfully", exchangeId);
+			log.info("{} API created successfully. Testing connection...", exchangeId);
+
+			exchange_status status = api->get_status();
+			std::string status_string = to_string(status);
+
+			if (status == exchange_status::ONLINE)
+			{
+				log.info("Exchange status: {}", status_string);
+			}
+			else
+			{
+				log.warning("Exchange status: {}", status_string);
+			}
+
 			exchanges.emplace_back(assembler(std::move(api)));
 		}
 

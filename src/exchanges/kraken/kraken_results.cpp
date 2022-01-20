@@ -4,6 +4,31 @@
 
 namespace cb::internal
 {
+	exchange_status read_system_status(const std::string& jsonResult)
+	{
+		json_wrapper json{ jsonResult };
+		auto resultObject = json.document()["result"].GetObject();
+
+		std::string status_string = resultObject["status"].GetString();
+
+		if (status_string == "online")
+		{
+			return exchange_status::ONLINE;
+		}
+		else if (status_string == "cancel_only")
+		{
+			return exchange_status::CANCEL_ONLY;
+		}
+		else if (status_string == "post_only")
+		{
+			return exchange_status::POST_ONLY;
+		}
+		else
+		{
+			return exchange_status::MAINTENANCE;
+		}
+	}
+
 	const std::vector<tradable_pair> read_tradable_pairs(const std::string& jsonResult)
 	{
 		json_wrapper json{ jsonResult };
