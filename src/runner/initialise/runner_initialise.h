@@ -26,7 +26,6 @@ namespace cb::internal
 			Config config = load_or_create_config<Config>();
 
 			log.info("{} read successfully", configName);
-
 			return config;
 		}
 		catch (const cb_exception& e)
@@ -36,7 +35,6 @@ namespace cb::internal
 	}
 
 	runner_config get_runner_config();
-	trading_options get_trading_options();
 
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode);
 }

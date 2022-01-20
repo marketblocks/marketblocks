@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "trading/asset_symbol.h"
+#include "trading/trading_options.h"
 #include "common/file/json_wrapper.h"
 
 namespace cb
@@ -16,9 +17,18 @@ namespace cb
 	{
 	private:
 		std::vector<std::string> _exchangeIds;
+		double _tradePercent;
+		asset_symbol _fiatCurrency;
+
+		static std::vector<std::string> default_exchange_ids() { return std::vector<std::string>{}; }
+		static double default_trade_percent() { return 0.05; }
+		static asset_symbol default_fiat_currency() { return asset_symbol{ "GBP" }; }
 
 	public:
-		explicit runner_config(std::vector<std::string> exchangeIds);
+		explicit runner_config(
+			std::vector<std::string> exchangeIds,
+			double tradePercent,
+			asset_symbol fiatCurrency);
 
 		static runner_config create_default();
 		static std::string name() { return "runnerConfig"; }
@@ -26,26 +36,9 @@ namespace cb
 		std::string serialize() const;
 
 		const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
-
-	};
-
-	class trading_options
-	{
-	private:
-		double _maxTradePercent;
-		asset_symbol _fiatCurrency;
-
-	public:
-		trading_options();
-		explicit trading_options(double maxTradePercent, asset_symbol fiatCurrency);
-
-		static trading_options create_default();
-		static std::string name() { return "tradingOptions"; }
-		static trading_options deserialize(json_wrapper& json);
-		std::string serialize() const;
-
-		double max_trade_percent() const { return _maxTradePercent; }
+		double max_trade_percent() const { return _tradePercent; }
 		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
 
+		trading_options get_trading_options() const;
 	};
 }

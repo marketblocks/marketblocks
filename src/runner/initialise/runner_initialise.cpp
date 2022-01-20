@@ -105,11 +105,6 @@ namespace cb::internal
 		return get_config<runner_config>();
 	}
 
-	trading_options get_trading_options()
-	{
-		return get_config<trading_options>();
-	}
-
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode)
 	{
 		std::vector<std::shared_ptr<exchange>> exchanges;

@@ -1,22 +1,40 @@
 #include "configs.h"
+#include "logging/logger.h"
 
 namespace cb
 {
 	runner_config::runner_config(
-		std::vector<std::string> exchangeIds)
+		std::vector<std::string> exchangeIds,
+		double tradePercent,
+		asset_symbol fiatCurrency)
 		:
-		_exchangeIds{ std::move(exchangeIds) }
+		_exchangeIds{ std::move(exchangeIds) },
+		_tradePercent{ tradePercent },
+		_fiatCurrency{ std::move(fiatCurrency) }
 	{}
 
 	runner_config runner_config::create_default()
 	{
-		return runner_config{ std::vector<std::string>{} };
+		return runner_config
+		{ 
+			default_exchange_ids(),
+			default_trade_percent(),
+			default_fiat_currency()
+		};
 	}
 
 	runner_config runner_config::deserialize(json_wrapper& json)
 	{
 		std::vector<std::string> exchangeIds = json.get_string_array("exchangeIds");
-		return runner_config{ std::move(exchangeIds) };
+		double maxTradePercent = json.document()["maxTradePercent"].GetDouble();
+		asset_symbol fiatCurrency = asset_symbol{ json.document()["fiatCurrency"].GetString() };
+
+		return runner_config
+		{ 
+			std::move(exchangeIds),
+			maxTradePercent,
+			std::move(fiatCurrency)
+		};
 	}
 
 	std::string runner_config::serialize() const
@@ -24,29 +42,12 @@ namespace cb
 		return "";
 	}
 
-	trading_options::trading_options()
-		: _maxTradePercent{ 1.0 }, _fiatCurrency{ "GBP" }
-	{}
-
-	trading_options::trading_options(double maxTradePercent, asset_symbol fiatCurrency)
-		: _maxTradePercent{ maxTradePercent }, _fiatCurrency{ std::move(fiatCurrency) }
-	{}
-
-	trading_options trading_options::create_default()
+	trading_options runner_config::get_trading_options() const
 	{
-		return trading_options{ 0.05, asset_symbol{ "GBP" } };
-	}
-
-	trading_options trading_options::deserialize(json_wrapper& json)
-	{
-		double maxTradePercent = json.document()["maxTradePercent"].GetDouble();
-		asset_symbol fiatCurrency = asset_symbol{ json.document()["fiatCurrency"].GetString() };
-
-		return trading_options{ maxTradePercent, std::move(fiatCurrency) };
-	}
-
-	std::string trading_options::serialize() const
-	{
-		return "";
+		return trading_options
+		{
+			_tradePercent,
+			_fiatCurrency
+		};
 	}
 }

@@ -89,7 +89,9 @@ add_library(CryptoBot_lib
 "trading/tradable_pair.h" 
 "trading/trade_description.h"
 "trading/trade_description.cpp"
-"trading/trading_constants.h")
+"trading/trading_constants.h"
+"trading/trading_options.cpp"
+"trading/trading_options.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(RapidJSON CONFIG REQUIRED)
