@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "common/file/json_wrapper.h"
+#include "common/file/json.h"
 
 namespace cb
 {
@@ -17,7 +17,7 @@ namespace cb
 
 		static kraken_config create_default();
 		static std::string name() { return "krakenConfig"; }
-		static kraken_config deserialize(json_wrapper& json);
+		static kraken_config deserialize(json_document& json);
 		std::string serialize() const;
 
 		const std::string& public_key() const { return _publicKey; }

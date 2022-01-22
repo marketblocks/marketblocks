@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #include "common/file/file.h"
-#include "common/file/json_wrapper.h"
+#include "common/file/json.h"
 #include "logging/logger.h"
 
 namespace cb
@@ -17,11 +17,10 @@ namespace cb
 	Config load_config_file()
 	{
 		std::filesystem::path path = get_path(Config::name());
-		std::string json = cb::read_file(path);
+		std::string jsonString = cb::read_file(path);
+		json_document jsonDocument = parse_json(jsonString);
 
-		cb::json_wrapper wrapper{ json };
-
-		return Config::deserialize(wrapper);
+		return Config::deserialize(jsonDocument);
 	}
 
 	template<typename Config>

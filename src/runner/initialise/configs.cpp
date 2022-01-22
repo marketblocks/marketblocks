@@ -23,11 +23,11 @@ namespace cb
 		};
 	}
 
-	runner_config runner_config::deserialize(json_wrapper& json)
+	runner_config runner_config::deserialize(json_document& json)
 	{
-		std::vector<std::string> exchangeIds = json.get_string_array("exchangeIds");
-		double maxTradePercent = json.document()["maxTradePercent"].GetDouble();
-		asset_symbol fiatCurrency = asset_symbol{ json.document()["fiatCurrency"].GetString() };
+		std::vector<std::string> exchangeIds = json.get<std::vector<std::string>>("exchangeIds");
+		double maxTradePercent = json.get<double>("maxTradePercent");
+		asset_symbol fiatCurrency = asset_symbol{ json.get<std::string>("fiatCurrency") };
 
 		return runner_config
 		{ 

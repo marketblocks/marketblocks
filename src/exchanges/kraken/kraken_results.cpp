@@ -1,15 +1,15 @@
 #include "kraken_results.h"
-#include "common/file/json_wrapper.h"
+#include "common/file/json.h"
 #include "common/utils/stringutils.h"
 
 namespace cb::internal
 {
 	exchange_status read_system_status(const std::string& jsonResult)
 	{
-		json_wrapper json{ jsonResult };
-		auto resultObject = json.document()["result"].GetObject();
+		json_document jsonDocument = parse_json(jsonResult);
+		json_element resultElement = jsonDocument.get<json_element>("result");
 
-		std::string status_string = resultObject["status"].GetString();
+		std::string status_string = resultElement.get<std::string>("status");
 
 		if (status_string == "online")
 		{
@@ -31,15 +31,16 @@ namespace cb::internal
 
 	const std::vector<tradable_pair> read_tradable_pairs(const std::string& jsonResult)
 	{
-		json_wrapper json{ jsonResult };
-		auto resultObject = json.document()["result"].GetObject();
-		std::vector<tradable_pair> pairs;
-		pairs.reserve(resultObject.MemberCount());
+		json_document jsonDocument = parse_json(jsonResult);
+		json_element resultElement = jsonDocument.get<json_element>("result");
 
-		for (auto it = resultObject.MemberBegin(); it != resultObject.MemberEnd(); ++it)
+		std::vector<tradable_pair> pairs;
+		pairs.reserve(resultElement.size());
+
+		for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
 		{
-			std::string name = it->name.GetString();
-			std::string wsName = it->value["wsname"].GetString();
+			std::string name = it.key();
+			std::string wsName = it.value().get<std::string>("wsname");
 			std::vector<std::string> assetSymbols = split(wsName, '/');
 			pairs.emplace_back(name, asset_symbol{ assetSymbols[0] }, asset_symbol{ assetSymbols[1] });
 		}
@@ -49,37 +50,35 @@ namespace cb::internal
 
 	const order_book_state read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
 	{
-		json_wrapper json{ jsonResult };
-
-		auto resultObject = json
-			.document()["result"]
-			.GetObject()
-			.FindMember(pair.exchange_identifier().c_str());
+		json_document jsonDocument = parse_json(jsonResult);
+		json_element resultElement = jsonDocument
+			.get<json_element>("result")
+			.get<json_element>(pair.exchange_identifier());
 
 		std::vector<order_book_level> levels;
 		levels.reserve(depth);
 
-		auto asks = resultObject->value["asks"].GetArray();
-		auto bids = resultObject->value["bids"].GetArray();
+		auto asks = resultElement.get<json_element>("asks");
+		auto bids = resultElement.get<json_element>("bids");
 
 		for (int i = 0; i < depth; i++)
 		{
-			auto asks_i = asks[i].GetArray();
+			json_element asks_i = asks.element(i);
 			order_book_entry askEntry
 			{
 				order_book_side::ASK,
-				std::stod(asks_i[0].GetString()),
-				std::stod(asks_i[1].GetString()),
-				asks_i[2].GetDouble()
+				std::stod(asks_i.element(0).get<std::string>()),
+				std::stod(asks_i.element(1).get<std::string>()),
+				asks_i.element(2).get<double>()
 			};
 
-			auto bids_i = bids[i].GetArray();
+			json_element bids_i = bids.element(i);
 			order_book_entry bidEntry
 			{
 				order_book_side::BID,
-				std::stod(bids_i[0].GetString()),
-				std::stod(bids_i[1].GetString()),
-				bids_i[2].GetDouble()
+				std::stod(bids_i.element(0).get<std::string>()),
+				std::stod(bids_i.element(1).get<std::string>()),
+				bids_i.element(2).get<double>()
 			};
 
 			levels.emplace_back(std::move(askEntry), std::move(bidEntry));

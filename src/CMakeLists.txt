@@ -1,8 +1,8 @@
 ﻿# Add source to this project's executable.
 add_library(CryptoBot_lib 
 
-"common/file/json_wrapper.cpp"
-"common/file/json_wrapper.h"
+"common/file/json.cpp"
+"common/file/json.h"
 "common/file/file.cpp"
 "common/file/file.h"
 "common/file/config_file_reader.cpp" 
@@ -33,8 +33,8 @@ add_library(CryptoBot_lib
 "exchanges/exchange_id.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
- "exchanges/exchange_status.cpp"
- "exchanges/exchange_status.h" 
+"exchanges/exchange_status.cpp"
+"exchanges/exchange_status.h" 
 
 "exchanges/kraken/kraken.cpp"
 "exchanges/kraken/kraken.h"
@@ -93,11 +93,11 @@ add_library(CryptoBot_lib
 "trading/trade_description.cpp"
 "trading/trading_constants.h"
 "trading/trading_options.cpp"
-"trading/trading_options.h")
+"trading/trading_options.h" "common/types/basic_iterator.h"   "common/file/json_iterator.h" "common/file/json_iterator.cpp" "common/types/proxy.h")
 
 # TODO: Add tests and install targets if needed.
-find_package(RapidJSON CONFIG REQUIRED)
-target_link_libraries(CryptoBot_lib PRIVATE rapidjson)
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(CryptoBot_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 
 find_package(CURL CONFIG REQUIRED)
 target_link_libraries(CryptoBot_lib PRIVATE CURL::libcurl)

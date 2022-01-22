@@ -11,10 +11,10 @@ namespace cb
 		return kraken_config{ "", "" };
 	}
 
-	kraken_config kraken_config::deserialize(json_wrapper& json)
+	kraken_config kraken_config::deserialize(json_document& json)
 	{
-		std::string publicKey = json.document()["publicKey"].GetString();
-		std::string privateKey = json.document()["privateKey"].GetString();
+		std::string publicKey = json.get<std::string>("publicKey");
+		std::string privateKey = json.get<std::string>("privateKey");
 
 		return kraken_config{ std::move(publicKey), std::move(privateKey) };
 	}
