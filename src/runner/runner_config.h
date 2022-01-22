@@ -16,29 +16,35 @@ namespace cb
 	class runner_config
 	{
 	private:
+		static const std::vector<std::string> DEFAULT_EXCHANGE_IDS;
+		static const double DEFAULT_TRADE_PERCENT;
+		static const asset_symbol DEFAULT_FIAT_CURRENCY;
+
 		std::vector<std::string> _exchangeIds;
 		double _tradePercent;
 		asset_symbol _fiatCurrency;
 
-		static std::vector<std::string> default_exchange_ids() { return std::vector<std::string>{}; }
-		static double default_trade_percent() { return 0.05; }
-		static asset_symbol default_fiat_currency() { return asset_symbol{ "GBP" }; }
+		void validate();
 
 	public:
+		runner_config();
 		explicit runner_config(
 			std::vector<std::string> exchangeIds,
 			double tradePercent,
 			asset_symbol fiatCurrency);
 
-		static runner_config create_default();
 		static std::string name() { return "runnerConfig"; }
-		static runner_config deserialize(json_document& json);
-		std::string serialize() const;
-
+		
 		const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
 		double max_trade_percent() const { return _tradePercent; }
 		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
 
 		trading_options get_trading_options() const;
 	};
+
+	template<>
+	runner_config from_json(const json_document& json);
+
+	template<>
+	json_document to_json(const runner_config& config);
 }

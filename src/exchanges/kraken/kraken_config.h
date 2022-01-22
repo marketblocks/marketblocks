@@ -12,15 +12,21 @@ namespace cb
 		std::string _publicKey;
 		std::string _privateKey;
 
+		void validate();
+
 	public:
+		kraken_config();
 		kraken_config(std::string publicKey, std::string privateKey);
 
-		static kraken_config create_default();
 		static std::string name() { return "krakenConfig"; }
-		static kraken_config deserialize(json_document& json);
-		std::string serialize() const;
 
 		const std::string& public_key() const { return _publicKey; }
 		const std::string& private_key() const { return _privateKey; }
 	};
+
+	template<>
+	kraken_config from_json<kraken_config>(const json_document& json);
+
+	template<>
+	json_document to_json<kraken_config>(const kraken_config& config);
 }

@@ -14,6 +14,7 @@ public:
 	{}
 
 	T& value() { return _value; }
+	const T& value() const { return _value; }
 };
 
 template<typename T>
@@ -28,4 +29,5 @@ public:
 	{}
 
 	T& value() { return _value; }
+	const T& value() const { return _value; }
 };

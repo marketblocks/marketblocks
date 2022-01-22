@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "configs.h"
+#include "trading/trading_options.h"
 #include "exchanges/exchange.h"
 
 namespace cb

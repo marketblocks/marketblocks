@@ -20,14 +20,14 @@ namespace cb
 		std::string jsonString = cb::read_file(path);
 		json_document jsonDocument = parse_json(jsonString);
 
-		return Config::deserialize(jsonDocument);
+		return from_json<Config>(jsonDocument);
 	}
 
 	template<typename Config>
 	void save_config_file(const Config& jsonObject)
 	{
 		std::filesystem::path path = get_path(Config::name());
-		std::string json = jsonObject.serialize();
+		std::string json = to_json(jsonObject).to_string();
 		cb::write_to_file(path, json);
 	}
 
@@ -36,10 +36,19 @@ namespace cb
 	{
 		if (!file_exists(Config::name()))
 		{
-			logger::instance().warning("Config file " + Config::name() + "does not exist, using default values");
+			logger& log{ logger::instance() };
+			log.warning("Config file " + Config::name() + "does not exist, using default values");
 
-			Config config = Config::create_default();
-			save_config_file(config);
+			Config config;
+
+			try
+			{
+				save_config_file(config);
+			}
+			catch (const std::exception& e)
+			{
+				log.error("Error occurred saving config file: {}", e.what());
+			}
 
 			return config;
 		}

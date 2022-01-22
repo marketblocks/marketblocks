@@ -23,7 +23,7 @@ namespace cb
 		return _iter.key();
 	}
 
-	json_element json_iterator::value()
+	const json_element json_iterator::value() const
 	{
 		return json_element{ reference_proxy{ *_iter } };
 	}

@@ -130,7 +130,6 @@ namespace cb::internal
 
 		if (runnerConfig.exchange_ids().empty())
 		{
-			logger::instance().warning("No exchanges specified, using all supported exchanges");
 			return ::create_exchanges(idLookup.all_ids(), idLookup, assembler, websocketClient);
 		}
 		else

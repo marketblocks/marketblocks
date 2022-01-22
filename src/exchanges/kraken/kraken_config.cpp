@@ -1,17 +1,36 @@
 #include "kraken_config.h"
+#include "logging/logger.h"
+#include "common/exceptions/not_implemented_exception.h"
 
 namespace cb
 {
 	kraken_config::kraken_config(std::string publicKey, std::string privateKey)
 		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
-	{}
-
-	kraken_config kraken_config::create_default()
 	{
-		return kraken_config{ "", "" };
+		validate();
 	}
 
-	kraken_config kraken_config::deserialize(json_document& json)
+	kraken_config::kraken_config()
+		: kraken_config{ "", "" }
+	{}
+
+	void kraken_config::validate()
+	{
+		logger& log{ logger::instance() };
+
+		if (_publicKey.empty())
+		{
+			log.warning("Authentication public key is empty, authenticated endpoints will be unavailable");
+		}
+
+		if (_privateKey.empty())
+		{
+			log.warning("Authentication private key is empty, authenticated endpoints will be unavailable");
+		}
+	}
+
+	template<>
+	kraken_config from_json(const json_document& json)
 	{
 		std::string publicKey = json.get<std::string>("publicKey");
 		std::string privateKey = json.get<std::string>("privateKey");
@@ -19,8 +38,9 @@ namespace cb
 		return kraken_config{ std::move(publicKey), std::move(privateKey) };
 	}
 
-	std::string kraken_config::serialize() const
+	template<>
+	json_document to_json(const kraken_config& config)
 	{
-		return "";
+		throw not_implemented_exception{ "kraken_config::to_json" };
 	}
 }

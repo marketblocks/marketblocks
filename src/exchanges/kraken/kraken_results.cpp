@@ -7,7 +7,7 @@ namespace cb::internal
 	exchange_status read_system_status(const std::string& jsonResult)
 	{
 		json_document jsonDocument = parse_json(jsonResult);
-		json_element resultElement = jsonDocument.get<json_element>("result");
+		json_element resultElement = jsonDocument.element("result");
 
 		std::string status_string = resultElement.get<std::string>("status");
 
@@ -32,7 +32,7 @@ namespace cb::internal
 	const std::vector<tradable_pair> read_tradable_pairs(const std::string& jsonResult)
 	{
 		json_document jsonDocument = parse_json(jsonResult);
-		json_element resultElement = jsonDocument.get<json_element>("result");
+		json_element resultElement = jsonDocument.element("result");
 
 		std::vector<tradable_pair> pairs;
 		pairs.reserve(resultElement.size());
@@ -52,14 +52,14 @@ namespace cb::internal
 	{
 		json_document jsonDocument = parse_json(jsonResult);
 		json_element resultElement = jsonDocument
-			.get<json_element>("result")
-			.get<json_element>(pair.exchange_identifier());
+			.element("result")
+			.element(pair.exchange_identifier());
 
 		std::vector<order_book_level> levels;
 		levels.reserve(depth);
 
-		auto asks = resultElement.get<json_element>("asks");
-		auto bids = resultElement.get<json_element>("bids");
+		auto asks = resultElement.element("asks");
+		auto bids = resultElement.element("bids");
 
 		for (int i = 0; i < depth; i++)
 		{

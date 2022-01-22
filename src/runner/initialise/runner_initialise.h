@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "configs.h"
+#include "runner/runner_config.h"
 #include "strategy_initialiser.h"
 #include "initialisation_error.h"
 #include "exchanges/exchange.h"
@@ -16,21 +16,22 @@ namespace cb::internal
 	template<typename Config>
 	Config get_config()
 	{
+		logger& log{ logger::instance() };
+		std::string configName{ Config::name() };
+
+		log.info("Reading config file: {}", configName);
+
 		try
 		{
-			std::string configName{ Config::name() };
-			logger& log{ logger::instance() };
-
-			log.info("Reading config file: {}", configName);
-
 			Config config = load_or_create_config<Config>();
 
 			log.info("{} read successfully", configName);
 			return config;
 		}
-		catch (const cb_exception& e)
+		catch (const std::exception& e)
 		{
-			throw initialisation_error{ std::format("Error occured reading {0}: {1}", Config::name(), e.what())};
+			log.error("Error occurred reading {0}: {1}, using default values", configName, e.what());
+			return Config{};
 		}
 	}
 

@@ -8,12 +8,12 @@ namespace cb
 	template <typename proxy>
 	class json;
 
-	typedef json<reference_proxy<nlohmann::json>> json_element;
+	typedef json<reference_proxy<const nlohmann::json>> json_element;
 
 	class json_iterator
 	{
 	private:
-		using iterator = nlohmann::detail::iter_impl<nlohmann::json>;
+		using iterator = nlohmann::detail::iter_impl<const nlohmann::json>;
 		iterator _iter;
 
 	public:
@@ -22,6 +22,6 @@ namespace cb
 		json_iterator operator++();
 		bool operator!=(const json_iterator& other) const;
 		const std::string& key() const;
-		json_element value();
+		const json_element value() const;
 	};
 }

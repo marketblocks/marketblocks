@@ -74,8 +74,8 @@ add_library(CryptoBot_lib
 "runner/initialise/runner_initialise.cpp"
 "runner/initialise/runner_initialise.h"
 "runner/initialise/strategy_initialiser.h"
-"runner/initialise/configs.cpp" 
-"runner/initialise/configs.h"
+"runner/runner_config.cpp" 
+"runner/runner_config.h"
 "runner/initialise/initialisation_error.h" 
 
 "strategies/tri_arb.cpp"
