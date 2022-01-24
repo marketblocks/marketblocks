@@ -28,5 +28,5 @@ namespace cb
 	kraken_config from_json<kraken_config>(const json_document& json);
 
 	template<>
-	json_document to_json<kraken_config>(const kraken_config& config);
+	void to_json<kraken_config>(const kraken_config& config, json_writer& writer);
 }

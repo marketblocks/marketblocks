@@ -77,6 +77,24 @@ namespace cb
 		}
 	};
 
+	class json_writer
+	{
+	private:
+		nlohmann::json _document;
+
+	public:
+		template<typename T>
+		void add(const std::string& propertyName, T value)
+		{
+			_document[propertyName] = std::move(value);
+		}
+
+		std::string to_string() const
+		{
+			return _document.dump();
+		}
+	};
+
 	json_document parse_json(const std::string& jsonString);
 
 	template<typename T>
@@ -86,8 +104,22 @@ namespace cb
 	}
 
 	template<typename T>
-	json_document to_json(const T& t)
+	T from_json(const std::string& json)
+	{
+		return from_json<T>(parse_json(json));
+	}
+
+	template<typename T>
+	void to_json(const T& t, json_writer& writer)
 	{
 		static_assert(sizeof(T) == 0, "No specialization of to_json found");
+	}
+
+	template<typename T>
+	std::string to_json(const T& t)
+	{
+		json_writer writer;
+		to_json<T>(t, writer);
+		return writer.to_string();
 	}
 }

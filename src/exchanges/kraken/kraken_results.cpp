@@ -6,10 +6,10 @@ namespace cb::internal
 {
 	exchange_status read_system_status(const std::string& jsonResult)
 	{
-		json_document jsonDocument = parse_json(jsonResult);
-		json_element resultElement = jsonDocument.element("result");
+		json_document jsonDocument{ parse_json(jsonResult) };
+		json_element resultElement{ jsonDocument.element("result") };
 
-		std::string status_string = resultElement.get<std::string>("status");
+		std::string status_string{ resultElement.get<std::string>("status") };
 
 		if (status_string == "online")
 		{
@@ -31,17 +31,17 @@ namespace cb::internal
 
 	const std::vector<tradable_pair> read_tradable_pairs(const std::string& jsonResult)
 	{
-		json_document jsonDocument = parse_json(jsonResult);
-		json_element resultElement = jsonDocument.element("result");
+		json_document jsonDocument{ parse_json(jsonResult) };
+		json_element resultElement{ jsonDocument.element("result") };
 
 		std::vector<tradable_pair> pairs;
 		pairs.reserve(resultElement.size());
 
 		for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
 		{
-			std::string name = it.key();
-			std::string wsName = it.value().get<std::string>("wsname");
-			std::vector<std::string> assetSymbols = split(wsName, '/');
+			std::string name{ it.key() };
+			std::string wsName{ it.value().get<std::string>("wsname") };
+			std::vector<std::string> assetSymbols{ split(wsName, '/') };
 			pairs.emplace_back(name, asset_symbol{ assetSymbols[0] }, asset_symbol{ assetSymbols[1] });
 		}
 
@@ -50,20 +50,20 @@ namespace cb::internal
 
 	const order_book_state read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
 	{
-		json_document jsonDocument = parse_json(jsonResult);
-		json_element resultElement = jsonDocument
+		json_document jsonDocument{ parse_json(jsonResult) };
+		json_element resultElement{ jsonDocument
 			.element("result")
-			.element(pair.exchange_identifier());
+			.element(pair.exchange_identifier()) };
 
 		std::vector<order_book_level> levels;
 		levels.reserve(depth);
 
-		auto asks = resultElement.element("asks");
-		auto bids = resultElement.element("bids");
+		json_element asks{ resultElement.element("asks") };
+		json_element bids{ resultElement.element("bids") };
 
 		for (int i = 0; i < depth; i++)
 		{
-			json_element asks_i = asks.element(i);
+			json_element asks_i{ asks.element(i) };
 			order_book_entry askEntry
 			{
 				order_book_side::ASK,
@@ -72,7 +72,7 @@ namespace cb::internal
 				asks_i.element(2).get<double>()
 			};
 
-			json_element bids_i = bids.element(i);
+			json_element bids_i{ bids.element(i) };
 			order_book_entry bidEntry
 			{
 				order_book_side::BID,

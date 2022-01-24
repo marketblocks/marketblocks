@@ -36,7 +36,7 @@ namespace cb
 		static std::string name() { return "runnerConfig"; }
 		
 		const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
-		double max_trade_percent() const { return _tradePercent; }
+		double trade_percent() const { return _tradePercent; }
 		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
 
 		trading_options get_trading_options() const;
@@ -46,5 +46,5 @@ namespace cb
 	runner_config from_json(const json_document& json);
 
 	template<>
-	json_document to_json(const runner_config& config);
+	void to_json(const runner_config& config, json_writer& writer);
 }

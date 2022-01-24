@@ -45,6 +45,13 @@ namespace cb
 
 	void write_to_file(const std::filesystem::path& path, const std::string& content)
 	{
-		throw not_implemented_exception{"write_to_file"};
+		file_handler handler = file_handler::write(path);
+
+		handler.stream() << content;
+
+		if (!handler.stream().good())
+		{
+			throw cb_exception{ strerror(errno) };
+		}
 	}
 }

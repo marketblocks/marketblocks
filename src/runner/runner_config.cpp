@@ -2,6 +2,16 @@
 #include "logging/logger.h"
 #include "common/exceptions/not_implemented_exception.h"
 
+namespace
+{
+	namespace json_property_names
+	{
+		const std::string exchange_ids() { return "exchangeIds"; }
+		const std::string trade_percent() { return "tradePercent"; }
+		const std::string fiat_currency() { return "fiatCurrency"; }
+	}
+}
+
 namespace cb
 {
 	const std::vector<std::string> runner_config::DEFAULT_EXCHANGE_IDS = std::vector<std::string>{};
@@ -60,9 +70,9 @@ namespace cb
 	template<>
 	runner_config from_json(const json_document& json)
 	{
-		std::vector<std::string> exchangeIds = json.get<std::vector<std::string>>("exchangeIds");
-		double maxTradePercent = json.get<double>("maxTradePercent");
-		asset_symbol fiatCurrency = asset_symbol{ json.get<std::string>("fiatCurrency") };
+		std::vector<std::string> exchangeIds = json.get<std::vector<std::string>>(json_property_names::exchange_ids());
+		double maxTradePercent = json.get<double>(json_property_names::trade_percent());
+		asset_symbol fiatCurrency = asset_symbol{ json.get<std::string>(json_property_names::fiat_currency()) };
 
 		return runner_config
 		{
@@ -73,8 +83,10 @@ namespace cb
 	}
 
 	template<>
-	json_document to_json(const runner_config& config)
+	void to_json(const runner_config& config, json_writer& writer)
 	{
-		throw not_implemented_exception{ "runner_config::to_json" };
+		writer.add(json_property_names::exchange_ids(), config.exchange_ids());
+		writer.add(json_property_names::trade_percent(), config.trade_percent());
+		writer.add(json_property_names::fiat_currency(), config.fiat_currency().get());
 	}
 }

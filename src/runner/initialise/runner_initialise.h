@@ -25,7 +25,7 @@ namespace cb::internal
 		{
 			Config config = load_or_create_config<Config>();
 
-			log.info("{} read successfully", configName);
+			log.info("{} created successfully", configName);
 			return config;
 		}
 		catch (const std::exception& e)

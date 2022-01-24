@@ -18,16 +18,15 @@ namespace cb
 	{
 		std::filesystem::path path = get_path(Config::name());
 		std::string jsonString = cb::read_file(path);
-		json_document jsonDocument = parse_json(jsonString);
 
-		return from_json<Config>(jsonDocument);
+		return from_json<Config>(jsonString);
 	}
 
 	template<typename Config>
-	void save_config_file(const Config& jsonObject)
+	void save_config_file(const Config& config)
 	{
 		std::filesystem::path path = get_path(Config::name());
-		std::string json = to_json(jsonObject).to_string();
+		std::string json = to_json(config);
 		cb::write_to_file(path, json);
 	}
 
@@ -37,7 +36,7 @@ namespace cb
 		if (!file_exists(Config::name()))
 		{
 			logger& log{ logger::instance() };
-			log.warning("Config file " + Config::name() + "does not exist, using default values");
+			log.warning("Config file " + Config::name() + " does not exist, using default values");
 
 			Config config;
 
