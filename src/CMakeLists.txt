@@ -3,6 +3,8 @@ add_library(CryptoBot_lib
 
 "common/file/json.cpp"
 "common/file/json.h"
+"common/file/json_iterator.cpp"
+"common/file/json_iterator.h" 
 "common/file/file.cpp"
 "common/file/file.h"
 "common/file/config_file_reader.cpp" 
@@ -25,6 +27,7 @@ add_library(CryptoBot_lib
 "common/exceptions/not_implemented_exception.h" 
 
 "common/types/result.h"
+"common/types/basic_iterator.h" 
 
 "exchanges/exchange.h"
 "exchanges/exchange_assemblers.cpp"  
@@ -93,7 +96,7 @@ add_library(CryptoBot_lib
 "trading/trade_description.cpp"
 "trading/trading_constants.h"
 "trading/trading_options.cpp"
-"trading/trading_options.h" "common/types/basic_iterator.h"   "common/file/json_iterator.h" "common/file/json_iterator.cpp" "common/types/proxy.h")
+"trading/trading_options.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

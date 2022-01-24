@@ -25,6 +25,6 @@ namespace cb
 
 	const json_element json_iterator::value() const
 	{
-		return json_element{ reference_proxy{ *_iter } };
+		return json_element{ *_iter };
 	}
 }

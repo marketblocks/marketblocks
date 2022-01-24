@@ -7,73 +7,65 @@
 #include <format>
 
 #include "json_iterator.h"
-#include "common/types/proxy.h"
-#include "common/exceptions/not_implemented_exception.h"
 
 namespace cb
 {
-	typedef json<value_proxy<const nlohmann::json>> json_document;
-	typedef json<reference_proxy<const nlohmann::json>> json_element;
+	typedef json<nlohmann::json> json_document;
+	typedef json<const nlohmann::json&> json_element;
 
-	template<typename json_proxy>
+	template<typename json_object>
 	class json
 	{
 	private:
 		friend json_iterator;
 
-		json_proxy _proxy;
-
-		template<typename Accessor>
-		const json_element get_element(const Accessor& accessor) const
-		{
-			return json_element{ reference_proxy{ _proxy.value()[accessor] } };
-		}
+		json_object _json;
 
 	public:
-		explicit json(json_proxy&& proxy)
-			: _proxy{ std::forward<json_proxy>(proxy) }
+		explicit json(json_object&& object)
+			: _json( std::forward<json_object>(object) )
 		{}
 
 		template<typename T>
-		const T get(const std::string& paramName) const
+		T get(const std::string& paramName) const
 		{
-			return _proxy.value()[paramName].get<T>();
+			return _json[paramName].get<T>();
 		}
 
 		template<typename T>
-		const T get() const
+		T get() const
 		{
-			return _proxy.value().get<T>();
+			return _json.get<T>();
 		}
 
 		const json_element element(const std::string& paramName) const
 		{
-			return get_element(paramName);
+			return json_element{ _json[paramName] };
 		}
 
 		const json_element element(int index) const
 		{
-			return get_element(index);
+			return json_element{ _json[index] };
 		}
 
 		size_t size() const
 		{
-			return _proxy.value().size();
+			return _json.size();
 		}
 
 		std::string to_string() const
 		{
-			return _proxy.value().dump();
+			return _json.dump();
 		}
 
 		json_iterator begin() const
 		{
-			return json_iterator{ _proxy.value().begin() };
+			return json_iterator{ _json.begin() };
 		}
 
 		json_iterator end() const
 		{
-			return json_iterator{ _proxy.value().end() };
+			return json_iterator{ _json.end() };
 		}
 	};
 

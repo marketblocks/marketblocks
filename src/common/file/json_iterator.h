@@ -1,14 +1,13 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
-#include "common/types/proxy.h"
 
 namespace cb
 {
 	template <typename proxy>
 	class json;
 
-	typedef json<reference_proxy<const nlohmann::json>> json_element;
+	typedef json<const nlohmann::json&> json_element;
 
 	class json_iterator
 	{
