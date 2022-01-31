@@ -8,11 +8,12 @@ namespace cb
 	class kraken_websocket_stream : public websocket_stream
 	{
 	private:
+		void process_order_book_message(const json_document& json);
+		void process_order_book_object(const std::string& pair, const json_element& json);
+		void process_order_book_initialisation(const std::string& pair, const json_element& json);
+
 		void process_event_message(const json_document& json);
 		void process_update_message(const json_document& json);
-
-		//void process_order_book_message(const rapidjson::GenericArray<false, rapidjson::Value>& messageObject);
-		//void process_order_book_object(const std::string& pair, const rapidjson::GenericObject<false, rapidjson::Value>& object);
 
 	protected:
 		std::string stream_url() const override { return "wss://ws.kraken.com"; }

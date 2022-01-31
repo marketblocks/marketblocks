@@ -20,7 +20,14 @@ namespace cb
 
 	const std::string& json_iterator::key() const
 	{
-		return _iter.key();
+		try
+		{
+			return _iter.key();
+		}
+		catch (nlohmann::detail::invalid_iterator)
+		{
+			return "";
+		}
 	}
 
 	const json_element json_iterator::value() const

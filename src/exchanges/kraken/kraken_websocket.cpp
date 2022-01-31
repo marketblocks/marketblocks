@@ -33,6 +33,31 @@ namespace
 		else
 			return cb::exchange_status::OFFLINE;
 	}
+
+	cb::order_book_side get_order_book_side(const std::string sideId)
+	{
+		return sideId.contains("a") 
+			? cb::order_book_side::ASK
+			: cb::order_book_side::BID;
+	}
+
+	cb::cache_entry get_order_book_cache_entry(cb::order_book_side side, const cb::json_element& json)
+	{
+		std::string price = json.element(0).get<std::string>();
+		cb::order_book_entry entry
+		{
+			side,
+			std::stod(price),
+			std::stod(json.element(1).get<std::string>()),
+			std::stod(json.element(2).get<std::string>())
+		};
+
+		return cb::cache_entry
+		{
+			std::move(price),
+			std::move(entry)
+		};
+	}
 }
 
 namespace cb
@@ -67,15 +92,104 @@ namespace cb
 		}
 	}
 
+	void kraken_websocket_stream::process_order_book_message(const json_document& json)
+	{
+		if (json.size() == 4)
+		{
+			std::string pair = json.element(3).get<std::string>();
+			json_element entryObject = json.element(1);
+
+			if (is_order_book_subscribed(pair))
+			{
+				process_order_book_object(pair, std::move(entryObject));
+			}
+			else
+			{
+				process_order_book_initialisation(pair, std::move(entryObject));
+			}
+		}
+		else
+		{
+			std::string pair = json.element(4).get<std::string>();
+			process_order_book_object(pair, json.element(1));
+			process_order_book_object(pair, json.element(2));
+		}
+	}
+
+	void kraken_websocket_stream::process_order_book_initialisation(const std::string& pair, const json_element& json)
+	{
+		json_element asks = json.element("as");
+		json_element bids = json.element("bs");
+
+		int depth = asks.size();
+
+		std::vector<cache_entry> askEntries;
+		askEntries.reserve(depth);
+
+		std::vector<cache_entry> bidEntries;
+		bidEntries.reserve(depth);
+
+		for (int i = 0; i < depth; ++i)
+		{
+			askEntries.emplace_back(get_order_book_cache_entry(order_book_side::ASK, asks.element(i)));
+			bidEntries.emplace_back(get_order_book_cache_entry(order_book_side::BID, bids.element(i)));
+		}
+
+		initialise_order_book_cache(pair, std::move(askEntries), std::move(bidEntries));
+	}
+
+	void kraken_websocket_stream::process_order_book_object(const std::string& pair, const json_element& json)
+	{
+		json_iterator first = json.begin();
+		std::string entrySideId = first.key();
+		json_element element = first.value();
+
+		order_book_side side = get_order_book_side(entrySideId); 
+		bool replace = false;
+		std::string priceToReplace;
+
+		for (auto entryIterator = element.begin(); entryIterator != element.end(); ++entryIterator)
+		{
+			json_element entryJson = entryIterator.value();
+			cache_entry cacheEntry = get_order_book_cache_entry(side, entryJson);
+
+			if (cacheEntry.entry.volume() == 0.0)
+			{
+				replace = true;
+				priceToReplace = std::move(cacheEntry.price);
+				continue;
+			}
+
+			if (replace)
+			{
+				cache_replacement replacement
+				{
+					priceToReplace,
+					std::move(cacheEntry.price),
+					std::move(cacheEntry.entry)
+				};
+
+				replace_in_order_book_cache(pair, std::move(replacement));
+			}
+			else
+			{
+				update_order_book_cache(pair, cacheEntry);
+			}
+		}
+	}
+
 	void kraken_websocket_stream::process_update_message(const json_document& json)
 	{
+		std::string channelName = json.element(json.size() - 2).get<std::string>();
 
+		if (channelName.contains("book"))
+		{
+			process_order_book_message(json);
+		}
 	}
 
 	void kraken_websocket_stream::on_message(const std::string& message)
 	{
-		//std::cout << message << std::endl;
-
 		json_document json = parse_json(message);
 		json_value_type type = json.type();
 
@@ -87,24 +201,6 @@ namespace cb
 		{
 			process_update_message(json);
 		}
-
-		//if (json.document().IsObject())
-		//{
-		//	//std::cout << message << std::endl;
-		//	return;
-		//}
-
-		//auto messageArray = json.GetArray();
-
-		//std::string channelName = messageArray[messageArray.Size() - 2].GetString();
-		//if (channelName.contains("book"))
-		//{
-		//	process_order_book_message(messageArray);
-		//}
-		//else
-		//{
-
-		//}
 	}
 
 	//void kraken_websocket_stream::process_order_book_message(const rapidjson::GenericArray<false, rapidjson::Value>& messageObject)

@@ -49,6 +49,34 @@ namespace cb
 		logger::instance().warning("Websocket stream status changed. New status: {}", to_string(newStatus));
 	}
 
+	bool websocket_stream::is_order_book_subscribed(const std::string& pair)
+	{
+		return _orderBookCaches.contains(pair);
+	}
+
+	void websocket_stream::initialise_order_book_cache(const std::string& pair, std::vector<cache_entry> asks, std::vector<cache_entry> bids)
+	{
+		_orderBookCaches.emplace(pair, order_book_cache{ std::move(asks), std::move(bids) });
+	}
+
+	void websocket_stream::update_order_book_cache(const std::string& pair, cache_entry cacheEntry)
+	{
+		auto cacheIterator = _orderBookCaches.find(pair);
+		if (cacheIterator != _orderBookCaches.end())
+		{
+			cacheIterator->second.cache(std::move(cacheEntry));
+		}
+	}
+
+	void websocket_stream::replace_in_order_book_cache(const std::string& pair, cache_replacement cacheReplacement)
+	{
+		auto cacheIterator = _orderBookCaches.find(pair);
+		if (cacheIterator != _orderBookCaches.end())
+		{
+			cacheIterator->second.replace(std::move(cacheReplacement));
+		}
+	}
+
 	order_book_state websocket_stream::get_order_book_snapshot(const tradable_pair& tradablePair) const
 	{
 		CB_ASSERT_CONNECTION_EXISTS(_connection);

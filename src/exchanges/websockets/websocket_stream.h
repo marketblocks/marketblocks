@@ -20,6 +20,11 @@ namespace cb
 		void send_message(const std::string& message) const;
 		void log_status_change(exchange_status newStatus);
 
+		bool is_order_book_subscribed(const std::string& pair);
+		void initialise_order_book_cache(const std::string& pair, std::vector<cache_entry> asks, std::vector<cache_entry> bids);
+		void update_order_book_cache(const std::string& pair, cache_entry cacheEntry);
+		void replace_in_order_book_cache(const std::string& pair, cache_replacement cacheReplacement);
+
 		virtual std::string stream_url() const = 0;
 		virtual void on_message(const std::string& message) = 0;
 

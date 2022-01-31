@@ -59,6 +59,11 @@ namespace cb
 			return json_element{ _json[index] };
 		}
 
+		bool has_member(const std::string& paramName) const
+		{
+			return _json.contains(paramName);
+		}
+
 		size_t size() const
 		{
 			return _json.size();

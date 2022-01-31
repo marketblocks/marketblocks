@@ -12,12 +12,25 @@ namespace
 			map.erase(--end);
 		}
 	}
+
+	template<typename OrderBookMap>
+	OrderBookMap create_map(std::vector<cb::cache_entry>& entries)
+	{
+		OrderBookMap map;
+
+		for (auto& cacheEntry : entries)
+		{
+			map.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
+		}
+
+		return map;
+	}
 }
 
 namespace cb
 {
-	order_book_cache::order_book_cache(int depth)
-		: _depth{ depth }, _asks{}, _bids{}, _mutex{}
+	order_book_cache::order_book_cache(std::vector<cache_entry> asks, std::vector<cache_entry> bids)
+		: _depth{ static_cast<int>(asks.size()) }, _asks{ create_map<cb::ask_map>(asks) }, _bids{ create_map<cb::bid_map>(bids) }, _mutex{}
 	{}
 
 	order_book_cache::order_book_cache(const order_book_cache& other)
@@ -47,35 +60,35 @@ namespace cb
 		return *this;
 	}
 
-	void order_book_cache::cache(std::string price, order_book_entry entry)
+	void order_book_cache::cache(cache_entry cacheEntry)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		if (entry.side() == order_book_side::ASK)
+		if (cacheEntry.entry.side() == order_book_side::ASK)
 		{
-			_asks.emplace(std::move(price), std::move(entry));
+			_asks.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 			ensure_depth(_asks, _depth);
 		}
 		else
 		{
-			_bids.emplace(std::move(price), std::move(entry));
+			_bids.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 			ensure_depth(_bids, _depth);
 		}
 	}
 
-	void order_book_cache::replace(const std::string& oldPrice, std::string newPrice, order_book_entry newEntry)
+	void order_book_cache::replace(cache_replacement cacheReplacement)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		if (newEntry.side() == order_book_side::ASK)
+		if (cacheReplacement.newEntry.side() == order_book_side::ASK)
 		{
-			_asks.erase(oldPrice);
-			_asks.emplace(std::move(newPrice), std::move(newEntry));
+			_asks.erase(cacheReplacement.oldPrice);
+			_asks.emplace(std::move(cacheReplacement.newPrice), std::move(cacheReplacement.newEntry));
 		}
 		else
 		{
-			_bids.erase(oldPrice);
-			_bids.emplace(std::move(newPrice), std::move(newEntry));
+			_bids.erase(cacheReplacement.oldPrice);
+			_bids.emplace(std::move(cacheReplacement.newPrice), std::move(cacheReplacement.newEntry));
 		}
 	}
 
