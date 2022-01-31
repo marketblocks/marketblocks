@@ -12,6 +12,7 @@ namespace cb
 		{
 			map.emplace(keySelector(item), valueSelector(item));
 		}
+
 		return map;
 	}
 

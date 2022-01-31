@@ -21,10 +21,10 @@ namespace cb
 		order_book_cache(int depth);
 
 		order_book_cache(const order_book_cache&);
-		order_book_cache(order_book_cache&&);
+		order_book_cache(order_book_cache&&) noexcept;
 
 		order_book_cache& operator=(const order_book_cache&);
-		order_book_cache& operator=(order_book_cache&&);
+		order_book_cache& operator=(order_book_cache&&) noexcept;
 
 		void cache(std::string price, order_book_entry entry);
 		void replace(const std::string& oldPrice, std::string newPrice, order_book_entry newEntry);

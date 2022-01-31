@@ -24,7 +24,7 @@ namespace cb
 		: _depth{ other._depth }, _asks{ other._asks }, _bids{ other._bids }, _mutex{}
 	{}
 
-	order_book_cache::order_book_cache(order_book_cache&& other)
+	order_book_cache::order_book_cache(order_book_cache&& other) noexcept
 		: _depth{ std::move(other._depth) }, _asks{ std::move(other._asks) }, _bids{ std::move(other._bids) }
 	{
 	}
@@ -38,7 +38,7 @@ namespace cb
 		return *this;
 	}
 
-	order_book_cache& order_book_cache::operator=(order_book_cache&& other)
+	order_book_cache& order_book_cache::operator=(order_book_cache&& other) noexcept
 	{
 		_depth = std::move(other._depth);
 		_asks = std::move(other._asks);

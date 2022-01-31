@@ -6,19 +6,19 @@
 #include "networking/url.h"
 #include "common/utils/stringutils.h"
 #include "common/utils/containerutils.h"
+#include "common/utils/timeutils.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 
 namespace cb
 {
-	kraken_api::kraken_api(kraken_config config, http_service httpService, std::shared_ptr<websocket_client> websocketClient)
+	kraken_api::kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream)
 		: exchange{ exchange_id::KRAKEN },
 		_constants{},
 		_publicKey{ config.public_key() },
 		_decodedPrivateKey{ b64_decode(config.private_key()) },
 		_httpService{ std::move(httpService) },
-		_websocketClient{ websocketClient },
-		_websocketStream{}
+		_websocketStream{ std::move(websocketStream) }
 	{}
 
 	std::string kraken_api::build_url_path(const std::string& access, const std::string& method) const
@@ -35,10 +35,7 @@ namespace cb
 
 	std::string kraken_api::get_nonce() const
 	{
-		return std::to_string(
-			std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::system_clock::now().time_since_epoch())
-			.count());
+		return std::to_string(milliseconds_since_epoch());
 	}
 
 	std::string kraken_api::compute_api_sign(const std::string& uriPath, const std::string& urlPostData, const std::string& nonce) const
@@ -137,18 +134,13 @@ namespace cb
 		return trade_result::SUCCESS;
 	}
 
-	websocket_stream& kraken_api::get_or_connect_websocket()
+	websocket_stream& kraken_api::get_websocket_stream()
 	{
-		if (_websocketStream.connection_status() != ws_connection_status::OPEN)
-		{
-			_websocketStream.connect(_websocketClient);
-		}
-
 		return _websocketStream;
 	}
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)
 	{
-		return std::make_unique<kraken_api>(std::move(config), http_service{}, websocketClient);
+		return std::make_unique<kraken_api>(std::move(config), http_service{}, kraken_websocket_stream{ websocketClient });
 	}
 }

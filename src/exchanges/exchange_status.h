@@ -9,7 +9,9 @@ namespace cb
 		ONLINE,
 		MAINTENANCE,
 		CANCEL_ONLY,
-		POST_ONLY
+		LIMIT_ONLY,
+		POST_ONLY,
+		OFFLINE
 	};
 
 	std::string to_string(exchange_status status);

@@ -42,28 +42,4 @@ namespace cb
     {
         return map_connection_status(_client->get_state(_connectionHandle));
     }
-
-    websocket_connection create_websocket_connection(std::shared_ptr<websocket_client> client, const std::string& url, const websocket_event_handlers& eventHandlers)
-    {
-        std::error_code ec;
-        client::connection_ptr connectionPtr = client->get_connection(url, ec);
-        if (ec)
-        {
-            //std::cout << "could not create connection because: " << ec.message() << std::endl;
-            throw std::runtime_error("Could not create connection: " + ec.message());
-        }
-
-        connectionPtr->set_message_handler(
-            [eventHandlers]
-        (websocketpp::connection_hdl, client::message_ptr message) { eventHandlers.onMessage(message->get_payload()); });
-
-        client->connect(connectionPtr);
-
-        while (client->get_state(connectionPtr->get_handle()) == websocketpp::session::state::connecting)
-        {
-
-        }
-
-        return websocket_connection{ client, connectionPtr->get_handle() };
-    }
 }

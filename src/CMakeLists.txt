@@ -96,7 +96,7 @@ add_library(CryptoBot_lib
 "trading/trade_description.cpp"
 "trading/trading_constants.h"
 "trading/trading_options.cpp"
-"trading/trading_options.h")
+"trading/trading_options.h" "networking/websocket/websocket_error.h" "common/utils/timeutils.h" "common/utils/timeutils.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

@@ -9,6 +9,7 @@
 #include "common/utils/vectorutils.h"
 #include "common/utils/mathutils.h"
 #include "common/utils/financeutils.h"
+#include "logging/logger.h"
 
 sequence_step::sequence_step(cb::tradable_pair pair, cb::trade_action action)
 	: _pair{ std::move(pair) }, _action{ std::move(action) }
@@ -232,9 +233,6 @@ namespace
 	}
 }
 
-#include <chrono>
-#include <thread>
-
 void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
 {
 	_options = initaliser.options();
@@ -250,10 +248,10 @@ void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
 			allPairs.insert(sequence.pairs().begin(), sequence.pairs().end());
 		}
 
-		spec.exchange().get_or_connect_websocket().subscribe_order_book(std::vector<cb::tradable_pair>{ allPairs.begin(), allPairs.end() });
+		cb::websocket_stream& websocketStream = spec.exchange().get_websocket_stream();
+		websocketStream.connect();
+		websocketStream.subscribe_order_book(std::vector<cb::tradable_pair>{ allPairs.begin(), allPairs.end() });
 	}
-
-	std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 void tri_arb_strategy::run_iteration()
@@ -265,24 +263,32 @@ void tri_arb_strategy::run_iteration()
 
 		for (auto& sequence : spec.sequences())
 		{
-			const std::unordered_map<cb::tradable_pair, cb::order_book_level> prices = get_best_order_book_prices(exchange.get_or_connect_websocket(), sequence.pairs());
-			const std::unordered_map<cb::tradable_pair, double> fees = exchange.get_fees(sequence.pairs());
-
-			SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
-
-			if (gains.g3 > tradeValue)
+			try
 			{
-				SequenceTrades trades = create_sequence_trades(sequence, gains, prices, tradeValue);
+				const std::unordered_map<cb::tradable_pair, cb::order_book_level> prices = get_best_order_book_prices(exchange.get_websocket_stream(), sequence.pairs());
+				const std::unordered_map<cb::tradable_pair, double> fees = exchange.get_fees(sequence.pairs());
 
-				exchange.trade(trades.first);
-				exchange.trade(trades.middle);
-				exchange.trade(trades.last);
+				SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
 
-				log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
+				if (gains.g3 > tradeValue)
+				{
+					SequenceTrades trades = create_sequence_trades(sequence, gains, prices, tradeValue);
+
+					exchange.trade(trades.first);
+					exchange.trade(trades.middle);
+					exchange.trade(trades.last);
+
+					log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
+				}
+				else
+				{
+					//log_sequence_checked(sequence, tradeValue, gains.g3);
+				}
 			}
-			else
+			catch (const cb::cb_exception& e)
 			{
-				//log_sequence_checked(sequence, tradeValue, gains.g3);
+				std::string sequenceString = sequence.first().pair().iso_4217_a3() + "->" + sequence.middle().pair().iso_4217_a3() + "->" + sequence.last().pair().iso_4217_a3();
+				cb::logger::instance().error("Error occurred during sequence {0}: {1}", sequenceString, e.what());
 			}
 		}
 	}

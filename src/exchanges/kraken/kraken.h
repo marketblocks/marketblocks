@@ -41,7 +41,6 @@ namespace cb
 		std::vector<unsigned char> _decodedPrivateKey;
 		http_service _httpService;
 		kraken_websocket_stream _websocketStream;
-		std::shared_ptr<websocket_client> _websocketClient;
 
 		std::string build_url_path(const std::string& access, const std::string& method) const;
 		std::string build_kraken_url(const std::string& access, const std::string& method, const std::string& query) const;
@@ -56,7 +55,7 @@ namespace cb
 		std::string send_private_request(const std::string& method) const;
 
 	public:
-		kraken_api(kraken_config config, http_service httpService, std::shared_ptr<websocket_client> websocketClient);
+		kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream);
 
 		exchange_status get_status() const override;
 		const std::vector<tradable_pair> get_tradable_pairs() const override;
@@ -65,7 +64,7 @@ namespace cb
 		const std::unordered_map<asset_symbol, double> get_balances() const override;
 		trade_result trade(const trade_description& description) override;
 
-		websocket_stream& get_or_connect_websocket() override;
+		websocket_stream& get_websocket_stream() override;
 	};
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient);

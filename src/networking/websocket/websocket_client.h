@@ -24,29 +24,10 @@ namespace cb
 		websocket_client& operator=(const websocket_client& other) = delete;
 		websocket_client& operator=(websocket_client&& other) noexcept = default;
 
-		client::connection_ptr get_connection(const std::string& url, std::error_code errorCode)
-		{
-			return _client.get_connection(url, errorCode);
-		}
-
-		void connect(client::connection_ptr connectionPtr)
-		{
-			_client.connect(connectionPtr);
-		}
-
-		void close_connection(websocketpp::connection_hdl connectionHandle)
-		{
-			_client.get_con_from_hdl(connectionHandle)->close(websocketpp::close::status::going_away, "");
-		}
-
-		websocketpp::session::state::value get_state(websocketpp::connection_hdl connectionHandle)
-		{
-			return _client.get_con_from_hdl(connectionHandle)->get_state();
-		}
-
-		void send_message(websocketpp::connection_hdl connectionHandle, const std::string& message)
-		{
-			_client.send(connectionHandle, message, websocketpp::frame::opcode::text);
-		}
+		void connect(client::connection_ptr connectionPtr);
+		client::connection_ptr get_connection(const std::string& url);
+		void close_connection(websocketpp::connection_hdl connectionHandle);
+		websocketpp::session::state::value get_state(websocketpp::connection_hdl connectionHandle);
+		void send_message(websocketpp::connection_hdl connectionHandle, const std::string& message);
 	};
 }

@@ -38,7 +38,7 @@ namespace cb
 		virtual const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const = 0;
 		virtual trade_result trade(const trade_description& description) = 0;
 
-		virtual websocket_stream& get_or_connect_websocket() = 0;
+		virtual websocket_stream& get_websocket_stream() = 0;
 	};
 
 	template<typename MarketApi, typename TradeApi>
@@ -68,9 +68,9 @@ namespace cb
 			return _marketApi->get_order_book(tradablePairs, depth);
 		}
 
-		websocket_stream& get_or_connect_websocket()
+		websocket_stream& get_websocket_stream()
 		{
-			return _marketApi->get_or_connect_websocket();
+			return _marketApi->get_websocket_stream();
 		}
 
 		const std::unordered_map<asset_symbol, double> get_balances() const override

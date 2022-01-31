@@ -13,6 +13,17 @@ namespace cb
 	typedef json<nlohmann::json> json_document;
 	typedef json<const nlohmann::json&> json_element;
 
+	enum class json_value_type
+	{
+		OBJECT,
+		ARRAY,
+		INT,
+		DOUBLE,
+		BOOL,
+		STRING,
+		UNKNOWN
+	};
+
 	template<typename json_object>
 	class json
 	{
@@ -66,6 +77,30 @@ namespace cb
 		json_iterator end() const
 		{
 			return json_iterator{ _json.end() };
+		}
+
+		json_value_type type() const
+		{
+			nlohmann::detail::value_t type = _json.type();
+
+			switch (type)
+			{
+			case nlohmann::detail::value_t::object:
+				return json_value_type::OBJECT;
+			case nlohmann::detail::value_t::array:
+				return json_value_type::ARRAY;
+			case nlohmann::detail::value_t::number_integer:
+				return json_value_type::INT;
+			case nlohmann::detail::value_t::number_float:
+				return json_value_type::DOUBLE;
+			case nlohmann::detail::value_t::boolean:
+				return json_value_type::BOOL;
+			case nlohmann::detail::value_t::string:
+				return json_value_type::STRING;
+
+			default:
+				return json_value_type::UNKNOWN;
+			}
 		}
 	};
 

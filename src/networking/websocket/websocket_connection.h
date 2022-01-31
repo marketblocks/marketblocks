@@ -4,6 +4,7 @@
 #include <string>
 
 #include "websocket_client.h"
+#include "websocket_error.h"
 
 namespace cb
 {
@@ -36,11 +37,19 @@ namespace cb
         ws_connection_status connection_status() const;
     };
 
-    struct websocket_event_handlers
+    template<typename OnMessageHandler>
+    websocket_connection create_websocket_connection(
+        std::shared_ptr<websocket_client> client, 
+        const std::string& url,
+        OnMessageHandler onMessageHandler)
     {
-    public:
-        std::function<void(const std::string&)> onMessage;
-    };
+        client::connection_ptr connectionPtr = client->get_connection(url);
+        
+        connectionPtr->set_message_handler(
+            [onMessageHandler](websocketpp::connection_hdl, client::message_ptr message) { onMessageHandler(message->get_payload()); });
 
-    websocket_connection create_websocket_connection(std::shared_ptr<websocket_client> client, const std::string& url, const websocket_event_handlers& eventHandlers);
+        client->connect(connectionPtr);
+
+        return websocket_connection{ client, connectionPtr->get_handle() };
+    }
 }

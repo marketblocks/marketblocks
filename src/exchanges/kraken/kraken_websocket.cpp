@@ -1,4 +1,6 @@
 #include "kraken_websocket.h"
+#include "logging/logger.h"
+#include "common/utils/containerutils.h"
 
 namespace
 {
@@ -15,22 +17,76 @@ namespace
 
 		return result;
 	}
+
+	cb::exchange_status to_exchange_status(const std::string& statusString)
+	{
+		if (statusString == "online")
+			return cb::exchange_status::ONLINE;
+		else if (statusString == "maintenance")
+			return cb::exchange_status::MAINTENANCE;
+		else if (statusString == "cancel_only")
+			return cb::exchange_status::CANCEL_ONLY;
+		else if (statusString == "limit_only")
+			return cb::exchange_status::LIMIT_ONLY;
+		else if (statusString == "post_only")
+			return cb::exchange_status::POST_ONLY;
+		else
+			return cb::exchange_status::OFFLINE;
+	}
 }
 
 namespace cb
 {
-	std::string kraken_websocket_stream::get_subscribe_order_book_message(const std::vector<tradable_pair>& tradablePairs) const
+	kraken_websocket_stream::kraken_websocket_stream(std::shared_ptr<websocket_client> websocketClient)
+		: websocket_stream{ websocketClient }
+	{}
+
+	void kraken_websocket_stream::process_event_message(const json_document& json)
 	{
-		std::string tradablePairList = join_tradable_pairs(tradablePairs);
-		std::string message = "{ \"event\": \"subscribe\", \"pair\": [" + std::move(tradablePairList) + "], \"subscription\": { \"name\": \"book\" } }";
-		return message;
+		std::string eventName{ json.get<std::string>("event") };
+
+		if (eventName == "systemStatus")
+		{
+			log_status_change(to_exchange_status(json.get<std::string>("status")));
+		}
+		else if (eventName == "subscriptionStatus")
+		{
+			std::string pair = json.get<std::string>("pair");
+			std::string channelName = json.element("subscription").get<std::string>("name");
+			bool subscribed = json.get<std::string>("status") == "subscribed";
+
+			if (subscribed)
+			{
+				logger::instance().info("Successfully suscribed to channel '{0}' for pair {1}", channelName, pair);
+			}
+			else
+			{
+				std::string error = json.get<std::string>("errorMessage");
+				logger::instance().error("Failed to subscribe to channel '{0}' for pair {1}: {2}", channelName, pair, error);
+			}
+		}
+	}
+
+	void kraken_websocket_stream::process_update_message(const json_document& json)
+	{
+
 	}
 
 	void kraken_websocket_stream::on_message(const std::string& message)
 	{
-		std::cout << message << std::endl;
+		//std::cout << message << std::endl;
 
-		auto json = parse_json(message);
+		json_document json = parse_json(message);
+		json_value_type type = json.type();
+
+		if (json.type() == json_value_type::OBJECT)
+		{
+			process_event_message(json);
+		}
+		else
+		{
+			process_update_message(json);
+		}
 
 		//if (json.document().IsObject())
 		//{
@@ -131,4 +187,12 @@ namespace cb
 	//		}
 	//	}
 	//}
+
+	void kraken_websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	{
+		std::string tradablePairList = join_tradable_pairs(tradablePairs);
+		std::string message = "{ \"event\": \"subscribe\", \"pair\": [" + std::move(tradablePairList) + "], \"subscription\": { \"name\": \"book\" } }";
+
+		send_message(message);
+	}
 }
