@@ -18,6 +18,9 @@ namespace cb
 	protected:
 		std::string stream_url() const override { return "wss://ws.kraken.com"; }
 
+		void on_open() override;
+		void on_close(const std::string& reason) override;
+		void on_fail(const std::string& reason) override;
 		void on_message(const std::string& message) override;
 
 	public:

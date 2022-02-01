@@ -21,8 +21,11 @@ namespace cb
 
 		_connection = std::make_unique<websocket_connection>(
 			create_websocket_connection(
-				_websocketClient, 
-				stream_url(), 
+				_websocketClient,
+				stream_url(),
+				[this]() { on_open(); },
+				[this](const std::string& reason) { on_close(reason); },
+				[this](const std::string& reason) { on_fail(reason); },
 				[this](const std::string& message) { on_message(message); }));
 	}
 
@@ -80,6 +83,8 @@ namespace cb
 	order_book_state websocket_stream::get_order_book_snapshot(const tradable_pair& tradablePair) const
 	{
 		CB_ASSERT_CONNECTION_EXISTS(_connection);
+
+		auto status = _connection->connection_status();
 
 		auto cacheIterator = _orderBookCaches.find(tradablePair.iso_4217_a3());
 

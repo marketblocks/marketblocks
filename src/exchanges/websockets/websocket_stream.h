@@ -26,6 +26,9 @@ namespace cb
 		void replace_in_order_book_cache(const std::string& pair, cache_replacement cacheReplacement);
 
 		virtual std::string stream_url() const = 0;
+		virtual void on_open() = 0;
+		virtual void on_close(const std::string& reason) = 0;
+		virtual void on_fail(const std::string& reason) = 0;
 		virtual void on_message(const std::string& message) = 0;
 
 	public:

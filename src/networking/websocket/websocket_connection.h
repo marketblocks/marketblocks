@@ -37,16 +37,42 @@ namespace cb
         ws_connection_status connection_status() const;
     };
 
-    template<typename OnMessageHandler>
+    template<typename OnOpenHandler, typename OnCloseHandler, typename OnFailHandler, typename OnMessageHandler>
     websocket_connection create_websocket_connection(
         std::shared_ptr<websocket_client> client, 
         const std::string& url,
+        OnOpenHandler onOpenHandler,
+        OnCloseHandler onCloseHandler,
+        OnFailHandler onFailHandler,
         OnMessageHandler onMessageHandler)
     {
         client::connection_ptr connectionPtr = client->get_connection(url);
         
+        connectionPtr->set_open_handler(
+            [onOpenHandler](websocketpp::connection_hdl) 
+            { 
+                onOpenHandler();
+            });
+
+        connectionPtr->set_close_handler(
+            [onCloseHandler, client](websocketpp::connection_hdl handle) 
+            { 
+                std::string reason = client->get_connection(handle)->get_ec().message();
+                onCloseHandler(reason);
+            });
+
+        connectionPtr->set_fail_handler(
+            [onFailHandler, client](websocketpp::connection_hdl handle) 
+            { 
+                std::string reason = client->get_connection(handle)->get_ec().message();
+                onFailHandler(reason);
+            });
+
         connectionPtr->set_message_handler(
-            [onMessageHandler](websocketpp::connection_hdl, client::message_ptr message) { onMessageHandler(message->get_payload()); });
+            [onMessageHandler](websocketpp::connection_hdl, client::message_ptr message) 
+            { 
+                onMessageHandler(message->get_payload());
+            });
 
         client->connect(connectionPtr);
 

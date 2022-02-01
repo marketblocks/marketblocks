@@ -3,24 +3,27 @@
 #include "websocket_client.h"
 #include "websocket_error.h"
 
-static std::shared_ptr<cb::ssl_context> on_tls_init()
+namespace
 {
-    std::shared_ptr<cb::ssl_context> context = std::make_shared<cb::ssl_context>(cb::ssl_context::sslv23);
-
-    try
+    std::shared_ptr<cb::ssl_context> on_tls_init()
     {
-        context->set_options(
-            websocketpp::lib::asio::ssl::context::default_workarounds |
-            websocketpp::lib::asio::ssl::context::no_sslv2 |
-            websocketpp::lib::asio::ssl::context::no_sslv3 |
-            websocketpp::lib::asio::ssl::context::single_dh_use);
-    }
-    catch (std::exception& e)
-    {
-        throw cb::websocket_error{ std::format("Error occurred initialising TLS: {}", e.what()) };
-    }
+        std::shared_ptr<cb::ssl_context> context = std::make_shared<cb::ssl_context>(cb::ssl_context::sslv23);
 
-    return context;
+        try
+        {
+            context->set_options(
+                websocketpp::lib::asio::ssl::context::default_workarounds |
+                websocketpp::lib::asio::ssl::context::no_sslv2 |
+                websocketpp::lib::asio::ssl::context::no_sslv3 |
+                websocketpp::lib::asio::ssl::context::single_dh_use);
+        }
+        catch (std::exception& e)
+        {
+            throw cb::websocket_error{ std::format("Error occurred initialising TLS: {}", e.what()) };
+        }
+
+        return context;
+    }
 }
 
 namespace cb
@@ -28,8 +31,9 @@ namespace cb
     websocket_client::websocket_client()
         :_client{}, _thread{}
     {
-        _client.set_access_channels(websocketpp::log::alevel::all);
-        _client.clear_access_channels(websocketpp::log::alevel::frame_payload);
+        //_client.set_access_channels(websocketpp::log::alevel::none);
+        _client.clear_access_channels(websocketpp::log::alevel::all);
+        _client.clear_error_channels(websocketpp::log::elevel::all);
 
         _client.init_asio();
         _client.start_perpetual();
@@ -71,6 +75,19 @@ namespace cb
         }
 
         return connectionPtr;
+    }
+
+    client::connection_ptr websocket_client::get_connection(websocketpp::connection_hdl connectionHandle)
+    {
+        std::error_code errorCode;
+        auto connectionPtr = _client.get_con_from_hdl(connectionHandle, errorCode);
+
+        if (connectionPtr)
+        {
+            return connectionPtr;
+        }
+
+        throw websocket_error{ std::format("Error occurred getting connection: {}", errorCode.message()) };
     }
 
     void websocket_client::close_connection(websocketpp::connection_hdl connectionHandle)
