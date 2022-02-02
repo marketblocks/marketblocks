@@ -74,6 +74,10 @@ namespace cb
 		{
 			log_status_change(to_exchange_status(json.get<std::string>("status")));
 		}
+		else if (eventName == "error")
+		{
+			throw cb_exception{ json.get<std::string>("errorMessage") };
+		}
 		else if (eventName == "subscriptionStatus")
 		{
 			std::string pair = json.get<std::string>("pair");

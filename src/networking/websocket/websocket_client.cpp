@@ -58,7 +58,7 @@ namespace cb
             {
             } // websocketpp will time out and throw exception
         }
-        catch (std::exception e)
+        catch (const std::exception& e)
         {
             throw websocket_error{ std::format("Error occured connecting to websocket: {}", e.what()) };
         }

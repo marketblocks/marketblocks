@@ -1,7 +1,4 @@
-﻿#include <iostream>
-#include <cassert>
-
-#include "runner/runner.h"
+﻿#include "runner/runner.h"
 #include "logging/logger.h"
 #include "strategies/tri_arb.h"
 
@@ -12,13 +9,13 @@ int main()
 	try
 	{
 		runner.initialise();
+		runner.run();
 	}
-	catch (const cb::initialisation_error& e)
+	catch (const std::exception& e)
 	{
-		cb::logger::instance().critical("Initialisation failed: {}", e.what());
+		cb::logger::instance().critical(e.what());
 		abort();
 	}
 
-	runner.run();
 	return 0;
 }

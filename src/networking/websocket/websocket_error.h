@@ -8,7 +8,7 @@ namespace cb
 	{
 	public:
 		websocket_error(std::string message)
-			: cb_exception{ std::move(message) }
+			: cb_exception{ "Websocket Error: " + std::move(message)}
 		{}
 	};
 }

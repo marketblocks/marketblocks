@@ -2,6 +2,7 @@
 
 #include "http_service.h"
 #include "http_constants.h"
+#include "http_error.h"
 
 namespace
 {
@@ -94,7 +95,7 @@ namespace cb
 		if (result != CURLcode::CURLE_OK)
 		{
 			std::string error = curl_easy_strerror(result);
-			return http_response{ 0, error };
+			throw http_error{ std::move(error) };
 		}
 
 		long responseCode;

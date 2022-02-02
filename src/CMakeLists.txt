@@ -22,6 +22,8 @@ add_library(CryptoBot_lib
 "common/utils/stringutils.cpp"
 "common/utils/stringutils.h"
 "common/utils/vectorutils.h"
+"common/utils/timeutils.cpp"
+"common/utils/timeutils.h" 
 
 "common/exceptions/cb_exception.h" 
 "common/exceptions/not_implemented_exception.h" 
@@ -66,6 +68,8 @@ add_library(CryptoBot_lib
 "networking/http/http_header.h"
 "networking/http/http_response.cpp"
 "networking/http/http_response.h" 
+"networking/http/http_error.h"
+"networking/websocket/websocket_error.h"
 "networking/websocket/websocket_connection.cpp" 
 "networking/websocket/websocket_connection.h" 
 "networking/websocket/websocket_client.cpp"
@@ -96,7 +100,7 @@ add_library(CryptoBot_lib
 "trading/trade_description.cpp"
 "trading/trading_constants.h"
 "trading/trading_options.cpp"
-"trading/trading_options.h" "networking/websocket/websocket_error.h" "common/utils/timeutils.h" "common/utils/timeutils.cpp")
+"trading/trading_options.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

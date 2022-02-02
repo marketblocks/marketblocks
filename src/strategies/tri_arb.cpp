@@ -11,6 +11,14 @@
 #include "common/utils/financeutils.h"
 #include "logging/logger.h"
 
+namespace
+{
+	std::string to_string(const tri_arb_sequence& sequence)
+	{
+		return sequence.first().pair().iso_4217_a3() + "->" + sequence.middle().pair().iso_4217_a3() + "->" + sequence.last().pair().iso_4217_a3();
+	}
+}
+
 sequence_step::sequence_step(cb::tradable_pair pair, cb::trade_action action)
 	: _pair{ std::move(pair) }, _action{ std::move(action) }
 {}
@@ -131,25 +139,7 @@ namespace
 		double g3;
 	};
 
-	void print_pair(const cb::tradable_pair& pair)
-	{
-		std::cout << pair.asset().get() << "/" << pair.price_unit().get();
-	}
-
-	void print_sequence(const tri_arb_sequence& sequence)
-	{
-		std::cout << "Sequence: ";
-
-		print_pair(sequence.first().pair());
-		std::cout << "->";
-		print_pair(sequence.middle().pair());
-		std::cout << "->";
-		print_pair(sequence.last().pair());
-
-		std::cout << std::endl;
-	}
-
-	void print_trade(const cb::trade_description& tradeDescription, double gain)
+	/*void print_trade(const cb::trade_description& tradeDescription, double gain)
 	{
 		char action;
 		double result;
@@ -168,9 +158,9 @@ namespace
 		std::cout << action << " " << tradeDescription.volume() << " ";
 		print_pair(tradeDescription.pair());
 		std::cout << " @ " << tradeDescription.asset_price() << " = " << result << std::endl;
-	}
+	}*/
 
-	void log_trade(const tri_arb_sequence& sequence, const SequenceTrades& trades, const SequenceGains& gains, double initialTradeValue, double newBalance)
+	/*void log_trade(const tri_arb_sequence& sequence, const SequenceTrades& trades, const SequenceGains& gains, double initialTradeValue, double newBalance)
 	{
 		std::cout << std::endl << "TRADE:" << std::endl;
 
@@ -184,15 +174,7 @@ namespace
 		std::cout << "Profit: " << percentageProfit << "%" << std::endl;
 
 		std::cout << "New Balance: " << newBalance << std::endl << std::endl;
-	}
-
-	void log_sequence_checked(const tri_arb_sequence& sequence, double initialTradeValue, double g3)
-	{
-		print_sequence(sequence);
-
-		double percentageDiff = cb::calculate_percentage_diff(initialTradeValue, g3);
-		std::cout << "Price Diff: " << percentageDiff << "%" << std::endl;
-	}
+	}*/
 
 	cb::trade_description create_trade(const sequence_step& sequenceStep, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, double g1, double g0)
 	{
@@ -278,17 +260,17 @@ void tri_arb_strategy::run_iteration()
 					exchange.trade(trades.middle);
 					exchange.trade(trades.last);
 
-					log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
+					//log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
 				}
 				else
 				{
-					//log_sequence_checked(sequence, tradeValue, gains.g3);
+					cb::logger::instance().info("Sequence: {0}. Percentage Diff: {1}", to_string(sequence), cb::calculate_percentage_diff(tradeValue, gains.g3));
 				}
 			}
 			catch (const cb::cb_exception& e)
 			{
-				std::string sequenceString = sequence.first().pair().iso_4217_a3() + "->" + sequence.middle().pair().iso_4217_a3() + "->" + sequence.last().pair().iso_4217_a3();
-				cb::logger::instance().error("Error occurred during sequence {0}: {1}", sequenceString, e.what());
+				
+				cb::logger::instance().error("Error occurred during sequence {0}: {1}", to_string(sequence), e.what());
 			}
 		}
 	}
