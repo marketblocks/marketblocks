@@ -199,12 +199,12 @@ namespace cb
 
 	void kraken_websocket_stream::on_close(const std::string& reason)
 	{
-		logger::instance().info("Kraken websocket connection closed");
+		logger::instance().info("Kraken websocket connection closed: {}", reason);
 	}
 
 	void kraken_websocket_stream::on_fail(const std::string& reason)
 	{
-		logger::instance().error("Kraken websocket connection failed");
+		logger::instance().error("Kraken websocket connection failed: {}", reason);
 	}
 
 	void kraken_websocket_stream::on_message(const std::string& message)

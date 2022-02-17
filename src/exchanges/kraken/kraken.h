@@ -32,6 +32,44 @@ namespace cb
 			inline static const std::string BALANCE = "Balance";
 			inline static const std::string SYSTEM_STATUS = "SystemStatus";
 		};
+
+		inline bool should_retry(std::string errorMessage)
+		{
+			static std::unordered_map<std::string, bool> errorBehaviours
+			{
+				{ "EGeneral:Permission denied", false },
+				{ "EAPI:Invalid key", false },
+				{ "EQuery:Unknown asset pair", false },
+				{ "EGeneral:Invalid arguments", false },
+				{ "EAPI:Invalid signature", false },
+				{ "EAPI:Invalid nonce", false },
+				{ "ESession:Invalid session", false },
+				{ "EAPI:Rate limit exceeded", true },
+				{ "EOrder:Rate limit exceeded", true },
+				{ "EGeneral:Temporary lockout", true },
+				{ "EOrder:Cannot open position", true },
+				{ "EOrder:Cannot open opposing position", false },
+				{ "EOrder:Margin allowance exceeded", false },
+				{ "EOrder:Insufficient margin", false },
+				{ "EOrder:Insufficient funds (insufficient user funds)", false },
+				{ "EOrder:Order minimum not met (volume too low)", false },
+				{ "EOrder:Orders limit exceeded", false },
+				{ "EOrder:Positions limit exceeded", false },
+				{ "EService:Unavailable", true },
+				{ "EService:Busy", true },
+				{ "EGeneral:Internal error", true },
+				{ "ETrade:Locked", false },
+				{ "EAPI:Feature disabled", false },
+			};
+
+			auto behaviourIterator = errorBehaviours.find(errorMessage);
+			if (behaviourIterator == errorBehaviours.end())
+			{
+				return false;
+			}
+
+			return behaviourIterator->second;
+		}
 	}
 	
 	class kraken_api final : public exchange
@@ -55,10 +93,25 @@ namespace cb
 		{
 			if (response.response_code() != HttpResponseCodes::OK)
 			{
+				// If POST, check if data was received by server
+				// If yes, warn with success?
+
 				return result<Value>::fail(response.message());
 			}
 
-			return reader(response.message());
+			result<Value> responseResult{ reader(response.message()) };
+
+			if (responseResult.is_success())
+			{
+				return responseResult;
+			}
+
+			if (internal::should_retry(responseResult.error()))
+			{
+				return result<Value>::fail(responseResult.error());
+			}
+
+			throw cb_exception{ std::format("Kraken API error occurred that could not be recovered from: {}", responseResult.error()) };
 		}
 
 		template<typename Value, typename ResponseReader>

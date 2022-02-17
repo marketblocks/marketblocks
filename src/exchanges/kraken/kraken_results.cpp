@@ -5,25 +5,13 @@
 
 namespace
 {
-	std::string process_messages(cb::json_document& json)
+	std::string get_error(cb::json_document& json)
 	{
 		std::vector<std::string> messages = json.get<std::vector<std::string>>("error");
-		std::string joinedMessage;
-
-		if (messages.empty())
-		{
-			return joinedMessage;
-		}
 		
-		cb::logger& log{ cb::logger::instance() };
-
-		for (auto& message : messages)
-		{
-			joinedMessage += message + ", ";
-		}
-		
-		joinedMessage.pop_back();
-		return joinedMessage;
+		return messages.empty()
+			? ""
+			: messages[0];
 	}
 }
 
@@ -33,11 +21,10 @@ namespace cb::internal
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
 
-		std::string errors = process_messages(jsonDocument);
-		
-		if (!errors.empty())
+		std::string error = get_error(jsonDocument);
+		if (!error.empty())
 		{
-			return result<exchange_status>::fail(std::move(errors));
+			return result<exchange_status>::fail(std::move(error));
 		}
 
 		json_element resultElement{ jsonDocument.element("result") };
@@ -68,6 +55,13 @@ namespace cb::internal
 	result<std::vector<tradable_pair>> read_tradable_pairs(const std::string& jsonResult)
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
+
+		std::string error = get_error(jsonDocument);
+		if (!error.empty())
+		{
+			return result<std::vector<tradable_pair>>::fail(std::move(error));
+		}
+
 		json_element resultElement{ jsonDocument.element("result") };
 
 		std::vector<tradable_pair> pairs;
@@ -87,6 +81,13 @@ namespace cb::internal
 	result<order_book_state> read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
+
+		std::string error = get_error(jsonDocument);
+		if (!error.empty())
+		{
+			return result<order_book_state>::fail(std::move(error));
+		}
+
 		json_element resultElement{ jsonDocument
 			.element("result")
 			.element(pair.exchange_identifier()) };
@@ -125,6 +126,14 @@ namespace cb::internal
 
 	result<std::unordered_map<asset_symbol, double>> read_balances(const std::string& jsonResult)
 	{
+		json_document jsonDocument{ parse_json(jsonResult) };
+
+		std::string error = get_error(jsonDocument);
+		if (!error.empty())
+		{
+			return result<std::unordered_map<asset_symbol, double>>::fail(std::move(error));
+		}
+
 		return result<std::unordered_map<asset_symbol, double>>::success(std::unordered_map<asset_symbol, double>());
 	}
 }
