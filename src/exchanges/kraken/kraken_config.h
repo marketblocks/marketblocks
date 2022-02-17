@@ -11,6 +11,7 @@ namespace cb
 	private:
 		std::string _publicKey;
 		std::string _privateKey;
+		int _httpRetries;
 
 		void validate();
 
@@ -22,6 +23,7 @@ namespace cb
 
 		const std::string& public_key() const { return _publicKey; }
 		const std::string& private_key() const { return _privateKey; }
+		int http_retries() const { return _httpRetries; }
 	};
 
 	template<>

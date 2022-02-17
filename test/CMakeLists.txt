@@ -15,7 +15,7 @@ add_executable(CryptoBotTest
 "unittest/strategies/tri_arb_test.cpp" 
 "unittest/exchanges/paper_trader/paper_trader_test.cpp" 
 "unittest/common/trading/fee_schedule_test.cpp" 
-"unittest/common/security/hash_test.cpp")
+"unittest/common/security/hash_test.cpp" "unittest/utils/retry_test.cpp")
 
 target_link_libraries(CryptoBotTest LINK_PUBLIC CryptoBot_lib)
 target_link_libraries(CryptoBotTest PRIVATE gtest_main gmock_main)

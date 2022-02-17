@@ -1,35 +1,71 @@
 #include "kraken_results.h"
 #include "common/file/json.h"
 #include "common/utils/stringutils.h"
+#include "logging/logger.h"
+
+namespace
+{
+	std::string process_messages(cb::json_document& json)
+	{
+		std::vector<std::string> messages = json.get<std::vector<std::string>>("error");
+		std::string joinedMessage;
+
+		if (messages.empty())
+		{
+			return joinedMessage;
+		}
+		
+		cb::logger& log{ cb::logger::instance() };
+
+		for (auto& message : messages)
+		{
+			joinedMessage += message + ", ";
+		}
+		
+		joinedMessage.pop_back();
+		return joinedMessage;
+	}
+}
 
 namespace cb::internal
 {
-	exchange_status read_system_status(const std::string& jsonResult)
+	result<exchange_status> read_system_status(const std::string& jsonResult)
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
+
+		std::string errors = process_messages(jsonDocument);
+		
+		if (!errors.empty())
+		{
+			return result<exchange_status>::fail(std::move(errors));
+		}
+
 		json_element resultElement{ jsonDocument.element("result") };
 
 		std::string status_string{ resultElement.get<std::string>("status") };
+		exchange_status status;
 
 		if (status_string == "online")
 		{
-			return exchange_status::ONLINE;
+			status = exchange_status::ONLINE;
 		}
 		else if (status_string == "cancel_only")
 		{
-			return exchange_status::CANCEL_ONLY;
+			status = exchange_status::CANCEL_ONLY;
 		}
 		else if (status_string == "post_only")
 		{
-			return exchange_status::POST_ONLY;
+			status = exchange_status::POST_ONLY;
 		}
 		else
 		{
-			return exchange_status::MAINTENANCE;
+			status = exchange_status::MAINTENANCE;
 		}
+
+		return result<exchange_status>::success(std::move(status));
 	}
 
-	const std::vector<tradable_pair> read_tradable_pairs(const std::string& jsonResult)
+	result<std::vector<tradable_pair>> read_tradable_pairs(const std::string& jsonResult)
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
 		json_element resultElement{ jsonDocument.element("result") };
@@ -45,10 +81,10 @@ namespace cb::internal
 			pairs.emplace_back(name, asset_symbol{ assetSymbols[0] }, asset_symbol{ assetSymbols[1] });
 		}
 
-		return pairs;
+		return result<std::vector<tradable_pair>>::success(std::move(pairs));
 	}
 
-	const order_book_state read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
+	result<order_book_state> read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
 		json_element resultElement{ jsonDocument
@@ -84,11 +120,11 @@ namespace cb::internal
 			levels.emplace_back(std::move(askEntry), std::move(bidEntry));
 		}
 
-		return order_book_state{ std::move(levels) };
+		return result<order_book_state>::success(std::move(levels));
 	}
 
-	const std::unordered_map<asset_symbol, double> read_balances(const std::string& jsonResult)
+	result<std::unordered_map<asset_symbol, double>> read_balances(const std::string& jsonResult)
 	{
-		return std::unordered_map<asset_symbol, double>();
+		return result<std::unordered_map<asset_symbol, double>>::success(std::unordered_map<asset_symbol, double>());
 	}
 }

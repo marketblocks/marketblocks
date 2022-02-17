@@ -1,53 +1,50 @@
 #pragma once
 
 #include <optional>
+#include <variant>
 #include <string>
 
 #include "common/exceptions/cb_exception.h"
 
 namespace cb
 {
-	template<typename T>
+	template<typename Value>
 	class result
 	{
 	private:
-		std::optional<T> _value;
-		std::string _error;
+		std::variant<Value, std::string> _result;
+		bool _isSuccess;
 
-		result(T&& value)
-			: _value{ std::forward<T>(value) }, _error{}
-		{}
-
-		result(std::string error)
-			: _value{ std::nullopt }, _error{ std::move(error) }
+		template<typename T>
+		result(T&& value, bool isSuccess)
+			: _result{ std::forward<T>(value) }, _isSuccess{ isSuccess }
 		{}
 
 	public:
-		static result<T> success(T&& value)
+		static result<Value> success(Value&& value)
 		{
-			return result<T>{ std::forward<T>(value) };
+			return result<Value>{ std::forward<Value>(value), true };
 		}
 
-		static result<T> fail(std::string error)
+		static result<Value> fail(std::string error)
 		{
-			return result<T>{ std::move(error) };
+			return result<Value>{ std::move(error), false };
 		}
 
-		T& value() 
+		const Value& value() const
 		{
-			if (!_value.has_value())
-			{
-				throw cb_exception{ "Result has no value" };
-			}
-
-			return _value.value();
+			assert(is_success());
+			return std::get<Value>(_result);
 		}
 
-		std::string& error() const { return _error; }
+		const std::string& error() const 
+		{ 
+			assert(is_failure());
+			return std::get<std::string>(_result);
+		}
 
-		bool is_success() const { return _value.has_value(); }
+		bool is_success() const { return _isSuccess; }
 
 		bool is_failure() const { return !is_success(); }
 	};
-
 }

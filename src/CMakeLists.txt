@@ -19,6 +19,7 @@ add_library(CryptoBot_lib
 "common/utils/financeutils.cpp"
 "common/utils/financeutils.h"
 "common/utils/mathutils.h"
+"common/utils/retry.h"
 "common/utils/stringutils.cpp"
 "common/utils/stringutils.h"
 "common/utils/vectorutils.h"

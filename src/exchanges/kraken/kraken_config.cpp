@@ -14,7 +14,7 @@ namespace
 namespace cb
 {
 	kraken_config::kraken_config(std::string publicKey, std::string privateKey)
-		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
+		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }, _httpRetries{ 3 }
 	{
 		validate();
 	}

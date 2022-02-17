@@ -6,6 +6,31 @@
 
 namespace
 {
+	size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
+	{
+		auto readBuffer = static_cast<std::string*>(userdata);
+		size_t realSize = size * nmemb;
+		readBuffer->append(ptr, realSize);
+
+		return realSize;
+	}
+
+	void throw_if_error(CURLcode result)
+	{
+		if (result != CURLcode::CURLE_OK)
+		{
+			std::string error = curl_easy_strerror(result);
+			throw cb::http_error{ std::move(error) };
+		}
+	}
+
+	template<typename... Args>
+	void set_option(CURL* handle, CURLoption option, Args&&... args)
+	{
+		CURLcode result = curl_easy_setopt(handle, option, std::forward<Args>(args)...);
+		throw_if_error(result);
+	}
+
 	curl_slist* append_headers(curl_slist* chunk, const std::vector<cb::http_header>& headers)
 	{
 		for (auto& header : headers)
@@ -30,21 +55,17 @@ namespace
 	}
 }
 
-static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
-{
-	auto readBuffer = static_cast<std::string*>(userdata);
-	size_t realSize = size * nmemb;
-	readBuffer->append(ptr, realSize);
-
-	return realSize;
-}
-
 namespace cb
 {
 	http_service::http_service()
 		: easyHandle{ curl_easy_init() }
 	{
-		curl_easy_setopt(easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
+		if (!easyHandle)
+		{
+			throw http_error{ "Could not create HTTP service" };
+		}
+
+		set_option(easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
 	}
 
 	http_service::~http_service()
@@ -83,20 +104,15 @@ namespace cb
 	{
 		std::string readBuffer;
 
-		curl_easy_setopt(easyHandle, CURLOPT_URL, request.url().c_str());
-		curl_easy_setopt(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
-		curl_easy_setopt(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
+		set_option(easyHandle, CURLOPT_URL, request.url().c_str());
+		set_option(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
+		set_option(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
 
 		curl_slist* chunk = append_headers(NULL, request.headers());
-		curl_easy_setopt(easyHandle, CURLOPT_HTTPHEADER, chunk);
+		set_option(easyHandle, CURLOPT_HTTPHEADER, chunk);
 
 		CURLcode result = curl_easy_perform(easyHandle);
-
-		if (result != CURLcode::CURLE_OK)
-		{
-			std::string error = curl_easy_strerror(result);
-			throw http_error{ std::move(error) };
-		}
+		throw_if_error(result);
 
 		long responseCode;
 		curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);

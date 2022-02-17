@@ -37,7 +37,7 @@ namespace cb
 
 	std::string build_url(const std::string& baseUrl, const std::string& path, const std::string& _query)
 	{
-		std::string url = baseUrl + path;
+		std::string url{ baseUrl + path };
 
 		append_query(url, _query);
 

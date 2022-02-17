@@ -3,7 +3,8 @@
 #include "kraken.h"
 #include "kraken_results.h"
 #include "kraken_websocket.h"
-#include "networking/url.h"
+#include "networking/http/http_constants.h"
+#include "common/types/result.h"
 #include "common/utils/stringutils.h"
 #include "common/utils/containerutils.h"
 #include "common/utils/timeutils.h"
@@ -17,6 +18,7 @@ namespace cb
 		_constants{},
 		_publicKey{ config.public_key() },
 		_decodedPrivateKey{ b64_decode(config.private_key()) },
+		_httpRetries{ config.http_retries() },
 		_httpService{ std::move(httpService) },
 		_websocketStream{ std::move(websocketStream) }
 	{}
@@ -28,7 +30,7 @@ namespace cb
 
 	std::string kraken_api::build_kraken_url(const std::string& access, const std::string& method, const std::string& query) const
 	{
-		std::string path = build_url_path(access, method);
+		std::string path{ build_url_path(access, method) };
 
 		return build_url(_constants.BASEURL, path, query);
 	}
@@ -48,59 +50,20 @@ namespace cb
 		return b64_encode(hmac_sha512(message, _decodedPrivateKey));
 	}
 
-	std::string kraken_api::send_public_request(const std::string& method, const std::string& _query) const
-	{
-		http_request request{ http_verb::GET, build_kraken_url(_constants.PUBLIC, method, _query) };
-		http_response result = _httpService.send(request);
-
-		return result.message();
-	}
-
-	std::string kraken_api::send_public_request(const std::string& method) const
-	{
-		return send_public_request(method, "");
-	}
-
-	std::string kraken_api::send_private_request(const std::string& method, const std::string& query) const
-	{
-		std::string nonce = get_nonce();
-		std::string postData = "nonce=" + nonce;
-		std::string apiPath = build_url_path(_constants.PRIVATE, method);
-		std::string apiSign = compute_api_sign(apiPath, postData, nonce);
-
-		http_request request{ http_verb::POST, build_url(_constants.BASEURL, apiPath, query) };
-		request.add_header("API-Key", _publicKey);
-		request.add_header("API-Sign", apiSign);
-		request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-		request.set_content(postData);
-
-		http_response result = _httpService.send(request);
-		return result.message();
-	}
-
-	std::string kraken_api::send_private_request(const std::string& method) const
-	{
-		return send_private_request(method, "");
-	}
-
 	exchange_status kraken_api::get_status() const
 	{
-		std::string response = send_public_request(_constants.SYSTEM_STATUS);
-
-		return internal::read_system_status(response);
+		return send_public_request<exchange_status>(_constants.SYSTEM_STATUS, internal::read_system_status);
 	}
 
 	const std::vector<tradable_pair> kraken_api::get_tradable_pairs() const
 	{
-		std::string response = send_public_request(_constants.TRADABLE_PAIRS);
-
-		return internal::read_tradable_pairs(response);
+		return send_public_request<std::vector<tradable_pair>>(_constants.TRADABLE_PAIRS, internal::read_tradable_pairs);
 	}
 
 	const std::unordered_map<tradable_pair, order_book_state> kraken_api::get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const
 	{
 		std::unordered_map<tradable_pair, order_book_state> orderBooks;
-		orderBooks.reserve(depth);
+		/*orderBooks.reserve(depth);
 
 		for (auto& pair : tradablePairs)
 		{
@@ -109,10 +72,8 @@ namespace cb
 				.add_parameter("count", std::to_string(depth))
 				.to_string();
 
-			std::string response = send_public_request(_constants.ORDER_BOOK, _query);
-
-			orderBooks.emplace(pair, internal::read_order_book(response, pair, depth));
-		}
+			orderBooks.emplace(pair, send_public_request<order_book_state>(_constants.ORDER_BOOK, _query, internal::read_order_book));
+		}*/
 
 		return orderBooks;
 	}
@@ -124,9 +85,7 @@ namespace cb
 
 	const std::unordered_map<asset_symbol, double> kraken_api::get_balances() const
 	{
-		std::string response = send_private_request(_constants.BALANCE);
-
-		return internal::read_balances(response);
+		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.BALANCE, internal::read_balances);
 	}
 
 	trade_result kraken_api::trade(const trade_description& description)
