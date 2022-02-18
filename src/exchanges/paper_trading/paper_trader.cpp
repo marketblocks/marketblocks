@@ -13,17 +13,17 @@ namespace cb
 		return _balances.at(asset) >= amount;
 	}
 
-	trade_result paper_trader::execute_trade(asset_symbol gainedAsset, double gainValue, asset_symbol soldAsset, double soldValue)
+	const std::string paper_trader::execute_trade(asset_symbol gainedAsset, double gainValue, asset_symbol soldAsset, double soldValue)
 	{
 		if (!has_sufficient_funds(soldAsset, soldValue))
 		{
-			return trade_result::INSUFFICENT_FUNDS;
+			return "ERROR";
 		}
 
 		_balances[gainedAsset] += gainValue;
 		_balances[soldAsset] -= soldValue;
 
-		return trade_result::SUCCESS;
+		return "";
 	}
 
 	const std::unordered_map<tradable_pair, double> paper_trader::get_fees(const std::vector<tradable_pair>& tradablePairs) const
@@ -34,7 +34,7 @@ namespace cb
 			[this](const tradable_pair& pair) { return _feeSchedule.get_fee(0); });
 	}
 
-	trade_result paper_trader::trade(const trade_description& description)
+	const std::string paper_trader::add_order(const trade_description& description)
 	{
 		double cost = calculate_cost(description.asset_price(), description.volume());
 		double fee = cost * _feeSchedule.get_fee(0) * 0.01;

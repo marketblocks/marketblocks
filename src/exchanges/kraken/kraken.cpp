@@ -80,9 +80,9 @@ namespace cb
 		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.BALANCE, internal::read_balances);
 	}
 
-	trade_result kraken_api::trade(const trade_description& description)
+	const std::string kraken_api::add_order(const trade_description& description)
 	{
-		return trade_result::SUCCESS;
+		return "";
 	}
 
 	websocket_stream& kraken_api::get_websocket_stream()

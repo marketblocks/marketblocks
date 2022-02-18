@@ -33,11 +33,14 @@ namespace cb
 
 		virtual exchange_status get_status() const = 0;
 		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
+		//virtual const std::unordered_map<tradable_pair, ticker_data> get_ticker_data(const std::vector<tradable_pair>& tradablePairs) const = 0;
 		virtual const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
 		virtual const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const = 0;
-		virtual trade_result trade(const trade_description& description) = 0;
-
+		virtual const std::string add_order(const trade_description& description) = 0;
+		//virtual int cancel_order(const std::string& orderId) const = 0;
+		//virtual const std::vector<order_description> get_open_orders() const = 0;
+		//virtual const std::vector<order_description> get_closed_orders() const = 0;
 		virtual websocket_stream& get_websocket_stream() = 0;
 	};
 
@@ -83,9 +86,9 @@ namespace cb
 			return _tradeApi->get_fees(tradablePairs);
 		}
 
-		trade_result trade(const trade_description& description) override
+		const std::string add_order(const trade_description& description) override
 		{
-			return _tradeApi->trade(description);
+			return _tradeApi->add_order(description);
 		}
 	};
 

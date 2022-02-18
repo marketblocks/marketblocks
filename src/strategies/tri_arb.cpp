@@ -256,9 +256,9 @@ void tri_arb_strategy::run_iteration()
 				{
 					SequenceTrades trades = create_sequence_trades(sequence, gains, prices, tradeValue);
 
-					exchange.trade(trades.first);
-					exchange.trade(trades.middle);
-					exchange.trade(trades.last);
+					exchange.add_order(trades.first);
+					exchange.add_order(trades.middle);
+					exchange.add_order(trades.last);
 
 					//log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
 				}

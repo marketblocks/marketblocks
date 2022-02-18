@@ -178,7 +178,7 @@ namespace cb
 		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override;
 		const std::unordered_map<asset_symbol, double> get_balances() const override;
-		trade_result trade(const trade_description& description) override;
+		const std::string add_order(const trade_description& description) override;
 
 		websocket_stream& get_websocket_stream() override;
 	};

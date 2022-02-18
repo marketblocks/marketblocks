@@ -18,7 +18,7 @@ namespace cb
 		std::unordered_map<asset_symbol, double> _balances;
 
 		bool has_sufficient_funds(const asset_symbol& asset, double amount) const;
-		trade_result execute_trade(asset_symbol gainedAsset, double gainValue, asset_symbol soldAsset, double soldValue);
+		const std::string execute_trade(asset_symbol gainedAsset, double gainValue, asset_symbol soldAsset, double soldValue);
 
 	public:
 		explicit paper_trader(fee_schedule feeSchedule, std::unordered_map<asset_symbol, double> initialBalances);
@@ -26,6 +26,6 @@ namespace cb
 		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const;
 		const std::unordered_map<asset_symbol, double> get_balances() const { return _balances; }
 
-		trade_result trade(const trade_description& description);
+		const std::string add_order(const trade_description& description);
 	};
 }
