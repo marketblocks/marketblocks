@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <optional>
 
 #include "kraken_config.h"
 #include "kraken_websocket.h"
@@ -70,6 +71,42 @@ namespace cb
 
 			return behaviourIterator->second;
 		}
+
+		template<typename Value>
+		using PostDataVerifier = std::function<result<Value>()>;
+
+		template<typename Value, typename ResponseReader>
+		result<Value> http_retry_result_converter(const http_response& response, const ResponseReader& reader, const std::optional<PostDataVerifier<Value>>& postDataVerifier)
+		{
+			if (response.response_code() != HttpResponseCodes::OK)
+			{
+				if (postDataVerifier.has_value())
+				{
+					result<Value> postVerifiedResult{ postDataVerifier.value()() };
+					if (postVerifiedResult.is_success())
+					{
+						logger::instance().warning("Kraken REST API call resulted in non-200 status code but data was verified as received by the server");
+						return postVerifiedResult;
+					}
+				}
+
+				return result<Value>::fail(response.message());
+			}
+
+			result<Value> responseResult{ reader(response.message()) };
+
+			if (responseResult.is_success())
+			{
+				return responseResult;
+			}
+
+			if (internal::should_retry(responseResult.error()))
+			{
+				return result<Value>::fail(responseResult.error());
+			}
+
+			throw cb_exception{ std::format("Kraken API error occurred that could not be recovered from: {}", responseResult.error()) };
+		}
 	}
 	
 	class kraken_api final : public exchange
@@ -89,37 +126,11 @@ namespace cb
 		std::string compute_api_sign(const std::string& uriPath, const std::string& postData, const std::string& nonce) const;
 
 		template<typename Value, typename ResponseReader>
-		result<Value> http_retry_result_converter(const cb::http_response& response, const ResponseReader& reader) const
-		{
-			if (response.response_code() != HttpResponseCodes::OK)
-			{
-				// If POST, check if data was received by server
-				// If yes, warn with success?
-
-				return result<Value>::fail(response.message());
-			}
-
-			result<Value> responseResult{ reader(response.message()) };
-
-			if (responseResult.is_success())
-			{
-				return responseResult;
-			}
-
-			if (internal::should_retry(responseResult.error()))
-			{
-				return result<Value>::fail(responseResult.error());
-			}
-
-			throw cb_exception{ std::format("Kraken API error occurred that could not be recovered from: {}", responseResult.error()) };
-		}
-
-		template<typename Value, typename ResponseReader>
-		Value send_request(const http_request& request, const ResponseReader& reader) const
+		Value send_request(const http_request& request, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier = std::nullopt) const
 		{
 			return retry_on_fail<Value>(
 				[this, &request]() { return _httpService.send(request); },
-				[this, &reader](const cb::http_response& response) { return http_retry_result_converter<Value>(response, reader); },
+				[this, &reader, &postDataVerifier](const cb::http_response& response) { return internal::http_retry_result_converter<Value>(response, reader, postDataVerifier); },
 				_httpRetries);
 		}
 
@@ -137,7 +148,7 @@ namespace cb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader) const
+		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier = std::nullopt) const
 		{
 			std::string nonce{ get_nonce() };
 			std::string postData{ "nonce=" + nonce };
@@ -150,13 +161,13 @@ namespace cb
 			request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 			request.set_content(postData);
 
-			return send_request<Value>(request, reader);
+			return send_request<Value>(request, reader, postDataVerifier);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const ResponseReader& reader) const
+		Value send_private_request(const std::string& method, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier = std::nullopt) const
 		{
-			return send_private_request<Value>(method, "", reader);
+			return send_private_request<Value>(method, "", reader, postDataVerifier);
 		}
 
 	public:
