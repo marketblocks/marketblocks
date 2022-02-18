@@ -78,7 +78,7 @@ namespace cb::internal
 		return result<std::vector<tradable_pair>>::success(std::move(pairs));
 	}
 
-	result<order_book_state> read_order_book(const std::string& jsonResult, const tradable_pair& pair, int depth)
+	result<order_book_state> read_order_book(const std::string& jsonResult)
 	{
 		json_document jsonDocument{ parse_json(jsonResult) };
 
@@ -90,13 +90,14 @@ namespace cb::internal
 
 		json_element resultElement{ jsonDocument
 			.element("result")
-			.element(pair.exchange_identifier()) };
-
-		std::vector<order_book_level> levels;
-		levels.reserve(depth);
+			.element(0) };
 
 		json_element asks{ resultElement.element("asks") };
 		json_element bids{ resultElement.element("bids") };
+
+		int depth = asks.size();
+		std::vector<order_book_level> levels;
+		levels.reserve(depth);
 
 		for (int i = 0; i < depth; i++)
 		{

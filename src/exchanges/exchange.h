@@ -33,7 +33,7 @@ namespace cb
 
 		virtual exchange_status get_status() const = 0;
 		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
-		virtual const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const = 0;
+		virtual const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
 		virtual const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const = 0;
 		virtual trade_result trade(const trade_description& description) = 0;
@@ -63,9 +63,9 @@ namespace cb
 			return _marketApi->get_tradable_pairs();
 		}
 
-		const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const override
+		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override
 		{
-			return _marketApi->get_order_book(tradablePairs, depth);
+			return _marketApi->get_order_book(tradablePair, depth);
 		}
 
 		websocket_stream& get_websocket_stream()

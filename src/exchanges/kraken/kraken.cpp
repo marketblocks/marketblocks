@@ -60,22 +60,14 @@ namespace cb
 		return send_public_request<std::vector<tradable_pair>>(_constants.TRADABLE_PAIRS, internal::read_tradable_pairs);
 	}
 
-	const std::unordered_map<tradable_pair, order_book_state> kraken_api::get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const
+	const order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
-		std::unordered_map<tradable_pair, order_book_state> orderBooks;
-		/*orderBooks.reserve(depth);
+		std::string _query = url_query_builder{}
+			.add_parameter("pair", tradablePair.exchange_identifier())
+			.add_parameter("count", std::to_string(depth))
+			.to_string();
 
-		for (auto& pair : tradablePairs)
-		{
-			std::string _query = url_query_builder{}
-				.add_parameter("pair", pair.exchange_identifier())
-				.add_parameter("count", std::to_string(depth))
-				.to_string();
-
-			orderBooks.emplace(pair, send_public_request<order_book_state>(_constants.ORDER_BOOK, _query, internal::read_order_book));
-		}*/
-
-		return orderBooks;
+		return send_public_request<order_book_state>(_constants.ORDER_BOOK, _query, internal::read_order_book);
 	}
 
 	const std::unordered_map<tradable_pair, double> kraken_api::get_fees(const std::vector<tradable_pair>& tradablePairs) const

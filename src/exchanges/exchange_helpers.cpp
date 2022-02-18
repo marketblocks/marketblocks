@@ -3,16 +3,6 @@
 
 namespace cb
 {
-	std::unordered_map<tradable_pair, order_book_level> get_best_order_book_prices(const exchange& exchange, const std::vector<tradable_pair>& tradablePairs)
-	{
-		std::unordered_map<tradable_pair, order_book_state> orderBook = exchange.get_order_book(tradablePairs, 1);
-
-		return to_unordered_map<tradable_pair, order_book_level>(
-			tradablePairs,
-			[](const tradable_pair& pair) { return pair; },
-			[&orderBook](const tradable_pair& pair) { return orderBook.at(pair).level(0); });
-	}
-
 	std::unordered_map<tradable_pair, order_book_level> get_best_order_book_prices(const websocket_stream& websocketStream, const std::vector<tradable_pair>& tradablePairs)
 	{
 		return to_unordered_map<tradable_pair, order_book_level>(

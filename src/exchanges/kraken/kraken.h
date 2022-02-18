@@ -175,7 +175,7 @@ namespace cb
 
 		exchange_status get_status() const override;
 		const std::vector<tradable_pair> get_tradable_pairs() const override;
-		const std::unordered_map<tradable_pair, order_book_state> get_order_book(const std::vector<tradable_pair>& tradablePairs, int depth) const override;
+		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override;
 		const std::unordered_map<asset_symbol, double> get_balances() const override;
 		trade_result trade(const trade_description& description) override;
