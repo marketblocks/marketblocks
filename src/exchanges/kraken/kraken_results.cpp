@@ -88,9 +88,7 @@ namespace cb::internal
 			return result<order_book_state>::fail(std::move(error));
 		}
 
-		json_element resultElement{ jsonDocument
-			.element("result")
-			.element(0) };
+		json_element resultElement{ jsonDocument.element("result").begin().value() };
 
 		json_element asks{ resultElement.element("asks") };
 		json_element bids{ resultElement.element("bids") };

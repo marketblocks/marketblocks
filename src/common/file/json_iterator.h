@@ -4,7 +4,7 @@
 
 namespace cb
 {
-	template <typename proxy>
+	template <typename json_object>
 	class json;
 
 	typedef json<const nlohmann::json&> json_element;

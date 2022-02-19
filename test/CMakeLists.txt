@@ -15,10 +15,14 @@ add_executable(CryptoBotTest
 "unittest/strategies/tri_arb_test.cpp" 
 "unittest/exchanges/paper_trader/paper_trader_test.cpp" 
 "unittest/common/trading/fee_schedule_test.cpp" 
-"unittest/common/security/hash_test.cpp" "unittest/utils/retry_test.cpp")
+"unittest/common/security/hash_test.cpp" "unittest/utils/retry_test.cpp" "unittest/exchanges/kraken/kraken_results_test.cpp" "unittest/assertion_helpers.h")
 
 target_link_libraries(CryptoBotTest LINK_PUBLIC CryptoBot_lib)
 target_link_libraries(CryptoBotTest PRIVATE gtest_main gmock_main)
+
+add_custom_command(TARGET CryptoBotTest POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+						   ${CMAKE_CURRENT_SOURCE_DIR}/test_data/ $<TARGET_FILE_DIR:CryptoBotTest>/test_data)
 
 include(GoogleTest)
 gtest_discover_tests(CryptoBotTest)
