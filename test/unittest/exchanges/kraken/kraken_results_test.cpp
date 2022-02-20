@@ -19,6 +19,11 @@ namespace
 		return reader(json);
 	}
 
+	template<typename T>
+	void no_assert(const T&, const T&)
+	{
+	}
+
 	void assert_order_book_entry_eq(const cb::order_book_entry& lhs, const cb::order_book_entry& rhs)
 	{
 		EXPECT_EQ(lhs.side(), rhs.side());
@@ -41,6 +46,23 @@ namespace
 		{
 			assert_order_book_level_eq(lhs.level(i), rhs.level(i));
 		}
+	}
+
+	void assert_ticker_data_eq(const cb::ticker_data& lhs, const cb::ticker_data& rhs)
+	{
+		EXPECT_DOUBLE_EQ(lhs.ask_price(), rhs.ask_price());
+		EXPECT_DOUBLE_EQ(lhs.ask_volume(), rhs.ask_volume());
+		EXPECT_DOUBLE_EQ(lhs.bid_price(), rhs.bid_price());
+		EXPECT_DOUBLE_EQ(lhs.bid_volume(), rhs.bid_volume());
+		EXPECT_DOUBLE_EQ(lhs.high_24(), rhs.high_24());
+		EXPECT_DOUBLE_EQ(lhs.high_today(), rhs.high_today());
+		EXPECT_DOUBLE_EQ(lhs.low_24(), rhs.low_24());
+		EXPECT_DOUBLE_EQ(lhs.low_today(), rhs.low_today());
+		EXPECT_DOUBLE_EQ(lhs.opening_price(), rhs.opening_price());
+		EXPECT_EQ(lhs.trades_24(), rhs.trades_24());
+		EXPECT_EQ(lhs.trades_today(), rhs.trades_today());
+		EXPECT_DOUBLE_EQ(lhs.volume_24(), rhs.volume_24());
+		EXPECT_DOUBLE_EQ(lhs.volume_today(), rhs.volume_today());
 	}
 }
 
@@ -72,6 +94,19 @@ namespace cb::test
 			result<std::vector<tradable_pair>>::fail(ERROR_MESSAGE));
 	}
 
+	TEST(KrakenResults, ReadTickerData)
+	{
+		assert_result_equal(
+			execute_reader("read_ticker_data_success.json", internal::read_ticker_data),
+			result<ticker_data>::success(ticker_data{ 1940.0, 3.0, 1939.990, 9.0, 267.88525096, 369.71101684, 560, 809, 1917.23, 1917.23, 2034.26, 2056.45, 2034.26 }),
+			assert_ticker_data_eq);
+
+		assert_result_equal(
+			execute_reader("error_response.json", internal::read_ticker_data),
+			result<ticker_data>::fail(ERROR_MESSAGE),
+			no_assert<ticker_data>);
+	}
+
 	TEST(KrakenResults, ReadOrderBook)
 	{
 		assert_result_equal(
@@ -86,6 +121,6 @@ namespace cb::test
 		assert_result_equal(
 			execute_reader("error_response.json", internal::read_order_book),
 			result<order_book_state>::fail(ERROR_MESSAGE),
-			assert_order_book_state_eq);
+			no_assert<order_book_state>);
 	}
 }

@@ -13,6 +13,7 @@
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 #include "trading/trade_description.h"
+#include "trading/ticker_data.h"
 #include "paper_trading/paper_trader.h"
 
 namespace cb
@@ -33,7 +34,7 @@ namespace cb
 
 		virtual exchange_status get_status() const = 0;
 		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
-		//virtual const std::unordered_map<tradable_pair, ticker_data> get_ticker_data(const std::vector<tradable_pair>& tradablePairs) const = 0;
+		virtual const ticker_data get_ticker_data(const tradable_pair& tradablePair) const = 0;
 		virtual const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
 		virtual const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const = 0;
@@ -64,6 +65,11 @@ namespace cb
 		const std::vector<tradable_pair> get_tradable_pairs() const override
 		{
 			return _marketApi->get_tradable_pairs();
+		}
+
+		const ticker_data get_ticker_data(const tradable_pair& tradablePair) const override
+		{
+			return _marketApi->get_ticker_data(tradablePair);
 		}
 
 		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override

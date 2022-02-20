@@ -29,6 +29,7 @@ namespace cb
 			inline static const std::string PRIVATE = "private";
 
 			inline static const std::string TRADABLE_PAIRS = "AssetPairs";
+			inline static const std::string TICKER = "Ticker";
 			inline static const std::string ORDER_BOOK = "Depth";
 			inline static const std::string BALANCE = "Balance";
 			inline static const std::string SYSTEM_STATUS = "SystemStatus";
@@ -175,6 +176,7 @@ namespace cb
 
 		exchange_status get_status() const override;
 		const std::vector<tradable_pair> get_tradable_pairs() const override;
+		const ticker_data get_ticker_data(const tradable_pair& tradablePair) const override;
 		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override;
 		const std::unordered_map<asset_symbol, double> get_balances() const override;
