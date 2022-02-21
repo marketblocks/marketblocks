@@ -123,4 +123,23 @@ namespace cb::test
 			result<order_book_state>::fail(ERROR_MESSAGE),
 			no_assert<order_book_state>);
 	}
+
+	TEST(KrakenResults, ReadBalances)
+	{
+		assert_result_equal(
+			execute_reader("read_balances_success.json", internal::read_balances),
+			result<std::unordered_map<asset_symbol, double>>::success(
+				{
+					{ asset_symbol{ "ZUSD" }, 171288.6158 },
+					{ asset_symbol{ "ZEUR" }, 504861.8946 },
+					{ asset_symbol{ "ZGBP" }, 459567.9171 },
+					{ asset_symbol{ "XXBT" }, 1011.19088779 },
+					{ asset_symbol{ "XLTC" }, 2000.0 },
+					{ asset_symbol{ "XETH" }, 818.55 }
+				}));
+		
+		assert_result_equal(
+			execute_reader("error_response.json", internal::read_balances),
+			result<std::unordered_map<asset_symbol, double>>::fail(ERROR_MESSAGE));
+	}
 }

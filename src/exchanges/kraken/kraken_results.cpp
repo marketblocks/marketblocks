@@ -155,7 +155,15 @@ namespace cb::internal
 	{
 		return read_result<std::unordered_map<asset_symbol, double>>(jsonResult, [](const json_element& resultElement)
 		{
-			return result<std::unordered_map<asset_symbol, double>>::success(std::unordered_map<asset_symbol, double>());
+			std::unordered_map<asset_symbol, double> balances;
+			balances.reserve(resultElement.size());
+
+			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
+			{
+				balances.emplace(asset_symbol{ it.key() }, std::stod(it.value().get<std::string>()));
+			}
+
+			return result<std::unordered_map<asset_symbol, double>>::success(std::move(balances));
 		});
 	}
 }
