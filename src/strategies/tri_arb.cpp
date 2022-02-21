@@ -248,7 +248,13 @@ void tri_arb_strategy::run_iteration()
 			try
 			{
 				const std::unordered_map<cb::tradable_pair, cb::order_book_level> prices = get_best_order_book_prices(exchange.get_websocket_stream(), sequence.pairs());
-				const std::unordered_map<cb::tradable_pair, double> fees = exchange.get_fees(sequence.pairs());
+				const std::unordered_map<cb::tradable_pair, double> fees
+				{
+					{ sequence.pairs()[0], 0.26 },
+					{ sequence.pairs()[1], 0.26 },
+					{ sequence.pairs()[2], 0.26 }
+				};
+				//exchange.get_fees(sequence.pairs());
 
 				SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
 

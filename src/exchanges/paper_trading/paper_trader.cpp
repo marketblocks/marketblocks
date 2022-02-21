@@ -26,12 +26,9 @@ namespace cb
 		return "";
 	}
 
-	const std::unordered_map<tradable_pair, double> paper_trader::get_fees(const std::vector<tradable_pair>& tradablePairs) const
+	const double paper_trader::get_fee(const tradable_pair& tradablePair) const
 	{
-		return to_unordered_map<tradable_pair, double>(
-			tradablePairs,
-			[](const tradable_pair& pair) { return pair; },
-			[this](const tradable_pair& pair) { return _feeSchedule.get_fee(0); });
+		return _feeSchedule.get_fee(0);
 	}
 
 	const std::string paper_trader::add_order(const trade_description& description)

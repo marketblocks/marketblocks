@@ -23,7 +23,7 @@ namespace cb
 	public:
 		explicit paper_trader(fee_schedule feeSchedule, std::unordered_map<asset_symbol, double> initialBalances);
 
-		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const;
+		const double get_fee(const tradable_pair& tradablePair) const;
 		const std::unordered_map<asset_symbol, double> get_balances() const { return _balances; }
 
 		const std::string add_order(const trade_description& description);

@@ -17,4 +17,5 @@ namespace cb::internal
 	result<ticker_data> read_ticker_data(const std::string& jsonResult);
 	result<order_book_state> read_order_book(const std::string& jsonResult);
 	result<std::unordered_map<asset_symbol, double>> read_balances(const std::string& jsonResult);
+	result<double> read_fee(const std::string& jsonResult);
 }

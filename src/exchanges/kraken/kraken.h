@@ -32,6 +32,7 @@ namespace cb
 			inline static const std::string TICKER = "Ticker";
 			inline static const std::string ORDER_BOOK = "Depth";
 			inline static const std::string BALANCE = "Balance";
+			inline static const std::string TRADE_VOLUME = "TradeVolume";
 			inline static const std::string SYSTEM_STATUS = "SystemStatus";
 		};
 
@@ -149,14 +150,20 @@ namespace cb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier = std::nullopt) const
+		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier) const
 		{
 			std::string nonce{ get_nonce() };
+			
 			std::string postData{ "nonce=" + nonce };
+			if (!query.empty())
+			{
+				postData += "&" + query;
+			}
+
 			std::string apiPath{ build_url_path(_constants.PRIVATE, method) };
 			std::string apiSign{ compute_api_sign(apiPath, postData, nonce) };
 
-			http_request request{ http_verb::POST, build_url(_constants.BASEURL, apiPath, query) };
+			http_request request{ http_verb::POST, _constants.BASEURL + apiPath };
 			request.add_header("API-Key", _publicKey);
 			request.add_header("API-Sign", apiSign);
 			request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
@@ -178,7 +185,7 @@ namespace cb
 		const std::vector<tradable_pair> get_tradable_pairs() const override;
 		const ticker_data get_ticker_data(const tradable_pair& tradablePair) const override;
 		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
-		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override;
+		const double get_fee(const tradable_pair& tradablePair) const override;
 		const std::unordered_map<asset_symbol, double> get_balances() const override;
 		const std::string add_order(const trade_description& description) override;
 

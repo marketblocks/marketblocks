@@ -79,9 +79,13 @@ namespace cb
 		return send_public_request<order_book_state>(_constants.ORDER_BOOK, query, internal::read_order_book);
 	}
 
-	const std::unordered_map<tradable_pair, double> kraken_api::get_fees(const std::vector<tradable_pair>& tradablePairs) const
+	const double kraken_api::get_fee(const tradable_pair& tradablePair) const
 	{
-		return std::unordered_map<tradable_pair, double>();
+		std::string query = url_query_builder{}
+			.add_parameter("pair", tradablePair.exchange_identifier())
+			.to_string();
+
+		return send_private_request<double>(_constants.TRADE_VOLUME, query, internal::read_fee, std::nullopt);
 	}
 
 	const std::unordered_map<asset_symbol, double> kraken_api::get_balances() const

@@ -142,4 +142,15 @@ namespace cb::test
 			execute_reader("error_response.json", internal::read_balances),
 			result<std::unordered_map<asset_symbol, double>>::fail(ERROR_MESSAGE));
 	}
+
+	TEST(KrakenResults, ReadFee)
+	{
+		assert_result_equal(
+			execute_reader("read_fee_success.json", internal::read_fee),
+			result<double>::success(0.1));
+
+		assert_result_equal(
+			execute_reader("error_response.json", internal::read_fee),
+			result<double>::fail(ERROR_MESSAGE));
+	}
 }

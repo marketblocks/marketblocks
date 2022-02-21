@@ -166,4 +166,15 @@ namespace cb::internal
 			return result<std::unordered_map<asset_symbol, double>>::success(std::move(balances));
 		});
 	}
+
+	result<double> read_fee(const std::string& jsonResult)
+	{
+		return read_result<double>(jsonResult, [](const json_element& resultElement)
+		{
+			json_element feeElement{ resultElement.element("fees").begin().value() };
+			std::string fee{ feeElement.get<std::string>("fee") };
+
+			return result<double>::success(std::stod(fee));
+		});
+	}
 }

@@ -37,7 +37,7 @@ namespace cb
 		virtual const ticker_data get_ticker_data(const tradable_pair& tradablePair) const = 0;
 		virtual const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
-		virtual const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const = 0;
+		virtual const double get_fee(const tradable_pair& tradablePair) const = 0;
 		virtual const std::string add_order(const trade_description& description) = 0;
 		//virtual int cancel_order(const std::string& orderId) const = 0;
 		//virtual const std::vector<order_description> get_open_orders() const = 0;
@@ -87,9 +87,9 @@ namespace cb
 			return _tradeApi->get_balances();
 		}
 
-		const std::unordered_map<tradable_pair, double> get_fees(const std::vector<tradable_pair>& tradablePairs) const override
+		const double get_fee(const tradable_pair& tradablePair) const override
 		{
-			return _tradeApi->get_fees(tradablePairs);
+			return _tradeApi->get_fee(tradablePair);
 		}
 
 		const std::string add_order(const trade_description& description) override
