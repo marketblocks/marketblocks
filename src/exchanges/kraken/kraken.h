@@ -34,6 +34,8 @@ namespace cb
 			inline static const std::string BALANCE = "Balance";
 			inline static const std::string TRADE_VOLUME = "TradeVolume";
 			inline static const std::string SYSTEM_STATUS = "SystemStatus";
+			inline static const std::string OPEN_ORDERS = "OpenOrders";
+			inline static const std::string CLOSED_ORDERS = "ClosedOrders";
 		};
 
 		inline bool should_retry(std::string errorMessage)
@@ -187,6 +189,8 @@ namespace cb
 		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		const double get_fee(const tradable_pair& tradablePair) const override;
 		const std::unordered_map<asset_symbol, double> get_balances() const override;
+		const std::vector<order_description> get_open_orders() const override;
+		const std::vector<order_description> get_closed_orders() const override;
 		const std::string add_order(const trade_description& description) override;
 
 		websocket_stream& get_websocket_stream() override;

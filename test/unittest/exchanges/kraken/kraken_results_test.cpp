@@ -8,6 +8,10 @@
 
 namespace
 {
+	using namespace cb::test;
+	
+	static const std::string ERROR_MESSAGE = "This is an error";
+
 	template<typename ResultReader>
 	auto execute_reader(const std::string& dataFileName, ResultReader reader)
 	{
@@ -19,9 +23,24 @@ namespace
 		return reader(json);
 	}
 
-	template<typename T>
-	void no_assert(const T&, const T&)
+	template<typename T, typename ResultReader, typename ValueAsserter>
+	void execute_test(const std::string& testDataFileName, const ResultReader& reader, T expectedValue, const ValueAsserter& valueAsserter)
 	{
+		assert_result_equal(
+			execute_reader(testDataFileName, reader),
+			cb::result<T>::success(std::move(expectedValue)),
+			valueAsserter);
+
+		assert_result_equal(
+			execute_reader("error_response.json", reader),
+			cb::result<T>::fail(ERROR_MESSAGE),
+			valueAsserter);
+	}
+
+	template<typename T, typename ResultReader>
+	void execute_test(const std::string& testDataFileName, const ResultReader& reader, const T& expectedValue)
+	{
+		execute_test(testDataFileName, reader, expectedValue, cb::test::default_expect_eq<T>);
 	}
 
 	void assert_order_book_entry_eq(const cb::order_book_entry& lhs, const cb::order_book_entry& rhs)
@@ -64,93 +83,116 @@ namespace
 		EXPECT_DOUBLE_EQ(lhs.volume_24(), rhs.volume_24());
 		EXPECT_DOUBLE_EQ(lhs.volume_today(), rhs.volume_today());
 	}
+
+	std::vector<cb::order_description> get_expected_open_closed_orders()
+	{
+		return
+		{
+			cb::order_description{ "OB5VMB-B4U2U-DK2WRW", "XBTUSD", cb::trade_action::SELL, 14500.0, 0.275 },
+			cb::order_description{ "OQCLML-BW3P3-BUCMWZ", "XBTUSD", cb::trade_action::BUY, 30010.0, 1.25 }
+		};
+	}
+
+	void assert_order_description_eq(const std::vector<cb::order_description>& lhs, const std::vector<cb::order_description>& rhs)
+	{
+		ASSERT_EQ(lhs.size(), rhs.size());
+
+		for (int i = 0; i < lhs.size(); ++i)
+		{
+			EXPECT_EQ(lhs[i].order_id(), rhs[i].order_id());
+			EXPECT_EQ(lhs[i].pair_name(), rhs[i].pair_name());
+			EXPECT_EQ(lhs[i].action(), rhs[i].action());
+			EXPECT_DOUBLE_EQ(lhs[i].price(), rhs[i].price());
+			EXPECT_DOUBLE_EQ(lhs[i].volume(), rhs[i].volume());
+		}
+	}
 }
 
 namespace cb::test
 {
-	static const std::string ERROR_MESSAGE = "This is an error";
-
 	TEST(KrakenResults, ReadSystemStatus)
 	{
-		assert_result_equal(execute_reader("read_system_status_online.json", internal::read_system_status), result<exchange_status>::success(exchange_status::ONLINE));
-		assert_result_equal(execute_reader("read_system_status_maintenance.json", internal::read_system_status), result<exchange_status>::success(exchange_status::MAINTENANCE));
-		assert_result_equal(execute_reader("read_system_status_cancel_only.json", internal::read_system_status), result<exchange_status>::success(exchange_status::CANCEL_ONLY));
-		assert_result_equal(execute_reader("read_system_status_post_only.json", internal::read_system_status), result<exchange_status>::success(exchange_status::POST_ONLY));
-		assert_result_equal(execute_reader("error_response.json", internal::read_system_status), result<exchange_status>::fail(ERROR_MESSAGE));
+		execute_test("read_system_status_online.json", internal::read_system_status, exchange_status::ONLINE);
+		execute_test("read_system_status_maintenance.json", internal::read_system_status,exchange_status::MAINTENANCE);
+		execute_test("read_system_status_cancel_only.json", internal::read_system_status, exchange_status::CANCEL_ONLY);
+		execute_test("read_system_status_post_only.json", internal::read_system_status, exchange_status::POST_ONLY);
 	}
 
 	TEST(KrakenResults, ReadTradablePairs)
 	{
-		assert_result_equal(
-			execute_reader("read_tradable_pairs_success.json", internal::read_tradable_pairs),
-			result<std::vector<tradable_pair>>::success(
-				{ 
-					tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
-					tradable_pair{asset_symbol{"XBT"}, asset_symbol{"USD"}} 
-				}));
-
-		assert_result_equal(
-			execute_reader("error_response.json", internal::read_tradable_pairs),
-			result<std::vector<tradable_pair>>::fail(ERROR_MESSAGE));
+		execute_test(
+			"read_tradable_pairs_success.json",
+			internal::read_tradable_pairs,
+			std::vector<tradable_pair> 
+			{
+				tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
+				tradable_pair{ asset_symbol{"XBT"}, asset_symbol{"USD"} }
+			});
 	}
 
 	TEST(KrakenResults, ReadTickerData)
 	{
-		assert_result_equal(
-			execute_reader("read_ticker_data_success.json", internal::read_ticker_data),
-			result<ticker_data>::success(ticker_data{ 1940.0, 3.0, 1939.990, 9.0, 267.88525096, 369.71101684, 560, 809, 1917.23, 1917.23, 2034.26, 2056.45, 2034.26 }),
+		execute_test(
+			"read_ticker_data_success.json",
+			internal::read_ticker_data,
+			ticker_data{ 1940.0, 3.0, 1939.990, 9.0, 267.88525096, 369.71101684, 560, 809, 1917.23, 1917.23, 2034.26, 2056.45, 2034.26 },
 			assert_ticker_data_eq);
-
-		assert_result_equal(
-			execute_reader("error_response.json", internal::read_ticker_data),
-			result<ticker_data>::fail(ERROR_MESSAGE),
-			no_assert<ticker_data>);
 	}
 
 	TEST(KrakenResults, ReadOrderBook)
 	{
-		assert_result_equal(
-			execute_reader("read_order_book_success.json", internal::read_order_book),
-			result<order_book_state>::success(order_book_state{
+		execute_test(
+			"read_order_book_success.json",
+			internal::read_order_book,
+			order_book_state
+			{
 				{
 					order_book_level{ order_book_entry{order_book_side::ASK, 52523.0, 1.199, 1616663113}, order_book_entry{order_book_side::BID, 52522.9, 0.753, 1616663112} },
 					order_book_level{ order_book_entry{order_book_side::ASK, 52536.0, 0.30, 1616663112}, order_book_entry{order_book_side::BID, 52522.8, 0.006, 1616663109} }
-				} }),
+				} 
+			},
 			assert_order_book_state_eq);
-
-		assert_result_equal(
-			execute_reader("error_response.json", internal::read_order_book),
-			result<order_book_state>::fail(ERROR_MESSAGE),
-			no_assert<order_book_state>);
 	}
 
 	TEST(KrakenResults, ReadBalances)
 	{
-		assert_result_equal(
-			execute_reader("read_balances_success.json", internal::read_balances),
-			result<std::unordered_map<asset_symbol, double>>::success(
-				{
-					{ asset_symbol{ "ZUSD" }, 171288.6158 },
-					{ asset_symbol{ "ZEUR" }, 504861.8946 },
-					{ asset_symbol{ "ZGBP" }, 459567.9171 },
-					{ asset_symbol{ "XXBT" }, 1011.19088779 },
-					{ asset_symbol{ "XLTC" }, 2000.0 },
-					{ asset_symbol{ "XETH" }, 818.55 }
-				}));
-		
-		assert_result_equal(
-			execute_reader("error_response.json", internal::read_balances),
-			result<std::unordered_map<asset_symbol, double>>::fail(ERROR_MESSAGE));
+		execute_test(
+			"read_balances_success.json",
+			internal::read_balances,
+			std::unordered_map<asset_symbol, double>
+			{
+				{ asset_symbol{ "ZUSD" }, 171288.6158 },
+				{ asset_symbol{ "ZEUR" }, 504861.8946 },
+				{ asset_symbol{ "ZGBP" }, 459567.9171 },
+				{ asset_symbol{ "XXBT" }, 1011.19088779 },
+				{ asset_symbol{ "XLTC" }, 2000.0 },
+				{ asset_symbol{ "XETH" }, 818.55 }
+			});
 	}
 
 	TEST(KrakenResults, ReadFee)
 	{
-		assert_result_equal(
-			execute_reader("read_fee_success.json", internal::read_fee),
-			result<double>::success(0.1));
+		execute_test(
+			"read_fee_success.json",
+			internal::read_fee,
+			0.1);
+	}
 
-		assert_result_equal(
-			execute_reader("error_response.json", internal::read_fee),
-			result<double>::fail(ERROR_MESSAGE));
+	TEST(KrakenResults, ReadOpenOrders)
+	{
+		execute_test(
+			"read_open_orders_success.json",
+			internal::read_open_orders,
+			get_expected_open_closed_orders(),
+			assert_order_description_eq);
+	}
+
+	TEST(KrakenResults, ReadClosedOrders)
+	{
+		execute_test(
+			"read_closed_orders_success.json",
+			internal::read_closed_orders,
+			get_expected_open_closed_orders(),
+			assert_order_description_eq);
 	}
 }

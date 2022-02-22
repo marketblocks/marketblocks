@@ -8,6 +8,7 @@
 #include "trading/tradable_pair.h"
 #include "trading/trade_description.h"
 #include "trading/fee_schedule.h"
+#include "trading/order_description.h"
 
 namespace cb
 {
@@ -25,6 +26,8 @@ namespace cb
 
 		const double get_fee(const tradable_pair& tradablePair) const;
 		const std::unordered_map<asset_symbol, double> get_balances() const { return _balances; }
+		const std::vector<order_description> get_open_orders() const { return std::vector<order_description>{}; }
+		const std::vector<order_description> get_closed_orders() const { return std::vector<order_description>{}; }
 
 		const std::string add_order(const trade_description& description);
 	};

@@ -93,6 +93,16 @@ namespace cb
 		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.BALANCE, internal::read_balances);
 	}
 
+	const std::vector<order_description> kraken_api::get_open_orders() const
+	{
+		return send_private_request<std::vector<order_description>>(_constants.OPEN_ORDERS, internal::read_open_orders);
+	}
+
+	const std::vector<order_description> kraken_api::get_closed_orders() const
+	{
+		return send_private_request<std::vector<order_description>>(_constants.CLOSED_ORDERS, internal::read_closed_orders);
+	}
+
 	const std::string kraken_api::add_order(const trade_description& description)
 	{
 		return "";

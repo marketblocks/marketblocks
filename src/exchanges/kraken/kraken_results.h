@@ -8,6 +8,7 @@
 #include "trading/order_book.h"
 #include "trading/tradable_pair.h"
 #include "trading/ticker_data.h"
+#include "trading/order_description.h"
 #include "common/types/result.h"
 
 namespace cb::internal
@@ -18,4 +19,6 @@ namespace cb::internal
 	result<order_book_state> read_order_book(const std::string& jsonResult);
 	result<std::unordered_map<asset_symbol, double>> read_balances(const std::string& jsonResult);
 	result<double> read_fee(const std::string& jsonResult);
+	result<std::vector<order_description>> read_open_orders(const std::string& jsonResult);
+	result<std::vector<order_description>> read_closed_orders(const std::string& jsonResult);
 }

@@ -14,6 +14,7 @@
 #include "trading/order_book.h"
 #include "trading/trade_description.h"
 #include "trading/ticker_data.h"
+#include "trading/order_description.h"
 #include "paper_trading/paper_trader.h"
 
 namespace cb
@@ -38,10 +39,10 @@ namespace cb
 		virtual const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
 		virtual const double get_fee(const tradable_pair& tradablePair) const = 0;
+		virtual const std::vector<order_description> get_open_orders() const = 0;
+		virtual const std::vector<order_description> get_closed_orders() const = 0;
 		virtual const std::string add_order(const trade_description& description) = 0;
 		//virtual int cancel_order(const std::string& orderId) const = 0;
-		//virtual const std::vector<order_description> get_open_orders() const = 0;
-		//virtual const std::vector<order_description> get_closed_orders() const = 0;
 		virtual websocket_stream& get_websocket_stream() = 0;
 	};
 
@@ -90,6 +91,16 @@ namespace cb
 		const double get_fee(const tradable_pair& tradablePair) const override
 		{
 			return _tradeApi->get_fee(tradablePair);
+		}
+
+		const std::vector<order_description> get_open_orders() const override
+		{
+			return _tradeApi->get_open_orders();
+		}
+		
+		const std::vector<order_description> get_closed_orders() const override
+		{
+			return _tradeApi->get_closed_orders();
 		}
 
 		const std::string add_order(const trade_description& description) override

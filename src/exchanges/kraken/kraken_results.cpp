@@ -27,6 +27,34 @@ namespace
 
 		return reader(jsonDocument.element("result"));
 	}
+
+	cb::result<std::vector<cb::order_description>> read_open_closed_orders(const std::string& jsonResult, const std::string& orderType)
+	{
+		return read_result<std::vector<cb::order_description>>(jsonResult, [&orderType](const cb::json_element& resultElement)
+			{
+				cb::json_element ordersElement{ resultElement.element(orderType) };
+				std::vector<cb::order_description> orderDescriptions;
+				orderDescriptions.reserve(ordersElement.size());
+
+				for (auto it = ordersElement.begin(); it != ordersElement.end(); ++it)
+				{
+					std::string orderId{ it.key() };
+					cb::json_element order{ it.value() };
+					cb::json_element descriptionElement{ order.element("descr") };
+
+					std::string pairName{ descriptionElement.get<std::string>("pair") };
+					cb::trade_action action = descriptionElement.get<std::string>("type") == "buy" 
+						? cb::trade_action::BUY 
+						: cb::trade_action::SELL;
+					double price = std::stod(descriptionElement.get<std::string>("price"));
+					double volume = std::stod(order.get<std::string>("vol"));
+
+					orderDescriptions.emplace_back(std::move(orderId), std::move(pairName), action, price, volume);
+				}
+
+				return cb::result<std::vector<cb::order_description>>::success(std::move(orderDescriptions));
+			});
+	}
 }
 
 namespace cb::internal
@@ -176,5 +204,15 @@ namespace cb::internal
 
 			return result<double>::success(std::stod(fee));
 		});
+	}
+
+	result<std::vector<order_description>> read_open_orders(const std::string& jsonResult)
+	{
+		return read_open_closed_orders(jsonResult, "open");
+	}
+
+	result<std::vector<order_description>> read_closed_orders(const std::string& jsonResult)
+	{
+		return read_open_closed_orders(jsonResult, "closed");
 	}
 }
