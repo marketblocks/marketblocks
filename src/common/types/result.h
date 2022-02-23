@@ -12,35 +12,39 @@ namespace cb
 	class result
 	{
 	private:
-		std::variant<Value, std::string> _result;
+		static constexpr int VALUE_INDEX = 0;
+		static constexpr int ERROR_INDEX = 1;
+
+		using result_variant = std::variant<Value, std::string>;
+		
+		result_variant _result;
 		bool _isSuccess;
 
-		template<typename T>
-		result(T&& value, bool isSuccess)
-			: _result{ std::forward<T>(value) }, _isSuccess{ isSuccess }
+		result(result_variant value, bool isSuccess)
+			: _result{ std::move(value) }, _isSuccess{ isSuccess }
 		{}
 
 	public:
 		static result<Value> success(Value&& value)
 		{
-			return result<Value>{ std::forward<Value>(value), true };
+			return result<Value>{ result_variant{ std::in_place_index<VALUE_INDEX>, std::forward<Value>(value) }, true };
 		}
 
 		static result<Value> fail(std::string error)
 		{
-			return result<Value>{ std::move(error), false };
+			return result<Value>{ result_variant{ std::in_place_index<ERROR_INDEX>, std::move(error) }, false };
 		}
 
 		const Value& value() const
 		{
 			assert(is_success());
-			return std::get<Value>(_result);
+			return std::get<VALUE_INDEX>(_result);
 		}
 
 		const std::string& error() const 
 		{ 
 			assert(is_failure());
-			return std::get<std::string>(_result);
+			return std::get<ERROR_INDEX>(_result);
 		}
 
 		bool is_success() const { return _isSuccess; }

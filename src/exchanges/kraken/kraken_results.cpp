@@ -215,4 +215,12 @@ namespace cb::internal
 	{
 		return read_open_closed_orders(jsonResult, "closed");
 	}
+
+	result<std::string> read_add_order(const std::string& jsonResult)
+	{
+		return read_result<std::string>(jsonResult, [](const json_element& resultElement)
+		{
+			return result<std::string>::success(std::move(resultElement.get<std::vector<std::string>>("txid")[0]));
+		});
+	}
 }

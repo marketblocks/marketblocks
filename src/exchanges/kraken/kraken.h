@@ -36,6 +36,8 @@ namespace cb
 			inline static const std::string SYSTEM_STATUS = "SystemStatus";
 			inline static const std::string OPEN_ORDERS = "OpenOrders";
 			inline static const std::string CLOSED_ORDERS = "ClosedOrders";
+			inline static const std::string QUERY_ORDERS = "QueryOrders";
+			inline static const std::string ADD_ORDER = "AddOrder";
 		};
 
 		inline bool should_retry(std::string errorMessage)
@@ -76,24 +78,11 @@ namespace cb
 			return behaviourIterator->second;
 		}
 
-		template<typename Value>
-		using PostDataVerifier = std::function<result<Value>()>;
-
 		template<typename Value, typename ResponseReader>
-		result<Value> http_retry_result_converter(const http_response& response, const ResponseReader& reader, const std::optional<PostDataVerifier<Value>>& postDataVerifier)
+		result<Value> http_retry_result_converter(const http_response& response, const ResponseReader& reader)
 		{
 			if (response.response_code() != HttpResponseCodes::OK)
 			{
-				if (postDataVerifier.has_value())
-				{
-					result<Value> postVerifiedResult{ postDataVerifier.value()() };
-					if (postVerifiedResult.is_success())
-					{
-						logger::instance().warning("Kraken REST API call resulted in non-200 status code but data was verified as received by the server");
-						return postVerifiedResult;
-					}
-				}
-
 				return result<Value>::fail(response.message());
 			}
 
@@ -109,7 +98,7 @@ namespace cb
 				return result<Value>::fail(responseResult.error());
 			}
 
-			throw cb_exception{ std::format("Kraken API error occurred that could not be recovered from: {}", responseResult.error()) };
+			throw cb_exception{ responseResult.error() };
 		}
 	}
 	
@@ -117,7 +106,7 @@ namespace cb
 	{
 	private:
 		internal::kraken_constants _constants;
-		
+
 		std::string _publicKey;
 		std::vector<unsigned char> _decodedPrivateKey;
 		int _httpRetries;
@@ -130,11 +119,11 @@ namespace cb
 		std::string compute_api_sign(const std::string& uriPath, const std::string& postData, const std::string& nonce) const;
 
 		template<typename Value, typename ResponseReader>
-		Value send_request(const http_request& request, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier = std::nullopt) const
+		Value send_request(const http_request& request, const ResponseReader& reader) const
 		{
 			return retry_on_fail<Value>(
 				[this, &request]() { return _httpService.send(request); },
-				[this, &reader, &postDataVerifier](const cb::http_response& response) { return internal::http_retry_result_converter<Value>(response, reader, postDataVerifier); },
+				[this, &reader](const cb::http_response& response) { return internal::http_retry_result_converter<Value>(response, reader); },
 				_httpRetries);
 		}
 
@@ -152,10 +141,10 @@ namespace cb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier) const
+		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader) const
 		{
 			std::string nonce{ get_nonce() };
-			
+
 			std::string postData{ "nonce=" + nonce };
 			if (!query.empty())
 			{
@@ -171,13 +160,13 @@ namespace cb
 			request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 			request.set_content(postData);
 
-			return send_request<Value>(request, reader, postDataVerifier);
+			return send_request<Value>(request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const ResponseReader& reader, const std::optional<internal::PostDataVerifier<Value>>& postDataVerifier = std::nullopt) const
+		Value send_private_request(const std::string& method, const ResponseReader& reader) const
 		{
-			return send_private_request<Value>(method, "", reader, postDataVerifier);
+			return send_private_request<Value>(method, "", reader);
 		}
 
 	public:

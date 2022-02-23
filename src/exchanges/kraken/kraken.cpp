@@ -11,6 +11,35 @@
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 
+namespace
+{
+	std::string to_string(const cb::order_type& orderType)
+	{
+		switch (orderType)
+		{
+		case cb::order_type::LIMIT:
+			return "limit";
+		case cb::order_type::MARKET:
+			return "market";
+		default:
+			throw std::invalid_argument{ "Order Type not recognized" };
+		}
+	}
+
+	std::string to_string(const cb::trade_action& tradeAction)
+	{
+		switch (tradeAction)
+		{
+		case cb::trade_action::BUY:
+			return "buy";
+		case cb::trade_action::SELL:
+			return "sell";
+		default:
+			throw std::invalid_argument{ "Trade Action not recognized" };
+		}
+	}
+}
+
 namespace cb
 {
 	kraken_api::kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream)
@@ -85,7 +114,7 @@ namespace cb
 			.add_parameter("pair", tradablePair.exchange_identifier())
 			.to_string();
 
-		return send_private_request<double>(_constants.TRADE_VOLUME, query, internal::read_fee, std::nullopt);
+		return send_private_request<double>(_constants.TRADE_VOLUME, query, internal::read_fee);
 	}
 
 	const std::unordered_map<asset_symbol, double> kraken_api::get_balances() const
@@ -105,7 +134,18 @@ namespace cb
 
 	const std::string kraken_api::add_order(const trade_description& description)
 	{
-		return "";
+		int userReference = milliseconds_since_epoch();
+
+		std::string query = url_query_builder{}
+			.add_parameter("userref", std::to_string(userReference))
+			.add_parameter("pair", description.pair().exchange_identifier())
+			.add_parameter("type", ::to_string(description.action()))
+			.add_parameter("ordertype", ::to_string(description.order_type()))
+			.add_parameter("price", std::to_string(description.asset_price()))
+			.add_parameter("volume", std::to_string(description.volume()))
+			.to_string();
+
+		return send_private_request<std::string>(_constants.ADD_ORDER, internal::read_add_order);
 	}
 
 	websocket_stream& kraken_api::get_websocket_stream()

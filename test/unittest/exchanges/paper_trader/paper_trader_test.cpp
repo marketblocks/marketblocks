@@ -32,6 +32,7 @@ namespace
 		cb::tradable_pair pair{ cb::asset_symbol{ "BTC" }, cb::asset_symbol{ "GBP" } };
 		cb::trade_description tradeDescription
 		{
+			cb::order_type::LIMIT,
 			pair,
 			tradeAction,
 			assetPrice,

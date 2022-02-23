@@ -113,7 +113,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadSystemStatus)
 	{
 		execute_test("read_system_status_online.json", internal::read_system_status, exchange_status::ONLINE);
-		execute_test("read_system_status_maintenance.json", internal::read_system_status,exchange_status::MAINTENANCE);
+		execute_test("read_system_status_maintenance.json", internal::read_system_status, exchange_status::MAINTENANCE);
 		execute_test("read_system_status_cancel_only.json", internal::read_system_status, exchange_status::CANCEL_ONLY);
 		execute_test("read_system_status_post_only.json", internal::read_system_status, exchange_status::POST_ONLY);
 	}
@@ -123,11 +123,11 @@ namespace cb::test
 		execute_test(
 			"read_tradable_pairs_success.json",
 			internal::read_tradable_pairs,
-			std::vector<tradable_pair> 
-			{
-				tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
+			std::vector<tradable_pair>
+		{
+			tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
 				tradable_pair{ asset_symbol{"XBT"}, asset_symbol{"USD"} }
-			});
+		});
 	}
 
 	TEST(KrakenResults, ReadTickerData)
@@ -149,7 +149,7 @@ namespace cb::test
 				{
 					order_book_level{ order_book_entry{order_book_side::ASK, 52523.0, 1.199, 1616663113}, order_book_entry{order_book_side::BID, 52522.9, 0.753, 1616663112} },
 					order_book_level{ order_book_entry{order_book_side::ASK, 52536.0, 0.30, 1616663112}, order_book_entry{order_book_side::BID, 52522.8, 0.006, 1616663109} }
-				} 
+				}
 			},
 			assert_order_book_state_eq);
 	}
@@ -160,14 +160,14 @@ namespace cb::test
 			"read_balances_success.json",
 			internal::read_balances,
 			std::unordered_map<asset_symbol, double>
-			{
-				{ asset_symbol{ "ZUSD" }, 171288.6158 },
-				{ asset_symbol{ "ZEUR" }, 504861.8946 },
-				{ asset_symbol{ "ZGBP" }, 459567.9171 },
-				{ asset_symbol{ "XXBT" }, 1011.19088779 },
-				{ asset_symbol{ "XLTC" }, 2000.0 },
-				{ asset_symbol{ "XETH" }, 818.55 }
-			});
+		{
+			{ asset_symbol{ "ZUSD" }, 171288.6158 },
+			{ asset_symbol{ "ZEUR" }, 504861.8946 },
+			{ asset_symbol{ "ZGBP" }, 459567.9171 },
+			{ asset_symbol{ "XXBT" }, 1011.19088779 },
+			{ asset_symbol{ "XLTC" }, 2000.0 },
+			{ asset_symbol{ "XETH" }, 818.55 }
+		});
 	}
 
 	TEST(KrakenResults, ReadFee)
@@ -194,5 +194,13 @@ namespace cb::test
 			internal::read_closed_orders,
 			get_expected_open_closed_orders(),
 			assert_order_description_eq);
+	}
+
+	TEST(KrakenResults, ReadAddOrder)
+	{
+		execute_test<std::string>(
+			"read_add_order_success.json",
+			internal::read_add_order,
+			"OUF4EM-FRGI2-MQMWZD");
 	}
 }

@@ -181,7 +181,7 @@ namespace
 		double volume = sequenceStep.action() == cb::trade_action::BUY ? g1 : g0;
 		double assetPrice = select_entry(prices.at(sequenceStep.pair()), sequenceStep.action()).price();
 
-		return cb::trade_description(sequenceStep.pair(), sequenceStep.action(), assetPrice, volume);
+		return cb::trade_description(cb::order_type::LIMIT, sequenceStep.pair(), sequenceStep.action(), assetPrice, volume);
 	}
 
 	SequenceTrades create_sequence_trades(const tri_arb_sequence& sequence, const SequenceGains& gains, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, double initialTradeValue)
