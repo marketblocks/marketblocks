@@ -38,6 +38,7 @@ namespace cb
 			inline static const std::string CLOSED_ORDERS = "ClosedOrders";
 			inline static const std::string QUERY_ORDERS = "QueryOrders";
 			inline static const std::string ADD_ORDER = "AddOrder";
+			inline static const std::string CANCEL_ORDER = "CancelOrder";
 		};
 
 		inline bool should_retry(std::string errorMessage)
@@ -181,6 +182,7 @@ namespace cb
 		const std::vector<order_description> get_open_orders() const override;
 		const std::vector<order_description> get_closed_orders() const override;
 		const std::string add_order(const trade_description& description) override;
+		void cancel_order(const std::string& orderId) override;
 
 		websocket_stream& get_websocket_stream() override;
 	};

@@ -22,4 +22,5 @@ namespace cb::internal
 	result<std::vector<order_description>> read_open_orders(const std::string& jsonResult);
 	result<std::vector<order_description>> read_closed_orders(const std::string& jsonResult);
 	result<std::string> read_add_order(const std::string& jsonResult);
+	result<void> read_cancel_order(const std::string& jsonResult);
 }

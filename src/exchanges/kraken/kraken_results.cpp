@@ -223,4 +223,16 @@ namespace cb::internal
 			return result<std::string>::success(std::move(resultElement.get<std::vector<std::string>>("txid")[0]));
 		});
 	}
+
+	result<void> read_cancel_order(const std::string& jsonResult)
+	{
+		return read_result<void>(jsonResult, [](const json_element& resultElement)
+		{
+			int count = resultElement.get<int>("count");
+
+			return count > 0
+				? result<void>::success()
+				: result<void>::fail("Could not cancel order");
+		});
+	}
 }

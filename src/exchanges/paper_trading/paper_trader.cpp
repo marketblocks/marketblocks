@@ -53,4 +53,7 @@ namespace cb
 				description.volume());
 		}
 	}
+
+	void paper_trader::cancel_order(const std::string& orderId)
+	{}
 }

@@ -11,6 +11,8 @@ namespace
 	using namespace cb::test;
 	
 	static const std::string ERROR_MESSAGE = "This is an error";
+	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";
+
 
 	template<typename ResultReader>
 	auto execute_reader(const std::string& dataFileName, ResultReader reader)
@@ -32,15 +34,23 @@ namespace
 			valueAsserter);
 
 		assert_result_equal(
-			execute_reader("error_response.json", reader),
+			execute_reader(ERROR_RESPONSE_FILE_NAME, reader),
 			cb::result<T>::fail(ERROR_MESSAGE),
-			valueAsserter);
+			no_assert<T>);
 	}
 
 	template<typename T, typename ResultReader>
 	void execute_test(const std::string& testDataFileName, const ResultReader& reader, const T& expectedValue)
 	{
 		execute_test(testDataFileName, reader, expectedValue, cb::test::default_expect_eq<T>);
+	}
+
+	template<typename ResultReader>
+	void execute_test(const std::string& testDataFileName, const ResultReader& reader)
+	{
+		EXPECT_EQ(execute_reader(testDataFileName, reader).is_success(), true);
+
+		EXPECT_EQ(execute_reader(ERROR_RESPONSE_FILE_NAME, reader).error(), ERROR_MESSAGE);
 	}
 
 	void assert_order_book_entry_eq(const cb::order_book_entry& lhs, const cb::order_book_entry& rhs)
@@ -202,5 +212,10 @@ namespace cb::test
 			"read_add_order_success.json",
 			internal::read_add_order,
 			"OUF4EM-FRGI2-MQMWZD");
+	}
+
+	TEST(KrakenResults, ReadCancelOrder)
+	{
+		execute_test("read_cancel_order.json", internal::read_cancel_order);
 	}
 }

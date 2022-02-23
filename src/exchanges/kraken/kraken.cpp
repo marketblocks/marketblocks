@@ -145,6 +145,15 @@ namespace cb
 		return send_private_request<std::string>(_constants.ADD_ORDER, internal::read_add_order);
 	}
 
+	void kraken_api::cancel_order(const std::string& orderId)
+	{
+		std::string query = url_query_builder{}
+			.add_parameter("txid", orderId)
+			.to_string();
+
+		send_private_request<void>(_constants.CANCEL_ORDER, internal::read_cancel_order);
+	}
+
 	websocket_stream& kraken_api::get_websocket_stream()
 	{
 		return _websocketStream;

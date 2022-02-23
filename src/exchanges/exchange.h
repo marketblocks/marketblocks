@@ -42,7 +42,7 @@ namespace cb
 		virtual const std::vector<order_description> get_open_orders() const = 0;
 		virtual const std::vector<order_description> get_closed_orders() const = 0;
 		virtual const std::string add_order(const trade_description& description) = 0;
-		//virtual int cancel_order(const std::string& orderId) const = 0;
+		virtual void cancel_order(const std::string& orderId) = 0;
 		virtual websocket_stream& get_websocket_stream() = 0;
 	};
 
@@ -106,6 +106,11 @@ namespace cb
 		const std::string add_order(const trade_description& description) override
 		{
 			return _tradeApi->add_order(description);
+		}
+
+		void cancel_order(const std::string& orderId) override
+		{
+			return _tradeApi->cancel_order(orderId);
 		}
 	};
 

@@ -51,4 +51,42 @@ namespace cb
 
 		bool is_failure() const { return !is_success(); }
 	};
+
+	template<>
+	class result<void>
+	{
+	private:
+		std::optional<std::string> _error;
+
+		result(std::string error)
+			: _error{ std::move(error) }
+		{}
+
+		result()
+			: _error{ std::nullopt }
+		{}
+
+	public:
+		static result<void> success()
+		{
+			return result<void>{};
+		}
+
+		static result<void> fail(std::string error)
+		{
+			return result<void>{ std::move(error) };
+		}
+
+		void value() const {}
+
+		const std::string& error() const
+		{
+			//assert(is_failure());
+			return _error.value();
+		}
+
+		bool is_failure() const { return _error.has_value(); }
+
+		bool is_success() const { return !is_failure(); }
+	};
 }

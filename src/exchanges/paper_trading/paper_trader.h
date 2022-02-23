@@ -30,5 +30,6 @@ namespace cb
 		const std::vector<order_description> get_closed_orders() const { return std::vector<order_description>{}; }
 
 		const std::string add_order(const trade_description& description);
+		void cancel_order(const std::string& orderId);
 	};
 }
