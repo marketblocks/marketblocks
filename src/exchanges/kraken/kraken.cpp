@@ -134,10 +134,7 @@ namespace cb
 
 	const std::string kraken_api::add_order(const trade_description& description)
 	{
-		int userReference = milliseconds_since_epoch();
-
 		std::string query = url_query_builder{}
-			.add_parameter("userref", std::to_string(userReference))
 			.add_parameter("pair", description.pair().exchange_identifier())
 			.add_parameter("type", ::to_string(description.action()))
 			.add_parameter("ordertype", ::to_string(description.order_type()))
