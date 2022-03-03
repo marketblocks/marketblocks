@@ -32,25 +32,25 @@ namespace
 
 namespace cb
 {
-    std::vector<unsigned char> sha256(const std::string& data)
+    std::vector<unsigned char> sha256(std::string_view data)
     {
         std::vector<unsigned char> hash(SHA256_DIGEST_LENGTH);
 
         SHA256_CTX context;
         SHA256_Init(&context);
-        SHA256_Update(&context, data.c_str(), data.length());
+        SHA256_Update(&context, data.data(), data.length());
         SHA256_Final(hash.data(), &context);
 
         return hash;
     }
 
-    std::vector<unsigned char> sha512(const std::string& data)
+    std::vector<unsigned char> sha512(std::string_view data)
     {
         std::vector<unsigned char> hash(SHA512_DIGEST_LENGTH);
 
         SHA512_CTX context;
         SHA512_Init(&context);
-        SHA512_Update(&context, data.c_str(), data.length());
+        SHA512_Update(&context, data.data(), data.length());
         SHA512_Final(hash.data(), &context);
 
         return hash;

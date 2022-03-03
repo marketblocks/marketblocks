@@ -16,7 +16,7 @@ namespace cb
 		iterator _iter;
 
 	public:
-		json_iterator(iterator iter);
+		explicit json_iterator(iterator iter);
 
 		json_iterator operator++();
 		bool operator!=(const json_iterator& other) const;

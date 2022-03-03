@@ -14,9 +14,9 @@ namespace
 
 namespace cb
 {
-	const std::vector<std::string> runner_config::DEFAULT_EXCHANGE_IDS = std::vector<std::string>{};
-	const double runner_config::DEFAULT_TRADE_PERCENT = 0.05;
-	const asset_symbol runner_config::DEFAULT_FIAT_CURRENCY = asset_symbol{ "GBP" };
+	runner_config::runner_config()
+		: runner_config{ {}, DEFAULT_TRADE_PERCENT, asset_symbol{ "GBP" } }
+	{}
 
 	runner_config::runner_config(
 		std::vector<std::string> exchangeIds,
@@ -29,10 +29,6 @@ namespace cb
 	{
 		validate();
 	}
-
-	runner_config::runner_config()
-		: runner_config{ DEFAULT_EXCHANGE_IDS, DEFAULT_TRADE_PERCENT, DEFAULT_FIAT_CURRENCY }
-	{}
 
 	void runner_config::validate()
 	{
@@ -56,15 +52,6 @@ namespace cb
 			log.warning("Trade Percent value of {0} is greater than maximum value. Reset to default value of {}", _tradePercent, DEFAULT_TRADE_PERCENT);
 			_tradePercent = DEFAULT_TRADE_PERCENT;
 		}
-	}
-
-	trading_options runner_config::get_trading_options() const
-	{
-		return trading_options
-		{
-			_tradePercent,
-			_fiatCurrency
-		};
 	}
 
 	template<>

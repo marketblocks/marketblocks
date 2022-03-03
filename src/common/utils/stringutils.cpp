@@ -10,7 +10,8 @@ namespace cb
 
 		while (std::getline(stream, segment, delimiter))
 		{
-			seglist.push_back(segment);
+			if (!segment.empty())
+				seglist.push_back(segment);
 		}
 
 		return seglist;

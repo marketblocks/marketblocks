@@ -21,10 +21,9 @@ namespace cb
 
 		~file_handler();
 
-		std::fstream& stream() { return _stream; }
+		std::fstream& stream() noexcept { return _stream; }
 	};
 
 	std::string read_file(const std::filesystem::path& path);
-
-	void write_to_file(const std::filesystem::path& path, const std::string& content);
+	void write_to_file(const std::filesystem::path& path, std::string_view content);
 }

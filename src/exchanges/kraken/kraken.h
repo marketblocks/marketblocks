@@ -23,27 +23,26 @@ namespace cb
 	{
 		struct kraken_constants
 		{
-			inline static const std::string BASEURL = "https://api.kraken.com";
-			inline static const std::string VERSION = "0";
-			inline static const std::string PUBLIC = "public";
-			inline static const std::string PRIVATE = "private";
-
-			inline static const std::string TRADABLE_PAIRS = "AssetPairs";
-			inline static const std::string TICKER = "Ticker";
-			inline static const std::string ORDER_BOOK = "Depth";
-			inline static const std::string BALANCE = "Balance";
-			inline static const std::string TRADE_VOLUME = "TradeVolume";
-			inline static const std::string SYSTEM_STATUS = "SystemStatus";
-			inline static const std::string OPEN_ORDERS = "OpenOrders";
-			inline static const std::string CLOSED_ORDERS = "ClosedOrders";
-			inline static const std::string QUERY_ORDERS = "QueryOrders";
-			inline static const std::string ADD_ORDER = "AddOrder";
-			inline static const std::string CANCEL_ORDER = "CancelOrder";
+			static constexpr std::string_view BASEURL = "https://api.kraken.com";
+			static constexpr std::string_view VERSION = "0";
+			static constexpr std::string_view PUBLIC = "public";
+			static constexpr std::string_view PRIVATE = "private";
+			static constexpr std::string_view TRADABLE_PAIRS = "AssetPairs";
+			static constexpr std::string_view TICKER = "Ticker";
+			static constexpr std::string_view ORDER_BOOK = "Depth";
+			static constexpr std::string_view BALANCE = "Balance";
+			static constexpr std::string_view TRADE_VOLUME = "TradeVolume";
+			static constexpr std::string_view SYSTEM_STATUS = "SystemStatus";
+			static constexpr std::string_view OPEN_ORDERS = "OpenOrders";
+			static constexpr std::string_view CLOSED_ORDERS = "ClosedOrders";
+			static constexpr std::string_view QUERY_ORDERS = "QueryOrders";
+			static constexpr std::string_view ADD_ORDER = "AddOrder";
+			static constexpr std::string_view CANCEL_ORDER = "CancelOrder";
 		};
 
-		inline bool should_retry(std::string errorMessage)
+		inline bool should_retry(std::string_view errorMessage)
 		{
-			static std::unordered_map<std::string, bool> errorBehaviours
+			static unordered_string_map<bool> errorBehaviours
 			{
 				{ "EGeneral:Permission denied", false },
 				{ "EAPI:Invalid key", false },
@@ -114,10 +113,25 @@ namespace cb
 		http_service _httpService;
 		kraken_websocket_stream _websocketStream;
 
-		std::string build_url_path(const std::string& access, const std::string& method) const;
-		std::string build_kraken_url(const std::string& access, const std::string& method, const std::string& query) const;
 		std::string get_nonce() const;
-		std::string compute_api_sign(const std::string& uriPath, const std::string& postData, const std::string& nonce) const;
+		std::string compute_api_sign(std::string_view uriPath, std::string_view postData, std::string_view nonce) const;
+
+		constexpr std::string build_url_path(std::string_view access, std::string_view method) const
+		{
+			std::string urlPath{ "/" };
+			urlPath.append(_constants.VERSION);
+			urlPath.append("/");
+			urlPath.append(access);
+			urlPath.append("/");
+			urlPath.append(method);
+
+			return urlPath;
+		}
+
+		constexpr std::string build_kraken_url(std::string_view access, std::string_view method, std::string_view query) const
+		{
+			return build_url(_constants.BASEURL, build_url_path(access, method), query);
+		}
 
 		template<typename Value, typename ResponseReader>
 		Value send_request(const http_request& request, const ResponseReader& reader) const
@@ -129,33 +143,30 @@ namespace cb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(const std::string& method, const std::string& query, const ResponseReader& reader) const
+		Value send_public_request(std::string_view method, std::string_view query, const ResponseReader& reader) const
 		{
 			http_request request{ http_verb::GET, build_kraken_url(_constants.PUBLIC, method, query) };
 			return send_request<Value>(request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(const std::string& method, const ResponseReader& reader) const
+		Value send_public_request(std::string_view method, const ResponseReader& reader) const
 		{
 			return send_public_request<Value>(method, "", reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const std::string& query, const ResponseReader& reader) const
+		Value send_private_request(std::string_view method, std::string_view query, const ResponseReader& reader) const
 		{
 			std::string nonce{ get_nonce() };
 
 			std::string postData{ "nonce=" + nonce };
-			if (!query.empty())
-			{
-				postData += "&" + query;
-			}
+			append_query(postData, query);
 
 			std::string apiPath{ build_url_path(_constants.PRIVATE, method) };
 			std::string apiSign{ compute_api_sign(apiPath, postData, nonce) };
 
-			http_request request{ http_verb::POST, _constants.BASEURL + apiPath };
+			http_request request{ http_verb::POST, std::string{ _constants.BASEURL } + apiPath };
 			request.add_header("API-Key", _publicKey);
 			request.add_header("API-Sign", apiSign);
 			request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
@@ -165,7 +176,7 @@ namespace cb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(const std::string& method, const ResponseReader& reader) const
+		Value send_private_request(std::string_view method, const ResponseReader& reader) const
 		{
 			return send_private_request<Value>(method, "", reader);
 		}
@@ -182,9 +193,9 @@ namespace cb
 		const std::vector<order_description> get_open_orders() const override;
 		const std::vector<order_description> get_closed_orders() const override;
 		const std::string add_order(const trade_description& description) override;
-		void cancel_order(const std::string& orderId) override;
+		void cancel_order(std::string_view orderId) override;
 
-		websocket_stream& get_websocket_stream() override;
+		constexpr websocket_stream& get_websocket_stream() override	{ return _websocketStream; }
 	};
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient);

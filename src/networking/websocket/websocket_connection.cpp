@@ -33,7 +33,7 @@ namespace cb
         }
     }
 
-    void websocket_connection::send_message(const std::string& message)
+    void websocket_connection::send_message(std::string_view message)
     {
         _client->send_message(_connectionHandle, message);
     }

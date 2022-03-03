@@ -18,7 +18,7 @@ namespace cb
 
 	public:
 		template<typename... Args>
-		explicit runner(run_mode runMode, Args&&... args)
+		explicit constexpr runner(run_mode runMode, Args&&... args)
 			: _runMode{ runMode }, _initialised{ false }, _strategy{ std::forward<Args>(args)... }, _logger{ logger::instance() }
 		{
 		}
@@ -33,7 +33,11 @@ namespace cb
 			strategy_initialiser strategyInitialiser
 			{
 				std::move(exchanges),
-				runnerConfig.get_trading_options()
+				trading_options
+				{
+					runnerConfig.trade_percent(),
+					runnerConfig.fiat_currency()
+				}
 			};
 			
 			_logger.info("Initialising strategy...");

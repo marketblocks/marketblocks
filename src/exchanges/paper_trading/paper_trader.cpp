@@ -54,6 +54,6 @@ namespace cb
 		}
 	}
 
-	void paper_trader::cancel_order(const std::string& orderId)
+	void paper_trader::cancel_order(std::string_view orderId)
 	{}
 }

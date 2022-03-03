@@ -39,7 +39,7 @@ namespace cb
 		return ws_connection_status::CLOSED;
 	}
 
-	void websocket_stream::send_message(const std::string& message) const
+	void websocket_stream::send_message(std::string_view message) const
 	{
 		CB_ASSERT_CONNECTION_EXISTS(_connection);
 
@@ -52,17 +52,17 @@ namespace cb
 		logger::instance().warning("Websocket stream status changed. New status: {}", to_string(newStatus));
 	}
 
-	bool websocket_stream::is_order_book_subscribed(const std::string& pair)
+	bool websocket_stream::is_order_book_subscribed(std::string_view pair)
 	{
 		return _orderBookCaches.contains(pair);
 	}
 
-	void websocket_stream::initialise_order_book_cache(const std::string& pair, std::vector<cache_entry> asks, std::vector<cache_entry> bids)
+	void websocket_stream::initialise_order_book_cache(std::string_view pair, std::vector<cache_entry> asks, std::vector<cache_entry> bids)
 	{
 		_orderBookCaches.emplace(pair, order_book_cache{ std::move(asks), std::move(bids) });
 	}
 
-	void websocket_stream::update_order_book_cache(const std::string& pair, cache_entry cacheEntry)
+	void websocket_stream::update_order_book_cache(std::string_view pair, cache_entry cacheEntry)
 	{
 		auto cacheIterator = _orderBookCaches.find(pair);
 		if (cacheIterator != _orderBookCaches.end())
@@ -71,7 +71,7 @@ namespace cb
 		}
 	}
 
-	void websocket_stream::replace_in_order_book_cache(const std::string& pair, cache_replacement cacheReplacement)
+	void websocket_stream::replace_in_order_book_cache(std::string_view pair, cache_replacement cacheReplacement)
 	{
 		auto cacheIterator = _orderBookCaches.find(pair);
 		if (cacheIterator != _orderBookCaches.end())

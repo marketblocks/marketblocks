@@ -14,11 +14,11 @@ namespace cb
 		trading_options _options;
 
 	public:
-		strategy_initialiser(std::vector<std::shared_ptr<exchange>> exchanges, trading_options options)
+		constexpr strategy_initialiser(std::vector<std::shared_ptr<exchange>> exchanges, trading_options options)
 			: _exchanges{ std::move(exchanges) }, _options{ std::move(options) }
 		{}
 
-		std::vector<std::shared_ptr<exchange>> exchanges() const { return _exchanges; }
-		trading_options options() const { return _options; }
+		constexpr std::vector<std::shared_ptr<exchange>> exchanges() const noexcept { return _exchanges; }
+		constexpr trading_options options() const noexcept { return _options; }
 	};
 }

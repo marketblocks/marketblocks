@@ -25,11 +25,11 @@ namespace cb
 		explicit paper_trader(fee_schedule feeSchedule, std::unordered_map<asset_symbol, double> initialBalances);
 
 		const double get_fee(const tradable_pair& tradablePair) const;
-		const std::unordered_map<asset_symbol, double> get_balances() const { return _balances; }
-		const std::vector<order_description> get_open_orders() const { return std::vector<order_description>{}; }
-		const std::vector<order_description> get_closed_orders() const { return std::vector<order_description>{}; }
+		const std::unordered_map<asset_symbol, double> get_balances() const noexcept { return _balances; }
+		constexpr const std::vector<order_description> get_open_orders() const noexcept { return std::vector<order_description>{}; }
+		constexpr const std::vector<order_description> get_closed_orders() const noexcept { return std::vector<order_description>{}; }
 
 		const std::string add_order(const trade_description& description);
-		void cancel_order(const std::string& orderId);
+		void cancel_order(std::string_view orderId);
 	};
 }

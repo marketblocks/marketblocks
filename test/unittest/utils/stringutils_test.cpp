@@ -12,6 +12,7 @@ namespace cb::test
 		EXPECT_THAT(split("This_is_underscore_test", '_'), ElementsAre("This", "is", "underscore", "test"));
 		EXPECT_THAT(split("This-is-hyphen-test", '-'), ElementsAre("This", "is", "hyphen", "test"));
 		EXPECT_THAT(split("This,is,comma,test", ','), ElementsAre("This", "is", "comma", "test"));
+		EXPECT_THAT(split(",Delimiter,at,ends,test,", ','), ElementsAre("Delimiter", "at", "ends", "test"));
 	}
 
 	TEST(StringUtils, SplitHandlesEmptySourceString)

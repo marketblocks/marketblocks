@@ -15,7 +15,7 @@ namespace
 	}
 
 	template<typename T, typename Reader> 
-	cb::result<T> read_result(const std::string& jsonResult, const Reader& reader)
+	cb::result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
 		cb::json_document jsonDocument{ cb::parse_json(jsonResult) };
 
@@ -28,7 +28,7 @@ namespace
 		return reader(jsonDocument.element("result"));
 	}
 
-	cb::result<std::vector<cb::order_description>> read_open_closed_orders(const std::string& jsonResult, const std::string& orderType)
+	cb::result<std::vector<cb::order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderType)
 	{
 		return read_result<std::vector<cb::order_description>>(jsonResult, [&orderType](const cb::json_element& resultElement)
 			{
@@ -59,7 +59,7 @@ namespace
 
 namespace cb::internal
 {
-	result<exchange_status> read_system_status(const std::string& jsonResult)
+	result<exchange_status> read_system_status(std::string_view jsonResult)
 	{
 		return read_result<exchange_status>(jsonResult, [](const json_element& resultElement)
 		{
@@ -87,7 +87,7 @@ namespace cb::internal
 		});
 	}
 
-	result<std::vector<tradable_pair>> read_tradable_pairs(const std::string& jsonResult)
+	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
 	{
 		return read_result<std::vector<tradable_pair>>(jsonResult, [](const json_element& resultElement)
 		{
@@ -106,7 +106,7 @@ namespace cb::internal
 		});
 	}
 
-	result<ticker_data> read_ticker_data(const std::string& jsonResult)
+	result<ticker_data> read_ticker_data(std::string_view jsonResult)
 	{
 		return read_result<ticker_data>(jsonResult, [](const json_element& resultElement)
 		{
@@ -139,7 +139,7 @@ namespace cb::internal
 		});
 	}
 
-	result<order_book_state> read_order_book(const std::string& jsonResult)
+	result<order_book_state> read_order_book(std::string_view jsonResult)
 	{
 		return read_result<order_book_state>(jsonResult, [](const json_element& resultElement)
 		{
@@ -179,7 +179,7 @@ namespace cb::internal
 		});
 	}
 
-	result<std::unordered_map<asset_symbol, double>> read_balances(const std::string& jsonResult)
+	result<std::unordered_map<asset_symbol, double>> read_balances(std::string_view jsonResult)
 	{
 		return read_result<std::unordered_map<asset_symbol, double>>(jsonResult, [](const json_element& resultElement)
 		{
@@ -195,7 +195,7 @@ namespace cb::internal
 		});
 	}
 
-	result<double> read_fee(const std::string& jsonResult)
+	result<double> read_fee(std::string_view jsonResult)
 	{
 		return read_result<double>(jsonResult, [](const json_element& resultElement)
 		{
@@ -206,17 +206,17 @@ namespace cb::internal
 		});
 	}
 
-	result<std::vector<order_description>> read_open_orders(const std::string& jsonResult)
+	result<std::vector<order_description>> read_open_orders(std::string_view jsonResult)
 	{
 		return read_open_closed_orders(jsonResult, "open");
 	}
 
-	result<std::vector<order_description>> read_closed_orders(const std::string& jsonResult)
+	result<std::vector<order_description>> read_closed_orders(std::string_view jsonResult)
 	{
 		return read_open_closed_orders(jsonResult, "closed");
 	}
 
-	result<std::string> read_add_order(const std::string& jsonResult)
+	result<std::string> read_add_order(std::string_view jsonResult)
 	{
 		return read_result<std::string>(jsonResult, [](const json_element& resultElement)
 		{
@@ -224,7 +224,7 @@ namespace cb::internal
 		});
 	}
 
-	result<void> read_cancel_order(const std::string& jsonResult)
+	result<void> read_cancel_order(std::string_view jsonResult)
 	{
 		return read_result<void>(jsonResult, [](const json_element& resultElement)
 		{

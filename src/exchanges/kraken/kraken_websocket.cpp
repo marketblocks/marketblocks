@@ -18,7 +18,7 @@ namespace
 		return result;
 	}
 
-	cb::exchange_status to_exchange_status(const std::string& statusString)
+	cb::exchange_status to_exchange_status(std::string_view statusString)
 	{
 		if (statusString == "online")
 			return cb::exchange_status::ONLINE;
@@ -197,17 +197,17 @@ namespace cb
 		logger::instance().info("Kraken websocket connection opened");
 	}
 
-	void kraken_websocket_stream::on_close(const std::string& reason)
+	void kraken_websocket_stream::on_close(std::string_view reason)
 	{
 		logger::instance().info("Kraken websocket connection closed: {}", reason);
 	}
 
-	void kraken_websocket_stream::on_fail(const std::string& reason)
+	void kraken_websocket_stream::on_fail(std::string_view reason)
 	{
 		logger::instance().error("Kraken websocket connection failed: {}", reason);
 	}
 
-	void kraken_websocket_stream::on_message(const std::string& message)
+	void kraken_websocket_stream::on_message(std::string_view message)
 	{
 		json_document json = parse_json(message);
 		json_value_type type = json.type();

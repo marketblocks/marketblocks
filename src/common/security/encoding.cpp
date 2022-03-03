@@ -27,12 +27,12 @@ namespace cb
         return output;
     }
 
-    std::vector<unsigned char> b64_decode(const std::string& data)
+    std::vector<unsigned char> b64_decode(std::string_view data)
     {
         BIO* b64 = BIO_new(BIO_f_base64());
         BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 
-        BIO* bmem = BIO_new_mem_buf((void*)data.c_str(), data.length());
+        BIO* bmem = BIO_new_mem_buf((void*)data.data(), data.length());
         bmem = BIO_push(b64, bmem);
 
         std::vector<unsigned char> output(data.length());

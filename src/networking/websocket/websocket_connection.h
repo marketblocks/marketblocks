@@ -32,7 +32,7 @@ namespace cb
         websocket_connection& operator=(const websocket_connection& other) = delete;
         websocket_connection& operator=(websocket_connection&& other) noexcept = default;
 
-        void send_message(const std::string& message);
+        void send_message(std::string_view message);
 
         ws_connection_status connection_status() const;
     };
@@ -40,7 +40,7 @@ namespace cb
     template<typename OnOpenHandler, typename OnCloseHandler, typename OnFailHandler, typename OnMessageHandler>
     websocket_connection create_websocket_connection(
         std::shared_ptr<websocket_client> client, 
-        const std::string& url,
+        std::string_view url,
         OnOpenHandler onOpenHandler,
         OnCloseHandler onCloseHandler,
         OnFailHandler onFailHandler,

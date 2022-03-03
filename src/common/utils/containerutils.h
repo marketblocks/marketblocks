@@ -1,9 +1,12 @@
 #include <unordered_map>
+#include <vector>
+#include <algorithm>
+#include <iterator>
 
 namespace cb
 {
 	template<typename Key, typename Value, typename Container, typename KeySelector, typename ValueSelector>
-	std::unordered_map<Key, Value> to_unordered_map(const Container& source, KeySelector keySelector, ValueSelector valueSelector)
+	constexpr std::unordered_map<Key, Value> to_unordered_map(const Container& source, KeySelector keySelector, ValueSelector valueSelector)
 	{
 		std::unordered_map<Key, Value> map;
 		map.reserve(source.size());
@@ -17,13 +20,13 @@ namespace cb
 	}
 
 	template<typename T, typename Container>
-	std::vector<T> to_vector(const Container& source)
+	constexpr std::vector<T> to_vector(const Container& source)
 	{
 		return to_vector<T>(source, [](const T& item) { return item; });
 	}
 
 	template<typename T, typename Container, typename Selector>
-	std::vector<T> to_vector(const Container& source, Selector selector)
+	constexpr std::vector<T> to_vector(const Container& source, Selector selector)
 	{
 		std::vector<T> vector;
 		vector.reserve(source.size());
@@ -34,5 +37,20 @@ namespace cb
 		}
 
 		return vector;
+	}
+
+	template<typename T, typename Container, typename Predicate>
+	constexpr T copy_where(const Container& source, Predicate p)
+	{
+		T copied;
+		std::copy_if(source.begin(), source.end(), std::back_inserter(copied), p);
+
+		return copied;
+	}
+
+	template<typename T, typename Container>
+	constexpr bool contains(const Container& source, T element)
+	{
+		return std::find(source.begin(), source.end(), element) != source.end();
 	}
 }

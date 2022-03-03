@@ -20,7 +20,7 @@ namespace cb
 		double _openingPrice;
 
 	public:
-		ticker_data(
+		constexpr ticker_data(
 			double askPrice,
 			double askVolume,
 			double bidPrice,
@@ -33,20 +33,35 @@ namespace cb
 			double low24,
 			double highToday,
 			double high24,
-			double openingPrice);
+			double openingPrice)
+			:
+			_askPrice{ askPrice },
+			_askVolume{ askVolume },
+			_bidPrice{ bidPrice },
+			_bidVolume{ bidVolume },
+			_volumeToday{ volumeToday },
+			_volume24{ volume24 },
+			_tradesToday{ tradesToday },
+			_trades24{ trades24 },
+			_lowToday{ lowToday },
+			_low24{ low24 },
+			_highToday{ highToday },
+			_high24{ high24 },
+			_openingPrice{ openingPrice }
+		{}
 
-		double ask_price() const { return _askPrice; }
-		double ask_volume() const { return _askVolume; }
-		double bid_price() const { return _bidPrice; }
-		double bid_volume() const { return _bidVolume; }
-		double volume_today() const { return _volumeToday; }
-		double volume_24() const { return _volume24; }
-		int trades_today() const { return _tradesToday; }
-		int trades_24() const { return _trades24; }
-		double low_today() const { return _lowToday; }
-		double low_24() const { return _low24; }
-		double high_today() const { return _highToday; }
-		double high_24() const { return _high24; }
-		double opening_price() const { return _openingPrice; }
+		constexpr double ask_price() const noexcept { return _askPrice; }
+		constexpr double ask_volume() const noexcept { return _askVolume; }
+		constexpr double bid_price() const noexcept { return _bidPrice; }
+		constexpr double bid_volume() const noexcept { return _bidVolume; }
+		constexpr double volume_today() const noexcept { return _volumeToday; }
+		constexpr double volume_24() const noexcept { return _volume24; }
+		constexpr int trades_today() const noexcept { return _tradesToday; }
+		constexpr int trades_24() const noexcept { return _trades24; }
+		constexpr double low_today() const noexcept { return _lowToday; }
+		constexpr double low_24() const noexcept { return _low24; }
+		constexpr double high_today() const noexcept { return _highToday; }
+		constexpr double high_24() const noexcept { return _high24; }
+		constexpr double opening_price() const noexcept { return _openingPrice; }
 	};
 }

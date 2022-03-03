@@ -8,14 +8,18 @@ namespace cb
 	{
 	private:
 		std::string _symbol;
-		bool is_valid(const std::string& symbol);
 
 	public:
-		explicit asset_symbol(std::string symbol);
+		constexpr asset_symbol(std::string symbol)
+			: _symbol{ std::move(symbol) }
+		{}
 
-		const std::string& get() const { return _symbol; }
+		constexpr const std::string& get() const noexcept { return _symbol; }
 
-		bool operator==(const asset_symbol& other) const;
+		constexpr bool operator==(const asset_symbol& other) const noexcept
+		{
+			return _symbol == other._symbol;
+		}
 	};
 }
 

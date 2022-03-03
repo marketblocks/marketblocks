@@ -14,12 +14,14 @@ namespace cb
 		double _volume;
 
 	public:
-		order_description(std::string orderId, std::string pairName, trade_action action, double price, double volume);
+		constexpr order_description(std::string orderId, std::string pairName, trade_action action, double price, double volume)
+			: _orderId{ std::move(orderId) }, _pairName{ std::move(pairName) }, _action{ action }, _price{ price }, _volume{ volume }
+		{}
 
-		const std::string& order_id() const { return _orderId; }
-		const std::string& pair_name() const { return _pairName; }
-		trade_action action() const { return _action; }
-		double price() const { return _price; }
-		double volume() const { return _volume; }
+		constexpr const std::string& order_id() const noexcept { return _orderId; }
+		constexpr const std::string& pair_name() const noexcept { return _pairName; }
+		constexpr trade_action action() const noexcept { return _action; }
+		constexpr double price() const noexcept { return _price; }
+		constexpr double volume() const noexcept { return _volume; }
 	};
 }

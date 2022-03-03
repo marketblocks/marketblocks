@@ -25,10 +25,10 @@ namespace cb
 		websocket_client& operator=(websocket_client&& other) noexcept = default;
 
 		void connect(client::connection_ptr connectionPtr);
-		client::connection_ptr get_connection(const std::string& url);
+		client::connection_ptr get_connection(std::string_view url);
 		client::connection_ptr get_connection(websocketpp::connection_hdl connectionHandle);
 		void close_connection(websocketpp::connection_hdl connectionHandle);
 		websocketpp::session::state::value get_state(websocketpp::connection_hdl connectionHandle);
-		void send_message(websocketpp::connection_hdl connectionHandle, const std::string& message);
+		void send_message(websocketpp::connection_hdl connectionHandle, std::string_view message);
 	};
 }

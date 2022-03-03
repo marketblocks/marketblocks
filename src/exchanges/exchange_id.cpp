@@ -1,5 +1,7 @@
 #include "exchange_id.h"
 
+#include "common/utils/containerutils.h"
+
 namespace cb
 {
 	exchange_id_lookup::exchange_id_lookup()
@@ -11,14 +13,6 @@ namespace cb
 
 	std::vector<std::string> exchange_id_lookup::all_ids() const
 	{
-		std::vector<std::string> ids;
-		ids.reserve(_container.size());
-
-		for (auto& pair : _container)
-		{
-			ids.push_back(pair.first);
-		}
-
-		return ids;
+		return to_vector<std::string>(_container, [](const std::pair<std::string, exchange_id>& pair) { return pair.first; });
 	}
 }

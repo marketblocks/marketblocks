@@ -25,13 +25,13 @@ namespace cb
 		exchange_id _id;
 
 	public:
-		exchange(exchange_id id)
+		constexpr exchange(exchange_id id)
 			: _id{ id }
 		{}
 
 		virtual ~exchange() = default;
 
-		exchange_id id() const { return _id; }
+		constexpr exchange_id id() const noexcept { return _id; }
 
 		virtual exchange_status get_status() const = 0;
 		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
@@ -42,7 +42,7 @@ namespace cb
 		virtual const std::vector<order_description> get_open_orders() const = 0;
 		virtual const std::vector<order_description> get_closed_orders() const = 0;
 		virtual const std::string add_order(const trade_description& description) = 0;
-		virtual void cancel_order(const std::string& orderId) = 0;
+		virtual void cancel_order(std::string_view orderId) = 0;
 		virtual websocket_stream& get_websocket_stream() = 0;
 	};
 
@@ -108,7 +108,7 @@ namespace cb
 			return _tradeApi->add_order(description);
 		}
 
-		void cancel_order(const std::string& orderId) override
+		void cancel_order(std::string_view orderId) override
 		{
 			return _tradeApi->cancel_order(orderId);
 		}

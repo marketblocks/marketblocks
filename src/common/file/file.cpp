@@ -32,7 +32,7 @@ namespace cb
 
 	std::string read_file(const std::filesystem::path& path)
 	{
-		file_handler handler = file_handler::read(path);
+		file_handler handler{ file_handler::read(path) };
 		std::string contents{ (std::istreambuf_iterator<char>(handler.stream())), std::istreambuf_iterator<char>() };
 
 		if (handler.stream().good())
@@ -43,9 +43,9 @@ namespace cb
 		throw cb_exception{ strerror(errno) };
 	}
 
-	void write_to_file(const std::filesystem::path& path, const std::string& content)
+	void write_to_file(const std::filesystem::path& path, std::string_view content)
 	{
-		file_handler handler = file_handler::write(path);
+		file_handler handler{ file_handler::write(path) };
 
 		handler.stream() << content;
 

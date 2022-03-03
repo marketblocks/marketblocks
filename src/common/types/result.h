@@ -3,6 +3,7 @@
 #include <optional>
 #include <variant>
 #include <string>
+#include <cassert>
 
 #include "common/exceptions/cb_exception.h"
 
@@ -20,36 +21,36 @@ namespace cb
 		result_variant _result;
 		bool _isSuccess;
 
-		result(result_variant value, bool isSuccess)
+		constexpr result(result_variant value, bool isSuccess)
 			: _result{ std::move(value) }, _isSuccess{ isSuccess }
 		{}
 
 	public:
-		static result<Value> success(Value&& value)
+		static constexpr result<Value> success(Value&& value) noexcept
 		{
 			return result<Value>{ result_variant{ std::in_place_index<VALUE_INDEX>, std::forward<Value>(value) }, true };
 		}
 
-		static result<Value> fail(std::string error)
+		static constexpr result<Value> fail(std::string error) noexcept
 		{
 			return result<Value>{ result_variant{ std::in_place_index<ERROR_INDEX>, std::move(error) }, false };
 		}
 
-		const Value& value() const
+		constexpr const Value& value() const
 		{
 			assert(is_success());
 			return std::get<VALUE_INDEX>(_result);
 		}
 
-		const std::string& error() const 
+		constexpr const std::string& error() const
 		{ 
 			assert(is_failure());
 			return std::get<ERROR_INDEX>(_result);
 		}
 
-		bool is_success() const { return _isSuccess; }
+		constexpr bool is_success() const noexcept { return _isSuccess; }
 
-		bool is_failure() const { return !is_success(); }
+		constexpr bool is_failure() const noexcept { return !is_success(); }
 	};
 
 	template<>
@@ -58,35 +59,35 @@ namespace cb
 	private:
 		std::optional<std::string> _error;
 
-		result(std::string error)
+		explicit constexpr result(std::string error)
 			: _error{ std::move(error) }
 		{}
 
-		result()
+		constexpr result()
 			: _error{ std::nullopt }
 		{}
 
 	public:
-		static result<void> success()
+		static constexpr result<void> success() noexcept
 		{
 			return result<void>{};
 		}
 
-		static result<void> fail(std::string error)
+		static constexpr result<void> fail(std::string error) noexcept
 		{
 			return result<void>{ std::move(error) };
 		}
 
-		void value() const {}
+		constexpr void value() const noexcept {}
 
-		const std::string& error() const
+		constexpr const std::string& error() const
 		{
-			//assert(is_failure());
+			assert(is_failure());
 			return _error.value();
 		}
 
-		bool is_failure() const { return _error.has_value(); }
+		constexpr bool is_failure() const noexcept { return _error.has_value(); }
 
-		bool is_success() const { return !is_failure(); }
+		constexpr bool is_success() const noexcept { return !is_failure(); }
 	};
 }

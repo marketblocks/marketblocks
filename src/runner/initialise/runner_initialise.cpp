@@ -31,7 +31,7 @@ namespace
 	}
 
 	std::unique_ptr<exchange> create_api_from_id(
-		const std::string& identifier,
+		std::string_view identifier,
 		const exchange_id_lookup& idLookup,
 		std::shared_ptr<websocket_client> websocketClient)
 	{

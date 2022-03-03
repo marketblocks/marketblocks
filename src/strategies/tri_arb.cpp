@@ -6,7 +6,7 @@
 #include "trading/order_book.h"
 #include "trading/trade_description.h"
 #include "exchanges/exchange_helpers.h"
-#include "common/utils/vectorutils.h"
+#include "common/utils/containerutils.h"
 #include "common/utils/mathutils.h"
 #include "common/utils/financeutils.h"
 #include "logging/logger.h"
@@ -46,11 +46,11 @@ std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::
 		const std::vector<cb::tradable_pair> tradablePairs = exchange->get_tradable_pairs();
 		std::vector<tri_arb_sequence> sequences;
 
-		std::vector<cb::tradable_pair> fiatTradables = copy_where(
+		std::vector<cb::tradable_pair> fiatTradables = copy_where<std::vector<cb::tradable_pair>>(
 			tradablePairs, 
 			[&fiatCurrency](const cb::tradable_pair& pair) { return pair.contains(fiatCurrency); });
 
-		std::vector<cb::tradable_pair> nonFiatTradables = copy_where(
+		std::vector<cb::tradable_pair> nonFiatTradables = copy_where<std::vector<cb::tradable_pair>>(
 			tradablePairs,
 			[&fiatTradables](const cb::tradable_pair& pair) { return !contains(fiatTradables, pair); });
 
@@ -70,7 +70,7 @@ std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::
 				firstGainedAsset = std::make_unique<cb::asset_symbol>(firstPair.price_unit());
 			}
 
-			std::vector<cb::tradable_pair> possibleMiddles = copy_where(
+			std::vector<cb::tradable_pair> possibleMiddles = copy_where<std::vector<cb::tradable_pair>>(
 				nonFiatTradables,
 				[&firstGainedAsset](const cb::tradable_pair& pair) { return pair.contains(*firstGainedAsset); });
 
@@ -90,7 +90,7 @@ std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::
 					middleGainedAsset = std::make_unique<cb::asset_symbol>(middlePair.price_unit());
 				}
 
-				std::vector<cb::tradable_pair> finals = copy_where(
+				std::vector<cb::tradable_pair> finals = copy_where<std::vector<cb::tradable_pair>>(
 					fiatTradables,
 					[&middleGainedAsset](const cb::tradable_pair& pair) { return pair.contains(*middleGainedAsset); });
 

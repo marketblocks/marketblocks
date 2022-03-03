@@ -2,20 +2,22 @@
 
 namespace
 {
-	const std::filesystem::path config_directory() { return "C:\\Users\\jorda\\Documents"; }
+	constexpr std::string_view CONFIG_DIRECTORY = "C:\\Users\\jorda\\Documents";
+	constexpr std::string_view JSON_FILE_EXTENSION = "json";
 }
 
 namespace cb
 {
-	std::filesystem::path get_path(const std::string& fileName)
+	std::filesystem::path get_path(std::string_view fileName)
 	{
-		std::filesystem::path path = config_directory();
-		path /= fileName + ".json";
+		std::filesystem::path path{ CONFIG_DIRECTORY };
+		path.replace_filename(fileName);
+		path.replace_extension(JSON_FILE_EXTENSION);
 
 		return path;
 	}
 
-	bool file_exists(const std::string& fileName)
+	bool file_exists(std::string_view fileName)
 	{
 		return std::filesystem::exists(get_path(fileName));
 	}

@@ -64,10 +64,10 @@ namespace cb
         }
     }
 
-    client::connection_ptr websocket_client::get_connection(const std::string& url)
+    client::connection_ptr websocket_client::get_connection(std::string_view url)
     {
         std::error_code errorCode;
-        auto connectionPtr = _client.get_connection(url, errorCode);
+        auto connectionPtr = _client.get_connection(url.data(), errorCode);
 
         if (errorCode)
         {
@@ -119,11 +119,11 @@ namespace cb
         throw websocket_error{ std::format("Could not get connection from handle: {}", errorCode.message()) };
     }
 
-    void websocket_client::send_message(websocketpp::connection_hdl connectionHandle, const std::string& message)
+    void websocket_client::send_message(websocketpp::connection_hdl connectionHandle, std::string_view message)
     {
         std::error_code errorCode;
 
-        _client.send(connectionHandle, message, websocketpp::frame::opcode::text, errorCode);
+        _client.send(connectionHandle, message.data(), websocketpp::frame::opcode::text, errorCode);
 
         if (errorCode)
         {

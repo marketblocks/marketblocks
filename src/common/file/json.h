@@ -38,9 +38,9 @@ namespace cb
 		{}
 
 		template<typename T>
-		T get(const std::string& paramName) const
+		T get(std::string_view paramName) const
 		{
-			return _json[paramName].get<T>();
+			return _json[paramName.data()].get<T>();
 		}
 
 		template<typename T>
@@ -49,9 +49,9 @@ namespace cb
 			return _json.get<T>();
 		}
 
-		const json_element element(const std::string& paramName) const
+		const json_element element(std::string_view paramName) const
 		{
-			return json_element{ _json[paramName] };
+			return json_element{ _json[paramName.data()]};
 		}
 
 		const json_element element(int index) const
@@ -59,9 +59,9 @@ namespace cb
 			return json_element{ _json[index] };
 		}
 
-		bool has_member(const std::string& paramName) const
+		bool has_member(std::string_view paramName) const
 		{
-			return _json.contains(paramName);
+			return _json.contains(paramName.data());
 		}
 
 		size_t size() const
@@ -116,9 +116,9 @@ namespace cb
 
 	public:
 		template<typename T>
-		void add(const std::string& propertyName, T value)
+		void add(std::string_view propertyName, T value)
 		{
-			_document[propertyName] = std::move(value);
+			_document[propertyName.data()] = std::move(value);
 		}
 
 		std::string to_string() const
@@ -127,7 +127,7 @@ namespace cb
 		}
 	};
 
-	json_document parse_json(const std::string& jsonString);
+	json_document parse_json(std::string_view jsonString);
 
 	template<typename T>
 	T from_json(const json_document& json)
@@ -136,7 +136,7 @@ namespace cb
 	}
 
 	template<typename T>
-	T from_json(const std::string& json)
+	T from_json(std::string_view json)
 	{
 		return from_json<T>(parse_json(json));
 	}

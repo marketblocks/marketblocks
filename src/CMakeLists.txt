@@ -16,13 +16,13 @@ add_library(CryptoBot_lib
 "common/security/encoding.h" 
 
 "common/utils/containerutils.h"
-"common/utils/financeutils.cpp"
+
 "common/utils/financeutils.h"
 "common/utils/mathutils.h"
 "common/utils/retry.h"
 "common/utils/stringutils.cpp"
 "common/utils/stringutils.h"
-"common/utils/vectorutils.h"
+
 "common/utils/timeutils.cpp"
 "common/utils/timeutils.h" 
 
@@ -39,7 +39,7 @@ add_library(CryptoBot_lib
 "exchanges/exchange_id.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
-"exchanges/exchange_status.cpp"
+
 "exchanges/exchange_status.h" 
 
 "exchanges/kraken/kraken.cpp"
@@ -63,11 +63,11 @@ add_library(CryptoBot_lib
 "networking/http/http_constants.h"
 "networking/http/http_service.cpp"
 "networking/http/http_service.h"
-"networking/http/http_request.cpp"
+
 "networking/http/http_request.h"
-"networking/http/http_header.cpp"
+
 "networking/http/http_header.h"
-"networking/http/http_response.cpp"
+
 "networking/http/http_response.h" 
 "networking/http/http_error.h"
 "networking/websocket/websocket_error.h"
@@ -75,7 +75,7 @@ add_library(CryptoBot_lib
 "networking/websocket/websocket_connection.h" 
 "networking/websocket/websocket_client.cpp"
 "networking/websocket/websocket_client.h" 
-"networking/url.cpp"
+
 "networking/url.h"
 
 "runner/runner.h" 
@@ -89,19 +89,19 @@ add_library(CryptoBot_lib
 "strategies/tri_arb.cpp"
 "strategies/tri_arb.h"
 
-"trading/order_book.cpp"
+
 "trading/order_book.h"
-"trading/asset_symbol.cpp"
+
 "trading/asset_symbol.h"
 "trading/fee_schedule.cpp" 
 "trading/fee_schedule.h" 
-"trading/tradable_pair.cpp" 
+ 
 "trading/tradable_pair.h" 
 "trading/trade_description.h"
-"trading/trade_description.cpp"
+
 "trading/trading_constants.h"
-"trading/trading_options.cpp"
-"trading/trading_options.h" "trading/ticker_data.h" "trading/ticker_data.cpp" "trading/order_description.h" "trading/order_description.cpp" "trading/order_type.h" )
+
+"trading/trading_options.h" "trading/ticker_data.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

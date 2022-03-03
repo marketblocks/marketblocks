@@ -16,9 +16,7 @@ namespace cb
 	class runner_config
 	{
 	private:
-		static const std::vector<std::string> DEFAULT_EXCHANGE_IDS;
-		static const double DEFAULT_TRADE_PERCENT;
-		static const asset_symbol DEFAULT_FIAT_CURRENCY;
+		static constexpr double DEFAULT_TRADE_PERCENT = 0.05;
 
 		std::vector<std::string> _exchangeIds;
 		double _tradePercent;
@@ -28,18 +26,17 @@ namespace cb
 
 	public:
 		runner_config();
-		explicit runner_config(
+
+		runner_config(
 			std::vector<std::string> exchangeIds,
 			double tradePercent,
 			asset_symbol fiatCurrency);
-
-		static std::string name() { return "runnerConfig"; }
+			
+		static constexpr std::string name() noexcept { return "runnerConfig"; }
 		
-		const std::vector<std::string>& exchange_ids() const { return _exchangeIds; }
-		double trade_percent() const { return _tradePercent; }
-		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
-
-		trading_options get_trading_options() const;
+		constexpr const std::vector<std::string>& exchange_ids() const noexcept { return _exchangeIds; }
+		constexpr double trade_percent() const noexcept { return _tradePercent; }
+		constexpr const asset_symbol& fiat_currency() const noexcept { return _fiatCurrency; }
 	};
 
 	template<>

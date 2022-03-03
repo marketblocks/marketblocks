@@ -11,10 +11,15 @@ namespace cb
 		asset_symbol _fiatCurrency;
 
 	public:
-		trading_options();
-		explicit trading_options(double maxTradePercent, asset_symbol fiatCurrency);
+		constexpr trading_options()
+			: _maxTradePercent{ 0.0 }, _fiatCurrency{ "" }
+		{}
 
-		double max_trade_percent() const { return _maxTradePercent; }
-		const asset_symbol& fiat_currency() const { return _fiatCurrency; }
+		constexpr trading_options(double maxTradePercent, asset_symbol fiatCurrency)
+			: _maxTradePercent{ maxTradePercent }, _fiatCurrency{ std::move(fiatCurrency) }
+		{}
+
+		constexpr double max_trade_percent() const noexcept { return _maxTradePercent; }
+		constexpr const asset_symbol& fiat_currency() const noexcept { return _fiatCurrency; }
 	};
 }

@@ -11,11 +11,16 @@ namespace cb
 		std::string _value;
 
 	public:
-		explicit http_header(std::string key, std::string value);
+		explicit constexpr http_header(std::string key, std::string value)
+			: _key{ std::move(key) }, _value{ std::move(value) }
+		{}
 
-		const std::string& key() const { return _key; }
-		const std::string& value() const { return _value; }
+		constexpr const std::string& key() const noexcept { return _key; }
+		constexpr const std::string& value() const noexcept { return _value; }
 
-		std::string to_string() const;
+		constexpr std::string to_string() const
+		{
+			return _key + ": " + _value;
+		}
 	};
 }

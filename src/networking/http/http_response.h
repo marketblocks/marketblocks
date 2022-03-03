@@ -11,9 +11,11 @@ namespace cb
 		std::string _message;
 
 	public:
-		http_response(int responseCode, std::string message);
+		constexpr http_response(int responseCode, std::string message)
+			: _responseCode{ responseCode }, _message{ std::move(message) }
+		{}
 
-		int response_code() const { return _responseCode; }
-		const std::string& message() const { return _message; }
+		constexpr int response_code() const noexcept { return _responseCode; }
+		constexpr const std::string& message() const noexcept { return _message; }
 	};
 }

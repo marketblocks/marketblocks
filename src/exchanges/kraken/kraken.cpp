@@ -13,27 +13,33 @@
 
 namespace
 {
-	std::string to_string(const cb::order_type& orderType)
+	std::string_view to_string(const cb::order_type& orderType)
 	{
+		static constexpr std::string_view LIMIT = "limit";
+		static constexpr std::string_view MARKET = "market";
+
 		switch (orderType)
 		{
 		case cb::order_type::LIMIT:
-			return "limit";
+			return LIMIT;
 		case cb::order_type::MARKET:
-			return "market";
+			return MARKET;
 		default:
 			throw std::invalid_argument{ "Order Type not recognized" };
 		}
 	}
 
-	std::string to_string(const cb::trade_action& tradeAction)
+	std::string_view to_string(const cb::trade_action& tradeAction)
 	{
+		static constexpr std::string_view BUY = "buy";
+		static constexpr std::string_view SELL = "sell";
+
 		switch (tradeAction)
 		{
 		case cb::trade_action::BUY:
-			return "buy";
+			return BUY;
 		case cb::trade_action::SELL:
-			return "sell";
+			return SELL;
 		default:
 			throw std::invalid_argument{ "Trade Action not recognized" };
 		}
@@ -52,26 +58,14 @@ namespace cb
 		_websocketStream{ std::move(websocketStream) }
 	{}
 
-	std::string kraken_api::build_url_path(const std::string& access, const std::string& method) const
-	{
-		return "/" + _constants.VERSION + "/" + access + "/" + method;
-	}
-
-	std::string kraken_api::build_kraken_url(const std::string& access, const std::string& method, const std::string& query) const
-	{
-		std::string path{ build_url_path(access, method) };
-
-		return build_url(_constants.BASEURL, path, query);
-	}
-
 	std::string kraken_api::get_nonce() const
 	{
 		return std::to_string(milliseconds_since_epoch());
 	}
 
-	std::string kraken_api::compute_api_sign(const std::string& uriPath, const std::string& urlPostData, const std::string& nonce) const
+	std::string kraken_api::compute_api_sign(std::string_view uriPath, std::string_view urlPostData, std::string_view nonce) const
 	{
-		std::vector<unsigned char> nonce_postData = sha256(nonce + urlPostData);
+		std::vector<unsigned char> nonce_postData = sha256(std::string{ nonce }.append(urlPostData));
 
 		std::vector<unsigned char> message{ uriPath.begin(), uriPath.end() };
 		message.insert(message.end(), nonce_postData.begin(), nonce_postData.end());
@@ -145,18 +139,13 @@ namespace cb
 		return send_private_request<std::string>(_constants.ADD_ORDER, internal::read_add_order);
 	}
 
-	void kraken_api::cancel_order(const std::string& orderId)
+	void kraken_api::cancel_order(std::string_view orderId)
 	{
 		std::string query = url_query_builder{}
 			.add_parameter("txid", orderId)
 			.to_string();
 
 		send_private_request<void>(_constants.CANCEL_ORDER, internal::read_cancel_order);
-	}
-
-	websocket_stream& kraken_api::get_websocket_stream()
-	{
-		return _websocketStream;
 	}
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)

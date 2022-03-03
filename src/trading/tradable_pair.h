@@ -16,17 +16,36 @@ namespace cb
 		asset_symbol _priceUnit;
 
 	public:
-		explicit tradable_pair(asset_symbol asset, asset_symbol priceUnit);
-		explicit tradable_pair(std::string exchangeId, asset_symbol asset, asset_symbol priceUnit);
+		constexpr tradable_pair(asset_symbol asset, asset_symbol priceUnit)
+			:
+			_iso4217_a3{ asset.get() + "/" + priceUnit.get() },
+			_exchangeId{ _iso4217_a3 },
+			_asset{ std::move(asset) },
+			_priceUnit{ std::move(priceUnit) }
+		{}
 
-		const std::string& iso_4217_a3() const { return _iso4217_a3; }
-		const std::string& exchange_identifier() const { return _exchangeId; }
-		const asset_symbol& asset() const { return _asset; }
-		const asset_symbol& price_unit() const { return _priceUnit; }
+		constexpr tradable_pair(std::string exchangeId, asset_symbol asset, asset_symbol priceUnit)
+			:
+			_iso4217_a3{ asset.get() + "/" + priceUnit.get() },
+			_exchangeId{ std::move(exchangeId) },
+			_asset{ std::move(asset) },
+			_priceUnit{ std::move(priceUnit) }
+		{}
 
-		bool contains(const asset_symbol& assetTicker) const;
+		constexpr const std::string& iso_4217_a3() const noexcept { return _iso4217_a3; }
+		constexpr const std::string& exchange_identifier() const noexcept { return _exchangeId; }
+		constexpr const asset_symbol& asset() const noexcept { return _asset; }
+		constexpr const asset_symbol& price_unit() const noexcept { return _priceUnit; }
 
-		bool operator==(const tradable_pair& other) const;
+		constexpr bool contains(const asset_symbol& assetTicker) const noexcept
+		{
+			return _asset == assetTicker || _priceUnit == assetTicker;
+		}
+
+		constexpr bool operator==(const tradable_pair& other) const noexcept
+		{
+			return _asset == other._asset && _priceUnit == other._priceUnit;
+		}
 	};
 }
 
