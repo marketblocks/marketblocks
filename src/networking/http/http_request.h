@@ -25,14 +25,14 @@ namespace cb
 		constexpr const std::string& content() const noexcept { return _content; }
 		constexpr const std::vector<http_header>& headers() const noexcept { return _headers; }
 
-		constexpr void set_content(std::string content) noexcept
+		constexpr void set_content(std::string_view content) noexcept
 		{
-			_content = std::move(content);
+			_content = content;
 		}
 
-		constexpr void add_header(std::string key, std::string value)
+		constexpr void add_header(std::string_view key, std::string_view value)
 		{
-			_headers.emplace_back(std::move(key), std::move(value));
+			_headers.emplace_back(std::string{ key }, std::string{ value });
 		}
 	};
 }

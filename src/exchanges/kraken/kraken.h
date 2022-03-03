@@ -23,21 +23,59 @@ namespace cb
 	{
 		struct kraken_constants
 		{
-			static constexpr std::string_view BASEURL = "https://api.kraken.com";
-			static constexpr std::string_view VERSION = "0";
-			static constexpr std::string_view PUBLIC = "public";
-			static constexpr std::string_view PRIVATE = "private";
-			static constexpr std::string_view TRADABLE_PAIRS = "AssetPairs";
-			static constexpr std::string_view TICKER = "Ticker";
-			static constexpr std::string_view ORDER_BOOK = "Depth";
-			static constexpr std::string_view BALANCE = "Balance";
-			static constexpr std::string_view TRADE_VOLUME = "TradeVolume";
-			static constexpr std::string_view SYSTEM_STATUS = "SystemStatus";
-			static constexpr std::string_view OPEN_ORDERS = "OpenOrders";
-			static constexpr std::string_view CLOSED_ORDERS = "ClosedOrders";
-			static constexpr std::string_view QUERY_ORDERS = "QueryOrders";
-			static constexpr std::string_view ADD_ORDER = "AddOrder";
-			static constexpr std::string_view CANCEL_ORDER = "CancelOrder";
+		private:
+			struct general_constants
+			{
+				static constexpr std::string_view BASEURL = "https://api.kraken.com";
+				static constexpr std::string_view VERSION = "0";
+				static constexpr std::string_view PUBLIC = "public";
+				static constexpr std::string_view PRIVATE = "private";
+			};
+
+			struct method_constants
+			{
+				static constexpr std::string_view TRADABLE_PAIRS = "AssetPairs";
+				static constexpr std::string_view TICKER = "Ticker";
+				static constexpr std::string_view ORDER_BOOK = "Depth";
+				static constexpr std::string_view BALANCE = "Balance";
+				static constexpr std::string_view TRADE_VOLUME = "TradeVolume";
+				static constexpr std::string_view SYSTEM_STATUS = "SystemStatus";
+				static constexpr std::string_view OPEN_ORDERS = "OpenOrders";
+				static constexpr std::string_view CLOSED_ORDERS = "ClosedOrders";
+				static constexpr std::string_view QUERY_ORDERS = "QueryOrders";
+				static constexpr std::string_view ADD_ORDER = "AddOrder";
+				static constexpr std::string_view CANCEL_ORDER = "CancelOrder";
+			};
+
+			struct query_constants
+			{
+				static constexpr std::string_view PAIR = "pair";
+				static constexpr std::string_view COUNT = "count";
+				static constexpr std::string_view TYPE = "type";
+				static constexpr std::string_view ORDER_TYPE = "ordertype";
+				static constexpr std::string_view PRICE = "price";
+				static constexpr std::string_view VOLUME = "volume";
+				static constexpr std::string_view TXID = "txid";
+				static constexpr std::string_view NONCE = "nonce";
+			};
+
+			struct http_constants
+			{
+				static constexpr std::string_view API_KEY_HEADER = "API-Key";
+				static constexpr std::string_view API_SIGN_HEADER = "API-Sign";
+				static constexpr std::string_view CONTENT_TYPE_HEADER_KEY = "Content-Type";
+				static constexpr std::string_view CONTENT_TYPE_HEADER_VALUE = "application/x-www-form-urlencoded; charset=utf-8";
+			};
+
+		public:
+			const general_constants general;
+			const method_constants methods;
+			const query_constants queryKeys;
+			const http_constants http;
+
+			constexpr kraken_constants()
+				: general{}, methods{}, queryKeys{}, http{}
+			{}
 		};
 
 		inline bool should_retry(std::string_view errorMessage)
@@ -119,7 +157,7 @@ namespace cb
 		constexpr std::string build_url_path(std::string_view access, std::string_view method) const
 		{
 			std::string urlPath{ "/" };
-			urlPath.append(_constants.VERSION);
+			urlPath.append(_constants.general.VERSION);
 			urlPath.append("/");
 			urlPath.append(access);
 			urlPath.append("/");
@@ -130,7 +168,7 @@ namespace cb
 
 		constexpr std::string build_kraken_url(std::string_view access, std::string_view method, std::string_view query) const
 		{
-			return build_url(_constants.BASEURL, build_url_path(access, method), query);
+			return build_url(_constants.general.BASEURL, build_url_path(access, method), query);
 		}
 
 		template<typename Value, typename ResponseReader>
@@ -145,7 +183,7 @@ namespace cb
 		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view method, std::string_view query, const ResponseReader& reader) const
 		{
-			http_request request{ http_verb::GET, build_kraken_url(_constants.PUBLIC, method, query) };
+			http_request request{ http_verb::GET, build_kraken_url(_constants.general.PUBLIC, method, query) };
 			return send_request<Value>(request, reader);
 		}
 
@@ -160,16 +198,22 @@ namespace cb
 		{
 			std::string nonce{ get_nonce() };
 
-			std::string postData{ "nonce=" + nonce };
-			append_query(postData, query);
+			std::string postData{ _constants.queryKeys.NONCE };
+			postData.append("=" + nonce);
 
-			std::string apiPath{ build_url_path(_constants.PRIVATE, method) };
+			if (!query.empty())
+			{
+				postData.append("&");
+				postData.append(query);
+			}
+
+			std::string apiPath{ build_url_path(_constants.general.PRIVATE, method) };
 			std::string apiSign{ compute_api_sign(apiPath, postData, nonce) };
 
-			http_request request{ http_verb::POST, std::string{ _constants.BASEURL } + apiPath };
-			request.add_header("API-Key", _publicKey);
-			request.add_header("API-Sign", apiSign);
-			request.add_header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+			http_request request{ http_verb::POST, std::string{ _constants.general.BASEURL } + apiPath };
+			request.add_header(_constants.http.API_KEY_HEADER, _publicKey);
+			request.add_header(_constants.http.API_SIGN_HEADER, apiSign);
+			request.add_header(_constants.http.CONTENT_TYPE_HEADER_KEY, _constants.http.CONTENT_TYPE_HEADER_VALUE);
 			request.set_content(postData);
 
 			return send_request<Value>(request, reader);
