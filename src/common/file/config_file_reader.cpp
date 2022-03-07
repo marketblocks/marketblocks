@@ -11,7 +11,7 @@ namespace cb
 	std::filesystem::path get_path(std::string_view fileName)
 	{
 		std::filesystem::path path{ CONFIG_DIRECTORY };
-		path.replace_filename(fileName);
+		path.append(fileName);
 		path.replace_extension(JSON_FILE_EXTENSION);
 
 		return path;

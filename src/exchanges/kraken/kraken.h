@@ -9,6 +9,7 @@
 #include "kraken_config.h"
 #include "kraken_websocket.h"
 #include "exchanges/exchange.h"
+#include "exchanges/exchange_ids.h"
 #include "common/utils/retry.h"
 #include "networking/url.h"
 #include "networking/http/http_service.h"
@@ -228,18 +229,19 @@ namespace cb
 	public:
 		kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream);
 
-		exchange_status get_status() const override;
-		const std::vector<tradable_pair> get_tradable_pairs() const override;
-		const ticker_data get_ticker_data(const tradable_pair& tradablePair) const override;
-		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
-		const double get_fee(const tradable_pair& tradablePair) const override;
-		const std::unordered_map<asset_symbol, double> get_balances() const override;
-		const std::vector<order_description> get_open_orders() const override;
-		const std::vector<order_description> get_closed_orders() const override;
-		const std::string add_order(const trade_description& description) override;
-		void cancel_order(std::string_view orderId) override;
+		constexpr std::string_view id() const noexcept override { return exchange_ids::KRAKEN; }
+		constexpr websocket_stream& get_websocket_stream() noexcept override { return _websocketStream; }
 
-		constexpr websocket_stream& get_websocket_stream() override	{ return _websocketStream; }
+		exchange_status get_status() const override;
+		std::vector<tradable_pair> get_tradable_pairs() const override;
+		ticker_data get_ticker_data(const tradable_pair& tradablePair) const override;
+		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
+		double get_fee(const tradable_pair& tradablePair) const override;
+		std::unordered_map<asset_symbol, double> get_balances() const override;
+		std::vector<order_description> get_open_orders() const override;
+		std::vector<order_description> get_closed_orders() const override;
+		std::string add_order(const trade_description& description) override;
+		void cancel_order(std::string_view orderId) override;
 	};
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient);

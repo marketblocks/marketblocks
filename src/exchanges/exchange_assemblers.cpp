@@ -20,7 +20,6 @@ namespace cb
 		};
 
 		return std::make_shared<live_test_exchange>(
-			api->id(),
 			std::move(api),
 			std::make_unique<paper_trader>(std::move(fees), std::move(initialBalances)));
 	}

@@ -49,7 +49,7 @@ namespace
 namespace cb
 {
 	kraken_api::kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream)
-		: exchange{ exchange_id::KRAKEN },
+		:
 		_constants{},
 		_publicKey{ config.public_key() },
 		_decodedPrivateKey{ b64_decode(config.private_key()) },
@@ -78,12 +78,12 @@ namespace cb
 		return send_public_request<exchange_status>(_constants.methods.SYSTEM_STATUS, internal::read_system_status);
 	}
 
-	const std::vector<tradable_pair> kraken_api::get_tradable_pairs() const
+	std::vector<tradable_pair> kraken_api::get_tradable_pairs() const
 	{
 		return send_public_request<std::vector<tradable_pair>>(_constants.methods.TRADABLE_PAIRS, internal::read_tradable_pairs);
 	}
 
-	const ticker_data kraken_api::get_ticker_data(const tradable_pair& tradablePair) const
+	ticker_data kraken_api::get_ticker_data(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
 			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
@@ -92,7 +92,7 @@ namespace cb
 		return send_public_request<ticker_data>(_constants.methods.TICKER, query, internal::read_ticker_data);
 	}
 
-	const order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const
+	order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
 		std::string query = url_query_builder{}
 			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
@@ -102,7 +102,7 @@ namespace cb
 		return send_public_request<order_book_state>(_constants.methods.ORDER_BOOK, query, internal::read_order_book);
 	}
 
-	const double kraken_api::get_fee(const tradable_pair& tradablePair) const
+	double kraken_api::get_fee(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
 			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
@@ -111,22 +111,22 @@ namespace cb
 		return send_private_request<double>(_constants.methods.TRADE_VOLUME, query, internal::read_fee);
 	}
 
-	const std::unordered_map<asset_symbol, double> kraken_api::get_balances() const
+	std::unordered_map<asset_symbol, double> kraken_api::get_balances() const
 	{
 		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.methods.BALANCE, internal::read_balances);
 	}
 
-	const std::vector<order_description> kraken_api::get_open_orders() const
+	std::vector<order_description> kraken_api::get_open_orders() const
 	{
 		return send_private_request<std::vector<order_description>>(_constants.methods.OPEN_ORDERS, internal::read_open_orders);
 	}
 
-	const std::vector<order_description> kraken_api::get_closed_orders() const
+	std::vector<order_description> kraken_api::get_closed_orders() const
 	{
 		return send_private_request<std::vector<order_description>>(_constants.methods.CLOSED_ORDERS, internal::read_closed_orders);
 	}
 
-	const std::string kraken_api::add_order(const trade_description& description)
+	std::string kraken_api::add_order(const trade_description& description)
 	{
 		std::string query = url_query_builder{}
 			.add_parameter(_constants.queryKeys.PAIR, description.pair().exchange_identifier())

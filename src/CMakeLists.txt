@@ -35,8 +35,8 @@ add_library(CryptoBot_lib
 "exchanges/exchange.h"
 "exchanges/exchange_assemblers.cpp"  
 "exchanges/exchange_assemblers.h" 
-"exchanges/exchange_id.cpp"
-"exchanges/exchange_id.h"
+
+"exchanges/exchange_ids.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
 
@@ -101,7 +101,7 @@ add_library(CryptoBot_lib
 
 "trading/trading_constants.h"
 
-"trading/trading_options.h" "trading/ticker_data.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h")
+"trading/trading_options.h" "trading/ticker_data.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

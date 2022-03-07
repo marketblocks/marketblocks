@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <memory>
 
-#include "exchange_id.h"
 #include "exchange_status.h"
 #include "websockets/websocket_stream.h"
 
@@ -21,29 +20,22 @@ namespace cb
 {
 	class exchange
 	{
-	private:
-		exchange_id _id;
-
 	public:
-		constexpr exchange(exchange_id id)
-			: _id{ id }
-		{}
-
 		virtual ~exchange() = default;
 
-		constexpr exchange_id id() const noexcept { return _id; }
+		constexpr virtual std::string_view id() const noexcept = 0;
+		constexpr virtual websocket_stream& get_websocket_stream() noexcept = 0;
 
 		virtual exchange_status get_status() const = 0;
-		virtual const std::vector<tradable_pair> get_tradable_pairs() const = 0;
-		virtual const ticker_data get_ticker_data(const tradable_pair& tradablePair) const = 0;
-		virtual const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
-		virtual const std::unordered_map<asset_symbol, double> get_balances() const = 0;
-		virtual const double get_fee(const tradable_pair& tradablePair) const = 0;
-		virtual const std::vector<order_description> get_open_orders() const = 0;
-		virtual const std::vector<order_description> get_closed_orders() const = 0;
-		virtual const std::string add_order(const trade_description& description) = 0;
+		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
+		virtual ticker_data get_ticker_data(const tradable_pair& tradablePair) const = 0;
+		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
+		virtual std::unordered_map<asset_symbol, double> get_balances() const = 0;
+		virtual double get_fee(const tradable_pair& tradablePair) const = 0;
+		virtual std::vector<order_description> get_open_orders() const = 0;
+		virtual std::vector<order_description> get_closed_orders() const = 0;
+		virtual std::string add_order(const trade_description& description) = 0;
 		virtual void cancel_order(std::string_view orderId) = 0;
-		virtual websocket_stream& get_websocket_stream() = 0;
 	};
 
 	template<typename MarketApi, typename TradeApi>
@@ -54,56 +46,61 @@ namespace cb
 		std::unique_ptr<TradeApi> _tradeApi;
 
 	public:
-		multi_component_exchange(exchange_id id, std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
-			: exchange{ id }, _marketApi{ std::move(dataApi) }, _tradeApi{ std::move(tradeApi) }
+		multi_component_exchange(std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
+			: _marketApi{ std::move(dataApi) }, _tradeApi{ std::move(tradeApi) }
 		{}
+
+		constexpr std::string_view id() const noexcept
+		{
+			return _marketApi->id();
+		}
+
+		constexpr websocket_stream& get_websocket_stream() noexcept
+		{
+			return _marketApi->get_websocket_stream();
+		}
 
 		exchange_status get_status() const override
 		{
 			return _marketApi->get_status();
 		}
 
-		const std::vector<tradable_pair> get_tradable_pairs() const override
+		std::vector<tradable_pair> get_tradable_pairs() const override
 		{
 			return _marketApi->get_tradable_pairs();
 		}
 
-		const ticker_data get_ticker_data(const tradable_pair& tradablePair) const override
+		ticker_data get_ticker_data(const tradable_pair& tradablePair) const override
 		{
 			return _marketApi->get_ticker_data(tradablePair);
 		}
 
-		const order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override
+		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override
 		{
 			return _marketApi->get_order_book(tradablePair, depth);
 		}
 
-		websocket_stream& get_websocket_stream()
-		{
-			return _marketApi->get_websocket_stream();
-		}
-
-		const std::unordered_map<asset_symbol, double> get_balances() const override
+		std::unordered_map<asset_symbol, double> get_balances() const override
 		{
 			return _tradeApi->get_balances();
 		}
 
-		const double get_fee(const tradable_pair& tradablePair) const override
+		double get_fee(const tradable_pair& tradablePair) const override
 		{
 			return _tradeApi->get_fee(tradablePair);
 		}
 
-		const std::vector<order_description> get_open_orders() const override
+		std::vector<order_description> get_open_orders() const override
 		{
 			return _tradeApi->get_open_orders();
 		}
 		
-		const std::vector<order_description> get_closed_orders() const override
+		std::vector<order_description> get_closed_orders() const override
 		{
 			return _tradeApi->get_closed_orders();
 		}
 
-		const std::string add_order(const trade_description& description) override
+		std::string add_order(const trade_description& description) override
 		{
 			return _tradeApi->add_order(description);
 		}

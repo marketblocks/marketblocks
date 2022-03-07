@@ -13,28 +13,6 @@
 
 namespace cb::internal
 {
-	template<typename Config>
-	Config get_config()
-	{
-		logger& log{ logger::instance() };
-		std::string configName{ Config::name() };
-
-		log.info("Reading config file: {}", configName);
-
-		try
-		{
-			Config config = load_or_create_config<Config>();
-
-			log.info("{} created successfully", configName);
-			return config;
-		}
-		catch (const std::exception& e)
-		{
-			log.error("Error occurred reading {0}: {1}, using default values", configName, e.what());
-			return Config{};
-		}
-	}
-
 	runner_config get_runner_config();
 
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode);

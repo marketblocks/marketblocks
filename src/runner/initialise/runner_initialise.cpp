@@ -3,8 +3,9 @@
 
 #include "runner_initialise.h"
 #include "initialisation_error.h"
-#include "exchanges/exchange_id.h"
+#include "exchanges/exchange_ids.h"
 #include "exchanges/kraken/kraken.h"
+#include "exchanges/coinbase/coinbase.h"
 #include "exchanges/exchange_assemblers.h"
 #include "exchanges/exchange_status.h"
 #include "common/file/file.h"
@@ -15,6 +16,28 @@
 namespace
 {
 	using namespace cb;
+
+	template<typename Config>
+	Config get_config()
+	{
+		logger& log{ logger::instance() };
+		std::string configName{ Config::name() };
+
+		log.info("Reading config file: {}", configName);
+
+		try
+		{
+			Config config = load_or_create_config<Config>();
+
+			log.info("{} created successfully", configName);
+			return config;
+		}
+		catch (const std::exception& e)
+		{
+			log.error("Error occurred reading {0}: {1}, using default values", configName, e.what());
+			return Config{};
+		}
+	}
 
 	typedef std::shared_ptr<exchange>(*exchange_assembler)(std::unique_ptr<exchange> api);
 	exchange_assembler select_assembler(run_mode runMode)
@@ -32,44 +55,40 @@ namespace
 
 	std::unique_ptr<exchange> create_api_from_id(
 		std::string_view identifier,
-		const exchange_id_lookup& idLookup,
 		std::shared_ptr<websocket_client> websocketClient)
 	{
-		auto it = idLookup.map().find(identifier);
-		if (it == idLookup.map().end())
+		if (identifier == exchange_ids::KRAKEN)
+		{
+			kraken_config config = get_config<kraken_config>();
+			return make_kraken(std::move(config), websocketClient);
+		}
+		else if (identifier == exchange_ids::COINBASE)
+		{
+			return make_coinbase(websocketClient);
+		}
+		else
 		{
 			return nullptr;
 		}
-
-		exchange_id id = it->second;
-
-		switch (id)
-		{
-			case exchange_id::KRAKEN:
-			{
-				kraken_config config = internal::get_config<kraken_config>();
-				return make_kraken(std::move(config), websocketClient);
-			}
-			default:
-				return nullptr;
-		}
 	}
 
-	void log_exchange_list(const std::vector<std::string>& exchangeIds, logger& log)
+	template<typename ExchangeIds>
+	void log_exchange_list(const ExchangeIds& exchangeIds, logger& log)
 	{
 		std::string exchangeList;
 
 		for (auto& id : exchangeIds)
 		{
-			exchangeList += "\n" + id;
+			exchangeList.append("\n");
+			exchangeList.append(id);
 		}
 
 		log.info("Found {0} exchange(s):{1}", exchangeIds.size(), exchangeList);
 	}
 
+	template<typename ExchangeIds>
 	std::vector<std::shared_ptr<cb::exchange>> create_exchanges(
-		const std::vector<std::string>& exchangeIds, 
-		const cb::exchange_id_lookup& idLookup, 
+		const ExchangeIds& exchangeIds,
 		const exchange_assembler& assembler,
 		std::shared_ptr<cb::websocket_client> websocketClient)
 	{
@@ -83,7 +102,7 @@ namespace
 		{
 			log.info("Creating exchange API: {}", exchangeId);
 
-			std::unique_ptr<cb::exchange> api = create_api_from_id(exchangeId, idLookup, websocketClient);
+			std::unique_ptr<cb::exchange> api = create_api_from_id(exchangeId, websocketClient);
 
 			if (!api)
 			{
@@ -124,17 +143,16 @@ namespace cb::internal
 		std::vector<std::shared_ptr<exchange>> exchanges;
 		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>();
 		exchange_assembler assembler = select_assembler(runMode);
-		exchange_id_lookup idLookup;
 
 		logger::instance().info("Creating exchange APIs...");
 
 		if (runnerConfig.exchange_ids().empty())
 		{
-			return ::create_exchanges(idLookup.all_ids(), idLookup, assembler, websocketClient);
+			return ::create_exchanges(exchange_ids::all(), assembler, websocketClient);
 		}
 		else
 		{
-			return ::create_exchanges(runnerConfig.exchange_ids(), idLookup, assembler, websocketClient);
+			return ::create_exchanges(runnerConfig.exchange_ids(), assembler, websocketClient);
 		}
 	}
 }
