@@ -17,15 +17,22 @@ namespace
 	template<typename T, typename Reader> 
 	cb::result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
-		cb::json_document jsonDocument{ cb::parse_json(jsonResult) };
-
-		std::string error = get_error(jsonDocument);
-		if (!error.empty())
+		try
 		{
-			return cb::result<T>::fail(std::move(error));
-		}
+			cb::json_document jsonDocument{ cb::parse_json(jsonResult) };
 
-		return reader(jsonDocument.element("result"));
+			std::string error = get_error(jsonDocument);
+			if (!error.empty())
+			{
+				return cb::result<T>::fail(std::move(error));
+			}
+
+			return reader(jsonDocument.element("result"));
+		}
+		catch (const std::exception& e)
+		{
+			return cb::result<T>::fail(e.what());
+		}
 	}
 
 	cb::result<std::vector<cb::order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderType)

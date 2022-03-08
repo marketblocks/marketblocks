@@ -141,7 +141,7 @@ namespace cb
 		}
 	}
 	
-	class kraken_api final : public exchange
+	class kraken_api : public exchange
 	{
 	private:
 		internal::kraken_constants _constants;
@@ -149,8 +149,8 @@ namespace cb
 		std::string _publicKey;
 		std::vector<unsigned char> _decodedPrivateKey;
 		int _httpRetries;
-		http_service _httpService;
-		kraken_websocket_stream _websocketStream;
+		std::unique_ptr<http_service> _httpService;
+		std::unique_ptr<kraken_websocket_stream> _websocketStream;
 
 		std::string get_nonce() const;
 		std::string compute_api_sign(std::string_view uriPath, std::string_view postData, std::string_view nonce) const;
@@ -176,7 +176,7 @@ namespace cb
 		Value send_request(const http_request& request, const ResponseReader& reader) const
 		{
 			return retry_on_fail<Value>(
-				[this, &request]() { return _httpService.send(request); },
+				[this, &request]() { return _httpService->send(request); },
 				[this, &reader](const cb::http_response& response) { return internal::http_retry_result_converter<Value>(response, reader); },
 				_httpRetries);
 		}
@@ -227,10 +227,14 @@ namespace cb
 		}
 
 	public:
-		kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream);
+		kraken_api(
+			kraken_config config, 
+			std::unique_ptr<http_service> httpService, 
+			std::unique_ptr<kraken_websocket_stream> websocketStream);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::KRAKEN; }
-		constexpr websocket_stream& get_websocket_stream() noexcept override { return _websocketStream; }
+		
+		websocket_stream& get_websocket_stream() noexcept override { return *_websocketStream; }
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
@@ -245,4 +249,4 @@ namespace cb
 	};
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient);
-}
+} 

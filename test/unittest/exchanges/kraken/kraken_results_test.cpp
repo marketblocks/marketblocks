@@ -1,7 +1,8 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include "../../assertion_helpers.h"
+#include "unittest/assertion_helpers.h"
+#include "test_data/test_data_constants.h"
 
 #include "exchanges/kraken/kraken_results.h"
 #include "common/file/file.h"
@@ -13,13 +14,10 @@ namespace
 	static const std::string ERROR_MESSAGE = "This is an error";
 	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";
 
-
 	template<typename ResultReader>
 	auto execute_reader(const std::string& dataFileName, ResultReader reader)
 	{
-		static const std::filesystem::path dataDirectory = "test_data\\kraken_results_test";
-		std::filesystem::path dataPath = dataDirectory / dataFileName;
-
+		std::filesystem::path dataPath{ kraken_results_test_data_path(dataFileName) };
 		std::string json = cb::read_file(dataPath);
 
 		return reader(json);
@@ -122,16 +120,16 @@ namespace cb::test
 {
 	TEST(KrakenResults, ReadSystemStatus)
 	{
-		execute_test("read_system_status_online.json", internal::read_system_status, exchange_status::ONLINE);
-		execute_test("read_system_status_maintenance.json", internal::read_system_status, exchange_status::MAINTENANCE);
-		execute_test("read_system_status_cancel_only.json", internal::read_system_status, exchange_status::CANCEL_ONLY);
-		execute_test("read_system_status_post_only.json", internal::read_system_status, exchange_status::POST_ONLY);
+		execute_test("system_status_online.json", internal::read_system_status, exchange_status::ONLINE);
+		execute_test("system_status_maintenance.json", internal::read_system_status, exchange_status::MAINTENANCE);
+		execute_test("system_status_cancel_only.json", internal::read_system_status, exchange_status::CANCEL_ONLY);
+		execute_test("system_status_post_only.json", internal::read_system_status, exchange_status::POST_ONLY);
 	}
 
 	TEST(KrakenResults, ReadTradablePairs)
 	{
 		execute_test(
-			"read_tradable_pairs_success.json",
+			"tradable_pairs_success.json",
 			internal::read_tradable_pairs,
 			std::vector<tradable_pair>
 		{
@@ -143,7 +141,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadTickerData)
 	{
 		execute_test(
-			"read_ticker_data_success.json",
+			"ticker_data_success.json",
 			internal::read_ticker_data,
 			ticker_data{ 1940.0, 3.0, 1939.990, 9.0, 267.88525096, 369.71101684, 560, 809, 1917.23, 1917.23, 2034.26, 2056.45, 2034.26 },
 			assert_ticker_data_eq);
@@ -152,7 +150,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadOrderBook)
 	{
 		execute_test(
-			"read_order_book_success.json",
+			"order_book_success.json",
 			internal::read_order_book,
 			order_book_state
 			{
@@ -167,7 +165,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadBalances)
 	{
 		execute_test(
-			"read_balances_success.json",
+			"balances_success.json",
 			internal::read_balances,
 			std::unordered_map<asset_symbol, double>
 		{
@@ -183,7 +181,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadFee)
 	{
 		execute_test(
-			"read_fee_success.json",
+			"fee_success.json",
 			internal::read_fee,
 			0.1);
 	}
@@ -191,7 +189,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadOpenOrders)
 	{
 		execute_test(
-			"read_open_orders_success.json",
+			"open_orders_success.json",
 			internal::read_open_orders,
 			get_expected_open_closed_orders(),
 			assert_order_description_eq);
@@ -200,7 +198,7 @@ namespace cb::test
 	TEST(KrakenResults, ReadClosedOrders)
 	{
 		execute_test(
-			"read_closed_orders_success.json",
+			"closed_orders_success.json",
 			internal::read_closed_orders,
 			get_expected_open_closed_orders(),
 			assert_order_description_eq);
@@ -209,13 +207,13 @@ namespace cb::test
 	TEST(KrakenResults, ReadAddOrder)
 	{
 		execute_test<std::string>(
-			"read_add_order_success.json",
+			"add_order_success.json",
 			internal::read_add_order,
 			"OUF4EM-FRGI2-MQMWZD");
 	}
 
 	TEST(KrakenResults, ReadCancelOrder)
 	{
-		execute_test("read_cancel_order.json", internal::read_cancel_order);
+		execute_test("cancel_order.json", internal::read_cancel_order);
 	}
 }

@@ -24,7 +24,8 @@ namespace cb
 		virtual ~exchange() = default;
 
 		constexpr virtual std::string_view id() const noexcept = 0;
-		constexpr virtual websocket_stream& get_websocket_stream() noexcept = 0;
+		
+		virtual websocket_stream& get_websocket_stream() noexcept = 0;
 
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;

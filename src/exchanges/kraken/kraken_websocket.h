@@ -26,6 +26,6 @@ namespace cb
 	public:
 		kraken_websocket_stream(std::shared_ptr<websocket_client> websocketClient);
 
-		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
+		virtual void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
 	};
 }

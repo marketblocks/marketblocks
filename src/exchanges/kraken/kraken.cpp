@@ -48,7 +48,10 @@ namespace
 
 namespace cb
 {
-	kraken_api::kraken_api(kraken_config config, http_service httpService, kraken_websocket_stream websocketStream)
+	kraken_api::kraken_api(
+		kraken_config config, 
+		std::unique_ptr<http_service> httpService,
+		std::unique_ptr<kraken_websocket_stream> websocketStream)
 		:
 		_constants{},
 		_publicKey{ config.public_key() },
@@ -136,7 +139,7 @@ namespace cb
 			.add_parameter(_constants.queryKeys.VOLUME, std::to_string(description.volume()))
 			.to_string();
 
-		return send_private_request<std::string>(_constants.methods.ADD_ORDER, internal::read_add_order);
+		return send_private_request<std::string>(_constants.methods.ADD_ORDER, query, internal::read_add_order);
 	}
 
 	void kraken_api::cancel_order(std::string_view orderId)
@@ -145,11 +148,14 @@ namespace cb
 			.add_parameter(_constants.queryKeys.TXID, orderId)
 			.to_string();
 
-		send_private_request<void>(_constants.methods.CANCEL_ORDER, internal::read_cancel_order);
+		send_private_request<void>(_constants.methods.CANCEL_ORDER, query, internal::read_cancel_order);
 	}
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)
 	{
-		return std::make_unique<kraken_api>(std::move(config), http_service{}, kraken_websocket_stream{ websocketClient });
+		return std::make_unique<kraken_api>(
+			std::move(config), 
+			std::make_unique<http_service>(),
+			std::make_unique<kraken_websocket_stream>(websocketClient));
 	}
 }
