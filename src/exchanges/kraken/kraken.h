@@ -27,7 +27,7 @@ namespace cb
 		private:
 			struct general_constants
 			{
-				static constexpr std::string_view BASEURL = "https://api.kraken.com";
+				static constexpr std::string_view BASEURL = "https://api.kraken.com/";
 				static constexpr std::string_view VERSION = "0";
 				static constexpr std::string_view PUBLIC = "public";
 				static constexpr std::string_view PRIVATE = "private";
@@ -150,15 +150,14 @@ namespace cb
 		std::vector<unsigned char> _decodedPrivateKey;
 		int _httpRetries;
 		std::unique_ptr<http_service> _httpService;
-		std::unique_ptr<kraken_websocket_stream> _websocketStream;
+		std::unique_ptr<websocket_stream> _websocketStream;
 
 		std::string get_nonce() const;
 		std::string compute_api_sign(std::string_view uriPath, std::string_view postData, std::string_view nonce) const;
 
 		constexpr std::string build_url_path(std::string_view access, std::string_view method) const
 		{
-			std::string urlPath{ "/" };
-			urlPath.append(_constants.general.VERSION);
+			std::string urlPath{ _constants.general.VERSION };
 			urlPath.append("/");
 			urlPath.append(access);
 			urlPath.append("/");
@@ -230,7 +229,7 @@ namespace cb
 		kraken_api(
 			kraken_config config, 
 			std::unique_ptr<http_service> httpService, 
-			std::unique_ptr<kraken_websocket_stream> websocketStream);
+			std::unique_ptr<websocket_stream> websocketStream);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::KRAKEN; }
 		

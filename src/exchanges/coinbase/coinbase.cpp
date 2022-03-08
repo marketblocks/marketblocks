@@ -3,7 +3,9 @@
 
 namespace cb
 {
-	coinbase_api::coinbase_api(http_service httpService, coinbase_websocket_stream websocketStream)
+	coinbase_api::coinbase_api(
+		std::unique_ptr<http_service> httpService,
+		std::unique_ptr<websocket_stream> websocketStream)
 		: 
 		_constants{},
 		_httpService{ std::move(httpService) }, 
@@ -62,6 +64,8 @@ namespace cb
 
 	std::unique_ptr<exchange> make_coinbase(std::shared_ptr<websocket_client> websocketClient)
 	{
-		return std::make_unique<coinbase_api>(http_service{}, coinbase_websocket_stream{ websocketClient });
+		return std::make_unique<coinbase_api>(
+			std::make_unique<http_service>(),
+			std::make_unique<coinbase_websocket_stream>(websocketClient));
 	}
 }

@@ -9,4 +9,12 @@ namespace cb::test
 
 		return directory;
 	}
+
+	std::filesystem::path coinbase_results_test_data_path(std::string_view fileName)
+	{
+		std::filesystem::path directory{ std::format("{0}\\{1}", TEST_DATA_FOLDER, "coinbase_results_test") };
+		directory.append(fileName);
+
+		return directory;
+	}
 }

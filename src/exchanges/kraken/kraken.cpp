@@ -51,7 +51,7 @@ namespace cb
 	kraken_api::kraken_api(
 		kraken_config config, 
 		std::unique_ptr<http_service> httpService,
-		std::unique_ptr<kraken_websocket_stream> websocketStream)
+		std::unique_ptr<websocket_stream> websocketStream)
 		:
 		_constants{},
 		_publicKey{ config.public_key() },

@@ -12,16 +12,6 @@ namespace
 	using namespace cb::test;
 	using ::testing::Return;
 
-	class mock_kraken_websocket_stream : public cb::kraken_websocket_stream
-	{
-	public:
-		mock_kraken_websocket_stream()
-			: cb::kraken_websocket_stream{ nullptr }
-		{}
-
-		MOCK_METHOD(void, subscribe_order_book, (const std::vector<cb::tradable_pair>& tradablePairs), (override));
-	};
-
 	MATCHER_P(IsKrakenPrivateHttpRequest, expected, "")
 	{
 		std::string regexString{ "(nonce=)[0-9]+" };
@@ -76,7 +66,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_public_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_status();
 	}
@@ -96,7 +86,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_public_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_tradable_pairs();
 	}
@@ -118,7 +108,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_public_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_ticker_data(pair);
 	}
@@ -141,7 +131,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_public_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_order_book(pair, depth);
 	}
@@ -165,7 +155,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_private_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_fee(pair);
 	}
@@ -185,7 +175,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_private_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_balances();
 	}
@@ -205,7 +195,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_private_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_open_orders();
 	}
@@ -225,7 +215,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_private_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.get_closed_orders();
 	}
@@ -256,7 +246,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_private_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.add_order(trade);
 	}
@@ -280,7 +270,7 @@ namespace cb::test
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_private_test(std::move(expectedRequest), std::move(response)) };
-		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_kraken_websocket_stream>() };
+		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
 		api.cancel_order(orderId);
 	}

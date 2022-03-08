@@ -18,7 +18,7 @@ namespace cb
 		private:
 			struct general_constants
 			{
-				static constexpr std::string_view BASE_URL = "https://api.exchange.coinbase.com";
+				static constexpr std::string_view BASE_URL = "https://api.exchange.coinbase.com/";
 			};
 
 			struct method_constants
@@ -40,13 +40,13 @@ namespace cb
 	{
 	private:
 		internal::coinbase_constants _constants;
-		http_service _httpService;
-		coinbase_websocket_stream _websocketStream;
+		std::unique_ptr<http_service> _httpService;
+		std::unique_ptr<websocket_stream> _websocketStream;
 
 		template<typename Value, typename ResponseReader>
 		Value send_request(const http_request& request, const ResponseReader& reader) const
 		{
-			http_response response{ _httpService.send(request) };
+			http_response response{ _httpService->send(request) };
 
 			if (response.response_code() != HttpResponseCodes::OK)
 			{
@@ -70,10 +70,12 @@ namespace cb
 		}
 
 	public:
-		coinbase_api(http_service httpService, coinbase_websocket_stream websocketStream);
+		coinbase_api(
+			std::unique_ptr<http_service> httpService, 
+			std::unique_ptr<websocket_stream> websocketStream);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::COINBASE; }
-		constexpr websocket_stream& get_websocket_stream() noexcept override { return _websocketStream; }
+		websocket_stream& get_websocket_stream() noexcept override { return *_websocketStream; }
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
