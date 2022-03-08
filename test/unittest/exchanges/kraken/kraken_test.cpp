@@ -91,7 +91,7 @@ namespace cb::test
 		api.get_tradable_pairs();
 	}
 
-	TEST(Kraken, GetTickerData)
+	TEST(Kraken, Get24hStats)
 	{
 		tradable_pair pair{ "ETHGBP", asset_symbol{"ETH"}, asset_symbol{"GBP"} };
 
@@ -110,7 +110,7 @@ namespace cb::test
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service_public_test(std::move(expectedRequest), std::move(response)) };
 		kraken_api api{ kraken_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 
-		api.get_ticker_data(pair);
+		api.get_24h_stats(pair);
 	}
 
 	TEST(Kraken, GetOrderBook)

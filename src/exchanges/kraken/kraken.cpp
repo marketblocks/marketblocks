@@ -86,13 +86,13 @@ namespace cb
 		return send_public_request<std::vector<tradable_pair>>(_constants.methods.TRADABLE_PAIRS, internal::read_tradable_pairs);
 	}
 
-	ticker_data kraken_api::get_ticker_data(const tradable_pair& tradablePair) const
+	pair_stats kraken_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
 			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
 			.to_string();
 
-		return send_public_request<ticker_data>(_constants.methods.TICKER, query, internal::read_ticker_data);
+		return send_public_request<pair_stats>(_constants.methods.TICKER, query, internal::read_24h_stats);
 	}
 
 	order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const

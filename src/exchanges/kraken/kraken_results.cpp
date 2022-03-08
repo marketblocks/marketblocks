@@ -113,33 +113,21 @@ namespace cb::internal
 		});
 	}
 
-	result<ticker_data> read_ticker_data(std::string_view jsonResult)
+	result<pair_stats> read_24h_stats(std::string_view jsonResult)
 	{
-		return read_result<ticker_data>(jsonResult, [](const json_element& resultElement)
+		return read_result<pair_stats>(jsonResult, [](const json_element& resultElement)
 		{
 			json_element dataElement{ resultElement.begin().value() };
 
-			std::vector<std::string> asks{ dataElement.get<std::vector<std::string>>("a") };
-			std::vector<std::string> bids{ dataElement.get<std::vector<std::string>>("b") };
 			std::vector<std::string> volumes{ dataElement.get<std::vector<std::string>>("v") };
-			std::vector<int> trades{ dataElement.get<std::vector<int>>("t") };
 			std::vector<std::string> lows{ dataElement.get<std::vector<std::string>>("l") };
 			std::vector<std::string> highs{ dataElement.get<std::vector<std::string>>("h") };
 			std::string openingPrice{ dataElement.get<std::string>("o") };
 
-			return result<ticker_data>::success(ticker_data
+			return result<pair_stats>::success(pair_stats
 			{
-				std::stod(asks[0]),
-				std::stod(asks[2]),
-				std::stod(bids[0]),
-				std::stod(bids[2]),
-				std::stod(volumes[0]),
 				std::stod(volumes[1]),
-				trades[0],
-				trades[1],
-				std::stod(lows[0]),
 				std::stod(lows[1]),
-				std::stod(highs[0]),
 				std::stod(highs[1]),
 				std::stod(openingPrice)
 			});

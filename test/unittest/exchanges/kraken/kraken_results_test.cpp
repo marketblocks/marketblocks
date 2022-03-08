@@ -75,21 +75,12 @@ namespace
 		}
 	}
 
-	void assert_ticker_data_eq(const cb::ticker_data& lhs, const cb::ticker_data& rhs)
+	void assert_pair_stats_eq(const cb::pair_stats& lhs, const cb::pair_stats& rhs)
 	{
-		EXPECT_DOUBLE_EQ(lhs.ask_price(), rhs.ask_price());
-		EXPECT_DOUBLE_EQ(lhs.ask_volume(), rhs.ask_volume());
-		EXPECT_DOUBLE_EQ(lhs.bid_price(), rhs.bid_price());
-		EXPECT_DOUBLE_EQ(lhs.bid_volume(), rhs.bid_volume());
-		EXPECT_DOUBLE_EQ(lhs.high_24(), rhs.high_24());
-		EXPECT_DOUBLE_EQ(lhs.high_today(), rhs.high_today());
-		EXPECT_DOUBLE_EQ(lhs.low_24(), rhs.low_24());
-		EXPECT_DOUBLE_EQ(lhs.low_today(), rhs.low_today());
-		EXPECT_DOUBLE_EQ(lhs.opening_price(), rhs.opening_price());
-		EXPECT_EQ(lhs.trades_24(), rhs.trades_24());
-		EXPECT_EQ(lhs.trades_today(), rhs.trades_today());
-		EXPECT_DOUBLE_EQ(lhs.volume_24(), rhs.volume_24());
-		EXPECT_DOUBLE_EQ(lhs.volume_today(), rhs.volume_today());
+		EXPECT_DOUBLE_EQ(lhs.high(), rhs.high());
+		EXPECT_DOUBLE_EQ(lhs.low(), rhs.low());
+		EXPECT_DOUBLE_EQ(lhs.open(), rhs.open());
+		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
 	}
 
 	std::vector<cb::order_description> get_expected_open_closed_orders()
@@ -138,13 +129,13 @@ namespace cb::test
 		});
 	}
 
-	TEST(KrakenResults, ReadTickerData)
+	TEST(KrakenResults, Read24hStats)
 	{
 		execute_test(
 			"ticker_data_success.json",
-			internal::read_ticker_data,
-			ticker_data{ 1940.0, 3.0, 1939.990, 9.0, 267.88525096, 369.71101684, 560, 809, 1917.23, 1917.23, 2034.26, 2056.45, 2034.26 },
-			assert_ticker_data_eq);
+			internal::read_24h_stats,
+			pair_stats{ 369.71101684, 1917.23, 2056.45, 2034.26 },
+			assert_pair_stats_eq);
 	}
 
 	TEST(KrakenResults, ReadOrderBook)

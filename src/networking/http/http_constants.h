@@ -12,6 +12,7 @@ namespace cb
 	enum class http_verb
 	{
 		GET,
-		POST
+		POST,
+		HTTP_DELETE
 	};
 }

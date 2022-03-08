@@ -22,9 +22,9 @@ namespace cb
 		return send_public_request<std::vector<tradable_pair>>(_constants.methods.PRODUCTS, internal::read_tradable_pairs);
 	}
 
-	ticker_data coinbase_api::get_ticker_data(const tradable_pair& tradablePair) const
+	pair_stats coinbase_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
-		return ticker_data{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		return pair_stats{ 0, 0, 0, 0 };
 	}
 
 	order_book_state coinbase_api::get_order_book(const tradable_pair& tradablePair, int depth) const
