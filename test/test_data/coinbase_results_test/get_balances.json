@@ -4,10 +4,34 @@
     "hold_balance": "0.00",
     "id": "OXT",
     "hold_currency": "USD",
-    "balance": "0.00000000",
+    "balance": "818.5500000000",
     "currency": "OXT",
     "primary": false,
     "name": "OXT Wallet",
+    "type": "wallet",
+    "active": true
+  },
+  {
+    "available_on_consumer": true,
+    "hold_balance": "0.00",
+    "id": "GBP",
+    "hold_currency": "USD",
+    "balance": "459567.9171",
+    "currency": "OXT",
+    "primary": false,
+    "name": "GBP Wallet",
+    "type": "wallet",
+    "active": true
+  },
+  {
+    "available_on_consumer": true,
+    "hold_balance": "0.00",
+    "id": "USD",
+    "hold_currency": "USD",
+    "balance": "171288.6158",
+    "currency": "OXT",
+    "primary": false,
+    "name": "USD Wallet",
     "type": "wallet",
     "active": true
   }

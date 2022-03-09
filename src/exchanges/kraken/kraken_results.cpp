@@ -154,8 +154,7 @@ namespace cb::kraken
 				{
 					order_book_side::ASK,
 					std::stod(asks_i.element(0).get<std::string>()),
-					std::stod(asks_i.element(1).get<std::string>()),
-					asks_i.element(2).get<double>()
+					std::stod(asks_i.element(1).get<std::string>())
 				};
 
 				json_element bids_i{ bids.element(i) };
@@ -163,8 +162,7 @@ namespace cb::kraken
 				{
 					order_book_side::BID,
 					std::stod(bids_i.element(0).get<std::string>()),
-					std::stod(bids_i.element(1).get<std::string>()),
-					bids_i.element(2).get<double>()
+					std::stod(bids_i.element(1).get<std::string>())
 				};
 
 				levels.emplace_back(std::move(askEntry), std::move(bidEntry));

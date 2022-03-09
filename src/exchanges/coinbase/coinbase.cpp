@@ -114,7 +114,10 @@ namespace cb
 			.add_parameter(_constants.queries.LEVEL, std::to_string(level))
 			.to_string() };
 
-		return send_public_request<order_book_state>(path, coinbase::read_order_book, query);
+		return send_public_request<order_book_state>(
+			path, 
+			[depth](std::string_view jsonResult) { return coinbase::read_order_book(jsonResult, depth); },
+			query);
 	}
 
 	double coinbase_api::get_fee(const tradable_pair& tradablePair) const
@@ -144,7 +147,7 @@ namespace cb
 			_constants.methods.ORDERS
 		}) };
 
-		return send_private_request<std::vector<order_description>>(http_verb::GET, path, coinbase::read_open_orders);
+		return send_private_request<std::vector<order_description>>(http_verb::GET, path, coinbase::read_orders);
 	}
 
 	std::vector<order_description> coinbase_api::get_closed_orders() const
@@ -160,7 +163,7 @@ namespace cb
 			.add_parameter(_constants.queries.STATUS, DONE)
 			.to_string() };
 
-		return send_private_request<std::vector<order_description>>(http_verb::GET, path, coinbase::read_open_orders, query);
+		return send_private_request<std::vector<order_description>>(http_verb::GET, path, coinbase::read_orders, query);
 	}
 
 	std::string coinbase_api::add_order(const trade_description& description)

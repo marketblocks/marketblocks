@@ -12,7 +12,7 @@ namespace cb::coinbase
 		return result<pair_stats>::success(pair_stats{ 0, 0, 0, 0 });
 	}
 
-	result<order_book_state> read_order_book(std::string_view jsonResult)
+	result<order_book_state> read_order_book(std::string_view jsonResult, int depth)
 	{
 		return result<order_book_state>::success(std::vector<order_book_level>{});
 	}
@@ -27,12 +27,7 @@ namespace cb::coinbase
 		return result<std::unordered_map<asset_symbol, double>>::success(std::unordered_map<asset_symbol, double>{});
 	}
 
-	result<std::vector<order_description>> read_open_orders(std::string_view jsonResult)
-	{
-		return result<std::vector<order_description>>::success(std::vector<order_description>{});
-	}
-
-	result<std::vector<order_description>> read_closed_orders(std::string_view jsonResult)
+	result<std::vector<order_description>> read_orders(std::string_view jsonResult)
 	{
 		return result<std::vector<order_description>>::success(std::vector<order_description>{});
 	}

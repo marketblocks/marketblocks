@@ -51,38 +51,6 @@ namespace
 		EXPECT_EQ(execute_reader(ERROR_RESPONSE_FILE_NAME, reader).error(), ERROR_MESSAGE);
 	}
 
-	void assert_order_book_entry_eq(const cb::order_book_entry& lhs, const cb::order_book_entry& rhs)
-	{
-		EXPECT_EQ(lhs.side(), rhs.side());
-		EXPECT_DOUBLE_EQ(lhs.price(), rhs.price());
-		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
-		EXPECT_DOUBLE_EQ(lhs.time_stamp(), rhs.time_stamp());
-	}
-
-	void assert_order_book_level_eq(const cb::order_book_level& lhs, const cb::order_book_level& rhs)
-	{
-		assert_order_book_entry_eq(lhs.ask(), rhs.ask());
-		assert_order_book_entry_eq(lhs.bid(), rhs.bid());
-	}
-
-	void assert_order_book_state_eq(const cb::order_book_state& lhs, const cb::order_book_state& rhs)
-	{
-		ASSERT_EQ(lhs.depth(), rhs.depth());
-
-		for (int i = 0; i < lhs.depth(); ++i)
-		{
-			assert_order_book_level_eq(lhs.level(i), rhs.level(i));
-		}
-	}
-
-	void assert_pair_stats_eq(const cb::pair_stats& lhs, const cb::pair_stats& rhs)
-	{
-		EXPECT_DOUBLE_EQ(lhs.high(), rhs.high());
-		EXPECT_DOUBLE_EQ(lhs.low(), rhs.low());
-		EXPECT_DOUBLE_EQ(lhs.open(), rhs.open());
-		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
-	}
-
 	std::vector<cb::order_description> get_expected_open_closed_orders()
 	{
 		return
@@ -90,20 +58,6 @@ namespace
 			cb::order_description{ "OB5VMB-B4U2U-DK2WRW", "XBTUSD", cb::trade_action::SELL, 14500.0, 0.275 },
 			cb::order_description{ "OQCLML-BW3P3-BUCMWZ", "XBTUSD", cb::trade_action::BUY, 30010.0, 1.25 }
 		};
-	}
-
-	void assert_order_description_eq(const std::vector<cb::order_description>& lhs, const std::vector<cb::order_description>& rhs)
-	{
-		ASSERT_EQ(lhs.size(), rhs.size());
-
-		for (int i = 0; i < lhs.size(); ++i)
-		{
-			EXPECT_EQ(lhs[i].order_id(), rhs[i].order_id());
-			EXPECT_EQ(lhs[i].pair_name(), rhs[i].pair_name());
-			EXPECT_EQ(lhs[i].action(), rhs[i].action());
-			EXPECT_DOUBLE_EQ(lhs[i].price(), rhs[i].price());
-			EXPECT_DOUBLE_EQ(lhs[i].volume(), rhs[i].volume());
-		}
 	}
 }
 
@@ -125,7 +79,7 @@ namespace cb::test
 			std::vector<tradable_pair>
 		{
 			tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
-				tradable_pair{ asset_symbol{"XBT"}, asset_symbol{"USD"} }
+			tradable_pair{ asset_symbol{"XBT"}, asset_symbol{"USD"} }
 		});
 	}
 
@@ -146,8 +100,8 @@ namespace cb::test
 			order_book_state
 			{
 				{
-					order_book_level{ order_book_entry{order_book_side::ASK, 52523.0, 1.199, 1616663113}, order_book_entry{order_book_side::BID, 52522.9, 0.753, 1616663112} },
-					order_book_level{ order_book_entry{order_book_side::ASK, 52536.0, 0.30, 1616663112}, order_book_entry{order_book_side::BID, 52522.8, 0.006, 1616663109} }
+					order_book_level{ order_book_entry{order_book_side::ASK, 52523.0, 1.199}, order_book_entry{order_book_side::BID, 52522.9, 0.753} },
+					order_book_level{ order_book_entry{order_book_side::ASK, 52536.0, 0.30}, order_book_entry{order_book_side::BID, 52522.8, 0.006} }
 				}
 			},
 			assert_order_book_state_eq);

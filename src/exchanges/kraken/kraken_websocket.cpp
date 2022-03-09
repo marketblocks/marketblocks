@@ -48,8 +48,7 @@ namespace
 		{
 			side,
 			std::stod(price),
-			std::stod(json.element(1).get<std::string>()),
-			std::stod(json.element(2).get<std::string>())
+			std::stod(json.element(1).get<std::string>())
 		};
 
 		return cb::cache_entry

@@ -39,7 +39,7 @@ namespace cb::test
 
 	TEST(FinanceUtils, SelectPrice)
 	{
-		order_book_level level{ order_book_entry {order_book_side::ASK, 1.0, 0.0, 0}, order_book_entry{order_book_side::BID, 2.0, 0.0, 0} };
+		order_book_level level{ order_book_entry {order_book_side::ASK, 1.0, 0.0}, order_book_entry{order_book_side::BID, 2.0, 0.0} };
 
 		EXPECT_DOUBLE_EQ(select_entry(level, trade_action::BUY).price(), level.ask().price());
 		EXPECT_DOUBLE_EQ(select_entry(level, trade_action::SELL).price(), level.bid().price());

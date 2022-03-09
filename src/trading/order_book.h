@@ -17,17 +17,15 @@ namespace cb
 		order_book_side _side;
 		double _price;
 		double _volume;
-		double _timeStamp;
 
 	public:
-		constexpr order_book_entry(order_book_side side, double price, double volume, double timeStamp)
-			: _side{ side }, _price{ price }, _volume{ volume }, _timeStamp{ timeStamp }
+		constexpr order_book_entry(order_book_side side, double price, double volume)
+			: _side{ side }, _price{ price }, _volume{ volume }
 		{}
 
 		constexpr order_book_side side() const noexcept { return _side; }
 		constexpr double price() const noexcept { return _price; }
 		constexpr double volume() const noexcept { return _volume; }
-		constexpr double time_stamp() const noexcept { return _timeStamp; }
 	};
 
 	class order_book_level
