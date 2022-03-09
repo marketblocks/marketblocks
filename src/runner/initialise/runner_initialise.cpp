@@ -64,7 +64,8 @@ namespace
 		}
 		else if (identifier == exchange_ids::COINBASE)
 		{
-			return make_coinbase(websocketClient);
+			coinbase_config config = get_config<coinbase_config>();
+			return make_coinbase(std::move(config), websocketClient);
 		}
 		else
 		{

@@ -9,6 +9,8 @@ namespace cb
 	class kraken_config
 	{
 	private:
+		static constexpr int DEFAULT_RETRIES = 3;
+
 		std::string _publicKey;
 		std::string _privateKey;
 		int _httpRetries;
@@ -16,14 +18,17 @@ namespace cb
 		void validate();
 
 	public:
-		kraken_config();
+		constexpr kraken_config()
+			: _publicKey{}, _privateKey{}, _httpRetries{ DEFAULT_RETRIES }
+		{}
+
 		kraken_config(std::string publicKey, std::string privateKey);
 
-		static std::string name() { return "krakenConfig"; }
+		static constexpr std::string name() noexcept { return "krakenConfig"; }
 
-		const std::string& public_key() const { return _publicKey; }
-		const std::string& private_key() const { return _privateKey; }
-		int http_retries() const { return _httpRetries; }
+		constexpr const std::string& public_key() const noexcept { return _publicKey; }
+		constexpr const std::string& private_key() const noexcept { return _privateKey; }
+		constexpr int http_retries() const noexcept { return _httpRetries; }
 	};
 
 	template<>

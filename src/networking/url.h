@@ -58,4 +58,20 @@ namespace cb
 
 		return url;
 	}
+
+	template<typename PathComponents>
+	constexpr std::string build_url_path(const PathComponents& pathComponents)
+	{
+		std::string path{"/"};
+
+		for (auto& component : pathComponents)
+		{
+			path.append(component);
+			path.append("/");
+		}
+
+		path.pop_back();
+
+		return path;
+	}
 }

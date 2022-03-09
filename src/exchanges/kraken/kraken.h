@@ -27,7 +27,7 @@ namespace cb
 		private:
 			struct general_constants
 			{
-				static constexpr std::string_view BASEURL = "https://api.kraken.com/";
+				static constexpr std::string_view BASEURL = "https://api.kraken.com";
 				static constexpr std::string_view VERSION = "0";
 				static constexpr std::string_view PUBLIC = "public";
 				static constexpr std::string_view PRIVATE = "private";
@@ -155,20 +155,17 @@ namespace cb
 		std::string get_nonce() const;
 		std::string compute_api_sign(std::string_view uriPath, std::string_view postData, std::string_view nonce) const;
 
-		constexpr std::string build_url_path(std::string_view access, std::string_view method) const
+		constexpr std::string build_kraken_url_path(std::string_view access, std::string_view method) const
 		{
-			std::string urlPath{ _constants.general.VERSION };
-			urlPath.append("/");
-			urlPath.append(access);
-			urlPath.append("/");
-			urlPath.append(method);
-
-			return urlPath;
+			return build_url_path(std::array<std::string_view, 3>{ _constants.general.VERSION, access, method });
 		}
 
 		constexpr std::string build_kraken_url(std::string_view access, std::string_view method, std::string_view query) const
 		{
-			return build_url(_constants.general.BASEURL, build_url_path(access, method), query);
+			return build_url(
+				_constants.general.BASEURL,
+				build_kraken_url_path(access, method),
+				query);
 		}
 
 		template<typename Value, typename ResponseReader>
@@ -181,20 +178,14 @@ namespace cb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(std::string_view method, std::string_view query, const ResponseReader& reader) const
+		Value send_public_request(std::string_view method, const ResponseReader& reader, std::string_view query = "") const
 		{
 			http_request request{ http_verb::GET, build_kraken_url(_constants.general.PUBLIC, method, query) };
 			return send_request<Value>(request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(std::string_view method, const ResponseReader& reader) const
-		{
-			return send_public_request<Value>(method, "", reader);
-		}
-
-		template<typename Value, typename ResponseReader>
-		Value send_private_request(std::string_view method, std::string_view query, const ResponseReader& reader) const
+		Value send_private_request(std::string_view method, const ResponseReader& reader, std::string_view query = "") const
 		{
 			std::string nonce{ get_nonce() };
 
@@ -207,7 +198,7 @@ namespace cb
 				postData.append(query);
 			}
 
-			std::string apiPath{ build_url_path(_constants.general.PRIVATE, method) };
+			std::string apiPath{ build_kraken_url_path(_constants.general.PRIVATE, method) };
 			std::string apiSign{ compute_api_sign(apiPath, postData, nonce) };
 
 			http_request request{ http_verb::POST, std::string{ _constants.general.BASEURL } + apiPath };
@@ -217,12 +208,6 @@ namespace cb
 			request.set_content(postData);
 
 			return send_request<Value>(request, reader);
-		}
-
-		template<typename Value, typename ResponseReader>
-		Value send_private_request(std::string_view method, const ResponseReader& reader) const
-		{
-			return send_private_request<Value>(method, "", reader);
 		}
 
 	public:

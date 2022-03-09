@@ -40,19 +40,6 @@ namespace
 
 		return chunk;
 	}
-
-	std::string to_string(cb::http_verb verb)
-	{
-		switch (verb)
-		{
-		case cb::http_verb::GET:
-			return "GET";
-		case cb::http_verb::POST:
-			return "POST";
-		}
-
-		throw std::invalid_argument("HTTP verb not recognized");
-	}
 }
 
 namespace cb

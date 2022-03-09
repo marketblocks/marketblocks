@@ -11,7 +11,7 @@
 #include "trading/order_description.h"
 #include "common/types/result.h"
 
-namespace cb::internal
+namespace cb::kraken
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult);
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult);

@@ -10,9 +10,9 @@ add_library(CryptoBot_lib
 "common/file/config_file_reader.cpp" 
 "common/file/config_file_reader.h" 
 
-"common/security/hash.cpp"
+
 "common/security/hash.h" 
-"common/security/encoding.cpp"
+
 "common/security/encoding.h" 
 
 "common/utils/containerutils.h"
@@ -101,7 +101,7 @@ add_library(CryptoBot_lib
 
 "trading/trading_constants.h"
 
-"trading/trading_options.h" "trading/pair_stats.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp")
+"trading/trading_options.h" "trading/pair_stats.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

@@ -2,6 +2,7 @@
 
 #include "string_view"
 
+#include "coinbase_config.h"
 #include "coinbase_websocket.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_ids.h"
@@ -18,7 +19,7 @@ namespace cb
 		private:
 			struct general_constants
 			{
-				static constexpr std::string_view BASE_URL = "https://api.exchange.coinbase.com/";
+				static constexpr std::string_view BASE_URL = "https://api.exchange.coinbase.com";
 			};
 
 			struct method_constants
@@ -26,20 +27,33 @@ namespace cb
 				static constexpr std::string_view PRODUCTS = "products";
 				static constexpr std::string_view STATS = "stats";
 				static constexpr std::string_view BOOK = "book";
+				static constexpr std::string_view FEES = "fees";
+				static constexpr std::string_view COINBASE_ACCOUNTS = "coinbase-accounts"; 
+				static constexpr std::string_view ORDERS = "orders"; 
 			};
 
 			struct query_constants
 			{
 				static constexpr std::string_view LEVEL = "level";
+				static constexpr std::string_view STATUS = "status";
+			};
+
+			struct http_constants
+			{
+				static constexpr std::string_view ACCESS_KEY_HEADER = "CB-ACCESS-KEY";
+				static constexpr std::string_view ACCESS_SIGN_HEADER = "CB-ACCESS-SIGN";
+				static constexpr std::string_view ACCESS_TIMESTAMP_HEADER = "CB-ACCESS-TIMESTAMP";
+				static constexpr std::string_view ACCESS_PASSPHRASE_HEADER = "CB-ACCESS-PASSPHRASE";
 			};
 
 		public:
 			general_constants general;
 			method_constants methods;
 			query_constants queries;
+			http_constants http;
 
 			constexpr coinbase_constants()
-				: general{}, methods{}, queries{}
+				: general{}, methods{}, queries{}, http{}
 			{}
 		};
 	}
@@ -48,8 +62,15 @@ namespace cb
 	{
 	private:
 		internal::coinbase_constants _constants;
+
+		std::string _apiKey;
+		std::vector<unsigned char> _decodedApiSecret;
+		std::string _apiPassphrase;
 		std::unique_ptr<http_service> _httpService;
 		std::unique_ptr<websocket_stream> _websocketStream;
+
+		std::string get_timestamp() const;
+		std::string compute_access_sign(std::string_view timestamp, http_verb httpVerb, std::string_view path, std::string_view body) const;
 
 		template<typename Value, typename ResponseReader>
 		Value send_request(const http_request& request, const ResponseReader& reader) const
@@ -61,24 +82,43 @@ namespace cb
 				throw cb_exception{ response.message() };
 			}
 
-			return reader(response.message());
+			result<Value> result{ reader(response.message()) };
+
+			if (result.is_success())
+			{
+				return result.value();
+			}
+
+			throw cb_exception{ result.error() };
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(std::string_view method, std::string_view query, const ResponseReader& reader) const
+		Value send_public_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
 		{
-			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, method, query) };
+			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
 			return send_request<Value>(request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(std::string_view method, const ResponseReader& reader) const
+		Value send_private_request(http_verb httpVerb, std::string_view path, const ResponseReader& reader, std::string_view query = "", std::string_view content = "") const
 		{
-			return send_public_request<Value>(method, "", reader);
+			http_request request{ httpVerb, build_url(_constants.general.BASE_URL, path, query) };
+
+			request.set_content(content);
+
+			std::string timestamp{ get_timestamp() };
+
+			request.add_header(_constants.http.ACCESS_KEY_HEADER, _apiKey);
+			request.add_header(_constants.http.ACCESS_SIGN_HEADER, compute_access_sign(timestamp, httpVerb, path, content));
+			request.add_header(_constants.http.ACCESS_TIMESTAMP_HEADER, timestamp);
+			request.add_header(_constants.http.ACCESS_PASSPHRASE_HEADER, _apiPassphrase);
+
+			return send_request<Value>(request, reader);
 		}
 
 	public:
 		coinbase_api(
+			coinbase_config config,
 			std::unique_ptr<http_service> httpService, 
 			std::unique_ptr<websocket_stream> websocketStream);
 
@@ -97,5 +137,5 @@ namespace cb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_coinbase(std::shared_ptr<websocket_client> websocketClient);
+	std::unique_ptr<exchange> make_coinbase(coinbase_config config, std::shared_ptr<websocket_client> websocketClient);
 }

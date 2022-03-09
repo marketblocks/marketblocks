@@ -111,17 +111,17 @@ namespace cb::test
 {
 	TEST(KrakenResults, ReadSystemStatus)
 	{
-		execute_test("system_status_online.json", internal::read_system_status, exchange_status::ONLINE);
-		execute_test("system_status_maintenance.json", internal::read_system_status, exchange_status::MAINTENANCE);
-		execute_test("system_status_cancel_only.json", internal::read_system_status, exchange_status::CANCEL_ONLY);
-		execute_test("system_status_post_only.json", internal::read_system_status, exchange_status::POST_ONLY);
+		execute_test("system_status_online.json", kraken::read_system_status, exchange_status::ONLINE);
+		execute_test("system_status_maintenance.json", kraken::read_system_status, exchange_status::MAINTENANCE);
+		execute_test("system_status_cancel_only.json", kraken::read_system_status, exchange_status::CANCEL_ONLY);
+		execute_test("system_status_post_only.json", kraken::read_system_status, exchange_status::POST_ONLY);
 	}
 
 	TEST(KrakenResults, ReadTradablePairs)
 	{
 		execute_test(
 			"tradable_pairs_success.json",
-			internal::read_tradable_pairs,
+			kraken::read_tradable_pairs,
 			std::vector<tradable_pair>
 		{
 			tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
@@ -133,7 +133,7 @@ namespace cb::test
 	{
 		execute_test(
 			"ticker_data_success.json",
-			internal::read_24h_stats,
+			kraken::read_24h_stats,
 			pair_stats{ 369.71101684, 1917.23, 2056.45, 2034.26 },
 			assert_pair_stats_eq);
 	}
@@ -142,7 +142,7 @@ namespace cb::test
 	{
 		execute_test(
 			"order_book_success.json",
-			internal::read_order_book,
+			kraken::read_order_book,
 			order_book_state
 			{
 				{
@@ -157,7 +157,7 @@ namespace cb::test
 	{
 		execute_test(
 			"balances_success.json",
-			internal::read_balances,
+			kraken::read_balances,
 			std::unordered_map<asset_symbol, double>
 		{
 			{ asset_symbol{ "ZUSD" }, 171288.6158 },
@@ -173,7 +173,7 @@ namespace cb::test
 	{
 		execute_test(
 			"fee_success.json",
-			internal::read_fee,
+			kraken::read_fee,
 			0.1);
 	}
 
@@ -181,7 +181,7 @@ namespace cb::test
 	{
 		execute_test(
 			"open_orders_success.json",
-			internal::read_open_orders,
+			kraken::read_open_orders,
 			get_expected_open_closed_orders(),
 			assert_order_description_eq);
 	}
@@ -190,7 +190,7 @@ namespace cb::test
 	{
 		execute_test(
 			"closed_orders_success.json",
-			internal::read_closed_orders,
+			kraken::read_closed_orders,
 			get_expected_open_closed_orders(),
 			assert_order_description_eq);
 	}
@@ -199,12 +199,12 @@ namespace cb::test
 	{
 		execute_test<std::string>(
 			"add_order_success.json",
-			internal::read_add_order,
+			kraken::read_add_order,
 			"OUF4EM-FRGI2-MQMWZD");
 	}
 
 	TEST(KrakenResults, ReadCancelOrder)
 	{
-		execute_test("cancel_order.json", internal::read_cancel_order);
+		execute_test("cancel_order.json", kraken::read_cancel_order);
 	}
 }

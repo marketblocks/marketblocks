@@ -64,7 +64,7 @@ namespace
 	}
 }
 
-namespace cb::internal
+namespace cb::kraken
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult)
 	{

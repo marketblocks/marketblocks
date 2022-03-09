@@ -13,10 +13,10 @@
 
 namespace
 {
-	std::string_view to_string(const cb::order_type& orderType)
+	constexpr std::string_view to_string(const cb::order_type& orderType)
 	{
-		static constexpr std::string_view LIMIT = "limit";
-		static constexpr std::string_view MARKET = "market";
+		constexpr std::string_view LIMIT = "limit";
+		constexpr std::string_view MARKET = "market";
 
 		switch (orderType)
 		{
@@ -29,10 +29,10 @@ namespace
 		}
 	}
 
-	std::string_view to_string(const cb::trade_action& tradeAction)
+	constexpr std::string_view to_string(const cb::trade_action& tradeAction)
 	{
-		static constexpr std::string_view BUY = "buy";
-		static constexpr std::string_view SELL = "sell";
+		constexpr std::string_view BUY = "buy";
+		constexpr std::string_view SELL = "sell";
 
 		switch (tradeAction)
 		{
@@ -78,12 +78,12 @@ namespace cb
 
 	exchange_status kraken_api::get_status() const
 	{
-		return send_public_request<exchange_status>(_constants.methods.SYSTEM_STATUS, internal::read_system_status);
+		return send_public_request<exchange_status>(_constants.methods.SYSTEM_STATUS, kraken::read_system_status);
 	}
 
 	std::vector<tradable_pair> kraken_api::get_tradable_pairs() const
 	{
-		return send_public_request<std::vector<tradable_pair>>(_constants.methods.TRADABLE_PAIRS, internal::read_tradable_pairs);
+		return send_public_request<std::vector<tradable_pair>>(_constants.methods.TRADABLE_PAIRS, kraken::read_tradable_pairs);
 	}
 
 	pair_stats kraken_api::get_24h_stats(const tradable_pair& tradablePair) const
@@ -92,7 +92,7 @@ namespace cb
 			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
 			.to_string();
 
-		return send_public_request<pair_stats>(_constants.methods.TICKER, query, internal::read_24h_stats);
+		return send_public_request<pair_stats>(_constants.methods.TICKER, kraken::read_24h_stats, query);
 	}
 
 	order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const
@@ -102,7 +102,7 @@ namespace cb
 			.add_parameter(_constants.queryKeys.COUNT, std::to_string(depth))
 			.to_string();
 
-		return send_public_request<order_book_state>(_constants.methods.ORDER_BOOK, query, internal::read_order_book);
+		return send_public_request<order_book_state>(_constants.methods.ORDER_BOOK, kraken::read_order_book, query);
 	}
 
 	double kraken_api::get_fee(const tradable_pair& tradablePair) const
@@ -111,22 +111,22 @@ namespace cb
 			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
 			.to_string();
 
-		return send_private_request<double>(_constants.methods.TRADE_VOLUME, query, internal::read_fee);
+		return send_private_request<double>(_constants.methods.TRADE_VOLUME, kraken::read_fee, query);
 	}
 
 	std::unordered_map<asset_symbol, double> kraken_api::get_balances() const
 	{
-		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.methods.BALANCE, internal::read_balances);
+		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.methods.BALANCE, kraken::read_balances);
 	}
 
 	std::vector<order_description> kraken_api::get_open_orders() const
 	{
-		return send_private_request<std::vector<order_description>>(_constants.methods.OPEN_ORDERS, internal::read_open_orders);
+		return send_private_request<std::vector<order_description>>(_constants.methods.OPEN_ORDERS, kraken::read_open_orders);
 	}
 
 	std::vector<order_description> kraken_api::get_closed_orders() const
 	{
-		return send_private_request<std::vector<order_description>>(_constants.methods.CLOSED_ORDERS, internal::read_closed_orders);
+		return send_private_request<std::vector<order_description>>(_constants.methods.CLOSED_ORDERS, kraken::read_closed_orders);
 	}
 
 	std::string kraken_api::add_order(const trade_description& description)
@@ -139,7 +139,7 @@ namespace cb
 			.add_parameter(_constants.queryKeys.VOLUME, std::to_string(description.volume()))
 			.to_string();
 
-		return send_private_request<std::string>(_constants.methods.ADD_ORDER, query, internal::read_add_order);
+		return send_private_request<std::string>(_constants.methods.ADD_ORDER, kraken::read_add_order, query);
 	}
 
 	void kraken_api::cancel_order(std::string_view orderId)
@@ -148,7 +148,7 @@ namespace cb
 			.add_parameter(_constants.queryKeys.TXID, orderId)
 			.to_string();
 
-		send_private_request<void>(_constants.methods.CANCEL_ORDER, query, internal::read_cancel_order);
+		send_private_request<void>(_constants.methods.CANCEL_ORDER, kraken::read_cancel_order, query);
 	}
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)

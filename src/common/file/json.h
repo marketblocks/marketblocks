@@ -116,9 +116,11 @@ namespace cb
 
 	public:
 		template<typename T>
-		void add(std::string_view propertyName, T value)
+		json_writer& add(std::string_view propertyName, T value)
 		{
 			_document[propertyName.data()] = std::move(value);
+
+			return *this;
 		}
 
 		std::string to_string() const
