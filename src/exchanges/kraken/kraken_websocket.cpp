@@ -10,7 +10,7 @@ namespace
 
 		for (auto& pair : tradablePairs)
 		{
-			result += "\"" + pair.iso_4217_a3() + "\"" + ",";
+			result += "\"" + pair.to_standard_string() + "\"" + ",";
 		}
 
 		result.erase(--result.end());

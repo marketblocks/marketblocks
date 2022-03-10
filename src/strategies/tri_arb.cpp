@@ -15,7 +15,7 @@ namespace
 {
 	std::string to_string(const tri_arb_sequence& sequence)
 	{
-		return sequence.first().pair().iso_4217_a3() + "->" + sequence.middle().pair().iso_4217_a3() + "->" + sequence.last().pair().iso_4217_a3();
+		return sequence.first().pair().to_standard_string() + "->" + sequence.middle().pair().to_standard_string() + "->" + sequence.last().pair().to_standard_string();
 	}
 }
 
@@ -36,7 +36,7 @@ tri_arb_exchange_spec::tri_arb_exchange_spec(std::shared_ptr<cb::exchange> excha
 	: _exchange{ exchange }, _sequences{ std::move(sequences) }
 {}
 
-std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, const cb::asset_symbol& fiatCurrency)
+std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, std::string_view fiatCurrency)
 {
 	std::vector<tri_arb_exchange_spec> specs;
 	specs.reserve(exchanges.size());
@@ -57,17 +57,17 @@ std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::
 		for (auto& firstPair : fiatTradables)
 		{
 			cb::trade_action firstAction;
-			std::unique_ptr<cb::asset_symbol> firstGainedAsset;
+			std::unique_ptr<std::string> firstGainedAsset;
 
 			if (firstPair.price_unit() == fiatCurrency)
 			{
 				firstAction = cb::trade_action::BUY;
-				firstGainedAsset = std::make_unique<cb::asset_symbol>(firstPair.asset());
+				firstGainedAsset = std::make_unique<std::string>(firstPair.asset());
 			}
 			else
 			{
 				firstAction = cb::trade_action::SELL;
-				firstGainedAsset = std::make_unique<cb::asset_symbol>(firstPair.price_unit());
+				firstGainedAsset = std::make_unique<std::string>(firstPair.price_unit());
 			}
 
 			std::vector<cb::tradable_pair> possibleMiddles = copy_where<std::vector<cb::tradable_pair>>(
@@ -77,17 +77,17 @@ std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::
 			for (auto& middlePair : possibleMiddles)
 			{
 				cb::trade_action middleAction;
-				std::unique_ptr<cb::asset_symbol> middleGainedAsset;
+				std::unique_ptr<std::string> middleGainedAsset;
 
 				if (middlePair.price_unit() == *firstGainedAsset)
 				{
 					middleAction = cb::trade_action::BUY;
-					middleGainedAsset = std::make_unique<cb::asset_symbol>(middlePair.asset());
+					middleGainedAsset = std::make_unique<std::string>(middlePair.asset());
 				}
 				else
 				{
 					middleAction = cb::trade_action::SELL;
-					middleGainedAsset = std::make_unique<cb::asset_symbol>(middlePair.price_unit());
+					middleGainedAsset = std::make_unique<std::string>(middlePair.price_unit());
 				}
 
 				std::vector<cb::tradable_pair> finals = copy_where<std::vector<cb::tradable_pair>>(

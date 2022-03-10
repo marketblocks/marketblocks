@@ -11,8 +11,16 @@ namespace cb
 			[&websocketStream](const tradable_pair& pair) { return websocketStream.get_order_book_snapshot(pair).level(0); });
 	}
 
-	double get_balance(const exchange& exchange, const asset_symbol& tickerId)
+	double get_balance(const exchange& exchange, std::string_view tickerId)
 	{
-		return exchange.get_balances().at(tickerId);
+		unordered_string_map<double> balances{ exchange.get_balances() };
+
+		auto it = balances.find(tickerId);
+		if (it != balances.end())
+		{
+			return it->second;
+		}
+
+		return 0.0;
 	}
 }

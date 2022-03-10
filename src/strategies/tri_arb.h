@@ -66,4 +66,4 @@ public:
 	void run_iteration();
 };
 
-std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, const cb::asset_symbol& fiatCurrency);
+std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, std::string_view fiatCurrency);

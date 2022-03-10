@@ -15,13 +15,13 @@ namespace
 namespace cb
 {
 	runner_config::runner_config()
-		: runner_config{ {}, DEFAULT_TRADE_PERCENT, asset_symbol{ "GBP" } }
+		: runner_config{ {}, DEFAULT_TRADE_PERCENT, "GBP" }
 	{}
 
 	runner_config::runner_config(
 		std::vector<std::string> exchangeIds,
 		double tradePercent,
-		asset_symbol fiatCurrency)
+		std::string fiatCurrency)
 		:
 		_exchangeIds{ std::move(exchangeIds) },
 		_tradePercent{ tradePercent },
@@ -57,9 +57,9 @@ namespace cb
 	template<>
 	runner_config from_json(const json_document& json)
 	{
-		std::vector<std::string> exchangeIds = json.get<std::vector<std::string>>(json_property_names::exchange_ids());
-		double maxTradePercent = json.get<double>(json_property_names::trade_percent());
-		asset_symbol fiatCurrency = asset_symbol{ json.get<std::string>(json_property_names::fiat_currency()) };
+		std::vector<std::string> exchangeIds{ json.get<std::vector<std::string>>(json_property_names::exchange_ids()) };
+		double maxTradePercent{ json.get<double>(json_property_names::trade_percent()) };
+		std::string fiatCurrency{ json.get<std::string>(json_property_names::fiat_currency()) };
 
 		return runner_config
 		{
@@ -74,6 +74,6 @@ namespace cb
 	{
 		writer.add(json_property_names::exchange_ids(), config.exchange_ids());
 		writer.add(json_property_names::trade_percent(), config.trade_percent());
-		writer.add(json_property_names::fiat_currency(), config.fiat_currency().get());
+		writer.add(json_property_names::fiat_currency(), config.fiat_currency());
 	}
 }

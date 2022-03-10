@@ -92,7 +92,7 @@ add_library(CryptoBot_lib
 
 "trading/order_book.h"
 
-"trading/asset_symbol.h"
+
 "trading/fee_schedule.cpp" 
 "trading/fee_schedule.h" 
  

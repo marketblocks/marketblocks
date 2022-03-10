@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "trading/asset_symbol.h"
 #include "trading/trading_options.h"
 #include "common/file/json.h"
 
@@ -20,7 +19,7 @@ namespace cb
 
 		std::vector<std::string> _exchangeIds;
 		double _tradePercent;
-		asset_symbol _fiatCurrency;
+		std::string _fiatCurrency;
 
 		void validate();
 
@@ -30,13 +29,13 @@ namespace cb
 		runner_config(
 			std::vector<std::string> exchangeIds,
 			double tradePercent,
-			asset_symbol fiatCurrency);
+			std::string fiatCurrency);
 			
 		static constexpr std::string name() noexcept { return "runnerConfig"; }
 		
 		constexpr const std::vector<std::string>& exchange_ids() const noexcept { return _exchangeIds; }
 		constexpr double trade_percent() const noexcept { return _tradePercent; }
-		constexpr const asset_symbol& fiat_currency() const noexcept { return _fiatCurrency; }
+		constexpr const std::string& fiat_currency() const noexcept { return _fiatCurrency; }
 	};
 
 	template<>

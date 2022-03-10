@@ -86,13 +86,13 @@ namespace cb
 
 		auto status = _connection->connection_status();
 
-		auto cacheIterator = _orderBookCaches.find(tradablePair.iso_4217_a3());
+		auto cacheIterator = _orderBookCaches.find(tradablePair.to_standard_string());
 
 		if (cacheIterator != _orderBookCaches.end())
 		{
 			return cacheIterator->second.snapshot();
 		}
 
-		throw cb_exception{ "Order book for pair '" + tradablePair.iso_4217_a3() + "' is not subscribed" };
+		throw cb_exception{ "Order book for pair '" + tradablePair.to_standard_string() + "' is not subscribed" };
 	}
 }

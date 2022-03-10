@@ -18,10 +18,10 @@ namespace
 		double tradeVolume,
 		double fee)
 	{
-		std::unordered_map<cb::asset_symbol, double> initialBalances
+		cb::unordered_string_map<double> initialBalances
 		{
-			{ cb::asset_symbol{ "GBP" }, initialGbpBalance },
-			{ cb::asset_symbol{ "BTC" }, initialBtcBalance }
+			{ "GBP", initialGbpBalance },
+			{ "BTC", initialBtcBalance }
 		};
 
 		cb::fee_schedule fees = cb::fee_schedule_builder{}
@@ -29,7 +29,7 @@ namespace
 			.build();
 
 		cb::paper_trader trader{ fees, initialBalances };
-		cb::tradable_pair pair{ cb::asset_symbol{ "BTC" }, cb::asset_symbol{ "GBP" } };
+		cb::tradable_pair pair{ "BTC", "GBP" };
 		cb::trade_description tradeDescription
 		{
 			cb::order_type::LIMIT,
@@ -65,7 +65,7 @@ namespace cb::test
 
 		//ASSERT_EQ(result, trade_result::SUCCESS);
 
-		std::unordered_map<asset_symbol, double> balances = trader.get_balances();
+		unordered_string_map<double> balances = trader.get_balances();
 
 		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().asset()), expectedBtcBalance);
 		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().price_unit()), expectedGbpBalance);
@@ -91,7 +91,7 @@ namespace cb::test
 
 		//ASSERT_EQ(result, trade_result::SUCCESS);
 
-		std::unordered_map<asset_symbol, double> balances = trader.get_balances();
+		unordered_string_map<double> balances = trader.get_balances();
 
 		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().asset()), expectedBtcBalance);
 		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().price_unit()), expectedGbpBalance);

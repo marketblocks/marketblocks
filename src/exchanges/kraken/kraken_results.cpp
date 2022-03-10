@@ -107,10 +107,8 @@ namespace cb::kraken
 
 			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
 			{
-				std::string name{ it.key() };
-				std::string wsName{ it.value().get<std::string>("wsname") };
-				std::vector<std::string> assetSymbols{ split(wsName, '/') };
-				pairs.emplace_back(name, asset_symbol{ assetSymbols[0] }, asset_symbol{ assetSymbols[1] });
+				std::vector<std::string> assetSymbols{ split(it.value().get<std::string>("wsname"), '/') };
+				pairs.emplace_back(std::string{ assetSymbols[0] }, std::string{ assetSymbols[1] });
 			}
 
 			return pairs;
@@ -176,16 +174,16 @@ namespace cb::kraken
 		});
 	}
 
-	result<std::unordered_map<asset_symbol, double>> read_balances(std::string_view jsonResult)
+	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
 	{
-		return read_result<std::unordered_map<asset_symbol, double>>(jsonResult, [](const json_element& resultElement)
+		return read_result<unordered_string_map<double>>(jsonResult, [](const json_element& resultElement)
 		{
-			std::unordered_map<asset_symbol, double> balances;
+			unordered_string_map<double> balances;
 			balances.reserve(resultElement.size());
 
 			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
 			{
-				balances.emplace(asset_symbol{ it.key() }, std::stod(it.value().get<std::string>()));
+				balances.emplace(it.key(), std::stod(it.value().get<std::string>()));
 			}
 
 			return balances;

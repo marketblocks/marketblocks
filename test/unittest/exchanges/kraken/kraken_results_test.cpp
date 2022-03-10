@@ -78,8 +78,8 @@ namespace cb::test
 			kraken::read_tradable_pairs,
 			std::vector<tradable_pair>
 		{
-			tradable_pair{ asset_symbol{"ETH"}, asset_symbol{"XBT"} },
-			tradable_pair{ asset_symbol{"XBT"}, asset_symbol{"USD"} }
+			tradable_pair{ "ETH", "XBT" },
+			tradable_pair{ "XBT", "USD" }
 		});
 	}
 
@@ -112,14 +112,14 @@ namespace cb::test
 		execute_test(
 			"balances_success.json",
 			kraken::read_balances,
-			std::unordered_map<asset_symbol, double>
+			unordered_string_map<double>
 		{
-			{ asset_symbol{ "ZUSD" }, 171288.6158 },
-			{ asset_symbol{ "ZEUR" }, 504861.8946 },
-			{ asset_symbol{ "ZGBP" }, 459567.9171 },
-			{ asset_symbol{ "XXBT" }, 1011.19088779 },
-			{ asset_symbol{ "XLTC" }, 2000.0 },
-			{ asset_symbol{ "XETH" }, 818.55 }
+			{ "ZUSD", 171288.6158 },
+			{ "ZEUR", 504861.8946 },
+			{ "ZGBP", 459567.9171 },
+			{ "XXBT", 1011.19088779 },
+			{ "XLTC", 2000.0 },
+			{ "XETH", 818.55 }
 		});
 	}
 

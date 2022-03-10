@@ -37,6 +37,11 @@ namespace
 			throw cb::cb_exception{ "Unknown order type" };
 		}
 	}
+
+	constexpr std::string to_exchange_id(const cb::tradable_pair& pair)
+	{
+		return pair.asset() + "-" + pair.price_unit();
+	}
 }
 
 namespace cb
@@ -90,7 +95,7 @@ namespace cb
 		std::string path{ build_url_path(std::array<std::string_view, 3>
 		{
 			_constants.methods.PRODUCTS,
-			tradablePair.exchange_identifier(),
+			::to_exchange_id(tradablePair),
 			_constants.methods.STATS
 		})};
 
@@ -102,7 +107,7 @@ namespace cb
 		std::string path{ build_url_path(std::array<std::string_view, 3>
 		{
 			_constants.methods.PRODUCTS,
-			tradablePair.exchange_identifier(),
+			::to_exchange_id(tradablePair),
 			_constants.methods.BOOK
 		})};
 
@@ -130,14 +135,14 @@ namespace cb
 		return send_private_request<double>(http_verb::GET, path, coinbase::read_fee);
 	}
 
-	std::unordered_map<asset_symbol, double> coinbase_api::get_balances() const
+	unordered_string_map<double> coinbase_api::get_balances() const
 	{
 		std::string path{ build_url_path(std::array<std::string_view, 1>
 		{
 			_constants.methods.COINBASE_ACCOUNTS
 		}) };
 
-		return send_private_request<std::unordered_map<asset_symbol, double>>(http_verb::GET, path, coinbase::read_balances);
+		return send_private_request<unordered_string_map<double>>(http_verb::GET, path, coinbase::read_balances);
 	}
 
 	std::vector<order_description> coinbase_api::get_open_orders() const
@@ -182,7 +187,7 @@ namespace cb
 		std::string content{ json_writer{}
 			.add(TYPE, ::to_string(description.order_type()))
 			.add(SIDE, ::to_string(description.action()))
-			.add(PRODUCT_ID, description.pair().exchange_identifier())
+			.add(PRODUCT_ID, ::to_exchange_id(description.pair()))
 			.add(PRICE, std::to_string(description.asset_price()))
 			.add(SIZE, std::to_string(description.volume()))
 			.to_string() };

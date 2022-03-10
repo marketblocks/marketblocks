@@ -93,7 +93,7 @@ namespace cb::test
 
 	TEST(Kraken, Get24hStats)
 	{
-		tradable_pair pair{ "ETHGBP", asset_symbol{"ETH"}, asset_symbol{"GBP"} };
+		tradable_pair pair{ "ETH", "GBP" };
 
 		http_request expectedRequest
 		{
@@ -115,7 +115,7 @@ namespace cb::test
 
 	TEST(Kraken, GetOrderBook)
 	{
-		tradable_pair pair{ "XBTUSD", asset_symbol{"XBT"}, asset_symbol{"USD"} };
+		tradable_pair pair{ "XBT", "USD" };
 		const int depth = 2;
 
 		http_request expectedRequest
@@ -138,7 +138,7 @@ namespace cb::test
 
 	TEST(Kraken, GetFee)
 	{
-		tradable_pair pair{ "XBTUSD", asset_symbol{"XBT"}, asset_symbol{"USD"} };
+		tradable_pair pair{ "XBT", "USD" };
 
 		http_request expectedRequest
 		{
@@ -225,7 +225,7 @@ namespace cb::test
 		trade_description trade
 		{
 			order_type::LIMIT,
-			tradable_pair{ "XBTUSD", asset_symbol{"XBT"}, asset_symbol{"USD"} },
+			tradable_pair{ "XBT", "USD" },
 			trade_action::BUY,
 			45000.10,
 			2.12340

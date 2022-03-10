@@ -47,7 +47,7 @@ namespace cb::test
 
 	TEST(Coinbase, Get24hStats)
 	{
-		tradable_pair pair{ "ETH-USD", asset_symbol{ "ETH" }, asset_symbol{ "USD" } };
+		tradable_pair pair{ "ETH", "USD" };
 
 		http_request expectedRequest
 		{
@@ -69,7 +69,7 @@ namespace cb::test
 
 	TEST(Coinbase, GetOrderBook)
 	{
-		tradable_pair pair{ "BTC-GBP", asset_symbol{ "BTC" }, asset_symbol{ "GBP" } };
+		tradable_pair pair{ "BTC", "GBP" };
 		const int depth = 3;
 
 		http_request expectedRequest
@@ -92,7 +92,7 @@ namespace cb::test
 
 	TEST(Coinbase, GetFee)
 	{
-		tradable_pair pair{ "BTC-GBP", asset_symbol{ "BTC" }, asset_symbol{ "GBP" } };
+		tradable_pair pair{ "BTC", "GBP" };
 
 		http_request expectedRequest
 		{
@@ -177,7 +177,7 @@ namespace cb::test
 		trade_description trade
 		{
 			order_type::LIMIT,
-			tradable_pair{ "BTC-USD", asset_symbol{ "BTC" }, asset_symbol{ "USD" } },
+			tradable_pair{ "BTC", "USD" },
 			trade_action::BUY,
 			10.0,
 			1.0

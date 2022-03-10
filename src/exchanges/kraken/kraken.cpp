@@ -44,6 +44,11 @@ namespace
 			throw std::invalid_argument{ "Trade Action not recognized" };
 		}
 	}
+
+	constexpr std::string to_query_name(const cb::tradable_pair pair)
+	{
+		return pair.asset() + pair.price_unit();
+	}
 }
 
 namespace cb
@@ -89,7 +94,7 @@ namespace cb
 	pair_stats kraken_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
-			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
+			.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(tradablePair))
 			.to_string();
 
 		return send_public_request<pair_stats>(_constants.methods.TICKER, kraken::read_24h_stats, query);
@@ -98,7 +103,7 @@ namespace cb
 	order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
 		std::string query = url_query_builder{}
-			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
+			.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(tradablePair))
 			.add_parameter(_constants.queryKeys.COUNT, std::to_string(depth))
 			.to_string();
 
@@ -108,15 +113,15 @@ namespace cb
 	double kraken_api::get_fee(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
-			.add_parameter(_constants.queryKeys.PAIR, tradablePair.exchange_identifier())
+			.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(tradablePair))
 			.to_string();
 
 		return send_private_request<double>(_constants.methods.TRADE_VOLUME, kraken::read_fee, query);
 	}
 
-	std::unordered_map<asset_symbol, double> kraken_api::get_balances() const
+	unordered_string_map<double> kraken_api::get_balances() const
 	{
-		return send_private_request<std::unordered_map<asset_symbol, double>>(_constants.methods.BALANCE, kraken::read_balances);
+		return send_private_request<unordered_string_map<double>>(_constants.methods.BALANCE, kraken::read_balances);
 	}
 
 	std::vector<order_description> kraken_api::get_open_orders() const
@@ -132,7 +137,7 @@ namespace cb
 	std::string kraken_api::add_order(const trade_description& description)
 	{
 		std::string query = url_query_builder{}
-			.add_parameter(_constants.queryKeys.PAIR, description.pair().exchange_identifier())
+			.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(description.pair()))
 			.add_parameter(_constants.queryKeys.TYPE, ::to_string(description.action()))
 			.add_parameter(_constants.queryKeys.ORDER_TYPE, ::to_string(description.order_type()))
 			.add_parameter(_constants.queryKeys.PRICE, std::to_string(description.asset_price()))

@@ -6,9 +6,8 @@
 
 #include "exchange_status.h"
 #include "websockets/websocket_stream.h"
-
+#include "common/types/unordered_string_map.h"
 #include "trading/tradable_pair.h"
-#include "trading/asset_symbol.h"
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 #include "trading/trade_description.h"
@@ -31,7 +30,7 @@ namespace cb
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
 		virtual pair_stats get_24h_stats(const tradable_pair& tradablePair) const = 0;
 		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
-		virtual std::unordered_map<asset_symbol, double> get_balances() const = 0;
+		virtual unordered_string_map<double> get_balances() const = 0;
 		virtual double get_fee(const tradable_pair& tradablePair) const = 0;
 		virtual std::vector<order_description> get_open_orders() const = 0;
 		virtual std::vector<order_description> get_closed_orders() const = 0;
@@ -81,7 +80,7 @@ namespace cb
 			return _marketApi->get_order_book(tradablePair, depth);
 		}
 
-		std::unordered_map<asset_symbol, double> get_balances() const override
+		unordered_string_map<double> get_balances() const override
 		{
 			return _tradeApi->get_balances();
 		}

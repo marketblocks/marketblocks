@@ -52,8 +52,8 @@ namespace cb::test
 			coinbase::read_tradable_pairs,
 			std::vector<tradable_pair>
 		{
-			tradable_pair{ asset_symbol{"DOT"}, asset_symbol{"USDT"} },
-			tradable_pair{ asset_symbol{"BTC"}, asset_symbol{"USD"} }
+			tradable_pair{ "DOT", "USDT" },
+			tradable_pair{ "BTC", "USD" }
 		});
 	}
 
@@ -96,11 +96,11 @@ namespace cb::test
 		execute_test(
 			"get_balances.json",
 			coinbase::read_balances,
-			std::unordered_map<asset_symbol, double>
+			unordered_string_map<double>
 		{
-			{ asset_symbol{ "OXT" }, 818.55 },
-			{ asset_symbol{ "GBP" }, 459567.9171 },
-			{ asset_symbol{ "USD" }, 171288.6158 }
+			{ "OXT", 818.55 },
+			{ "GBP", 459567.9171 },
+			{ "USD", 171288.6158 }
 		});
 	}
 

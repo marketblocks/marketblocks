@@ -14,9 +14,9 @@ namespace cb
 			.add_tier(1000, 0.26)
 			.build();
 
-		std::unordered_map<asset_symbol, double> initialBalances
+		unordered_string_map<double> initialBalances
 		{
-			{ asset_symbol { "GBP" }, 1000 }
+			{ "GBP", 1000 }
 		};
 
 		return std::make_shared<live_test_exchange>(

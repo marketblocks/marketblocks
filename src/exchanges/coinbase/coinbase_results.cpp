@@ -54,11 +54,10 @@ namespace cb::coinbase
 			{
 				json_element pairElement{ it.value() };
 
-				std::string exchangeName{ pairElement.get<std::string>("id") };
-				asset_symbol asset{ pairElement.get<std::string>("base_currency")};
-				asset_symbol priceUnit{ pairElement.get<std::string>("quote_currency")};
+				std::string asset{ pairElement.get<std::string>("base_currency")};
+				std::string priceUnit{ pairElement.get<std::string>("quote_currency")};
 
-				pairs.emplace_back(std::move(exchangeName), std::move(asset), std::move(priceUnit));
+				pairs.emplace_back(std::move(asset), std::move(priceUnit));
 			}
 
 			return pairs;
@@ -125,11 +124,11 @@ namespace cb::coinbase
 		});
 	}
 
-	result<std::unordered_map<asset_symbol, double>> read_balances(std::string_view jsonResult)
+	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
 	{
-		return read_result<std::unordered_map<asset_symbol, double>>(jsonResult, [](const json_document& json)
+		return read_result<unordered_string_map<double>>(jsonResult, [](const json_document& json)
 		{
-			std::unordered_map<asset_symbol, double> balances;
+			unordered_string_map<double> balances;
 			balances.reserve(json.size());
 
 			for (auto it = json.begin(); it != json.end(); ++it)
@@ -137,7 +136,7 @@ namespace cb::coinbase
 				json_element balanceElement{ it.value() };
 
 				balances.emplace(
-					asset_symbol{ balanceElement.get<std::string>("id") },
+					balanceElement.get<std::string>("id"),
 					std::stod(balanceElement.get<std::string>("balance")));
 			}
 
