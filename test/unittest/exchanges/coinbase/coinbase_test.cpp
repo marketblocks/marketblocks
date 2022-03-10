@@ -201,7 +201,7 @@ namespace cb::test
 		http_response response
 		{
 			200,
-			read_file(coinbase_results_test_data_path("get_orders.json"))
+			read_file(coinbase_results_test_data_path("add_order.json"))
 		};
 
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };

@@ -1,44 +1,185 @@
 #include "coinbase_results.h"
+#include "common/file/json.h"
+
+namespace
+{
+	template<typename T, typename Reader>
+	cb::result<T> read_result(std::string_view jsonResult, const Reader& reader)
+	{
+		try
+		{
+			cb::json_document jsonDocument{ cb::parse_json(jsonResult) };
+
+			if (jsonDocument.has_member("message"))
+			{
+				return cb::result<T>::fail(jsonDocument.get<std::string>("message"));
+			}
+
+			if constexpr (std::is_same_v<T, void>)
+			{
+				return cb::result<T>::success();
+			}
+			else
+			{
+				return cb::result<T>::success(reader(jsonDocument));
+			}
+		}
+		catch (const std::exception& e)
+		{
+			return cb::result<T>::fail(e.what());
+		}
+	}
+
+	cb::trade_action to_trade_action(std::string_view actionString)
+	{
+		if (actionString == "buy")
+		{
+			return cb::trade_action::BUY;
+		}
+
+		return cb::trade_action::SELL;
+	}
+}
 
 namespace cb::coinbase
 {
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
 	{
-		return result<std::vector<tradable_pair>>::success(std::vector<tradable_pair>{});
+		return read_result<std::vector<tradable_pair>>(jsonResult, [](const json_document& json)
+		{
+			std::vector<tradable_pair> pairs;
+			pairs.reserve(json.size());
+
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				json_element pairElement{ it.value() };
+
+				std::string exchangeName{ pairElement.get<std::string>("id") };
+				asset_symbol asset{ pairElement.get<std::string>("base_currency")};
+				asset_symbol priceUnit{ pairElement.get<std::string>("quote_currency")};
+
+				pairs.emplace_back(std::move(exchangeName), std::move(asset), std::move(priceUnit));
+			}
+
+			return pairs;
+		});
 	}
 
 	result<pair_stats> read_24h_stats(std::string_view jsonResult)
 	{
-		return result<pair_stats>::success(pair_stats{ 0, 0, 0, 0 });
+		return read_result<pair_stats>(jsonResult, [](const json_document& json)
+		{
+			json_element statsElement{ json.element("stats_24hour") };
+
+			return pair_stats
+			{
+				std::stod(statsElement.get<std::string>("volume")),
+				std::stod(statsElement.get<std::string>("low")),
+				std::stod(statsElement.get<std::string>("high")),
+				std::stod(statsElement.get<std::string>("open"))
+			};
+		});
 	}
 
 	result<order_book_state> read_order_book(std::string_view jsonResult, int depth)
 	{
-		return result<order_book_state>::success(std::vector<order_book_level>{});
+		static constexpr int PRICE_INDEX = 0;
+		static constexpr int VOLUME_INDEX = 1;
+
+		return read_result<order_book_state>(jsonResult, [depth](const json_document& json)
+		{
+			json_element bids{ json.element("bids") };
+			json_element asks{ json.element("asks") };
+
+			std::vector<order_book_entry> bidEntries;
+			bidEntries.reserve(depth);
+
+			std::vector<order_book_entry> askEntries;
+			askEntries.reserve(depth);
+
+			for (int i = 0; i < depth; ++i)
+			{
+				json_element bidElement{ bids.element(i) };
+				json_element askElement{ asks.element(i) };
+
+				bidEntries.emplace_back(
+					order_book_side::BID, 
+					std::stod(bidElement.get<std::string>(PRICE_INDEX)), 
+					std::stod(bidElement.get<std::string>(VOLUME_INDEX)));
+
+				askEntries.emplace_back(
+					order_book_side::ASK,
+					std::stod(askElement.get<std::string>(PRICE_INDEX)),
+					std::stod(askElement.get<std::string>(VOLUME_INDEX)));
+			}
+
+			return order_book_state{ std::move(askEntries), std::move(bidEntries) };
+		});
 	}
 
 	result<double> read_fee(std::string_view jsonResult)
 	{
-		return result<double>::success(0.0);
+		return read_result<double>(jsonResult, [](const json_document& json)
+		{
+			return std::stod(json.get<std::string>("taker_fee_rate")) * 100;
+		});
 	}
 
 	result<std::unordered_map<asset_symbol, double>> read_balances(std::string_view jsonResult)
 	{
-		return result<std::unordered_map<asset_symbol, double>>::success(std::unordered_map<asset_symbol, double>{});
+		return read_result<std::unordered_map<asset_symbol, double>>(jsonResult, [](const json_document& json)
+		{
+			std::unordered_map<asset_symbol, double> balances;
+			balances.reserve(json.size());
+
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				json_element balanceElement{ it.value() };
+
+				balances.emplace(
+					asset_symbol{ balanceElement.get<std::string>("id") },
+					std::stod(balanceElement.get<std::string>("balance")));
+			}
+
+			return balances;
+		});
 	}
 
 	result<std::vector<order_description>> read_orders(std::string_view jsonResult)
 	{
-		return result<std::vector<order_description>>::success(std::vector<order_description>{});
+		return read_result<std::vector<order_description>>(jsonResult, [](const json_document& json)
+		{
+			std::vector<order_description> orders;
+			orders.reserve(json.size());
+
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				json_element orderElement{ it.value() };
+
+				orders.emplace_back(
+					orderElement.get<std::string>("id"),
+					orderElement.get<std::string>("product_id"),
+					to_trade_action(orderElement.get<std::string>("side")),
+					std::stod(orderElement.get<std::string>("price")),
+					std::stod(orderElement.get<std::string>("size")));
+			}
+
+			return orders;
+		});
 	}
 
 	result<std::string> read_add_order(std::string_view jsonResult)
 	{
-		return result<std::string>::success("");
+		return read_result<std::string>(jsonResult, [](const json_document& json)
+		{
+			return json.get<std::string>("id");
+		});
 	}
 
 	result<void> read_cancel_order(std::string_view jsonResult)
 	{
-		return result<void>::success();
+		return read_result<void>(jsonResult, [](const json_document& json)
+		{
+		});
 	}
 }

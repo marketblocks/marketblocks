@@ -126,7 +126,7 @@ namespace cb::test
 	TEST(CoinbaseResults, ReadAddOrder)
 	{
 		execute_test<std::string>(
-			"get_orders.json",
+			"add_order.json",
 			coinbase::read_add_order,
 			"a9625b04-fc66-4999-a876-543c3684d702");
 	}

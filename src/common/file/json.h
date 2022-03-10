@@ -44,6 +44,12 @@ namespace cb
 		}
 
 		template<typename T>
+		T get(int index) const
+		{
+			return _json[index].get<T>();
+		}
+
+		template<typename T>
 		T get() const
 		{
 			return _json.get<T>();

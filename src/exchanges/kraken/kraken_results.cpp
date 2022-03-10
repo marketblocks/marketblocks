@@ -27,7 +27,14 @@ namespace
 				return cb::result<T>::fail(std::move(error));
 			}
 
-			return reader(jsonDocument.element("result"));
+			if constexpr (std::is_same_v<T, void>)
+			{
+				return cb::result<T>::success();
+			}
+			else
+			{
+				return cb::result<T>::success(reader(jsonDocument.element("result")));
+			}
 		}
 		catch (const std::exception& e)
 		{
@@ -59,7 +66,7 @@ namespace
 					orderDescriptions.emplace_back(std::move(orderId), std::move(pairName), action, price, volume);
 				}
 
-				return cb::result<std::vector<cb::order_description>>::success(std::move(orderDescriptions));
+				return orderDescriptions;
 			});
 	}
 }
@@ -71,26 +78,23 @@ namespace cb::kraken
 		return read_result<exchange_status>(jsonResult, [](const json_element& resultElement)
 		{
 			std::string status_string{ resultElement.get<std::string>("status") };
-			exchange_status status;
 
 			if (status_string == "online")
 			{
-				status = exchange_status::ONLINE;
+				return exchange_status::ONLINE;
 			}
 			else if (status_string == "cancel_only")
 			{
-				status = exchange_status::CANCEL_ONLY;
+				return exchange_status::CANCEL_ONLY;
 			}
 			else if (status_string == "post_only")
 			{
-				status = exchange_status::POST_ONLY;
+				return exchange_status::POST_ONLY;
 			}
 			else
 			{
-				status = exchange_status::MAINTENANCE;
+				return exchange_status::MAINTENANCE;
 			}
-
-			return result<exchange_status>::success(std::move(status));
 		});
 	}
 
@@ -109,7 +113,7 @@ namespace cb::kraken
 				pairs.emplace_back(name, asset_symbol{ assetSymbols[0] }, asset_symbol{ assetSymbols[1] });
 			}
 
-			return result<std::vector<tradable_pair>>::success(std::move(pairs));
+			return pairs;
 		});
 	}
 
@@ -124,13 +128,13 @@ namespace cb::kraken
 			std::vector<std::string> highs{ dataElement.get<std::vector<std::string>>("h") };
 			std::string openingPrice{ dataElement.get<std::string>("o") };
 
-			return result<pair_stats>::success(pair_stats
+			return pair_stats
 			{
 				std::stod(volumes[1]),
 				std::stod(lows[1]),
 				std::stod(highs[1]),
 				std::stod(openingPrice)
-			});
+			};
 		});
 	}
 
@@ -168,7 +172,7 @@ namespace cb::kraken
 				levels.emplace_back(std::move(askEntry), std::move(bidEntry));
 			}
 
-			return result<order_book_state>::success(std::move(levels));
+			return levels;
 		});
 	}
 
@@ -184,7 +188,7 @@ namespace cb::kraken
 				balances.emplace(asset_symbol{ it.key() }, std::stod(it.value().get<std::string>()));
 			}
 
-			return result<std::unordered_map<asset_symbol, double>>::success(std::move(balances));
+			return balances;
 		});
 	}
 
@@ -195,7 +199,7 @@ namespace cb::kraken
 			json_element feeElement{ resultElement.element("fees").begin().value() };
 			std::string fee{ feeElement.get<std::string>("fee") };
 
-			return result<double>::success(std::stod(fee));
+			return std::stod(fee);
 		});
 	}
 
@@ -213,7 +217,7 @@ namespace cb::kraken
 	{
 		return read_result<std::string>(jsonResult, [](const json_element& resultElement)
 		{
-			return result<std::string>::success(std::move(resultElement.get<std::vector<std::string>>("txid")[0]));
+			return resultElement.get<std::vector<std::string>>("txid")[0];
 		});
 	}
 
@@ -221,11 +225,6 @@ namespace cb::kraken
 	{
 		return read_result<void>(jsonResult, [](const json_element& resultElement)
 		{
-			int count = resultElement.get<int>("count");
-
-			return count > 0
-				? result<void>::success()
-				: result<void>::fail("Could not cancel order");
 		});
 	}
 }
