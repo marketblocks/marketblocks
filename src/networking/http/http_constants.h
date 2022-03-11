@@ -15,6 +15,7 @@ namespace cb
 		constexpr static inline std::string_view ACCEPT = "Accept";
 		constexpr static inline std::string_view CONTENT_TYPE = "Content-Type";
 		constexpr static inline std::string_view APPLICATION_JSON = "application/json";
+		constexpr static inline std::string_view APPLICATION_URLENCODED = "application/x-www-form-urlencoded";
 	}
 
 	enum class http_verb

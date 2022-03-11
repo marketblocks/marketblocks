@@ -64,8 +64,6 @@ namespace cb
 			{
 				static constexpr std::string_view API_KEY_HEADER = "API-Key";
 				static constexpr std::string_view API_SIGN_HEADER = "API-Sign";
-				static constexpr std::string_view CONTENT_TYPE_HEADER_KEY = "Content-Type";
-				static constexpr std::string_view CONTENT_TYPE_HEADER_VALUE = "application/x-www-form-urlencoded; charset=utf-8";
 			};
 
 		public:
@@ -204,7 +202,8 @@ namespace cb
 			http_request request{ http_verb::POST, std::string{ _constants.general.BASEURL } + apiPath };
 			request.add_header(_constants.http.API_KEY_HEADER, _publicKey);
 			request.add_header(_constants.http.API_SIGN_HEADER, apiSign);
-			request.add_header(_constants.http.CONTENT_TYPE_HEADER_KEY, _constants.http.CONTENT_TYPE_HEADER_VALUE);
+			request.add_header(common_http_headers::CONTENT_TYPE, common_http_headers::APPLICATION_URLENCODED);
+			request.add_header(common_http_headers::ACCEPT, common_http_headers::APPLICATION_JSON);
 			request.set_content(postData);
 
 			return send_request<Value>(request, reader);

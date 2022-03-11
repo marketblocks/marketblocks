@@ -94,7 +94,7 @@ namespace cb
 		set_option(easyHandle, CURLOPT_URL, request.url().c_str());
 		set_option(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
 		set_option(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
-
+		
 		if (!request.content().empty())
 		{
 			set_option(easyHandle, CURLOPT_POSTFIELDS, request.content());
@@ -104,6 +104,9 @@ namespace cb
 		set_option(easyHandle, CURLOPT_HTTPHEADER, chunk);
 
 		CURLcode result = curl_easy_perform(easyHandle);
+
+		curl_slist_free_all(chunk);
+
 		throw_if_error(result);
 
 		long responseCode;
