@@ -49,9 +49,11 @@ namespace cb
 	coinbase_api::coinbase_api(
 		coinbase_config config,
 		std::unique_ptr<http_service> httpService,
-		std::unique_ptr<websocket_stream> websocketStream)
+		std::unique_ptr<websocket_stream> websocketStream,
+		bool enableTesting)
 		:
-		_constants{},
+		_constants{ enableTesting },
+		_userAgentId{ get_timestamp() },
 		_apiKey{ config.api_key() },
 		_decodedApiSecret{ b64_decode(config.api_secret()) },
 		_apiPassphrase{ config.api_passphrase() },
@@ -61,18 +63,21 @@ namespace cb
 
 	std::string coinbase_api::get_timestamp() const
 	{
-		return std::to_string(milliseconds_since_epoch());
+		return std::to_string(time_since_epoch<std::chrono::seconds>());
 	}
 
-	std::string coinbase_api::compute_access_sign(std::string_view timestamp, http_verb httpVerb, std::string_view path, std::string_view body) const
+	std::string coinbase_api::compute_access_sign(std::string_view timestamp, http_verb httpVerb, std::string_view path, std::string_view query, std::string_view body) const
 	{
 		std::string message;
 		message.append(timestamp);
 		message.append(to_string(httpVerb));
 		message.append(path);
+		append_query(message, query);
 		message.append(body);
-
-		return b64_encode(hmac_sha256(message, _decodedApiSecret));
+		
+		auto hmac = hmac_sha256(message, _decodedApiSecret);
+		auto encoded = b64_encode(hmac);
+		return encoded;
 	}
 
 	exchange_status coinbase_api::get_status() const
@@ -206,11 +211,12 @@ namespace cb
 		send_private_request<void>(http_verb::HTTP_DELETE, path, coinbase::read_cancel_order);
 	}
 
-	std::unique_ptr<exchange> make_coinbase(coinbase_config config, std::shared_ptr<websocket_client> websocketClient)
+	std::unique_ptr<exchange> make_coinbase(coinbase_config config, std::shared_ptr<websocket_client> websocketClient, bool enableTesting)
 	{
 		return std::make_unique<coinbase_api>(
 			std::move(config),
 			std::make_unique<http_service>(),
-			std::make_unique<coinbase_websocket_stream>(websocketClient));
+			std::make_unique<coinbase_websocket_stream>(websocketClient),
+			enableTesting);
 	}
 }

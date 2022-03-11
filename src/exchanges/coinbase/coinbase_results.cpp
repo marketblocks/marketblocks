@@ -68,14 +68,12 @@ namespace cb::coinbase
 	{
 		return read_result<pair_stats>(jsonResult, [](const json_document& json)
 		{
-			json_element statsElement{ json.element("stats_24hour") };
-
 			return pair_stats
 			{
-				std::stod(statsElement.get<std::string>("volume")),
-				std::stod(statsElement.get<std::string>("low")),
-				std::stod(statsElement.get<std::string>("high")),
-				std::stod(statsElement.get<std::string>("open"))
+				std::stod(json.get<std::string>("volume")),
+				std::stod(json.get<std::string>("low")),
+				std::stod(json.get<std::string>("high")),
+				std::stod(json.get<std::string>("open"))
 			};
 		});
 	}
@@ -136,7 +134,7 @@ namespace cb::coinbase
 				json_element balanceElement{ it.value() };
 
 				balances.emplace(
-					balanceElement.get<std::string>("id"),
+					balanceElement.get<std::string>("currency"),
 					std::stod(balanceElement.get<std::string>("balance")));
 			}
 

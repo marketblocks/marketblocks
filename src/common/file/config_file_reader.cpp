@@ -3,7 +3,6 @@
 namespace
 {
 	constexpr std::string_view CONFIG_DIRECTORY = "C:\\Users\\jorda\\Documents";
-	constexpr std::string_view JSON_FILE_EXTENSION = "json";
 }
 
 namespace cb

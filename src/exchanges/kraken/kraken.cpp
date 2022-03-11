@@ -68,7 +68,7 @@ namespace cb
 
 	std::string kraken_api::get_nonce() const
 	{
-		return std::to_string(milliseconds_since_epoch());
+		return std::to_string(time_since_epoch<std::chrono::milliseconds>());
 	}
 
 	std::string kraken_api::compute_api_sign(std::string_view uriPath, std::string_view urlPostData, std::string_view nonce) const

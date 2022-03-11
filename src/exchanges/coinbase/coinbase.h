@@ -19,7 +19,25 @@ namespace cb
 		private:
 			struct general_constants
 			{
-				static constexpr std::string_view BASE_URL = "https://api.exchange.coinbase.com";
+			private:
+				static constexpr std::string_view LIVE_BASE_URL = "https://api.exchange.coinbase.com";
+				static constexpr std::string_view SANDBOX_BASE_URL = "https://api-public.sandbox.exchange.coinbase.com";
+
+				constexpr std::string_view select_base_url(bool enableTesting)
+				{
+					if (enableTesting)
+					{
+						return SANDBOX_BASE_URL;
+					}
+					return LIVE_BASE_URL;
+				}
+
+			public:
+				const std::string_view BASE_URL;
+
+				constexpr general_constants(bool enableTesting)
+					: BASE_URL{ select_base_url(enableTesting) }
+				{}
 			};
 
 			struct method_constants
@@ -52,8 +70,8 @@ namespace cb
 			query_constants queries;
 			http_constants http;
 
-			constexpr coinbase_constants()
-				: general{}, methods{}, queries{}, http{}
+			constexpr coinbase_constants(bool enableTesting)
+				: general{ enableTesting }, methods{}, queries{}, http{}
 			{}
 		};
 	}
@@ -63,6 +81,7 @@ namespace cb
 	private:
 		internal::coinbase_constants _constants;
 
+		std::string _userAgentId;
 		std::string _apiKey;
 		std::vector<unsigned char> _decodedApiSecret;
 		std::string _apiPassphrase;
@@ -70,11 +89,15 @@ namespace cb
 		std::unique_ptr<websocket_stream> _websocketStream;
 
 		std::string get_timestamp() const;
-		std::string compute_access_sign(std::string_view timestamp, http_verb httpVerb, std::string_view path, std::string_view body) const;
+		std::string compute_access_sign(std::string_view timestamp, http_verb httpVerb, std::string_view path, std::string_view query, std::string_view body) const;
 
 		template<typename Value, typename ResponseReader>
-		Value send_request(const http_request& request, const ResponseReader& reader) const
+		Value send_request(http_request& request, const ResponseReader& reader) const
 		{
+			request.add_header(common_http_headers::USER_AGENT, _userAgentId);
+			request.add_header(common_http_headers::ACCEPT, common_http_headers::APPLICATION_JSON);
+			request.add_header(common_http_headers::CONTENT_TYPE, common_http_headers::APPLICATION_JSON);
+
 			http_response response{ _httpService->send(request) };
 
 			if (response.response_code() != HttpResponseCodes::OK)
@@ -109,7 +132,7 @@ namespace cb
 			std::string timestamp{ get_timestamp() };
 
 			request.add_header(_constants.http.ACCESS_KEY_HEADER, _apiKey);
-			request.add_header(_constants.http.ACCESS_SIGN_HEADER, compute_access_sign(timestamp, httpVerb, path, content));
+			request.add_header(_constants.http.ACCESS_SIGN_HEADER, compute_access_sign(timestamp, httpVerb, path, query, content));
 			request.add_header(_constants.http.ACCESS_TIMESTAMP_HEADER, timestamp);
 			request.add_header(_constants.http.ACCESS_PASSPHRASE_HEADER, _apiPassphrase);
 
@@ -120,7 +143,8 @@ namespace cb
 		coinbase_api(
 			coinbase_config config,
 			std::unique_ptr<http_service> httpService, 
-			std::unique_ptr<websocket_stream> websocketStream);
+			std::unique_ptr<websocket_stream> websocketStream,
+			bool enableTesting = false);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::COINBASE; }
 		websocket_stream& get_websocket_stream() noexcept override { return *_websocketStream; }
@@ -137,5 +161,5 @@ namespace cb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_coinbase(coinbase_config config, std::shared_ptr<websocket_client> websocketClient);
+	std::unique_ptr<exchange> make_coinbase(coinbase_config config, std::shared_ptr<websocket_client> websocketClient, bool enableTesting = false);
 }

@@ -38,7 +38,7 @@ namespace cb
         BIO* bmem = BIO_new_mem_buf((void*)data.data(), data.size());
         bmem = BIO_push(b64, bmem);
 
-        std::vector<unsigned char> output(data.size());
+        std::vector<unsigned char> output(64);
         int decoded_size = BIO_read(bmem, output.data(), output.size());
         BIO_free_all(bmem);
 

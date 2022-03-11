@@ -95,6 +95,11 @@ namespace cb
 		set_option(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
 		set_option(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
 
+		if (!request.content().empty())
+		{
+			set_option(easyHandle, CURLOPT_POSTFIELDS, request.content());
+		}
+
 		curl_slist* chunk = append_headers(NULL, request.headers());
 		set_option(easyHandle, CURLOPT_HTTPHEADER, chunk);
 

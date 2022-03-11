@@ -12,9 +12,8 @@ namespace cb
     namespace internal
     {
         template<typename Source, typename Key>
-        std::vector<unsigned char> hmac(const Source& source, const Key& key, const EVP_MD* hashAlgorithm)
+        std::vector<unsigned char> hmac(const Source& source, const Key& key, const EVP_MD* hashAlgorithm, unsigned int length)
         {
-            unsigned int length = EVP_MAX_MD_SIZE;
             std::vector<unsigned char> hash(length);
 
             HMAC_CTX* context = HMAC_CTX_new();
@@ -62,12 +61,14 @@ namespace cb
     template<typename Source, typename Key>
     std::vector<unsigned char> hmac_sha512(const Source& data, const Key& key)
     {
-        return internal::hmac(data, key, EVP_sha512());
+        constexpr unsigned int length = 512 / CHAR_BIT;
+        return internal::hmac(data, key, EVP_sha512(), length);
     }
 
     template<typename Source, typename Key>
     std::vector<unsigned char> hmac_sha256(const Source& data, const Key& key)
     {
-        return internal::hmac(data, key, EVP_sha256());
+        constexpr unsigned int length = 256 / CHAR_BIT;
+        return internal::hmac(data, key, EVP_sha256(), length);
     }
 }

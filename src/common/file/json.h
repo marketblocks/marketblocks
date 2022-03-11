@@ -10,6 +10,8 @@
 
 namespace cb
 {
+	inline constexpr std::string_view JSON_FILE_EXTENSION = "json";
+
 	typedef json<nlohmann::json> json_document;
 	typedef json<const nlohmann::json&> json_element;
 

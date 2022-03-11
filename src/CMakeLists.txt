@@ -23,7 +23,7 @@ add_library(CryptoBot_lib
 "common/utils/stringutils.cpp"
 "common/utils/stringutils.h"
 
-"common/utils/timeutils.cpp"
+
 "common/utils/timeutils.h" 
 
 "common/exceptions/cb_exception.h" 

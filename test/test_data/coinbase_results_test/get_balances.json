@@ -1,38 +1,82 @@
 [
   {
-    "available_on_consumer": true,
-    "hold_balance": "0.00",
-    "id": "OXT",
-    "hold_currency": "USD",
-    "balance": "818.5500000000",
-    "currency": "OXT",
-    "primary": false,
-    "name": "OXT Wallet",
+    "id": "766fd85c-42fd-5470-ae9e-4528a73257fe",
+    "name": "XRP Wallet",
+    "balance": "346436.00000000",
+    "currency": "XRP",
     "type": "wallet",
-    "active": true
+    "primary": true,
+    "active": true,
+    "available_on_consumer": true,
+    "hold_balance": "5000.00",
+    "hold_currency": "USD"
   },
   {
-    "available_on_consumer": true,
-    "hold_balance": "0.00",
-    "id": "GBP",
-    "hold_currency": "USD",
-    "balance": "459567.9171",
-    "currency": "OXT",
-    "primary": false,
-    "name": "GBP Wallet",
+    "id": "78e6166a-717c-5beb-b095-043601d66f30",
+    "name": "BTC Wallet",
+    "balance": "1.354656",
+    "currency": "BTC",
     "type": "wallet",
-    "active": true
+    "primary": true,
+    "active": true,
+    "available_on_consumer": true,
+    "hold_balance": "5000.00",
+    "hold_currency": "USD"
   },
   {
+    "id": "e4fcd410-1be1-54f3-a019-a4486ee4b914",
+    "name": "ETH Wallet",
+    "balance": "2986657.46463",
+    "currency": "ETH",
+    "type": "wallet",
+    "primary": true,
+    "active": true,
     "available_on_consumer": true,
-    "hold_balance": "0.00",
-    "id": "USD",
-    "hold_currency": "USD",
-    "balance": "171288.6158",
-    "currency": "OXT",
-    "primary": false,
+    "hold_balance": "5000.00",
+    "hold_currency": "USD"
+  },
+  {
+    "id": "fbc49091-b8c7-5a7c-a33a-75e88b53e074",
     "name": "USD Wallet",
-    "type": "wallet",
-    "active": true
+    "balance": "210480.536456",
+    "currency": "USD",
+    "type": "fiat",
+    "primary": false,
+    "active": true,
+    "available_on_consumer": true,
+    "wire_deposit_information": {
+      "account_number": "12345678912",
+      "routing_number": "1234567",
+      "bank_name": "Coinbase Test Bank",
+      "bank_address": "1 Test Bank Drive, Nowhere",
+      "bank_country": {
+        "code": "US",
+        "name": "United States"
+      },
+      "account_name": "Coinbase, Inc",
+      "account_address": "548 Market Street, #23008, San Francisco, CA 94104",
+      "reference": "TESTREFERENCE"
+    },
+    "hold_balance": "5000.00",
+    "hold_currency": "USD"
+  },
+  {
+    "id": "f525c293-ad92-57f1-9198-9d9a55abe61a",
+    "name": "GBP Wallet",
+    "balance": "464768.574",
+    "currency": "GBP",
+    "type": "fiat",
+    "primary": false,
+    "active": true,
+    "available_on_consumer": true,
+    "uk_deposit_information": {
+      "sort_code": "20-06-05",
+      "account_name": "CB PAYMENTS, LTD",
+      "account_number": "63056902",
+      "bank_name": "BARCLAYS BANK PLC",
+      "reference": "CBAEURKBJGZAULEXC"
+    },
+    "hold_balance": "5000.00",
+    "hold_currency": "USD"
   }
 ]

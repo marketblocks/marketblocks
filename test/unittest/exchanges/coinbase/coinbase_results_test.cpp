@@ -98,9 +98,11 @@ namespace cb::test
 			coinbase::read_balances,
 			unordered_string_map<double>
 		{
-			{ "OXT", 818.55 },
-			{ "GBP", 459567.9171 },
-			{ "USD", 171288.6158 }
+			{ "XRP", 346436.0 },
+			{ "BTC", 1.354656 },
+			{ "ETH", 2986657.46463 },
+			{ "USD", 210480.536456 },
+			{ "GBP", 464768.574 },
 		});
 	}
 

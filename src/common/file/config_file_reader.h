@@ -16,7 +16,7 @@ namespace cb
 	Config load_config_file()
 	{
 		std::filesystem::path path{ get_path(Config::name()) };
-		std::string jsonString{ cb::read_file(path) };
+		std::string jsonString{ read_file(path) };
 
 		return from_json<Config>(jsonString);
 	}
