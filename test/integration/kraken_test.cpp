@@ -45,7 +45,7 @@ namespace cb::test
 
 	TEST(KrakenIntegration, GetFee)
 	{
-		tradable_pair pair{ "XETC", "XETH" };
+		tradable_pair pair{ "BTC", "USD" };
 
 		auto kraken{ create_api() };
 		ASSERT_NO_THROW(kraken->get_fee(pair));
@@ -69,36 +69,21 @@ namespace cb::test
 		ASSERT_NO_THROW(kraken->get_closed_orders());
 	}
 
-	TEST(KrakenIntegration, AddOrder)
+	TEST(KrakenIntegration, AddCancelOrder)
 	{
 		trade_description trade
 		{
 			order_type::LIMIT,
-			tradable_pair{ "XBT", "USD" },
+			tradable_pair{ "BTC", "USD" },
 			trade_action::BUY,
 			37500,
 			1.25
 		};
 
 		auto kraken{ create_api() };
-		ASSERT_NO_THROW(kraken->add_order(trade));
-	}
+		std::string orderId;
 
-	TEST(KrakenIntegration, CancelOrder)
-	{
-		auto kraken{ create_api() };
-
-		trade_description trade
-		{
-			order_type::LIMIT,
-			tradable_pair{ "XBT", "USD" },
-			trade_action::BUY,
-			37500,
-			1.25
-		};
-
-		std::string orderId{ kraken->add_order(trade) };
-
+		ASSERT_NO_THROW(orderId = kraken->add_order(trade));
 		ASSERT_NO_THROW(kraken->cancel_order(orderId));
 	}
 }

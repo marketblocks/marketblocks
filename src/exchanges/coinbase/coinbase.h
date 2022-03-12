@@ -96,8 +96,7 @@ namespace cb
 		{
 			request.add_header(common_http_headers::USER_AGENT, _userAgentId);
 			request.add_header(common_http_headers::ACCEPT, common_http_headers::APPLICATION_JSON);
-			request.add_header(common_http_headers::CONTENT_TYPE, common_http_headers::APPLICATION_JSON);
-
+			
 			http_response response{ _httpService->send(request) };
 
 			if (response.response_code() != HttpResponseCodes::OK)
@@ -127,7 +126,11 @@ namespace cb
 		{
 			http_request request{ httpVerb, build_url(_constants.general.BASE_URL, path, query) };
 
-			request.set_content(content);
+			if (!content.empty())
+			{
+				request.set_content(content);
+				request.add_header(common_http_headers::CONTENT_TYPE, common_http_headers::APPLICATION_JSON);
+			}
 
 			std::string timestamp{ get_timestamp() };
 

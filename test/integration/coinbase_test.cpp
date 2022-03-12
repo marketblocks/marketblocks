@@ -69,7 +69,7 @@ namespace cb::test
 		ASSERT_NO_THROW(coinbase->get_closed_orders());
 	}
 
-	TEST(CoinbaseIntegration, AddOrder)
+	TEST(CoinbaseIntegration, AddCancelOrder)
 	{
 		trade_description trade
 		{
@@ -81,24 +81,9 @@ namespace cb::test
 		};
 
 		auto coinbase{ create_api() };
-		ASSERT_NO_THROW(coinbase->add_order(trade));
-	}
+		std::string orderId;
 
-	TEST(CoinbaseIntegration, CancelOrder)
-	{
-		auto coinbase{ create_api() };
-
-		trade_description trade
-		{
-			order_type::LIMIT,
-			tradable_pair{ "BTC", "USD" },
-			trade_action::BUY,
-			1.0,
-			1.0
-		};
-
-		std::string orderId{ coinbase->add_order(trade) };
-
+		ASSERT_NO_THROW(orderId = coinbase->add_order(trade));
 		ASSERT_NO_THROW(coinbase->cancel_order(orderId));
 	}
 }

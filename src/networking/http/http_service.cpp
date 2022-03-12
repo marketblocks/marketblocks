@@ -97,7 +97,7 @@ namespace cb
 		
 		if (!request.content().empty())
 		{
-			set_option(easyHandle, CURLOPT_POSTFIELDS, request.content());
+			set_option(easyHandle, CURLOPT_POSTFIELDS, request.content().c_str());
 		}
 
 		curl_slist* chunk = append_headers(NULL, request.headers());
