@@ -74,7 +74,7 @@ namespace cb
                 onMessageHandler(message->get_payload());
             });
 
-        //connectionPtr->set_open_handshake_timeout(0);
+        connectionPtr->set_open_handshake_timeout(0);
 
         client->connect(connectionPtr);
 

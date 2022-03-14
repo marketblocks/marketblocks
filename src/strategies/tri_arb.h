@@ -8,19 +8,26 @@
 #include "exchanges/exchange.h"
 #include "runner/initialise/strategy_initialiser.h"
 
+using namespace cb;
+
 class sequence_step
 {
 private:
-	cb::tradable_pair _pair;
-	cb::trade_action _action;
+	tradable_pair _pair;
+	trade_action _action;
 
 public:
-	explicit sequence_step(cb::tradable_pair pair, cb::trade_action action);
+	constexpr sequence_step(tradable_pair pair, trade_action action)
+		: _pair{ std::move(pair) }, _action{ std::move(action) }
+	{}
 
-	const cb::tradable_pair& pair() const { return _pair; }
-	const cb::trade_action& action() const { return _action; }
+	constexpr const tradable_pair& pair() const noexcept { return _pair; }
+	constexpr const trade_action& action() const noexcept { return _action; }
 
-	bool operator==(const sequence_step& other) const;
+	constexpr bool operator==(const sequence_step& other) const noexcept
+	{
+		return _action == other._action && _pair == other._pair;
+	}
 };
 
 class tri_arb_sequence
@@ -29,34 +36,49 @@ private:
 	sequence_step _first;
 	sequence_step _middle;
 	sequence_step _last;
-	std::vector<cb::tradable_pair> _pairs;
+	std::vector<tradable_pair> _pairs;
 
 public:
-	explicit tri_arb_sequence(sequence_step first, sequence_step middle, sequence_step last, std::vector<cb::tradable_pair> pairs);
+	constexpr tri_arb_sequence(
+		sequence_step first,
+		sequence_step middle, 
+		sequence_step last, 
+		std::vector<tradable_pair> pairs)
+		:
+		_first{ std::move(first) }, 
+		_middle{ std::move(middle) },
+		_last{ std::move(last) }, 
+		_pairs{ std::move(pairs) }
+	{}
 
-	const sequence_step& first() const { return _first; }
-	const sequence_step& middle() const { return _middle; }
-	const sequence_step& last() const { return _last; }
-	const std::vector<cb::tradable_pair>& pairs() const { return _pairs; }
+	constexpr const sequence_step& first() const noexcept { return _first; }
+	constexpr const sequence_step& middle() const noexcept { return _middle; }
+	constexpr const sequence_step& last() const noexcept { return _last; }
+	constexpr const std::vector<cb::tradable_pair>& pairs() const noexcept { return _pairs; }
 };
 
-class tri_arb_exchange_spec
+class tri_arb_spec
 {
 private:
-	std::shared_ptr<cb::exchange> _exchange;
-	std::vector<tri_arb_sequence> _sequences;
+	std::shared_ptr<exchange> _exchange;
+	std::queue<tradable_pair> _orderBookMessageQueue;
+	std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> _sequences;
 
 public:
-	explicit tri_arb_exchange_spec(std::shared_ptr<cb::exchange> exchange, std::vector<tri_arb_sequence> sequences);
+	tri_arb_spec(
+		std::shared_ptr<exchange> exchange, 
+		std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> sequences);
 
-	cb::exchange& exchange() const { return *(_exchange.get()); }
-	const std::vector<tri_arb_sequence>& sequences() const { return _sequences; }
+	std::shared_ptr<exchange> exchange() const { return _exchange; }
+	std::queue<tradable_pair>& message_queue() { return _orderBookMessageQueue; }
+
+	const std::vector<tri_arb_sequence>& get_sequences(const tradable_pair& pair) const;
 };
 
 class tri_arb_strategy
 {
 private:
-	std::vector<tri_arb_exchange_spec> _specs;
+	std::vector<tri_arb_spec> _specs;
 	cb::trading_options _options;
 
 public:
@@ -66,4 +88,4 @@ public:
 	void run_iteration();
 };
 
-std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, std::string_view fiatCurrency);
+std::vector<tri_arb_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, std::string_view fiatCurrency);

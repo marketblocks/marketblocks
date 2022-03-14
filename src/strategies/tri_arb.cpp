@@ -11,6 +11,8 @@
 #include "common/utils/financeutils.h"
 #include "logging/logger.h"
 
+using namespace cb;
+
 namespace
 {
 	std::string to_string(const tri_arb_sequence& sequence)
@@ -19,40 +21,62 @@ namespace
 	}
 }
 
-sequence_step::sequence_step(cb::tradable_pair pair, cb::trade_action action)
-	: _pair{ std::move(pair) }, _action{ std::move(action) }
+tri_arb_spec::tri_arb_spec(
+	std::shared_ptr<cb::exchange> exchange, 
+	std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> sequences)
+	: 
+	_exchange{ exchange }, 
+	_sequences{ std::move(sequences) }, 
+	_orderBookMessageQueue{}
 {}
 
-bool sequence_step::operator==(const sequence_step& other) const
+const std::vector<tri_arb_sequence>& tri_arb_spec::get_sequences(const tradable_pair& pair) const
 {
-	return _action == other._action && _pair == other._pair;
+	auto it = _sequences.find(pair);
+
+	if (it == _sequences.end())
+	{
+		return std::vector<tri_arb_sequence>{};
+	}
+
+	return it->second;
 }
 
-tri_arb_sequence::tri_arb_sequence(sequence_step first, sequence_step middle, sequence_step last, std::vector<cb::tradable_pair> pairs)
-	: _first{ std::move(first) }, _middle{ std::move(middle) }, _last{ std::move(last) }, _pairs{ std::move(pairs) }
-{}
-
-tri_arb_exchange_spec::tri_arb_exchange_spec(std::shared_ptr<cb::exchange> exchange, std::vector<tri_arb_sequence> sequences)
-	: _exchange{ exchange }, _sequences{ std::move(sequences) }
-{}
-
-std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, std::string_view fiatCurrency)
+std::vector<tri_arb_spec> create_exchange_specs(const std::vector<std::shared_ptr<cb::exchange>>& exchanges, std::string_view fiatCurrency)
 {
-	std::vector<tri_arb_exchange_spec> specs;
-	specs.reserve(exchanges.size());
+	std::vector<tri_arb_spec> specs;
+
+	for (auto exchange : exchanges)
+	{
+		specs.emplace_back(exchange, std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>>{});
+	}
+	/*specs.reserve(exchanges.size());
 
 	for (std::shared_ptr<cb::exchange> exchange : exchanges)
 	{
-		const std::vector<cb::tradable_pair> tradablePairs = exchange->get_tradable_pairs();
-		std::vector<tri_arb_sequence> sequences;
+		std::vector<tradable_pair> tradablePairs{ exchange->get_tradable_pairs() };
+		std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> sequences;
 
-		std::vector<cb::tradable_pair> fiatTradables = copy_where<std::vector<cb::tradable_pair>>(
-			tradablePairs, 
-			[&fiatCurrency](const cb::tradable_pair& pair) { return pair.contains(fiatCurrency); });
+		for (auto& firstPair : tradablePairs)
+		{
+			std::vector<tradable_pair> middlePairs = copy_where<std::vector<tradable_pair>>(tradablePairs, [&firstPair](const tradable_pair& other)
+				{
+					return firstPair != other && (other.contains(firstPair.asset()) || other.contains(firstPair.price_unit()));
+				});
 
-		std::vector<cb::tradable_pair> nonFiatTradables = copy_where<std::vector<cb::tradable_pair>>(
-			tradablePairs,
-			[&fiatTradables](const cb::tradable_pair& pair) { return !contains(fiatTradables, pair); });
+			for (auto& middlePair : middlePairs)
+			{
+				std::vector<tradable_pair> lastPairs = copy_where<std::vector<tradable_pair>>(tradablePairs, [&firstPair, &middlePair](const tradable_pair& other)
+					{
+						return firstPair != other && middlePair != other && (other.contains(middlePair.asset()) || other.contains(middlePair.price_unit()));
+					});
+
+				for (auto& lastPair : lastPairs)
+				{
+
+				}
+			}
+		}
 
 		for (auto& firstPair : fiatTradables)
 		{
@@ -112,7 +136,7 @@ std::vector<tri_arb_exchange_spec> create_exchange_specs(const std::vector<std::
 		}
 
 		specs.emplace_back(exchange, std::move(sequences));
-	}
+	}*/
 
 	return specs;
 }
@@ -220,19 +244,14 @@ void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
 	_options = initaliser.options();
 	_specs = create_exchange_specs(initaliser.exchanges(), _options.fiat_currency());
 
-
 	for (auto& spec : _specs)
 	{
-		std::unordered_set<cb::tradable_pair> allPairs;
+		auto exchange = spec.exchange();
 
-		for (auto& sequence : spec.sequences())
-		{
-			allPairs.insert(sequence.pairs().begin(), sequence.pairs().end());
-		}
-
-		cb::websocket_stream& websocketStream = spec.exchange().get_websocket_stream();
+		cb::websocket_stream& websocketStream = spec.exchange()->get_websocket_stream();
 		websocketStream.connect();
-		websocketStream.subscribe_order_book(std::vector<cb::tradable_pair>{ allPairs.begin(), allPairs.end() });
+		websocketStream.set_order_book_message_handler([&spec](cb::tradable_pair pair) { spec.message_queue().push(std::move(pair)); });
+		websocketStream.subscribe_order_book(exchange->get_tradable_pairs());
 	}
 }
 
@@ -240,44 +259,60 @@ void tri_arb_strategy::run_iteration()
 {
 	for (auto& spec : _specs)
 	{
-		cb::exchange& exchange = spec.exchange();
-		double tradeValue = _options.max_trade_percent() * get_balance(exchange, _options.fiat_currency());
-
-		for (auto& sequence : spec.sequences())
+		if (spec.message_queue().empty())
 		{
-			try
-			{
-				const std::unordered_map<cb::tradable_pair, cb::order_book_level> prices = get_best_order_book_prices(exchange.get_websocket_stream(), sequence.pairs());
-				const std::unordered_map<cb::tradable_pair, double> fees
-				{
-					{ sequence.pairs()[0], 0.26 },
-					{ sequence.pairs()[1], 0.26 },
-					{ sequence.pairs()[2], 0.26 }
-				};
-				//exchange.get_fees(sequence.pairs());
+			cb::logger::instance().info("No new updates");
+			return;
+		}
 
-				SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
+		while (!spec.message_queue().empty())
+		{
+			cb::logger::instance().info("Updated order book for pair {}", spec.message_queue().front().to_standard_string());
 
-				if (gains.g3 > tradeValue)
-				{
-					SequenceTrades trades = create_sequence_trades(sequence, gains, prices, tradeValue);
-
-					exchange.add_order(trades.first);
-					exchange.add_order(trades.middle);
-					exchange.add_order(trades.last);
-
-					//log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
-				}
-				else
-				{
-					cb::logger::instance().info("Sequence: {0}. Percentage Diff: {1}", to_string(sequence), cb::calculate_percentage_diff(tradeValue, gains.g3));
-				}
-			}
-			catch (const cb::cb_exception& e)
-			{
-				
-				cb::logger::instance().error("Error occurred during sequence {0}: {1}", to_string(sequence), e.what());
-			}
+			spec.message_queue().pop();
 		}
 	}
+
+	//for (auto& spec : _specs)
+	//{
+	//	cb::exchange& exchange = spec.exchange();
+	//	double tradeValue = _options.max_trade_percent() * get_balance(exchange, _options.fiat_currency());
+
+	//	for (auto& sequence : spec.sequences())
+	//	{
+	//		try
+	//		{
+	//			const std::unordered_map<cb::tradable_pair, cb::order_book_level> prices = get_best_order_book_prices(exchange.get_websocket_stream(), sequence.pairs());
+	//			const std::unordered_map<cb::tradable_pair, double> fees
+	//			{
+	//				{ sequence.pairs()[0], 0.26 },
+	//				{ sequence.pairs()[1], 0.26 },
+	//				{ sequence.pairs()[2], 0.26 }
+	//			};
+	//			//exchange.get_fees(sequence.pairs());
+
+	//			SequenceGains gains = calculate_sequence_gains(sequence, prices, fees, tradeValue);
+
+	//			if (gains.g3 > tradeValue)
+	//			{
+	//				SequenceTrades trades = create_sequence_trades(sequence, gains, prices, tradeValue);
+
+	//				exchange.add_order(trades.first);
+	//				exchange.add_order(trades.middle);
+	//				exchange.add_order(trades.last);
+
+	//				//log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
+	//			}
+	//			else
+	//			{
+	//				cb::logger::instance().info("Sequence: {0}. Percentage Diff: {1}", to_string(sequence), cb::calculate_percentage_diff(tradeValue, gains.g3));
+	//			}
+	//		}
+	//		catch (const cb::cb_exception& e)
+	//		{
+	//			
+	//			cb::logger::instance().error("Error occurred during sequence {0}: {1}", to_string(sequence), e.what());
+	//		}
+	//	}
+	//}
 }

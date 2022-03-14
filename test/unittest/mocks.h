@@ -29,4 +29,9 @@ namespace cb::test
 
 		MOCK_METHOD(void, subscribe_order_book, (const std::vector<cb::tradable_pair>& tradablePairs), (override));
 	};
+
+	class mock_websocket_client : public websocket_client
+	{
+
+	};
 }

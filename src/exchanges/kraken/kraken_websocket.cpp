@@ -1,6 +1,7 @@
 #include "kraken_websocket.h"
 #include "logging/logger.h"
 #include "common/utils/containerutils.h"
+#include "common/utils/stringutils.h"
 
 namespace
 {
@@ -57,6 +58,12 @@ namespace
 			std::move(entry)
 		};
 	}
+
+	cb::tradable_pair parse_tradable_pair(const std::string& pairName)
+	{
+		std::vector<std::string> assets{ cb::split(pairName, '/') };
+		return cb::tradable_pair{ std::move(assets[0]), std::move(assets[1]) };
+	}
 }
 
 namespace cb
@@ -99,10 +106,10 @@ namespace cb
 	{
 		if (json.size() == 4)
 		{
-			std::string pair = json.element(3).get<std::string>();
+			tradable_pair pair{ parse_tradable_pair(json.element(3).get<std::string>()) };
 			json_element entryObject = json.element(1);
 
-			if (is_order_book_subscribed(pair))
+			if (_localOrderBook.is_subscribed(pair))
 			{
 				process_order_book_object(pair, std::move(entryObject));
 			}
@@ -113,13 +120,13 @@ namespace cb
 		}
 		else
 		{
-			std::string pair = json.element(4).get<std::string>();
+			tradable_pair pair{ parse_tradable_pair(json.element(4).get<std::string>()) };
 			process_order_book_object(pair, json.element(1));
 			process_order_book_object(pair, json.element(2));
 		}
 	}
 
-	void kraken_websocket_stream::process_order_book_initialisation(const std::string& pair, const json_element& json)
+	void kraken_websocket_stream::process_order_book_initialisation(const tradable_pair& pair, const json_element& json)
 	{
 		json_element asks = json.element("as");
 		json_element bids = json.element("bs");
@@ -138,10 +145,10 @@ namespace cb
 			bidEntries.emplace_back(get_order_book_cache_entry(order_book_side::BID, bids.element(i)));
 		}
 
-		initialise_order_book_cache(pair, std::move(askEntries), std::move(bidEntries));
+		_localOrderBook.initialise_book(pair, std::move(askEntries), std::move(bidEntries));
 	}
 
-	void kraken_websocket_stream::process_order_book_object(const std::string& pair, const json_element& json)
+	void kraken_websocket_stream::process_order_book_object(const tradable_pair& pair, const json_element& json)
 	{
 		json_iterator first = json.begin();
 		std::string entrySideId = first.key();
@@ -172,11 +179,11 @@ namespace cb
 					std::move(cacheEntry.entry)
 				};
 
-				replace_in_order_book_cache(pair, std::move(replacement));
+				_localOrderBook.replace_in_book(pair, std::move(replacement));
 			}
 			else
 			{
-				update_order_book_cache(pair, cacheEntry);
+				_localOrderBook.update_book(pair, cacheEntry);
 			}
 		}
 	}

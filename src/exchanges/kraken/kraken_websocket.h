@@ -9,8 +9,8 @@ namespace cb
 	{
 	private:
 		void process_order_book_message(const json_document& json);
-		void process_order_book_object(const std::string& pair, const json_element& json);
-		void process_order_book_initialisation(const std::string& pair, const json_element& json);
+		void process_order_book_object(const tradable_pair& pair, const json_element& json);
+		void process_order_book_initialisation(const tradable_pair& pair, const json_element& json);
 
 		void process_event_message(const json_document& json);
 		void process_update_message(const json_document& json);

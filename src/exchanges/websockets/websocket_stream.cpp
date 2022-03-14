@@ -9,7 +9,11 @@ namespace
 namespace cb
 {
 	websocket_stream::websocket_stream(std::shared_ptr<websocket_client> websocketClient)
-		: _websocketClient{ websocketClient }, _currentStatus{ exchange_status::OFFLINE }
+		: 
+		_websocketClient{ websocketClient }, 
+		_currentStatus{ exchange_status::OFFLINE },
+		_connection{},
+		_localOrderBook{}
 	{}
 
 	void websocket_stream::connect()
@@ -50,49 +54,5 @@ namespace cb
 	{
 		_currentStatus = newStatus;
 		logger::instance().warning("Websocket stream status changed. New status: {}", to_string(newStatus));
-	}
-
-	bool websocket_stream::is_order_book_subscribed(std::string_view pair)
-	{
-		return _orderBookCaches.contains(pair);
-	}
-
-	void websocket_stream::initialise_order_book_cache(std::string_view pair, std::vector<cache_entry> asks, std::vector<cache_entry> bids)
-	{
-		_orderBookCaches.emplace(pair, order_book_cache{ std::move(asks), std::move(bids) });
-	}
-
-	void websocket_stream::update_order_book_cache(std::string_view pair, cache_entry cacheEntry)
-	{
-		auto cacheIterator = _orderBookCaches.find(pair);
-		if (cacheIterator != _orderBookCaches.end())
-		{
-			cacheIterator->second.cache(std::move(cacheEntry));
-		}
-	}
-
-	void websocket_stream::replace_in_order_book_cache(std::string_view pair, cache_replacement cacheReplacement)
-	{
-		auto cacheIterator = _orderBookCaches.find(pair);
-		if (cacheIterator != _orderBookCaches.end())
-		{
-			cacheIterator->second.replace(std::move(cacheReplacement));
-		}
-	}
-
-	order_book_state websocket_stream::get_order_book_snapshot(const tradable_pair& tradablePair) const
-	{
-		CB_ASSERT_CONNECTION_EXISTS(_connection);
-
-		auto status = _connection->connection_status();
-
-		auto cacheIterator = _orderBookCaches.find(tradablePair.to_standard_string());
-
-		if (cacheIterator != _orderBookCaches.end())
-		{
-			return cacheIterator->second.snapshot();
-		}
-
-		throw cb_exception{ "Order book for pair '" + tradablePair.to_standard_string() + "' is not subscribed" };
 	}
 }
