@@ -148,7 +148,6 @@ namespace cb
 		std::vector<unsigned char> _decodedPrivateKey;
 		int _httpRetries;
 		std::unique_ptr<http_service> _httpService;
-		std::unique_ptr<websocket_stream> _websocketStream;
 
 		std::string get_nonce() const;
 		std::string compute_api_sign(std::string_view uriPath, std::string_view postData, std::string_view nonce) const;
@@ -213,12 +212,10 @@ namespace cb
 		kraken_api(
 			kraken_config config, 
 			std::unique_ptr<http_service> httpService, 
-			std::unique_ptr<websocket_stream> websocketStream);
+			websocket_stream websocketStream);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::KRAKEN; }
 		
-		websocket_stream& get_websocket_stream() noexcept override { return *_websocketStream; }
-
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 		pair_stats get_24h_stats(const tradable_pair& tradablePair) const override;

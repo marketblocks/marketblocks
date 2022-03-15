@@ -19,12 +19,19 @@ namespace cb
 {
 	class exchange
 	{
+	private:
+		websocket_stream _websocketStream;
+
 	public:
+		exchange(websocket_stream websocketStream)
+			: _websocketStream{ std::move(websocketStream) }
+		{}
+
 		virtual ~exchange() = default;
 
 		constexpr virtual std::string_view id() const noexcept = 0;
 		
-		virtual websocket_stream& get_websocket_stream() noexcept = 0;
+		websocket_stream& get_websocket_stream() noexcept { return _websocketStream; }
 
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
@@ -47,17 +54,15 @@ namespace cb
 
 	public:
 		multi_component_exchange(std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
-			: _marketApi{ std::move(dataApi) }, _tradeApi{ std::move(tradeApi) }
+			: 
+			exchange{ std::move(dataApi->get_websocket_stream()) },
+			_marketApi{ std::move(dataApi) }, 
+			_tradeApi{ std::move(tradeApi) }
 		{}
 
 		constexpr std::string_view id() const noexcept
 		{
 			return _marketApi->id();
-		}
-
-		constexpr websocket_stream& get_websocket_stream() noexcept
-		{
-			return _marketApi->get_websocket_stream();
 		}
 
 		exchange_status get_status() const override

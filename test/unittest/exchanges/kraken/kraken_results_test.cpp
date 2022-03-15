@@ -86,7 +86,7 @@ namespace cb::test
 	TEST(KrakenResults, Read24hStats)
 	{
 		execute_test(
-			"ticker_data_success.json",
+			"24h_stats_success.json",
 			kraken::read_24h_stats,
 			pair_stats{ 369.71101684, 1917.23, 2056.45, 2034.26 },
 			assert_pair_stats_eq);

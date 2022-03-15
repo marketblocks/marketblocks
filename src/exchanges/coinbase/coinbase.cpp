@@ -49,16 +49,16 @@ namespace cb
 	coinbase_api::coinbase_api(
 		coinbase_config config,
 		std::unique_ptr<http_service> httpService,
-		std::unique_ptr<websocket_stream> websocketStream,
+		websocket_stream websocketStream,
 		bool enableTesting)
 		:
+		exchange{ std::move(websocketStream) },
 		_constants{ enableTesting },
 		_userAgentId{ get_timestamp() },
 		_apiKey{ config.api_key() },
 		_decodedApiSecret{ b64_decode(config.api_secret()) },
 		_apiPassphrase{ config.api_passphrase() },
-		_httpService{ std::move(httpService) }, 
-		_websocketStream{ std::move(websocketStream) }
+		_httpService{ std::move(httpService) } 
 	{}
 
 	std::string coinbase_api::get_timestamp() const
@@ -216,7 +216,7 @@ namespace cb
 		return std::make_unique<coinbase_api>(
 			std::move(config),
 			std::make_unique<http_service>(),
-			std::make_unique<coinbase_websocket_stream>(websocketClient),
+			websocket_stream{ std::make_unique<internal::coinbase_websocket_stream>(), websocketClient },
 			enableTesting);
 	}
 }

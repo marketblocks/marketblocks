@@ -8,12 +8,13 @@ namespace
 
 namespace cb
 {
-	websocket_stream::websocket_stream(std::shared_ptr<websocket_client> websocketClient)
+	websocket_stream::websocket_stream(
+		std::unique_ptr<internal::websocket_stream_implementation> implementation,
+		std::shared_ptr<websocket_client> websocketClient)
 		: 
+		_implementation{ std::move(implementation) },
 		_websocketClient{ websocketClient }, 
-		_currentStatus{ exchange_status::OFFLINE },
-		_connection{},
-		_localOrderBook{}
+		_connection{}
 	{}
 
 	void websocket_stream::connect()
@@ -26,11 +27,11 @@ namespace cb
 		_connection = std::make_unique<websocket_connection>(
 			create_websocket_connection(
 				_websocketClient,
-				stream_url(),
-				[this]() { on_open(); },
-				[this](const std::string& reason) { on_close(reason); },
-				[this](const std::string& reason) { on_fail(reason); },
-				[this](const std::string& message) { on_message(message); }));
+				_implementation->stream_url(),
+				[this]() { _implementation->on_open(); },
+				[this](const std::string& reason) { _implementation->on_close(reason); },
+				[this](const std::string& reason) { _implementation->on_fail(reason); },
+				[this](const std::string& message) { _implementation->on_message(message); }));
 	}
 
 	ws_connection_status websocket_stream::connection_status() const
@@ -50,9 +51,11 @@ namespace cb
 		_connection->send_message(message);
 	}
 
-	void websocket_stream::log_status_change(exchange_status newStatus)
+	void websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
 	{
-		_currentStatus = newStatus;
-		logger::instance().warning("Websocket stream status changed. New status: {}", to_string(newStatus));
+		assert(tradablePairs.size() > 0);
+
+		std::string subscriptionMessage{ _implementation->get_order_book_subscription_message(tradablePairs) };
+		send_message(subscriptionMessage);
 	}
 }

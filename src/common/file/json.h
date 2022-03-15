@@ -131,9 +131,22 @@ namespace cb
 			return *this;
 		}
 
+		template<>
+		json_writer& add(std::string_view propertyName, json_writer value)
+		{
+			_document[propertyName.data()] = value._document;
+
+			return *this;
+		}
+
 		std::string to_string() const
 		{
 			return _document.dump();
+		}
+
+		json_element to_json() const
+		{
+			return json_element{ _document };
 		}
 	};
 

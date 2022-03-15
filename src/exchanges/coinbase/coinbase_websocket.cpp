@@ -1,11 +1,7 @@
 #include "coinbase_websocket.h"
 
-namespace cb
+namespace cb::internal
 {
-	coinbase_websocket_stream::coinbase_websocket_stream(std::shared_ptr<websocket_client> websocketClient)
-		: websocket_stream{ websocketClient }
-	{}
-
 	void coinbase_websocket_stream::on_open()
 	{
 
@@ -26,8 +22,8 @@ namespace cb
 
 	}
 
-	void coinbase_websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	std::string coinbase_websocket_stream::get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
 	{
-
+		return "";
 	}
 }

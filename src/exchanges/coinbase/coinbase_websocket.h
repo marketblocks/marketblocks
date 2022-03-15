@@ -1,22 +1,19 @@
 #pragma once
 
-#include "exchanges/websockets/websocket_stream.h"
+#include "exchanges/websockets/websocket_stream_implementation.h"
 
-namespace cb
+namespace cb::internal
 {
-	class coinbase_websocket_stream : public websocket_stream
+	class coinbase_websocket_stream : public websocket_stream_implementation
 	{
-	protected:
-		std::string stream_url() const override { return ""; }
+	public:
+		std::string stream_url() const noexcept override { return ""; }
 
 		void on_open() override;
 		void on_close(std::string_view reason) override;
 		void on_fail(std::string_view reason) override;
 		void on_message(std::string_view message) override;
 
-	public:
-		coinbase_websocket_stream(std::shared_ptr<websocket_client> websocketClient);
-
-		virtual void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
+		std::string get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
 	};
 }

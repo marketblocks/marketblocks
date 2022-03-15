@@ -2,6 +2,7 @@
 #include "logging/logger.h"
 #include "common/utils/containerutils.h"
 #include "common/utils/stringutils.h"
+#include "common/exceptions/cb_exception.h"
 
 namespace
 {
@@ -66,19 +67,15 @@ namespace
 	}
 }
 
-namespace cb
+namespace cb::internal
 {
-	kraken_websocket_stream::kraken_websocket_stream(std::shared_ptr<websocket_client> websocketClient)
-		: websocket_stream{ websocketClient }
-	{}
-
 	void kraken_websocket_stream::process_event_message(const json_document& json)
 	{
 		std::string eventName{ json.get<std::string>("event") };
 
 		if (eventName == "systemStatus")
 		{
-			log_status_change(to_exchange_status(json.get<std::string>("status")));
+			_currentStatus = to_exchange_status(json.get<std::string>("status"));
 		}
 		else if (eventName == "error")
 		{
@@ -228,11 +225,14 @@ namespace cb
 		}
 	}
 
-	void kraken_websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	std::string kraken_websocket_stream::get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
 	{
-		std::string tradablePairList = join_tradable_pairs(tradablePairs);
-		std::string message = "{ \"event\": \"subscribe\", \"pair\": [" + std::move(tradablePairList) + "], \"subscription\": { \"name\": \"book\" } }";
+		std::vector<std::string> tradablePairList{ to_vector<std::string>(tradablePairs, [](const tradable_pair& pair) { return pair.to_standard_string(); }) };
 
-		send_message(message);
+		return json_writer{}
+			.add("event", "subscribe")
+			.add("pair", std::move(tradablePairList))
+			.add("subscription", json_writer{}.add("name", "book"))
+			.to_string();
 	}
 }
