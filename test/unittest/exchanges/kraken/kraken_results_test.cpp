@@ -99,9 +99,15 @@ namespace cb::test
 			kraken::read_order_book,
 			order_book_state
 			{
+				std::vector<order_book_entry>
 				{
-					order_book_level{ order_book_entry{order_book_side::ASK, 52523.0, 1.199}, order_book_entry{order_book_side::BID, 52522.9, 0.753} },
-					order_book_level{ order_book_entry{order_book_side::ASK, 52536.0, 0.30}, order_book_entry{order_book_side::BID, 52522.8, 0.006} }
+					order_book_entry{52523.0, 1.199},
+					order_book_entry{52536.0, 0.30}
+				},
+				std::vector<order_book_entry>
+				{
+					order_book_entry{52522.9, 0.753},
+					order_book_entry{52522.8, 0.006}
 				}
 			},
 			assert_order_book_state_eq);

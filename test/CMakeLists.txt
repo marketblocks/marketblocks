@@ -15,7 +15,7 @@ add_executable(CryptoBotTest
 "unittest/strategies/tri_arb_test.cpp" 
 "unittest/exchanges/paper_trader/paper_trader_test.cpp" 
 "unittest/common/trading/fee_schedule_test.cpp" 
-"unittest/common/security/hash_test.cpp" "unittest/utils/retry_test.cpp" "unittest/exchanges/kraken/kraken_results_test.cpp" "unittest/assertion_helpers.h" "unittest/exchanges/kraken/kraken_test.cpp" "unittest/common_matchers.h" "test_data/test_data_constants.h" "test_data/test_data_constants.cpp" "unittest/exchanges/coinbase/coinbase_test.cpp" "unittest/exchanges/coinbase/coinbase_results_test.cpp" "unittest/assertion_helpers.cpp" "integration/coinbase_test.cpp" "test_data/test_exchange_configs/test_config_loader.h" "integration/kraken_test.cpp" "unittest/exchanges/kraken/kraken_websocket_test.cpp")
+"unittest/common/security/hash_test.cpp" "unittest/utils/retry_test.cpp" "unittest/exchanges/kraken/kraken_results_test.cpp" "unittest/assertion_helpers.h" "unittest/exchanges/kraken/kraken_test.cpp" "unittest/common_matchers.h" "test_data/test_data_constants.h" "test_data/test_data_constants.cpp" "unittest/exchanges/coinbase/coinbase_test.cpp" "unittest/exchanges/coinbase/coinbase_results_test.cpp" "unittest/assertion_helpers.cpp" "integration/coinbase_test.cpp" "test_data/test_exchange_configs/test_config_loader.h" "integration/kraken_test.cpp" "unittest/exchanges/kraken/kraken_websocket_test.cpp"  "unittest/exchanges/websockets/order_book_cache_tests.cpp")
 
 target_link_libraries(CryptoBotTest LINK_PUBLIC CryptoBot_lib)
 target_link_libraries(CryptoBotTest PRIVATE gtest_main gmock_main)

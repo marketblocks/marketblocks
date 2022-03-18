@@ -75,10 +75,16 @@ namespace cb::test
 			[depth](std::string_view jsonResult) { return coinbase::read_order_book(jsonResult, depth); },
 			order_book_state
 			{ 
+				std::vector<order_book_entry>
 				{
-					order_book_level{ order_book_entry{ order_book_side::ASK, 29550.54, 0.06408441 }, order_book_entry{ order_book_side::BID, 29541.72, 0.04937732} },
-					order_book_level{ order_book_entry{ order_book_side::ASK, 29559.69, 0.11 }, order_book_entry{ order_book_side::BID, 29549.16, 0.05532591 } },
-				} 
+					order_book_entry{ 29550.54, 0.06408441 },
+					order_book_entry{ 29559.69, 0.11 }
+				}, 
+				std::vector<order_book_entry>
+				{
+					order_book_entry{ 29541.72, 0.04937732},
+					order_book_entry{ 29549.16, 0.05532591 }
+				}
 			},
 			assert_order_book_state_eq);
 	}

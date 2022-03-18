@@ -146,31 +146,27 @@ namespace cb::kraken
 			json_element bids{ bookElement.element("bids") };
 
 			int depth = asks.size();
-			std::vector<order_book_level> levels;
-			levels.reserve(depth);
+
+			std::vector<order_book_entry> askEntries;
+			askEntries.reserve(depth);
+
+			std::vector<order_book_entry> bidEntries;
+			bidEntries.reserve(depth);
 
 			for (int i = 0; i < depth; i++)
 			{
 				json_element asks_i{ asks.element(i) };
-				order_book_entry askEntry
-				{
-					order_book_side::ASK,
+				askEntries.emplace_back(
 					std::stod(asks_i.element(0).get<std::string>()),
-					std::stod(asks_i.element(1).get<std::string>())
-				};
+					std::stod(asks_i.element(1).get<std::string>()));
 
 				json_element bids_i{ bids.element(i) };
-				order_book_entry bidEntry
-				{
-					order_book_side::BID,
+				bidEntries.emplace_back(
 					std::stod(bids_i.element(0).get<std::string>()),
-					std::stod(bids_i.element(1).get<std::string>())
-				};
-
-				levels.emplace_back(std::move(askEntry), std::move(bidEntry));
+					std::stod(bids_i.element(1).get<std::string>()));
 			}
 
-			return levels;
+			return order_book_state{ std::move(askEntries), std::move(bidEntries) };
 		});
 	}
 

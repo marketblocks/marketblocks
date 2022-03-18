@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <string>
 #include <string_view>
 
@@ -16,7 +17,10 @@ namespace cb
 			:
 			_asset{ std::move(asset) },
 			_priceUnit{ std::move(priceUnit) }
-		{}
+		{
+			assert(!_asset.empty());
+			assert(!_priceUnit.empty());
+		}
 
 		constexpr const std::string& asset() const noexcept { return _asset; }
 		constexpr const std::string& price_unit() const noexcept { return _priceUnit; }

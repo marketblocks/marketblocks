@@ -6,65 +6,54 @@ namespace
 	template<typename OrderBookMap>
 	void ensure_depth(OrderBookMap& map, int depth)
 	{
-		auto end = map.end();
 		while (map.size() > depth)
 		{
-			map.erase(--end);
+			map.erase(std::prev(map.end()));
 		}
-	}
-
-	template<typename OrderBookMap>
-	OrderBookMap create_map(std::vector<cb::cache_entry>& entries)
-	{
-		OrderBookMap map;
-
-		for (auto& cacheEntry : entries)
-		{
-			map.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
-		}
-
-		return map;
 	}
 }
 
 namespace cb
 {
-	order_book_cache::order_book_cache(std::vector<cache_entry> asks, std::vector<cache_entry> bids)
-		: _depth{ static_cast<int>(asks.size()) }, _asks{ create_map<cb::ask_map>(asks) }, _bids{ create_map<cb::bid_map>(bids) }, _mutex{}
-	{}
+	order_book_cache::order_book_cache(ask_map asks, bid_map bids, int depth)
+		: _asks{ std::move(asks) }, _bids{ std::move(bids) }, _depth{ depth }, _mutex{}
+	{
+		ensure_depth(_asks, depth);
+		ensure_depth(_bids, depth);
+	}
 
 	order_book_cache::order_book_cache(const order_book_cache& other)
-		: _depth{ other._depth }, _asks{ other._asks }, _bids{ other._bids }, _mutex{}
+		: _asks{ other._asks }, _bids{ other._bids }, _depth{ other._depth }, _mutex{}
 	{}
 
 	order_book_cache::order_book_cache(order_book_cache&& other) noexcept
-		: _depth{ std::move(other._depth) }, _asks{ std::move(other._asks) }, _bids{ std::move(other._bids) }
+		: _asks{ std::move(other._asks) }, _bids{ std::move(other._bids) }, _depth{ std::move(other._depth) }, _mutex{}
 	{
 	}
 
 	order_book_cache& order_book_cache::operator=(const order_book_cache& other)
 	{
-		_depth = other._depth;
 		_asks = other._asks;
 		_bids = other._bids;
+		_depth = other._depth;
 
 		return *this;
 	}
 
 	order_book_cache& order_book_cache::operator=(order_book_cache&& other) noexcept
 	{
-		_depth = std::move(other._depth);
 		_asks = std::move(other._asks);
 		_bids = std::move(other._bids);
+		_depth = std::move(other._depth);
 
 		return *this;
 	}
 
-	void order_book_cache::cache(cache_entry cacheEntry)
+	void order_book_cache::cache(order_book_cache_entry cacheEntry)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		if (cacheEntry.entry.side() == order_book_side::ASK)
+		if (cacheEntry.side == order_book_side::ASK)
 		{
 			_asks.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 			ensure_depth(_asks, _depth);
@@ -76,30 +65,55 @@ namespace cb
 		}
 	}
 
-	void order_book_cache::replace(cache_replacement cacheReplacement)
+	void order_book_cache::replace(std::string_view oldPrice, order_book_cache_entry cacheEntry)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		if (cacheReplacement.newEntry.side() == order_book_side::ASK)
+		if (cacheEntry.side == order_book_side::ASK)
 		{
-			_asks.erase(cacheReplacement.oldPrice);
-			_asks.emplace(std::move(cacheReplacement.newPrice), std::move(cacheReplacement.newEntry));
+			_asks.erase(std::string{ oldPrice });
+			_asks.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 		}
 		else
 		{
-			_bids.erase(cacheReplacement.oldPrice);
-			_bids.emplace(std::move(cacheReplacement.newPrice), std::move(cacheReplacement.newEntry));
+			_bids.erase(std::string{ oldPrice });
+			_bids.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 		}
 	}
 
-	order_book_state order_book_cache::snapshot() const
+	order_book_state order_book_cache::snapshot(int depth) const
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
+		std::vector<order_book_entry> asks;
+		asks.reserve(_asks.size());
+
+		std::vector<order_book_entry> bids;
+		bids.reserve(_bids.size());
+
+		int snapshotDepth = depth == 0 ? _depth : depth;
+		auto askIt = _asks.begin();
+		auto bidIt = _bids.begin();
+
+		for (int i = 0; i < snapshotDepth; ++i)
+		{
+			if (askIt != _asks.end())
+			{
+				asks.emplace_back(askIt->second);
+				++askIt;
+			}
+
+			if (bidIt != _bids.end())
+			{
+				bids.emplace_back(bidIt->second);
+				++bidIt;
+			}
+		}
+
 		return order_book_state
 		{
-			to_vector<order_book_entry>(_asks, [](const std::pair<std::string, order_book_entry>& pair) { return pair.second; }),
-			to_vector<order_book_entry>(_bids, [](const std::pair<std::string, order_book_entry>& pair) { return pair.second; })
+			std::move(asks),
+			std::move(bids)
 		};
 	}
 }

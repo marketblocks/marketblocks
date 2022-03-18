@@ -43,20 +43,26 @@ namespace
 			: cb::order_book_side::BID;
 	}
 
-	cb::cache_entry get_order_book_cache_entry(cb::order_book_side side, const cb::json_element& json)
+	std::pair<std::string, cb::order_book_entry> construct_order_book_map_pair(const cb::json_element& json)
 	{
-		std::string price = json.element(0).get<std::string>();
+		std::string price{ json.element(0).get<std::string>() };
 		cb::order_book_entry entry
 		{
-			side,
 			std::stod(price),
 			std::stod(json.element(1).get<std::string>())
 		};
 
-		return cb::cache_entry
+		return std::make_pair<std::string, cb::order_book_entry>(std::move(price), std::move(entry));
+	}
+
+	cb::order_book_cache_entry create_order_book_cache_entry(cb::order_book_side side, const cb::json_element& json)
+	{
+		std::pair<std::string, cb::order_book_entry> pair{ construct_order_book_map_pair(json) };
+		return cb::order_book_cache_entry
 		{
-			std::move(price),
-			std::move(entry)
+			side,
+			std::move(pair.first),
+			std::move(pair.second)
 		};
 	}
 
@@ -128,21 +134,18 @@ namespace cb::internal
 		json_element asks = json.element("as");
 		json_element bids = json.element("bs");
 
-		int depth = asks.size();
+		int depth = 10;
 
-		std::vector<cache_entry> askEntries;
-		askEntries.reserve(depth);
-
-		std::vector<cache_entry> bidEntries;
-		bidEntries.reserve(depth);
+		ask_map askMap;
+		bid_map bidMap;
 
 		for (int i = 0; i < depth; ++i)
 		{
-			askEntries.emplace_back(get_order_book_cache_entry(order_book_side::ASK, asks.element(i)));
-			bidEntries.emplace_back(get_order_book_cache_entry(order_book_side::BID, bids.element(i)));
+			askMap.emplace(construct_order_book_map_pair(asks.element(i)));
+			bidMap.emplace(construct_order_book_map_pair(bids.element(i)));
 		}
 
-		_localOrderBook.initialise_book(pair, std::move(askEntries), std::move(bidEntries));
+		_localOrderBook.initialise_book(pair, std::move(askMap), std::move(bidMap), depth);
 	}
 
 	void kraken_websocket_stream::process_order_book_object(const tradable_pair& pair, const json_element& json)
@@ -157,8 +160,8 @@ namespace cb::internal
 
 		for (auto entryIterator = element.begin(); entryIterator != element.end(); ++entryIterator)
 		{
-			json_element entryJson = entryIterator.value();
-			cache_entry cacheEntry = get_order_book_cache_entry(side, entryJson);
+			json_element entryJson{ entryIterator.value() };
+			order_book_cache_entry cacheEntry{ create_order_book_cache_entry(side, entryJson) };
 
 			if (cacheEntry.entry.volume() == 0.0)
 			{
@@ -169,18 +172,11 @@ namespace cb::internal
 
 			if (replace)
 			{
-				cache_replacement replacement
-				{
-					priceToReplace,
-					std::move(cacheEntry.price),
-					std::move(cacheEntry.entry)
-				};
-
-				_localOrderBook.replace_in_book(pair, std::move(replacement));
+				_localOrderBook.replace_in_book(pair, std::move(priceToReplace), std::move(cacheEntry));
 			}
 			else
 			{
-				_localOrderBook.update_book(pair, cacheEntry);
+				_localOrderBook.update_book(pair, std::move(cacheEntry));
 			}
 		}
 	}

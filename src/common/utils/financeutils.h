@@ -30,9 +30,4 @@ namespace cb
 		int a = static_cast<int>(action);
 		return tradeValue * (1 - feePercentage * 0.01) * (a / assetPrice + assetPrice * (1 - a));
 	}
-
-	constexpr order_book_entry select_entry(const order_book_level& prices, trade_action action) noexcept
-	{
-		return action == trade_action::BUY ? prices.ask() : prices.bid();
-	}
 }

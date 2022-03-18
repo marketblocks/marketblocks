@@ -9,15 +9,9 @@
 
 namespace cb
 {
-	struct cache_replacement
+	struct order_book_cache_entry
 	{
-		const std::string& oldPrice;
-		std::string newPrice;
-		order_book_entry newEntry;
-	};
-
-	struct cache_entry
-	{
+		order_book_side side;
 		std::string price;
 		order_book_entry entry;
 	};
@@ -34,7 +28,7 @@ namespace cb
 		mutable std::mutex _mutex;
 
 	public:
-		order_book_cache(std::vector<cache_entry> asks, std::vector<cache_entry> bids);
+		order_book_cache(ask_map asks, bid_map bids, int depth);
 
 		order_book_cache(const order_book_cache&);
 		order_book_cache(order_book_cache&&) noexcept;
@@ -42,9 +36,9 @@ namespace cb
 		order_book_cache& operator=(const order_book_cache&);
 		order_book_cache& operator=(order_book_cache&&) noexcept;
 
-		void cache(cache_entry cacheEntry);
-		void replace(cache_replacement cacheReplacement);
+		void cache(order_book_cache_entry cacheEntry);
+		void replace(std::string_view oldPrice, order_book_cache_entry cacheEntry);
 
-		order_book_state snapshot() const;
+		order_book_state snapshot(int depth = 0) const;
 	};
 }

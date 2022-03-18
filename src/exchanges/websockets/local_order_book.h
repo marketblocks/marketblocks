@@ -21,8 +21,8 @@ namespace cb
 		order_book_state get_order_book(const tradable_pair& pair) const;
 
 		bool is_subscribed(const tradable_pair& pair) const;
-		void initialise_book(tradable_pair pair, std::vector<cache_entry> asks, std::vector<cache_entry> bids);
-		void update_book(const tradable_pair& pair, cache_entry cacheEntry);
-		void replace_in_book(const tradable_pair& pair, cache_replacement cacheReplacement);
+		void initialise_book(tradable_pair pair, ask_map asks, bid_map bids, int depth);
+		void update_book(const tradable_pair& pair, order_book_cache_entry cacheEntry);
+		void replace_in_book(const tradable_pair& pair, std::string_view oldPrice, order_book_cache_entry cacheEntry);
 	};
 }

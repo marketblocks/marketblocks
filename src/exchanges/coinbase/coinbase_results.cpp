@@ -100,12 +100,10 @@ namespace cb::coinbase
 				json_element askElement{ asks.element(i) };
 
 				bidEntries.emplace_back(
-					order_book_side::BID, 
 					std::stod(bidElement.get<std::string>(PRICE_INDEX)), 
 					std::stod(bidElement.get<std::string>(VOLUME_INDEX)));
 
 				askEntries.emplace_back(
-					order_book_side::ASK,
 					std::stod(askElement.get<std::string>(PRICE_INDEX)),
 					std::stod(askElement.get<std::string>(VOLUME_INDEX)));
 			}

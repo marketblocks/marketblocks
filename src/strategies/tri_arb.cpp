@@ -200,7 +200,7 @@ namespace
 		std::cout << "New Balance: " << newBalance << std::endl << std::endl;
 	}*/
 
-	cb::trade_description create_trade(const sequence_step& sequenceStep, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, double g1, double g0)
+	/*cb::trade_description create_trade(const sequence_step& sequenceStep, const std::unordered_map<cb::tradable_pair, cb::order_book_level>& prices, double g1, double g0)
 	{
 		double volume = sequenceStep.action() == cb::trade_action::BUY ? g1 : g0;
 		double assetPrice = select_entry(prices.at(sequenceStep.pair()), sequenceStep.action()).price();
@@ -236,7 +236,7 @@ namespace
 		double g3 = calculate_trade_gain(lastOrderBookEntry.price(), g2, lastFee, lastStep.action());
 
 		return SequenceGains{ g1, g2, g3 };
-	}
+	}*/
 }
 
 void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
