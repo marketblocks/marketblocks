@@ -59,13 +59,10 @@ public:
 	constexpr const std::string& description() const noexcept { return _description; }
 };
 
-std::ostream& operator<<(std::ostream& os, const tri_arb_sequence& sequence);
-
 class tri_arb_spec
 {
 private:
 	std::shared_ptr<exchange> _exchange;
-	cb::set_queue<tradable_pair> _orderBookMessageQueue;
 	std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> _sequences;
 
 public:
@@ -74,7 +71,6 @@ public:
 		std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> sequences);
 
 	std::shared_ptr<exchange> exchange() const { return _exchange; }
-	cb::set_queue<tradable_pair>& message_queue() { return _orderBookMessageQueue; }
 
 	std::vector<tradable_pair> get_all_tradable_pairs() const;
 	const std::vector<tri_arb_sequence>& get_sequences(const tradable_pair& pair) const;
@@ -120,16 +116,19 @@ tri_arb_spec create_exchange_spec(std::shared_ptr<cb::exchange> exchange, const 
 	{
 		cb::trade_action firstAction;
 		std::string firstGainedAsset;
+		std::string baseCurrency;
 
 		if (cb::contains(baseCurrencies, firstPair.price_unit()))
 		{
 			firstAction = cb::trade_action::BUY;
 			firstGainedAsset = firstPair.asset();
+			baseCurrency = firstPair.price_unit();
 		}
 		else
 		{
 			firstAction = cb::trade_action::SELL;
 			firstGainedAsset = firstPair.price_unit();
+			baseCurrency = firstPair.asset();
 		}
 
 		std::vector<cb::tradable_pair> possibleMiddles = cb::copy_where<std::vector<cb::tradable_pair>>(
@@ -154,7 +153,7 @@ tri_arb_spec create_exchange_spec(std::shared_ptr<cb::exchange> exchange, const 
 
 			std::vector<cb::tradable_pair> finals = cb::copy_where<std::vector<cb::tradable_pair>>(
 				firstTradables,
-				[&middleGainedAsset](const cb::tradable_pair& pair) { return pair.contains(middleGainedAsset); });
+				[&middleGainedAsset, &baseCurrency](const cb::tradable_pair& pair) { return pair.contains(middleGainedAsset) && pair.contains(baseCurrency); });
 
 			for (auto& finalPair : finals)
 			{

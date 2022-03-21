@@ -17,8 +17,7 @@ tri_arb_spec::tri_arb_spec(
 	std::unordered_map<tradable_pair, std::vector<tri_arb_sequence>> sequences)
 	: 
 	_exchange{ exchange }, 
-	_sequences{ std::move(sequences) }, 
-	_orderBookMessageQueue{}
+	_sequences{ std::move(sequences) }
 {}
 
 std::vector<tradable_pair> tri_arb_spec::get_all_tradable_pairs() const
@@ -124,10 +123,6 @@ void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
 
 		cb::websocket_stream& websocketStream = exchange->get_websocket_stream();
 		websocketStream.connect();
-		websocketStream.set_order_book_message_handler([&spec](cb::tradable_pair pair) 
-			{ 
-				spec.message_queue().push(std::move(pair));
-			});
 		websocketStream.subscribe_order_book(spec.get_all_tradable_pairs());
 	}
 }
@@ -136,9 +131,11 @@ void tri_arb_strategy::run_iteration()
 {
 	for (auto& spec : _specs)
 	{
-		while (!spec.message_queue().empty())
+		auto& messageQueue = spec.exchange()->get_websocket_stream().get_order_book_message_queue();
+
+		while (!messageQueue.empty())
 		{
-			const std::vector<tri_arb_sequence>& sequences{ spec.get_sequences(spec.message_queue().pop()) };
+			const std::vector<tri_arb_sequence>& sequences{ spec.get_sequences(messageQueue.pop()) };
 			std::shared_ptr<exchange> exchange{ spec.exchange() };
 
 			double tradeValue = _options.max_trade_percent() * get_balance(*exchange, _options.fiat_currency());
@@ -163,11 +160,13 @@ void tri_arb_strategy::run_iteration()
 
 					if (gains.g3 > tradeValue)
 					{
-						SequenceTrades trades = create_sequence_trades(sequence, gains, orderBooks, tradeValue);
+						/*SequenceTrades trades = create_sequence_trades(sequence, gains, orderBooks, tradeValue);
 
 						exchange->add_order(trades.first);
 						exchange->add_order(trades.middle);
-						exchange->add_order(trades.last);
+						exchange->add_order(trades.last);*/
+
+						cb::logger::instance().info("FOUND TRADE!!! Sequence: {0}. Percentage Diff : {1}", sequence.description(), cb::calculate_percentage_diff(tradeValue, gains.g3));
 
 						//log_trade(sequence, trades, gains, tradeValue, get_balance(exchange, _options.fiat_currency()));
 					}

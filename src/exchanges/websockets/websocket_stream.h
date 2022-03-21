@@ -25,8 +25,8 @@ namespace cb
 		ws_connection_status connection_status() const;
 		exchange_status get_exchange_status() const noexcept { return _implementation->get_exchange_status(); }
 
-		void set_order_book_message_handler(std::function<void(tradable_pair)> onMessage) noexcept { _implementation->set_order_book_message_handler(onMessage); }
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const { return _implementation->get_order_book(pair, depth); }
 		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs);
+		set_queue<tradable_pair>& get_order_book_message_queue() noexcept { return _implementation->get_order_book_message_queue(); }
 	};
 }

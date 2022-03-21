@@ -4,22 +4,24 @@
 namespace cb
 {
 	local_order_book::local_order_book()
-		: _onMessage{}, _orderBookCaches{}, _mutex{}
+		: _messageQueue{}, _orderBookCaches{}, _mutex{}
 	{}
 
 	local_order_book::local_order_book(const local_order_book& other)
-		: _onMessage{ other._onMessage }, _orderBookCaches{}, _mutex{}
+		: _messageQueue{}, _orderBookCaches{}, _mutex{}
 	{
 		std::lock_guard<std::mutex> lock{ other._mutex };
 
+		_messageQueue = other._messageQueue;
 		_orderBookCaches = other._orderBookCaches;
 	}
 
 	local_order_book::local_order_book(local_order_book&& other) noexcept
-		: _onMessage{ std::move(other._onMessage) }, _orderBookCaches{}, _mutex{}
+		: _messageQueue{}, _orderBookCaches{}, _mutex{}
 	{
 		std::lock_guard<std::mutex> lock{ other._mutex };
 
+		_messageQueue = std::move(other._messageQueue);
 		_orderBookCaches = std::move(other._orderBookCaches);
 	}
 
@@ -28,7 +30,7 @@ namespace cb
 		std::lock_guard<std::mutex> lock{ _mutex };
 		std::lock_guard<std::mutex> otherLock{ other._mutex };
 
-		_onMessage = other._onMessage;
+		_messageQueue = other._messageQueue;
 		_orderBookCaches = other._orderBookCaches;
 
 		return *this;
@@ -39,7 +41,7 @@ namespace cb
 		std::lock_guard<std::mutex> lock{ _mutex };
 		std::lock_guard<std::mutex> otherLock{ other._mutex };
 
-		_onMessage = std::move(other._onMessage);
+		_messageQueue = std::move(other._messageQueue);
 		_orderBookCaches = std::move(other._orderBookCaches);
 
 		return *this;
@@ -71,7 +73,7 @@ namespace cb
 		std::lock_guard<std::mutex> lock{ _mutex };
 
 		_orderBookCaches.emplace(pair.to_standard_string(), order_book_cache{ std::move(asks), std::move(bids), depth });
-		_onMessage(pair);
+		_messageQueue.push(std::move(pair));
 	}
 
 	void local_order_book::update_book(const tradable_pair& pair, order_book_cache_entry cacheEntry)
@@ -83,7 +85,7 @@ namespace cb
 		{
 			order_book_cache& cache{ cacheIterator->second };
 			cache.cache(std::move(cacheEntry));
-			_onMessage(pair);
+			_messageQueue.push(tradable_pair{ pair });
 		}
 	}
 
@@ -95,7 +97,7 @@ namespace cb
 		if (cacheIterator != _orderBookCaches.end())
 		{
 			cacheIterator->second.replace(oldPrice, std::move(cacheEntry));
-			_onMessage(pair);
+			_messageQueue.push(tradable_pair{ pair });
 		}
 	}
 }

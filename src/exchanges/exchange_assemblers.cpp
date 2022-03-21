@@ -16,7 +16,9 @@ namespace cb
 
 		unordered_string_map<double> initialBalances
 		{
-			{ "GBP", 1000 }
+			{ "GBP", 1000 },
+			{ "EUR", 1000 },
+			{ "USD", 1000 }
 		};
 
 		return std::make_shared<live_test_exchange>(
