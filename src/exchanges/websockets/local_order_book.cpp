@@ -3,8 +3,52 @@
 
 namespace cb
 {
-	order_book_state local_order_book::get_order_book(const tradable_pair& pair) const
+	local_order_book::local_order_book()
+		: _onMessage{}, _orderBookCaches{}, _mutex{}
+	{}
+
+	local_order_book::local_order_book(const local_order_book& other)
+		: _onMessage{ other._onMessage }, _orderBookCaches{}, _mutex{}
 	{
+		std::lock_guard<std::mutex> lock{ other._mutex };
+
+		_orderBookCaches = other._orderBookCaches;
+	}
+
+	local_order_book::local_order_book(local_order_book&& other) noexcept
+		: _onMessage{ std::move(other._onMessage) }, _orderBookCaches{}, _mutex{}
+	{
+		std::lock_guard<std::mutex> lock{ other._mutex };
+
+		_orderBookCaches = std::move(other._orderBookCaches);
+	}
+
+	local_order_book& local_order_book::operator=(const local_order_book& other)
+	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+		std::lock_guard<std::mutex> otherLock{ other._mutex };
+
+		_onMessage = other._onMessage;
+		_orderBookCaches = other._orderBookCaches;
+
+		return *this;
+	}
+
+	local_order_book& local_order_book::operator=(local_order_book&& other) noexcept
+	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+		std::lock_guard<std::mutex> otherLock{ other._mutex };
+
+		_onMessage = std::move(other._onMessage);
+		_orderBookCaches = std::move(other._orderBookCaches);
+
+		return *this;
+	}
+
+	order_book_state local_order_book::get_order_book(const tradable_pair& pair, int depth) const
+	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+
 		auto it = _orderBookCaches.find(pair.to_standard_string());
 
 		if (it == _orderBookCaches.end())
@@ -12,22 +56,28 @@ namespace cb
 			throw cb_exception{ std::format("Order book not subscribed for pair {}", pair.to_standard_string()) };
 		}
 
-		return it->second.snapshot();
+		return it->second.snapshot(depth);
 	}
 
 	bool local_order_book::is_subscribed(const tradable_pair& pair) const
 	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+
 		return _orderBookCaches.contains(pair.to_standard_string());
 	}
 
 	void local_order_book::initialise_book(tradable_pair pair, ask_map asks, bid_map bids, int depth)
 	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+
 		_orderBookCaches.emplace(pair.to_standard_string(), order_book_cache{ std::move(asks), std::move(bids), depth });
 		_onMessage(pair);
 	}
 
 	void local_order_book::update_book(const tradable_pair& pair, order_book_cache_entry cacheEntry)
 	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+
 		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{
@@ -39,6 +89,8 @@ namespace cb
 
 	void local_order_book::replace_in_book(const tradable_pair& pair, std::string_view oldPrice, order_book_cache_entry cacheEntry)
 	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+
 		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{

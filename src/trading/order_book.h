@@ -3,6 +3,8 @@
 #include <vector>
 #include <cassert>
 
+#include "trading/trading_constants.h"
+
 namespace cb
 {
 	enum class order_book_side
@@ -43,4 +45,11 @@ namespace cb
 
 		constexpr int depth() const { return std::max(_asks.size(), _bids.size()); }
 	};
+
+	constexpr const order_book_entry& select_best_entry(const order_book_state& orderBook, trade_action action)
+	{
+		return action == trade_action::BUY
+			? orderBook.asks()[0]
+			: orderBook.bids()[0];
+	}
 }

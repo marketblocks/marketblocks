@@ -12,7 +12,7 @@ namespace cb
 
 	public:
 		constexpr trading_options()
-			: _maxTradePercent{ 0.0 }, _fiatCurrency{ "" }
+			: _maxTradePercent{ 0.05 }, _fiatCurrency{ "GBP" }
 		{}
 
 		constexpr trading_options(double maxTradePercent, std::string fiatCurrency)

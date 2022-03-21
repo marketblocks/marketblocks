@@ -23,6 +23,6 @@ namespace cb::internal
 
 		virtual std::string get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const = 0;
 		void set_order_book_message_handler(std::function<void(tradable_pair)> onMessage) noexcept { _localOrderBook.set_message_handler(onMessage); }
-		order_book_state get_order_book(const tradable_pair& pair) const { _localOrderBook.get_order_book(pair); }
+		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const { return _localOrderBook.get_order_book(pair, depth); }
 	};
 }
