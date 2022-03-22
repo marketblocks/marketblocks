@@ -36,8 +36,8 @@ namespace cb
 		order_book_cache& operator=(const order_book_cache&);
 		order_book_cache& operator=(order_book_cache&&) noexcept;
 
-		void cache(order_book_cache_entry cacheEntry);
-		void replace(std::string_view oldPrice, order_book_cache_entry cacheEntry);
+		void update_cache(order_book_cache_entry cacheEntry);
+		void remove(std::string_view price, order_book_side side);
 
 		order_book_state snapshot(int depth = 0) const;
 	};

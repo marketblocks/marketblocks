@@ -20,6 +20,10 @@ namespace cb
 		double _volume;
 
 	public:
+		constexpr order_book_entry()
+			: _price{}, _volume{}
+		{}
+
 		constexpr order_book_entry(double price, double volume)
 			: _price{ price }, _volume{ volume }
 		{}

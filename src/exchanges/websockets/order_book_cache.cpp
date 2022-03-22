@@ -6,6 +6,11 @@ namespace
 	template<typename OrderBookMap>
 	void ensure_depth(OrderBookMap& map, int depth)
 	{
+		if (depth == 0)
+		{
+			return;
+		}
+
 		while (map.size() > depth)
 		{
 			map.erase(std::prev(map.end()));
@@ -49,35 +54,33 @@ namespace cb
 		return *this;
 	}
 
-	void order_book_cache::cache(order_book_cache_entry cacheEntry)
+	void order_book_cache::update_cache(order_book_cache_entry cacheEntry)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
 		if (cacheEntry.side == order_book_side::ASK)
 		{
-			_asks.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
+			_asks[std::move(cacheEntry.price)] = std::move(cacheEntry.entry);
 			ensure_depth(_asks, _depth);
 		}
 		else
 		{
-			_bids.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
+			_bids[std::move(cacheEntry.price)] = std::move(cacheEntry.entry);
 			ensure_depth(_bids, _depth);
 		}
 	}
 
-	void order_book_cache::replace(std::string_view oldPrice, order_book_cache_entry cacheEntry)
+	void order_book_cache::remove(std::string_view oldPrice, order_book_side side)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		if (cacheEntry.side == order_book_side::ASK)
+		if (side == order_book_side::ASK)
 		{
 			_asks.erase(std::string{ oldPrice });
-			_asks.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 		}
 		else
 		{
 			_bids.erase(std::string{ oldPrice });
-			_bids.emplace(std::move(cacheEntry.price), std::move(cacheEntry.entry));
 		}
 	}
 

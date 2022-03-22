@@ -109,6 +109,9 @@ void tri_arb_strategy::initialise(const cb::strategy_initialiser& initaliser)
 	for (auto exchange : initaliser.exchanges())
 	{
 		std::vector<std::string> baseCurrencies;
+		/*{
+			"GBP"
+		};*/
 		cb::unordered_string_map<double> balances{ exchange->get_balances() };
 
 		for (auto& [asset, balance] : balances)
@@ -183,7 +186,7 @@ void tri_arb_strategy::run_iteration()
 			}
 		}
 
-		cb::logger::instance().info("Queue empty");
+		//cb::logger::instance().info("Queue empty");
 	}
 
 	//for (auto& spec : _specs)

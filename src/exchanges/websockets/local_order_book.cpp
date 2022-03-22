@@ -68,12 +68,12 @@ namespace cb
 		return _orderBookCaches.contains(pair.to_standard_string());
 	}
 
-	void local_order_book::initialise_book(tradable_pair pair, ask_map asks, bid_map bids, int depth)
+	void local_order_book::initialise_book(const tradable_pair& pair, ask_map asks, bid_map bids, int depth)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
 		_orderBookCaches.emplace(pair.to_standard_string(), order_book_cache{ std::move(asks), std::move(bids), depth });
-		_messageQueue.push(std::move(pair));
+		_messageQueue.push(tradable_pair{ pair });
 	}
 
 	void local_order_book::update_book(const tradable_pair& pair, order_book_cache_entry cacheEntry)
@@ -83,8 +83,19 @@ namespace cb
 		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{
-			order_book_cache& cache{ cacheIterator->second };
-			cache.cache(std::move(cacheEntry));
+			cacheIterator->second.update_cache(std::move(cacheEntry));
+			_messageQueue.push(tradable_pair{ pair });
+		}
+	}
+
+	void local_order_book::remove_from_book(const tradable_pair& pair, std::string_view price, order_book_side side)
+	{
+		std::lock_guard<std::mutex> lock{ _mutex };
+
+		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
+		if (cacheIterator != _orderBookCaches.end())
+		{
+			cacheIterator->second.remove(price, side);
 			_messageQueue.push(tradable_pair{ pair });
 		}
 	}
@@ -96,7 +107,8 @@ namespace cb
 		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{
-			cacheIterator->second.replace(oldPrice, std::move(cacheEntry));
+			cacheIterator->second.remove(oldPrice, cacheEntry.side);
+			cacheIterator->second.update_cache(std::move(cacheEntry));
 			_messageQueue.push(tradable_pair{ pair });
 		}
 	}

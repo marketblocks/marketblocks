@@ -6,7 +6,7 @@
 
 namespace cb
 {
-	std::vector<std::string> split(const std::string& source, const char delimiter);
+	std::vector<std::string> split(std::string_view source, const char delimiter);
 
 	struct numeric_string_less
 	{

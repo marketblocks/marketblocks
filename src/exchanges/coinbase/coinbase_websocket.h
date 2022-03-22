@@ -7,7 +7,7 @@ namespace cb::internal
 	class coinbase_websocket_stream : public websocket_stream_implementation
 	{
 	public:
-		std::string stream_url() const noexcept override { return ""; }
+		std::string stream_url() const noexcept override { return "wss://ws-feed.exchange.coinbase.com"; }
 
 		void on_open() override;
 		void on_close(std::string_view reason) override;

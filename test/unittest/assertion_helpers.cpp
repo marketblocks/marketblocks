@@ -13,11 +13,13 @@ namespace cb::test
 		ASSERT_EQ(lhs.asks().size(), rhs.asks().size());
 		ASSERT_EQ(lhs.bids().size(), rhs.bids().size());
 
-		int depth = std::max(lhs.asks().size(), lhs.bids().size());
-
-		for (int i = 0; i < depth; ++i)
+		for (int i = 0; i < lhs.asks().size(); ++i)
 		{
 			assert_order_book_entry_eq(lhs.asks()[i], rhs.asks()[i]);
+		}
+
+		for (int i = 0; i < lhs.bids().size(); ++i)
+		{
 			assert_order_book_entry_eq(lhs.bids()[i], rhs.bids()[i]);
 		}
 	}

@@ -74,6 +74,11 @@ namespace cb
 				: general{ enableTesting }, methods{}, queries{}, http{}
 			{}
 		};
+
+		constexpr std::string to_exchange_id(const cb::tradable_pair& pair)
+		{
+			return pair.asset() + "-" + pair.price_unit();
+		}
 	}
 
 	class coinbase_api final : public exchange

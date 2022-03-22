@@ -31,8 +31,9 @@ namespace cb
 		set_queue<tradable_pair>& message_queue() noexcept { return _messageQueue; }
 
 		bool is_subscribed(const tradable_pair& pair) const;
-		void initialise_book(tradable_pair pair, ask_map asks, bid_map bids, int depth);
+		void initialise_book(const tradable_pair& pair, ask_map asks, bid_map bids, int depth = 0);
 		void update_book(const tradable_pair& pair, order_book_cache_entry cacheEntry);
+		void remove_from_book(const tradable_pair& pair, std::string_view price, order_book_side side);
 		void replace_in_book(const tradable_pair& pair, std::string_view oldPrice, order_book_cache_entry cacheEntry);
 	};
 }

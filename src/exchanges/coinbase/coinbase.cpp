@@ -37,11 +37,6 @@ namespace
 			throw cb::cb_exception{ "Unknown order type" };
 		}
 	}
-
-	constexpr std::string to_exchange_id(const cb::tradable_pair& pair)
-	{
-		return pair.asset() + "-" + pair.price_unit();
-	}
 }
 
 namespace cb
@@ -100,7 +95,7 @@ namespace cb
 		std::string path{ build_url_path(std::array<std::string_view, 3>
 		{
 			_constants.methods.PRODUCTS,
-			::to_exchange_id(tradablePair),
+			internal::to_exchange_id(tradablePair),
 			_constants.methods.STATS
 		})};
 
@@ -112,7 +107,7 @@ namespace cb
 		std::string path{ build_url_path(std::array<std::string_view, 3>
 		{
 			_constants.methods.PRODUCTS,
-			::to_exchange_id(tradablePair),
+			internal::to_exchange_id(tradablePair),
 			_constants.methods.BOOK
 		})};
 
@@ -192,7 +187,7 @@ namespace cb
 		std::string content{ json_writer{}
 			.add(TYPE, ::to_string(description.order_type()))
 			.add(SIDE, ::to_string(description.action()))
-			.add(PRODUCT_ID, ::to_exchange_id(description.pair()))
+			.add(PRODUCT_ID, internal::to_exchange_id(description.pair()))
 			.add(PRICE, std::to_string(description.asset_price()))
 			.add(SIZE, std::to_string(description.volume()))
 			.to_string() };
