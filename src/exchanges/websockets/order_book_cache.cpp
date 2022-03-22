@@ -94,7 +94,7 @@ namespace cb
 		std::vector<order_book_entry> bids;
 		bids.reserve(_bids.size());
 
-		int snapshotDepth = depth == 0 ? _depth : depth;
+		int snapshotDepth = depth == 0 ? std::max(_asks.size(), _bids.size()) : depth;
 		auto askIt = _asks.begin();
 		auto bidIt = _bids.begin();
 

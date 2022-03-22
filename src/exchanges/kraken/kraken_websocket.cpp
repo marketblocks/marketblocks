@@ -8,6 +8,17 @@ namespace
 {
 	using namespace cb;
 
+	std::string create_message(std::string_view eventName, std::string_view channel, const std::vector<tradable_pair>& tradablePairs)
+	{
+		std::vector<std::string> tradablePairList{ to_vector<std::string>(tradablePairs, [](const tradable_pair& pair) { return pair.to_standard_string(); }) };
+
+		return json_writer{}
+			.add("event", eventName)
+			.add("pair", std::move(tradablePairList))
+			.add("subscription", json_writer{}.add("name", channel))
+			.to_string();
+	}
+
 	order_book_side get_order_book_side(const std::string sideId)
 	{
 		return sideId.contains("a") 
@@ -157,12 +168,11 @@ namespace cb::internal
 
 	std::string kraken_websocket_stream::get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
 	{
-		std::vector<std::string> tradablePairList{ to_vector<std::string>(tradablePairs, [](const tradable_pair& pair) { return pair.to_standard_string(); }) };
+		return create_message("subscribe", "book", tradablePairs);
+	}
 
-		return json_writer{}
-			.add("event", "subscribe")
-			.add("pair", std::move(tradablePairList))
-			.add("subscription", json_writer{}.add("name", "book"))
-			.to_string();
+	std::string kraken_websocket_stream::get_order_book_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const
+	{
+		return create_message("unsubscribe", "book", tradablePairs);
 	}
 }

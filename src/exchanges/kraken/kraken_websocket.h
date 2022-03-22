@@ -16,5 +16,6 @@ namespace cb::internal
 		void on_message(std::string_view message) override;
 
 		std::string get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
+		std::string get_order_book_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
 	};
 }

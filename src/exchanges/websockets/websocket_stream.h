@@ -26,6 +26,7 @@ namespace cb
 
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const { return _implementation->get_order_book(pair, depth); }
 		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs);
+		void unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs);
 		set_queue<tradable_pair>& get_order_book_message_queue() noexcept { return _implementation->get_order_book_message_queue(); }
 	};
 }

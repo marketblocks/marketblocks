@@ -58,4 +58,12 @@ namespace cb
 		std::string subscriptionMessage{ _implementation->get_order_book_subscription_message(tradablePairs) };
 		send_message(subscriptionMessage);
 	}
+
+	void websocket_stream::unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	{
+		assert(tradablePairs.size() > 0);
+
+		std::string unsubscriptionMessage{ _implementation->get_order_book_unsubscription_message(tradablePairs) };
+		send_message(unsubscriptionMessage);
+	}
 }

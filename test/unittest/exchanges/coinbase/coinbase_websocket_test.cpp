@@ -23,6 +23,20 @@ namespace cb::test
 		ASSERT_EQ(expectedMessage, actualMessage);
 	}
 
+	TEST(CoinbaseWebsocket, CreatesCorrectOrderBookUnsubscriptionMessage)
+	{
+		coinbase_websocket_stream coinbaseWebsocket{};
+		std::vector<tradable_pair> tradablePairs
+		{
+			tradable_pair{ "BTC", "GBP" },
+			tradable_pair{ "ETH", "USD" }
+		};
+		std::string expectedMessage{ "{\"channels\":[\"level2\"],\"product_ids\":[\"BTC-GBP\",\"ETH-USD\"],\"type\":\"unsubscribe\"}" };
+
+		std::string actualMessage{ coinbaseWebsocket.get_order_book_unsubscription_message(tradablePairs) };
+		ASSERT_EQ(expectedMessage, actualMessage);
+	}
+
 	TEST(CoinbaseWebsocket, SnapshotMessageInitializesOrderBook)
 	{
 		coinbase_websocket_stream coinbaseWebsocket{};

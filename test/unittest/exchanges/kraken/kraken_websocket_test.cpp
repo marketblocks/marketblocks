@@ -23,6 +23,20 @@ namespace cb::test
 		ASSERT_EQ(expectedMessage, actualMessage);
 	}
 
+	TEST(KrakenWebsocket, CreatesCorrectOrderBookUnsubscriptionMessage)
+	{
+		kraken_websocket_stream krakenWebsocket{};
+		std::vector<tradable_pair> tradablePairs
+		{
+			tradable_pair{ "BTC", "GBP" },
+			tradable_pair{ "ETH", "USD" }
+		};
+		std::string expectedMessage{ "{\"event\":\"unsubscribe\",\"pair\":[\"BTC/GBP\",\"ETH/USD\"],\"subscription\":{\"name\":\"book\"}}" };
+
+		std::string actualMessage{ krakenWebsocket.get_order_book_unsubscription_message(tradablePairs) };
+		ASSERT_EQ(expectedMessage, actualMessage);
+	}
+
 	TEST(KrakenWebsocket, SnapshotMessageInitializesOrderBook)
 	{
 		kraken_websocket_stream krakenWebsocket{};

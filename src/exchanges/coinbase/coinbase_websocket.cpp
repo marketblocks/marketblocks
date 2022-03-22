@@ -25,6 +25,17 @@ namespace
 		return std::make_pair(std::move(price), std::move(entry));
 	}
 
+	std::string create_message(std::string_view type, std::string channel, const std::vector<tradable_pair>& pairs)
+	{
+		std::vector<std::string> tradablePairList{ to_vector<std::string>(pairs, [](const tradable_pair& pair) { return internal::to_exchange_id(pair); }) };
+
+		return json_writer{}
+			.add("type", type)
+			.add("product_ids", std::move(tradablePairList))
+			.add("channels", std::vector<std::string>{ channel })
+			.to_string();
+	}
+
 	void process_order_book_snapshot_message(const json_document& json, local_order_book& localOrderBook)
 	{
 		std::string productId{ json.get<std::string>("product_id") };
@@ -127,12 +138,11 @@ namespace cb::internal
 
 	std::string coinbase_websocket_stream::get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
 	{
-		std::vector<std::string> tradablePairList{ to_vector<std::string>(tradablePairs, [](const tradable_pair& pair) { return internal::to_exchange_id(pair); }) };
+		return create_message("subscribe", "level2", tradablePairs);
+	}
 
-		return json_writer{}
-			.add("type", "subscribe")
-			.add("product_ids", std::move(tradablePairList))
-			.add("channels", std::vector<std::string>{ "level2" })
-			.to_string();
+	std::string coinbase_websocket_stream::get_order_book_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const
+	{
+		return create_message("unsubscribe", "level2", tradablePairs);
 	}
 }
