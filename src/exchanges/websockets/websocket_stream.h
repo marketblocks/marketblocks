@@ -23,7 +23,6 @@ namespace cb
 
 		void connect();
 		ws_connection_status connection_status() const;
-		exchange_status get_exchange_status() const noexcept { return _implementation->get_exchange_status(); }
 
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const { return _implementation->get_order_book(pair, depth); }
 		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs);

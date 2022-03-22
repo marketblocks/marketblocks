@@ -9,12 +9,10 @@ namespace cb::internal
 	class websocket_stream_implementation
 	{
 	protected:
-		exchange_status _currentStatus;
 		local_order_book _localOrderBook;
 
 	public:
 		virtual std::string stream_url() const noexcept = 0;
-		virtual exchange_status get_exchange_status() const noexcept { return _currentStatus; }
 
 		virtual void on_open() = 0;
 		virtual void on_close(std::string_view reason) = 0;

@@ -65,25 +65,6 @@ namespace cb::test
 		assert_order_book_state_eq(expectedOrderBook, actualOrderBook);
 	}
 
-	TEST(CoinbaseWebsocket, SnapshotMessageAddsPairToMessageQueue)
-	{
-		coinbase_websocket_stream coinbaseWebsocket{};
-
-		std::string snapshotMessage = json_writer{}
-			.add("type", "snapshot")
-			.add("product_id", "BTC-USD")
-			.add("bids", std::vector<std::vector<std::string>>{})
-			.add("asks", std::vector<std::vector<std::string>>{})
-			.to_string();
-
-		coinbaseWebsocket.on_message(snapshotMessage);
-		auto& messageQueue = coinbaseWebsocket.get_order_book_message_queue();
-
-		tradable_pair expectedPair{ "BTC", "USD" };
-
-		ASSERT_EQ(messageQueue.pop(), expectedPair);
-	}
-
 	TEST(CoinbaseWebsocket, UpdateMessageCorrectlyUpdatesOrderBook)
 	{
 		coinbase_websocket_stream coinbaseWebsocket{};
@@ -194,41 +175,5 @@ namespace cb::test
 		order_book_state actualOrderBook{ coinbaseWebsocket.get_order_book(tradable_pair{ "BTC", "USD" }) };
 
 		assert_order_book_state_eq(expectedOrderBook, actualOrderBook);
-	}
-
-	TEST(CoinbaseWebsocket, UpdateMessageAddsPairToMessageQueue)
-	{
-		coinbase_websocket_stream coinbaseWebsocket{};
-
-		std::string snapshotMessage = json_writer{}
-			.add("type", "snapshot")
-			.add("product_id", "BTC-USD")
-			.add("bids", std::vector<std::vector<std::string>>{})
-			.add("asks", std::vector<std::vector<std::string>>{})
-			.to_string();
-
-		coinbaseWebsocket.on_message(snapshotMessage);
-		auto& messageQueue = coinbaseWebsocket.get_order_book_message_queue();
-
-		messageQueue.pop();
-		ASSERT_TRUE(messageQueue.empty());
-
-		std::vector<std::vector<std::string>> changes
-		{
-			{"buy", "10101.10", "0.0"}
-		};
-
-		std::string updateMessage = json_writer{}
-			.add("type", "l2update")
-			.add("product_id", "BTC-USD")
-			.add("time", "2019-08-14T20:42:27.265Z")
-			.add("changes", std::move(changes))
-			.to_string();
-
-		coinbaseWebsocket.on_message(updateMessage);
-
-		tradable_pair expectedPair{ "BTC", "USD" };
-
-		ASSERT_EQ(messageQueue.pop(), expectedPair);
 	}
 }

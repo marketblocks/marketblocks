@@ -27,7 +27,8 @@ namespace
 
 	void process_order_book_snapshot_message(const json_document& json, local_order_book& localOrderBook)
 	{
-		tradable_pair pair{ get_pair_from_id(json.get<std::string>("product_id")) };
+		std::string productId{ json.get<std::string>("product_id") };
+		tradable_pair pair{ get_pair_from_id(productId) };
 
 		json_element asks{ json.element("asks") };
 		json_element bids{ json.element("bids") };
@@ -50,8 +51,8 @@ namespace
 			}
 		}
 
-		logger::instance().info("Initialising order book for {}", pair.to_standard_string());
 		localOrderBook.initialise_book(std::move(pair), std::move(askMap), std::move(bidMap));
+		logger::instance().info("Coinbase: initialised order book for {}", productId);
 	}
 
 	void process_order_book_update_message(const json_document& json, local_order_book& localOrderBook)
@@ -95,7 +96,7 @@ namespace cb::internal
 {
 	void coinbase_websocket_stream::on_open()
 	{
-
+		logger::instance().info("Successfully connected to Coinbase websocket feed");
 	}
 
 	void coinbase_websocket_stream::on_close(std::string_view reason)
