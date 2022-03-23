@@ -6,31 +6,18 @@
 #include <unordered_map>
 #include <format>
 
+#include "json_constants.h"
 #include "json_iterator.h"
+#include "json_writer.h"
 
 namespace cb
 {
-	inline constexpr std::string_view JSON_FILE_EXTENSION = "json";
-
-	typedef json<nlohmann::json> json_document;
-	typedef json<const nlohmann::json&> json_element;
-
-	enum class json_value_type
-	{
-		OBJECT,
-		ARRAY,
-		INT,
-		DOUBLE,
-		BOOL,
-		STRING,
-		UNKNOWN
-	};
-
 	template<typename json_object>
 	class json
 	{
 	private:
 		friend json_iterator;
+		friend json_writer;
 
 		json_object _json;
 
@@ -117,39 +104,6 @@ namespace cb
 		}
 	};
 
-	class json_writer
-	{
-	private:
-		nlohmann::json _document;
-
-	public:
-		template<typename T>
-		json_writer& add(std::string_view propertyName, T value)
-		{
-			_document[propertyName.data()] = std::move(value);
-
-			return *this;
-		}
-
-		template<>
-		json_writer& add(std::string_view propertyName, json_writer value)
-		{
-			_document[propertyName.data()] = value._document;
-
-			return *this;
-		}
-
-		std::string to_string() const
-		{
-			return _document.dump();
-		}
-
-		json_element to_json() const
-		{
-			return json_element{ _document };
-		}
-	};
-
 	json_document parse_json(std::string_view jsonString);
 
 	template<typename T>
@@ -171,10 +125,10 @@ namespace cb
 	}
 
 	template<typename T>
-	std::string to_json(const T& t)
+	json_document to_json(const T& t)
 	{
 		json_writer writer;
 		to_json<T>(t, writer);
-		return writer.to_string();
+		return writer.to_json();
 	}
 }

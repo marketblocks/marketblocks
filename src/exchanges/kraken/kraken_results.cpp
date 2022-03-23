@@ -1,5 +1,5 @@
 #include "kraken_results.h"
-#include "common/file/json.h"
+#include "common/json/json.h"
 #include "common/utils/stringutils.h"
 #include "logging/logger.h"
 

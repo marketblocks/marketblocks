@@ -3,12 +3,11 @@
 #include <unordered_map>
 #include <string>
 
+#include "paper_trading_config.h"
 #include "trading/trading_constants.h"
 #include "trading/tradable_pair.h"
 #include "trading/trade_description.h"
-#include "trading/fee_schedule.h"
 #include "trading/order_description.h"
-#include "common/types/unordered_string_map.h"
 
 namespace cb
 {
@@ -22,7 +21,7 @@ namespace cb
 		std::string execute_trade(std::string gainedAsset, double gainValue, std::string soldAsset, double soldValue);
 
 	public:
-		explicit paper_trader(fee_schedule feeSchedule, unordered_string_map<double> initialBalances);
+		explicit paper_trader(paper_trading_config config);
 
 		double get_fee(const tradable_pair& tradablePair) const;
 		unordered_string_map<double> get_balances() const noexcept { return _balances; }

@@ -1,5 +1,5 @@
 #include "coinbase_results.h"
-#include "common/file/json.h"
+#include "common/json/json.h"
 
 namespace
 {

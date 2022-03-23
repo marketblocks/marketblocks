@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #include "common/file/file.h"
-#include "common/file/json.h"
+#include "common/json/json.h"
 #include "logging/logger.h"
 
 namespace cb
@@ -25,7 +25,7 @@ namespace cb
 	void save_config_file(const Config& config)
 	{
 		std::filesystem::path path{ get_path(Config::name()) };
-		std::string json{ to_json(config) };
+		std::string json{ to_json(config).to_string() };
 		cb::write_to_file(path, json);
 	}
 

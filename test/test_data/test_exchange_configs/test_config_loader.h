@@ -2,7 +2,7 @@
 
 #include "test_data/test_data_constants.h"
 #include "common/file/file.h"
-#include "common/file/json.h"
+#include "common/json/json.h"
 
 namespace cb::test
 {

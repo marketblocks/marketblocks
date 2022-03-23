@@ -15,7 +15,7 @@ namespace
 		return json_writer{}
 			.add("event", eventName)
 			.add("pair", std::move(tradablePairList))
-			.add("subscription", json_writer{}.add("name", channel))
+			.add("subscription", json_writer{}.add("name", channel).to_json())
 			.to_string();
 	}
 

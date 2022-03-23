@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "common/file/json.h"
+#include "common/json/json.h"
 
 namespace cb
 {

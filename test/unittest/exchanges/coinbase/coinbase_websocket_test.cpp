@@ -2,7 +2,7 @@
 
 #include "unittest/assertion_helpers.h"
 #include "exchanges/coinbase/coinbase_websocket.h"
-#include "common/file/json.h"
+#include "common/json/json.h"
 #include "common/utils/containerutils.h"
 
 namespace cb::test

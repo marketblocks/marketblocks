@@ -1,5 +1,4 @@
 #include "exchange_assemblers.h"
-#include "exchanges/paper_trading/paper_trader.h"
 
 namespace cb
 {
@@ -8,21 +7,10 @@ namespace cb
 		return api;
 	}
 
-	std::shared_ptr<exchange> assemble_live_test(std::unique_ptr<exchange> api)
+	std::shared_ptr<exchange> assemble_live_test(std::unique_ptr<exchange> api, paper_trading_config paperTradingConfig)
 	{
-		fee_schedule fees = fee_schedule_builder{}
-			.add_tier(1000, 0.26)
-			.build();
-
-		unordered_string_map<double> initialBalances
-		{
-			{ "GBP", 1000 },
-			{ "EUR", 1000 },
-			{ "USD", 1000 }
-		};
-
 		return std::make_shared<live_test_exchange>(
 			std::move(api),
-			std::make_unique<paper_trader>(std::move(fees), std::move(initialBalances)));
+			std::make_unique<paper_trader>(std::move(paperTradingConfig)));
 	}
 }

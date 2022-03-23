@@ -4,8 +4,8 @@
 
 namespace cb
 {
-	paper_trader::paper_trader(fee_schedule feeSchedule, unordered_string_map<double> initialBalances)
-		: _feeSchedule{ std::move(feeSchedule) }, _balances{ std::move(initialBalances) }
+	paper_trader::paper_trader(paper_trading_config config)
+		: _feeSchedule{ std::move(config.fees()) }, _balances{ std::move(config.balances()) }
 	{}
 
 	bool paper_trader::has_sufficient_funds(const std::string& asset, double amount) const

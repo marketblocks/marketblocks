@@ -1,7 +1,7 @@
 #pragma once
 
 #include "exchanges/websockets/websocket_stream_implementation.h"
-#include "common/file/json.h"
+#include "common/json/json.h"
 
 namespace cb::internal
 {

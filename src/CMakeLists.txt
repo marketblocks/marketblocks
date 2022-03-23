@@ -1,10 +1,10 @@
 ﻿# Add source to this project's executable.
 add_library(CryptoBot_lib 
 
-"common/file/json.cpp"
-"common/file/json.h"
-"common/file/json_iterator.cpp"
-"common/file/json_iterator.h" 
+"common/json/json.cpp"
+"common/json/json.h"
+"common/json/json_iterator.cpp"
+"common/json/json_iterator.h" 
 "common/file/file.cpp"
 "common/file/file.h"
 "common/file/config_file_reader.cpp" 
@@ -101,7 +101,7 @@ add_library(CryptoBot_lib
 
 "trading/trading_constants.h"
 
-"trading/trading_options.h" "trading/pair_stats.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp" "exchanges/websockets/local_order_book.cpp"    "exchanges/websockets/websocket_stream_implementation.h"   "common/types/set_queue.h")
+"trading/trading_options.h" "trading/pair_stats.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp" "exchanges/websockets/local_order_book.cpp"    "exchanges/websockets/websocket_stream_implementation.h"   "common/types/set_queue.h" "exchanges/paper_trading/paper_trading_config.h" "exchanges/paper_trading/paper_trading_config.cpp" "common/json/json_constants.h" "common/json/json_writer.h"  "common/json/json_writer.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

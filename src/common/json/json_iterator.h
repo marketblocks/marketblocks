@@ -2,13 +2,10 @@
 
 #include <nlohmann/json.hpp>
 
+#include "json_constants.h"
+
 namespace cb
 {
-	template <typename json_object>
-	class json;
-
-	typedef json<const nlohmann::json&> json_element;
-
 	class json_iterator
 	{
 	private:
