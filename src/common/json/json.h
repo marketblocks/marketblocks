@@ -66,7 +66,7 @@ namespace cb
 
 		std::string to_string() const
 		{
-			return _json.dump();
+			return _json.dump(4);
 		}
 
 		json_iterator begin() const

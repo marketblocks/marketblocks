@@ -10,6 +10,7 @@
 namespace cb
 {
 	std::filesystem::path get_path(std::string_view fileName);
+	void create_config_directory_if_not_exist();
 	bool file_exists(std::string_view fileName);
 
 	template<typename Config>

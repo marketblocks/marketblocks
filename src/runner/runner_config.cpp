@@ -1,31 +1,65 @@
 #include "runner_config.h"
 #include "logging/logger.h"
-#include "common/exceptions/not_implemented_exception.h"
 
 namespace
 {
+	using namespace cb;
+
+	static constexpr int DEFAULT_WEBSOCKET_TIMEOUT = 5000;
+	static constexpr int DEFAULT_HTTP_TIMEOUT = 5000;
+
 	namespace json_property_names
 	{
-		const std::string exchange_ids() { return "exchangeIds"; }
-		const std::string trade_percent() { return "tradePercent"; }
-		const std::string fiat_currency() { return "fiatCurrency"; }
+		static constexpr std::string_view EXCHANGE_IDS = "exchangeIds";
+		static constexpr std::string_view RUN_MODE = "runMode";
+		static constexpr std::string_view WEBSOCKET_TIMEOUT = "websocketTimeout";
+		static constexpr std::string_view HTTP_TIMEOUT = "httpTimeout";
+	}
+
+	namespace run_mode_strings
+	{
+		static constexpr std::string_view LIVE = "live";
+		static constexpr std::string_view LIVE_TEST = "live_test";
+	}
+
+	std::string_view to_string(run_mode runMode)
+	{
+		switch (runMode)
+		{
+		case run_mode::LIVE:
+			return run_mode_strings::LIVE;
+		default:
+			return run_mode_strings::LIVE_TEST;
+		}
+	}
+
+	run_mode run_mode_from_string(std::string_view runMode)
+	{
+		if (runMode == run_mode_strings::LIVE)
+		{
+			return run_mode::LIVE;
+		}
+
+		return run_mode::LIVETEST;
 	}
 }
 
 namespace cb
 {
 	runner_config::runner_config()
-		: runner_config{ {}, DEFAULT_TRADE_PERCENT, "GBP" }
+		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT }
 	{}
 
 	runner_config::runner_config(
 		std::vector<std::string> exchangeIds,
-		double tradePercent,
-		std::string fiatCurrency)
+		run_mode runMode,
+		int websocketTimeout,
+		int httpTimeout)
 		:
 		_exchangeIds{ std::move(exchangeIds) },
-		_tradePercent{ tradePercent },
-		_fiatCurrency{ std::move(fiatCurrency) }
+		_runMode{ runMode },
+		_websocketTimeout{ websocketTimeout },
+		_httpTimeout{ httpTimeout }
 	{
 		validate();
 	}
@@ -38,42 +72,26 @@ namespace cb
 		{
 			log.warning("Exchange list is empty, all supported exchanges will be used");
 		}
-
-		constexpr double MIN_TRADE_PERCENT = 0.0;
-		constexpr double MAX_TRADE_PERCENT = 1.0;
-
-		if (_tradePercent < MIN_TRADE_PERCENT)
-		{
-			log.warning("Trade Percent value of {0} is less than minimum value. Reset to default value of {}", _tradePercent, DEFAULT_TRADE_PERCENT);
-			_tradePercent = DEFAULT_TRADE_PERCENT;
-		}
-		else if (_tradePercent > MAX_TRADE_PERCENT)
-		{
-			log.warning("Trade Percent value of {0} is greater than maximum value. Reset to default value of {}", _tradePercent, DEFAULT_TRADE_PERCENT);
-			_tradePercent = DEFAULT_TRADE_PERCENT;
-		}
 	}
 
 	template<>
 	runner_config from_json(const json_document& json)
 	{
-		std::vector<std::string> exchangeIds{ json.get<std::vector<std::string>>(json_property_names::exchange_ids()) };
-		double maxTradePercent{ json.get<double>(json_property_names::trade_percent()) };
-		std::string fiatCurrency{ json.get<std::string>(json_property_names::fiat_currency()) };
-
 		return runner_config
 		{
-			std::move(exchangeIds),
-			maxTradePercent,
-			std::move(fiatCurrency)
+			json.get<std::vector<std::string>>(json_property_names::EXCHANGE_IDS),
+			run_mode_from_string(json.get<std::string>(json_property_names::RUN_MODE)),
+			json.get<int>(json_property_names::WEBSOCKET_TIMEOUT),
+			json.get<int>(json_property_names::HTTP_TIMEOUT)
 		};
 	}
 
 	template<>
 	void to_json(const runner_config& config, json_writer& writer)
 	{
-		writer.add(json_property_names::exchange_ids(), config.exchange_ids());
-		writer.add(json_property_names::trade_percent(), config.trade_percent());
-		writer.add(json_property_names::fiat_currency(), config.fiat_currency());
+		writer.add(json_property_names::EXCHANGE_IDS, config.exchange_ids());
+		writer.add(json_property_names::RUN_MODE, to_string(config.runmode()));
+		writer.add(json_property_names::WEBSOCKET_TIMEOUT, config.websocket_timeout());
+		writer.add(json_property_names::HTTP_TIMEOUT, config.http_timeout());
 	}
 }

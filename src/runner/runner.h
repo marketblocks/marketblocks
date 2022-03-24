@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "initialise/runner_initialise.h"
+#include "common/file/config_file_reader.h"
 #include "logging/logger.h"
 
 namespace cb
@@ -11,15 +12,14 @@ namespace cb
 	class runner
 	{
 	private:
-		run_mode _runMode;
 		bool _initialised;
 		Strategy _strategy;
 		logger& _logger;
 
 	public:
 		template<typename... Args>
-		explicit constexpr runner(run_mode runMode, Args&&... args)
-			: _runMode{ runMode }, _initialised{ false }, _strategy{ std::forward<Args>(args)... }, _logger{ logger::instance() }
+		explicit constexpr runner(Args&&... args)
+			: _initialised{ false }, _strategy{ std::forward<Args>(args)... }, _logger{ logger::instance() }
 		{
 		}
 
@@ -27,17 +27,14 @@ namespace cb
 		{
 			_logger.info("Starting initialisation...");
 
+			create_config_directory_if_not_exist();
+
 			runner_config runnerConfig = internal::get_runner_config();
-			std::vector<std::shared_ptr<exchange>> exchanges = internal::create_exchanges(runnerConfig, _runMode);
+			std::vector<std::shared_ptr<exchange>> exchanges = internal::create_exchanges(runnerConfig);
 
 			strategy_initialiser strategyInitialiser
 			{
-				std::move(exchanges),
-				trading_options
-				{
-					runnerConfig.trade_percent(),
-					runnerConfig.fiat_currency()
-				}
+				std::move(exchanges)
 			};
 			
 			_logger.info("Initialising strategy...");

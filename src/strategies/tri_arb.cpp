@@ -141,12 +141,12 @@ void tri_arb_strategy::run_iteration()
 			const std::vector<tri_arb_sequence>& sequences{ spec.get_sequences(messageQueue.pop()) };
 			std::shared_ptr<exchange> exchange{ spec.exchange() };
 
-			double tradeValue = _options.max_trade_percent() * get_balance(*exchange, _options.fiat_currency());
-
 			for (auto& sequence : sequences)
 			{
 				try
 				{
+					double tradeValue = 0.05 * get_balance(*exchange, sequence.first().pair().price_unit());
+
 					std::unordered_map<tradable_pair, order_book_entry> orderBooks;
 					orderBooks.emplace(sequence.first().pair(), get_best_entry(exchange, sequence.first()));
 					orderBooks.emplace(sequence.middle().pair(), get_best_entry(exchange, sequence.middle()));

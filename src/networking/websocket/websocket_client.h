@@ -15,7 +15,7 @@ namespace cb
 		std::unique_ptr<std::thread> _thread;
 
 	public:
-		websocket_client();
+		websocket_client(int timeout = 0);
 		~websocket_client();
 
 		websocket_client(const websocket_client& other) = delete;

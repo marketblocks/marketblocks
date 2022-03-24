@@ -18,7 +18,7 @@ namespace cb
 
 		coinbase_config(std::string apiKey, std::string apiSecret, std::string apiPassphrase);
 
-		static constexpr std::string name() noexcept { return "coinbaseConfig"; }
+		static constexpr std::string name() noexcept { return "coinbase"; }
 
 		constexpr const std::string& api_key() const noexcept { return _apiKey; }
 		constexpr const std::string& api_secret() const noexcept { return _apiSecret; }

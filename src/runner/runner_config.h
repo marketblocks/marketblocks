@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "trading/trading_options.h"
 #include "common/json/json.h"
 
 namespace cb
@@ -15,11 +14,10 @@ namespace cb
 	class runner_config
 	{
 	private:
-		static constexpr double DEFAULT_TRADE_PERCENT = 0.05;
-
 		std::vector<std::string> _exchangeIds;
-		double _tradePercent;
-		std::string _fiatCurrency;
+		run_mode _runMode;
+		int _websocketTimeout;
+		int _httpTimeout;
 
 		void validate();
 
@@ -28,14 +26,16 @@ namespace cb
 
 		runner_config(
 			std::vector<std::string> exchangeIds,
-			double tradePercent,
-			std::string fiatCurrency);
+			run_mode runMode,
+			int websocketTimeout,
+			int httpTimeout);
 			
-		static constexpr std::string name() noexcept { return "runnerConfig"; }
+		static constexpr std::string name() noexcept { return "runner"; }
 		
 		constexpr const std::vector<std::string>& exchange_ids() const noexcept { return _exchangeIds; }
-		constexpr double trade_percent() const noexcept { return _tradePercent; }
-		constexpr const std::string& fiat_currency() const noexcept { return _fiatCurrency; }
+		constexpr run_mode runmode() const noexcept { return _runMode; }
+		constexpr int websocket_timeout() const noexcept { return _websocketTimeout; }
+		constexpr int http_timeout() const noexcept { return _httpTimeout; }
 	};
 
 	template<>

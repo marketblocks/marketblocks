@@ -15,10 +15,16 @@ namespace cb
 	{
 	private:
 		CURL* easyHandle;
+		inline static int _timeout;
 
 	public:
 		http_service();
 		virtual ~http_service();
+
+		inline static void set_timeout(int timeout) noexcept
+		{
+			_timeout = timeout;
+		}
 
 		http_service(const http_service& other);
 		http_service(http_service&& other) noexcept;

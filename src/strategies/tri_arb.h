@@ -80,7 +80,6 @@ class tri_arb_strategy
 {
 private:
 	std::vector<tri_arb_spec> _specs;
-	cb::trading_options _options;
 
 public:
 	tri_arb_strategy() {}

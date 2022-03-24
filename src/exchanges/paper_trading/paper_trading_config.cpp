@@ -12,7 +12,7 @@ namespace
 namespace cb
 {
 	paper_trading_config::paper_trading_config()
-		: _fees{ std::map<double, double>{{0, 0.1}} }, _balances{}
+		: _fees{ std::map<double, double>{} }, _balances{}
 	{}
 
 	paper_trading_config::paper_trading_config(fee_schedule fees, unordered_string_map<double> balances)

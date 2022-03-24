@@ -15,5 +15,5 @@ namespace cb::internal
 {
 	runner_config get_runner_config();
 
-	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode);
+	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig);
 }

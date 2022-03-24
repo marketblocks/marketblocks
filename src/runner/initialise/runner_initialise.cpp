@@ -143,11 +143,13 @@ namespace cb::internal
 		return get_config<runner_config>();
 	}
 
-	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig, run_mode runMode)
+	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig)
 	{
 		std::vector<std::shared_ptr<exchange>> exchanges;
-		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>();
-		exchange_assembler assembler = select_assembler(runMode);
+		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>(runnerConfig.websocket_timeout());
+		exchange_assembler assembler = select_assembler(runnerConfig.runmode());
+
+		http_service::set_timeout(runnerConfig.http_timeout());
 
 		logger::instance().info("Creating exchange APIs...");
 

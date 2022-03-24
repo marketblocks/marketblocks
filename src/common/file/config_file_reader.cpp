@@ -2,11 +2,20 @@
 
 namespace
 {
-	constexpr std::string_view CONFIG_DIRECTORY = "C:\\Users\\jorda\\Documents";
+	constexpr std::string_view CONFIG_DIRECTORY = "configs";
 }
 
 namespace cb
 {
+	void create_config_directory_if_not_exist()
+	{
+		std::filesystem::path path{ CONFIG_DIRECTORY };
+		if (!std::filesystem::exists(path))
+		{
+			std::filesystem::create_directory(path);
+		}
+	}
+
 	std::filesystem::path get_path(std::string_view fileName)
 	{
 		std::filesystem::path path{ CONFIG_DIRECTORY };

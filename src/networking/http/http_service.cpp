@@ -53,6 +53,7 @@ namespace cb
 		}
 
 		set_option(easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
+		set_option(easyHandle, CURLOPT_TIMEOUT_MS, _timeout);
 	}
 
 	http_service::~http_service()

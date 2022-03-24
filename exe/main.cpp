@@ -6,7 +6,7 @@
 
 int main()
 {
-	cb::runner<tri_arb_strategy> runner { cb::run_mode::LIVETEST };
+	cb::runner<tri_arb_strategy> runner {};
 	
 	try
 	{

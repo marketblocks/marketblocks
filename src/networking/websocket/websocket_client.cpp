@@ -28,7 +28,7 @@ namespace
 
 namespace cb
 {
-    websocket_client::websocket_client()
+    websocket_client::websocket_client(int timeout)
         :_client{}, _thread{}
     {
         //_client.set_access_channels(websocketpp::log::alevel::none);
@@ -38,6 +38,7 @@ namespace cb
         _client.init_asio();
         _client.start_perpetual();
         _client.set_tls_init_handler(bind(&on_tls_init));
+        _client.set_open_handshake_timeout(timeout);
 
         _thread = std::make_unique<std::thread>(&client::run, &_client);
     }
