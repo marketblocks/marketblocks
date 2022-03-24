@@ -19,19 +19,6 @@ namespace cb
 		double get_fee(double tradingVolume) const;
 	};
 
-	class fee_schedule_builder
-	{
-	private:
-		std::map<double, double> fees;
-
-	public:
-		explicit fee_schedule_builder();
-
-		fee_schedule_builder add_tier(double tierUpperLimit, double fee);
-
-		fee_schedule build();
-	};
-
 	template<>
 	fee_schedule from_json<fee_schedule>(const json_document& json);
 

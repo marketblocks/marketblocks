@@ -27,22 +27,6 @@ namespace cb
 		return 0.0;
 	}
 
-	fee_schedule_builder::fee_schedule_builder()
-		: fees{}
-	{}
-
-	fee_schedule_builder fee_schedule_builder::add_tier(double tierUpperLimit, double fee)
-	{
-		fees.emplace(tierUpperLimit, fee);
-
-		return *this;
-	}
-
-	fee_schedule fee_schedule_builder::build()
-	{
-		return fee_schedule{ fees };
-	}
-
 	template<>
 	fee_schedule from_json<fee_schedule>(const json_document& json)
 	{

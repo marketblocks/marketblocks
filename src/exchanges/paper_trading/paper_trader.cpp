@@ -1,29 +1,36 @@
 #include "paper_trader.h"
 #include "common/utils/financeutils.h"
 #include "common/utils/containerutils.h"
+#include "common/exceptions/cb_exception.h"
 
 namespace cb
 {
 	paper_trader::paper_trader(paper_trading_config config)
-		: _feeSchedule{ std::move(config.fees()) }, _balances{ std::move(config.balances()) }
+		: _feeSchedule{ std::move(config.fees()) }, _balances{ std::move(config.balances()) }, _nextOrderNumber{ 1 }
 	{}
 
 	bool paper_trader::has_sufficient_funds(const std::string& asset, double amount) const
 	{
-		return _balances.at(asset) >= amount;
+		auto balanceIt = _balances.find(asset);
+		if (balanceIt == _balances.end())
+		{
+			return false;
+		}
+
+		return balanceIt->second >= amount;
 	}
 
 	std::string paper_trader::execute_trade(std::string gainedAsset, double gainValue, std::string soldAsset, double soldValue)
 	{
 		if (!has_sufficient_funds(soldAsset, soldValue))
 		{
-			return "ERROR";
+			throw cb_exception{ "Insufficient funds" };
 		}
 
 		_balances[gainedAsset] += gainValue;
 		_balances[soldAsset] -= soldValue;
 
-		return "";
+		return std::to_string(_nextOrderNumber++);
 	}
 
 	double paper_trader::get_fee(const tradable_pair& tradablePair) const

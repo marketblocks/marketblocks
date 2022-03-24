@@ -16,6 +16,7 @@ namespace cb
 	private:
 		fee_schedule _feeSchedule;
 		unordered_string_map<double> _balances;
+		int _nextOrderNumber;
 
 		bool has_sufficient_funds(const std::string& asset, double amount) const;
 		std::string execute_trade(std::string gainedAsset, double gainValue, std::string soldAsset, double soldValue);

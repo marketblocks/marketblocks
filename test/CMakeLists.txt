@@ -14,7 +14,7 @@ add_executable(CryptoBotTest
 "unittest/utils/financeutils_test.cpp" 
 "unittest/strategies/tri_arb_test.cpp" 
 "unittest/exchanges/paper_trader/paper_trader_test.cpp" 
-"unittest/common/trading/fee_schedule_test.cpp" 
+ 
 "unittest/common/security/hash_test.cpp"
 "unittest/utils/retry_test.cpp" 
 "unittest/exchanges/kraken/kraken_results_test.cpp"
