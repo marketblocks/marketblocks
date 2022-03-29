@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <spdlog/spdlog.h>
 
 #include "initialise/runner_initialise.h"
 #include "common/file/config_file_reader.h"
@@ -21,6 +22,11 @@ namespace cb
 		explicit constexpr runner(Args&&... args)
 			: _initialised{ false }, _strategy{ std::forward<Args>(args)... }, _logger{ logger::instance() }
 		{
+		}
+
+		~runner()
+		{
+			spdlog::shutdown();
 		}
 
 		void initialise()

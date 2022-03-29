@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "trading/trading_constants.h"
+#include "common/exceptions/cb_exception.h"
 
 namespace cb
 {
@@ -49,11 +50,21 @@ namespace cb
 
 		constexpr int depth() const { return std::max(_asks.size(), _bids.size()); }
 	};
+	
+	constexpr const order_book_entry& get_best_entry(const std::vector<order_book_entry>& entries)
+	{
+		if (entries.size() == 0)
+		{
+			throw cb_exception{ "Order Book entries are empty" };
+		}
+
+		return entries[0];
+	}
 
 	constexpr const order_book_entry& select_best_entry(const order_book_state& orderBook, trade_action action)
 	{
 		return action == trade_action::BUY
-			? orderBook.asks()[0]
-			: orderBook.bids()[0];
+			? get_best_entry(orderBook.asks())
+			: get_best_entry(orderBook.bids());
 	}
 }
