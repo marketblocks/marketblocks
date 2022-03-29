@@ -10,6 +10,5 @@ project ("CryptoBot")
 enable_testing()
 
 # Include sub-projects.
-add_subdirectory ("exe")
 add_subdirectory ("src")
 add_subdirectory ("test")
