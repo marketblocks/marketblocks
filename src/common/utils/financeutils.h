@@ -27,7 +27,7 @@ namespace cb
 
 	constexpr double calculate_trade_gain(double assetPrice, double tradeValue, double feePercentage, trade_action action) noexcept
 	{
-		int a = static_cast<int>(action);
+		int a = action == trade_action::SELL ? 0 : 1;
 		return tradeValue * (1 - feePercentage * 0.01) * (a / assetPrice + assetPrice * (1 - a));
 	}
 }

@@ -31,7 +31,7 @@ add_executable(CryptoBotTest
 "integration/kraken_test.cpp"
 "unittest/exchanges/kraken/kraken_websocket_test.cpp" 
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
-"unittest/exchanges/coinbase/coinbase_websocket_test.cpp" )
+"unittest/exchanges/coinbase/coinbase_websocket_test.cpp"  "unittest/common/types/set_queue_test.cpp")
 
 target_link_libraries(CryptoBotTest LINK_PUBLIC CryptoBot_lib)
 target_link_libraries(CryptoBotTest PRIVATE gtest_main gmock_main)

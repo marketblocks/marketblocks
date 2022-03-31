@@ -3,9 +3,9 @@
 
 namespace cb
 {
-	double get_balance(const exchange& exchange, std::string_view tickerId)
+	double get_balance(std::shared_ptr<exchange> exchange, std::string_view tickerId)
 	{
-		unordered_string_map<double> balances{ exchange.get_balances() };
+		unordered_string_map<double> balances{ exchange->get_balances() };
 
 		auto it = balances.find(tickerId);
 		if (it != balances.end())

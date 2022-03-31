@@ -4,6 +4,8 @@
 #include <string>
 #include <string_view>
 
+#include "trading_constants.h"
+
 namespace cb
 {
 	class tradable_pair
@@ -40,6 +42,13 @@ namespace cb
 			return _asset == other._asset && _priceUnit == other._priceUnit;
 		}
 	};
+
+	constexpr std::string_view get_gained_asset(const tradable_pair& pair, trade_action action)
+	{
+		return action == trade_action::BUY
+			? pair.asset()
+			: pair.price_unit();
+	}
 }
 
 namespace std

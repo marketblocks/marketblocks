@@ -24,11 +24,6 @@ namespace cb
 		{
 		}
 
-		~runner()
-		{
-			spdlog::shutdown();
-		}
-
 		void initialise()
 		{
 			_logger.info("Starting initialisation...");
@@ -60,7 +55,14 @@ namespace cb
 
 			while (true)
 			{
-				_strategy.run_iteration();
+				try
+				{
+					_strategy.run_iteration();
+				}
+				catch (const std::exception& e)
+				{
+					_logger.error(e.what());
+				}
 			}
 		}
 	};
