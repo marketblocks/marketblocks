@@ -57,9 +57,11 @@ namespace mb
         {
             _client.connect(connectionPtr);
 
-            while (connectionPtr->get_state() == websocketpp::session::state::connecting)
+            volatile bool connecting = true;
+            while (connecting)
             {
-            } // websocketpp will time out and throw exception
+                connecting = connectionPtr->get_state() == websocketpp::session::state::connecting;
+            }
         }
         catch (const std::exception& e)
         {
