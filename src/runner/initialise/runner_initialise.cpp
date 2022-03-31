@@ -12,6 +12,7 @@
 #include "common/exceptions/cb_exception.h"
 #include "logging/logger.h"
 #include "networking/websocket/websocket_client.h"
+#include "project_settings.h"
 
 namespace
 {
@@ -138,6 +139,11 @@ namespace
 
 namespace cb::internal
 {
+	void log_version()
+	{
+		logger::instance().info("CryptoBot v{}", PROJECT_VERSION);
+	}
+
 	runner_config get_runner_config()
 	{
 		return get_config<runner_config>();

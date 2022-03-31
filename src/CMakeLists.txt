@@ -116,3 +116,4 @@ find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(CryptoBot_lib PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
 
 target_include_directories (CryptoBot_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(CryptoBot_lib PRIVATE ${CMAKE_BINARY_DIR}/generated)

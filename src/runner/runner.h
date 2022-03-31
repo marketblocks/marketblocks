@@ -26,6 +26,8 @@ namespace cb
 
 		void initialise()
 		{
+			internal::log_version();
+
 			_logger.info("Starting initialisation...");
 
 			create_config_directory_if_not_exist();

@@ -13,6 +13,8 @@
 
 namespace cb::internal
 {
+	void log_version();
+
 	runner_config get_runner_config();
 
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig);
