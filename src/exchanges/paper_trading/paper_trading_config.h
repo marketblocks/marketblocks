@@ -4,7 +4,7 @@
 #include "common/types/unordered_string_map.h"
 #include "common/json/json.h"
 
-namespace cb
+namespace mb
 {
 	class paper_trading_config
 	{

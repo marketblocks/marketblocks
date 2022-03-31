@@ -6,7 +6,7 @@
 #include "websocket_client.h"
 #include "websocket_error.h"
 
-namespace cb
+namespace mb
 {
     enum class ws_connection_status
     {

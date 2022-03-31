@@ -5,7 +5,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace cb
+namespace mb
 {
 	class file_handler
 	{

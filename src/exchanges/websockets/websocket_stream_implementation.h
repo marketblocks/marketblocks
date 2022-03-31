@@ -4,7 +4,7 @@
 #include "exchanges/exchange_status.h"
 #include "trading/tradable_pair.h"
 
-namespace cb::internal
+namespace mb::internal
 {
 	class websocket_stream_implementation
 	{

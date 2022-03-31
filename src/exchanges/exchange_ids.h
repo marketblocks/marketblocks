@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-namespace cb
+namespace mb
 {
 	namespace exchange_ids
 	{

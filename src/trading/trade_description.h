@@ -5,7 +5,7 @@
 #include "order_type.h"
 #include "common/utils/financeutils.h"
 
-namespace cb
+namespace mb
 {
 	class trade_description
 	{

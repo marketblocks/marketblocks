@@ -16,7 +16,7 @@
 
 namespace
 {
-	using namespace cb;
+	using namespace mb;
 
 	template<typename Config>
 	Config get_config()
@@ -93,12 +93,12 @@ namespace
 	}
 
 	template<typename ExchangeIds>
-	std::vector<std::shared_ptr<cb::exchange>> create_exchanges(
+	std::vector<std::shared_ptr<exchange>> create_exchanges(
 		const ExchangeIds& exchangeIds,
 		const exchange_assembler& assembler,
-		std::shared_ptr<cb::websocket_client> websocketClient)
+		std::shared_ptr<websocket_client> websocketClient)
 	{
-		std::vector<std::shared_ptr<cb::exchange>> exchanges;
+		std::vector<std::shared_ptr<exchange>> exchanges;
 		exchanges.reserve(exchangeIds.size());
 
 		logger& log{ logger::instance() };
@@ -108,7 +108,7 @@ namespace
 		{
 			log.info("Creating exchange API: {}", exchangeId);
 
-			std::unique_ptr<cb::exchange> api = create_api_from_id(exchangeId, websocketClient);
+			std::unique_ptr<exchange> api = create_api_from_id(exchangeId, websocketClient);
 
 			if (!api)
 			{
@@ -137,7 +137,7 @@ namespace
 	}
 }
 
-namespace cb::internal
+namespace mb::internal
 {
 	void log_version()
 	{

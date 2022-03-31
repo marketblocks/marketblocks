@@ -2,7 +2,7 @@
 
 #include "common/json/json.h"
 
-namespace cb
+namespace mb
 {
 	class coinbase_config
 	{

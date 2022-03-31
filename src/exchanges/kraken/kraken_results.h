@@ -12,7 +12,7 @@
 #include "common/types/result.h"
 #include "common/types/unordered_string_map.h"
 
-namespace cb::kraken
+namespace mb::kraken
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult);
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult);

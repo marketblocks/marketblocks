@@ -10,7 +10,7 @@
 #include "networking/url.h"
 #include "common/utils/retry.h"
 
-namespace cb
+namespace mb
 {
 	namespace internal
 	{
@@ -75,7 +75,7 @@ namespace cb
 			{}
 		};
 
-		constexpr std::string to_exchange_id(const cb::tradable_pair& pair)
+		constexpr std::string to_exchange_id(const tradable_pair& pair)
 		{
 			return pair.asset() + "-" + pair.price_unit();
 		}

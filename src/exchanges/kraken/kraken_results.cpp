@@ -5,7 +5,9 @@
 
 namespace
 {
-	std::string get_error(cb::json_document& json)
+	using namespace mb;
+
+	std::string get_error(json_document& json)
 	{
 		std::vector<std::string> messages = json.get<std::vector<std::string>>("error");
 		
@@ -15,51 +17,51 @@ namespace
 	}
 
 	template<typename T, typename Reader> 
-	cb::result<T> read_result(std::string_view jsonResult, const Reader& reader)
+	result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
 		try
 		{
-			cb::json_document jsonDocument{ cb::parse_json(jsonResult) };
+			json_document jsonDocument{ parse_json(jsonResult) };
 
 			std::string error = get_error(jsonDocument);
 			if (!error.empty())
 			{
-				return cb::result<T>::fail(std::move(error));
+				return result<T>::fail(std::move(error));
 			}
 
 			if constexpr (std::is_same_v<T, void>)
 			{
-				return cb::result<T>::success();
+				return result<T>::success();
 			}
 			else
 			{
-				return cb::result<T>::success(reader(jsonDocument.element("result")));
+				return result<T>::success(reader(jsonDocument.element("result")));
 			}
 		}
 		catch (const std::exception& e)
 		{
-			return cb::result<T>::fail(e.what());
+			return result<T>::fail(e.what());
 		}
 	}
 
-	cb::result<std::vector<cb::order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderType)
+	result<std::vector<order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderType)
 	{
-		return read_result<std::vector<cb::order_description>>(jsonResult, [&orderType](const cb::json_element& resultElement)
+		return read_result<std::vector<order_description>>(jsonResult, [&orderType](const json_element& resultElement)
 			{
-				cb::json_element ordersElement{ resultElement.element(orderType) };
-				std::vector<cb::order_description> orderDescriptions;
+				json_element ordersElement{ resultElement.element(orderType) };
+				std::vector<order_description> orderDescriptions;
 				orderDescriptions.reserve(ordersElement.size());
 
 				for (auto it = ordersElement.begin(); it != ordersElement.end(); ++it)
 				{
 					std::string orderId{ it.key() };
-					cb::json_element order{ it.value() };
-					cb::json_element descriptionElement{ order.element("descr") };
+					json_element order{ it.value() };
+					json_element descriptionElement{ order.element("descr") };
 
 					std::string pairName{ descriptionElement.get<std::string>("pair") };
-					cb::trade_action action = descriptionElement.get<std::string>("type") == "buy" 
-						? cb::trade_action::BUY 
-						: cb::trade_action::SELL;
+					trade_action action = descriptionElement.get<std::string>("type") == "buy" 
+						? trade_action::BUY 
+						: trade_action::SELL;
 					double price = std::stod(descriptionElement.get<std::string>("price"));
 					double volume = std::stod(order.get<std::string>("vol"));
 
@@ -71,7 +73,7 @@ namespace
 	}
 }
 
-namespace cb::kraken
+namespace mb::kraken
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult)
 	{

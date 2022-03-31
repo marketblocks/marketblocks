@@ -1,7 +1,7 @@
 #include "local_order_book.h"
 #include "common/exceptions/cb_exception.h"
 
-namespace cb
+namespace mb
 {
 	local_order_book::local_order_book()
 		: _messageQueue{}, _orderBookCaches{}, _mutex{}

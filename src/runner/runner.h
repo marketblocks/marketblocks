@@ -7,7 +7,7 @@
 #include "common/file/config_file_reader.h"
 #include "logging/logger.h"
 
-namespace cb
+namespace mb
 {
 	template<typename Strategy>
 	class runner

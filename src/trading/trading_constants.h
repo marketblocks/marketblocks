@@ -1,6 +1,6 @@
 #pragma once
 
-namespace cb
+namespace mb
 {
 	enum class trade_action
 	{

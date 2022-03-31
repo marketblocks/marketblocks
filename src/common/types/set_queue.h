@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <mutex>
 
-namespace cb
+namespace mb
 {
 	template<typename T>
 	class set_queue

@@ -4,7 +4,7 @@
 
 #include "json_constants.h"
 
-namespace cb
+namespace mb
 {
 	class json_writer
 	{

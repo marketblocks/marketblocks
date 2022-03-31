@@ -10,7 +10,7 @@
 #include "common/types/set_queue.h"
 #include "trading/tradable_pair.h"
 
-namespace cb
+namespace mb
 {
 	class local_order_book
 	{

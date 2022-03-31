@@ -6,7 +6,7 @@
 
 #include "trading_constants.h"
 
-namespace cb
+namespace mb
 {
 	class tradable_pair
 	{
@@ -54,9 +54,9 @@ namespace cb
 namespace std
 {
 	template<>
-	struct hash<cb::tradable_pair>
+	struct hash<mb::tradable_pair>
 	{
-		size_t operator()(const cb::tradable_pair& pair) const
+		size_t operator()(const mb::tradable_pair& pair) const
 		{
 			return std::hash<std::string>()(pair.asset()) ^ std::hash<std::string>()(pair.price_unit());
 		}

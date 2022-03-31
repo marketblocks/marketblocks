@@ -18,7 +18,7 @@
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 
-namespace cb
+namespace mb
 {
 	namespace internal
 	{
@@ -170,7 +170,7 @@ namespace cb
 		{
 			return retry_on_fail<Value>(
 				[this, &request]() { return _httpService->send(request); },
-				[this, &reader](const cb::http_response& response) { return internal::http_retry_result_converter<Value>(response, reader); },
+				[this, &reader](const http_response& response) { return internal::http_retry_result_converter<Value>(response, reader); },
 				_httpRetries);
 		}
 

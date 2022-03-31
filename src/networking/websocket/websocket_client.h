@@ -3,7 +3,7 @@
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 
-namespace cb
+namespace mb
 {
 	typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
 	typedef websocketpp::lib::asio::ssl::context ssl_context;

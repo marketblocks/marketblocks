@@ -7,7 +7,7 @@
 #include "trading/order_book.h"
 #include "common/utils/stringutils.h"
 
-namespace cb
+namespace mb
 {
 	struct order_book_cache_entry
 	{

@@ -5,9 +5,9 @@
 #include "common/json/json.h"
 #include "common/utils/containerutils.h"
 
-namespace cb::test
+namespace mb::test
 {
-	using namespace cb::internal;
+	using namespace mb::internal;
 
 	TEST(CoinbaseWebsocket, CreatesCorrectOrderBookSubscriptionMessage)
 	{

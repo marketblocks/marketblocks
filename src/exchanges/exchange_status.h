@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace cb
+namespace mb
 {
 	enum class exchange_status
 	{

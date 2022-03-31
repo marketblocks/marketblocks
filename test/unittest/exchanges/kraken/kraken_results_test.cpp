@@ -9,7 +9,8 @@
 
 namespace
 {
-	using namespace cb::test;
+	using namespace mb;
+	using namespace mb::test;
 	
 	static const std::string ERROR_MESSAGE = "This is an error";
 	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";
@@ -18,7 +19,7 @@ namespace
 	auto execute_reader(const std::string& dataFileName, ResultReader reader)
 	{
 		std::filesystem::path dataPath{ kraken_results_test_data_path(dataFileName) };
-		std::string json = cb::read_file(dataPath);
+		std::string json = read_file(dataPath);
 
 		return reader(json);
 	}
@@ -28,19 +29,19 @@ namespace
 	{
 		assert_result_equal(
 			execute_reader(testDataFileName, reader),
-			cb::result<T>::success(std::move(expectedValue)),
+			result<T>::success(std::move(expectedValue)),
 			valueAsserter);
 
 		assert_result_equal(
 			execute_reader(ERROR_RESPONSE_FILE_NAME, reader),
-			cb::result<T>::fail(ERROR_MESSAGE),
+			result<T>::fail(ERROR_MESSAGE),
 			no_assert<T>);
 	}
 
 	template<typename T, typename ResultReader>
 	void execute_test(const std::string& testDataFileName, const ResultReader& reader, const T& expectedValue)
 	{
-		execute_test(testDataFileName, reader, expectedValue, cb::test::default_expect_eq<T>);
+		execute_test(testDataFileName, reader, expectedValue, default_expect_eq<T>);
 	}
 
 	template<typename ResultReader>
@@ -51,17 +52,17 @@ namespace
 		EXPECT_EQ(execute_reader(ERROR_RESPONSE_FILE_NAME, reader).error(), ERROR_MESSAGE);
 	}
 
-	std::vector<cb::order_description> get_expected_open_closed_orders()
+	std::vector<order_description> get_expected_open_closed_orders()
 	{
 		return
 		{
-			cb::order_description{ "OB5VMB-B4U2U-DK2WRW", "XBTUSD", cb::trade_action::SELL, 14500.0, 0.275 },
-			cb::order_description{ "OQCLML-BW3P3-BUCMWZ", "XBTUSD", cb::trade_action::BUY, 30010.0, 1.25 }
+			order_description{ "OB5VMB-B4U2U-DK2WRW", "XBTUSD", trade_action::SELL, 14500.0, 0.275 },
+			order_description{ "OQCLML-BW3P3-BUCMWZ", "XBTUSD", trade_action::BUY, 30010.0, 1.25 }
 		};
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(KrakenResults, ReadSystemStatus)
 	{

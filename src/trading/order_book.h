@@ -6,7 +6,7 @@
 #include "trading/trading_constants.h"
 #include "common/exceptions/cb_exception.h"
 
-namespace cb
+namespace mb
 {
 	enum class order_book_side
 	{

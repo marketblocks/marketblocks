@@ -6,7 +6,7 @@
 #include "exchanges/exchange.h"
 #include "networking/http/http_service.h"
 
-namespace cb::test
+namespace mb::test
 {
 	class mock_http_service : public http_service
 	{

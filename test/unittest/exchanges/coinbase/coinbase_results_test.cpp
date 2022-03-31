@@ -8,7 +8,8 @@
 
 namespace
 {
-	using namespace cb::test;
+	using namespace mb;
+	using namespace mb::test;
 
 	static const std::string ERROR_MESSAGE = "This is an error";
 	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";
@@ -17,7 +18,7 @@ namespace
 	auto execute_reader(const std::string& dataFileName, ResultReader reader)
 	{
 		std::filesystem::path dataPath{ coinbase_results_test_data_path(dataFileName) };
-		std::string json = cb::read_file(dataPath);
+		std::string json = read_file(dataPath);
 
 		return reader(json);
 	}
@@ -27,23 +28,23 @@ namespace
 	{
 		assert_result_equal(
 			execute_reader(testDataFileName, reader),
-			cb::result<T>::success(std::move(expectedValue)),
+			result<T>::success(std::move(expectedValue)),
 			valueAsserter);
 
 		assert_result_equal(
 			execute_reader(ERROR_RESPONSE_FILE_NAME, reader),
-			cb::result<T>::fail(ERROR_MESSAGE),
+			result<T>::fail(ERROR_MESSAGE),
 			no_assert<T>);
 	}
 
 	template<typename T, typename ResultReader>
 	void execute_test(const std::string& testDataFileName, const ResultReader& reader, const T& expectedValue)
 	{
-		execute_test(testDataFileName, reader, expectedValue, cb::test::default_expect_eq<T>);
+		execute_test(testDataFileName, reader, expectedValue, default_expect_eq<T>);
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(CoinbaseResults, ReadTradablePairs)
 	{

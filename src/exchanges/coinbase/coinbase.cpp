@@ -6,40 +6,42 @@
 
 namespace
 {
-	constexpr std::string_view to_string(cb::order_type orderType)
+	using namespace mb;
+
+	constexpr std::string_view to_string(order_type orderType)
 	{
 		constexpr std::string_view LIMIT = "limit";
 		constexpr std::string_view MARKET = "market";
 
 		switch (orderType)
 		{
-		case cb::order_type::LIMIT:
+		case order_type::LIMIT:
 			return LIMIT;
-		case cb::order_type::MARKET:
+		case order_type::MARKET:
 			return MARKET;
 		default:
-			throw cb::cb_exception{ "Unknown order type" };
+			throw cb_exception{ "Unknown order type" };
 		}
 	}
 
-	constexpr std::string_view to_string(cb::trade_action tradeAction)
+	constexpr std::string_view to_string(trade_action tradeAction)
 	{
 		constexpr std::string_view BUY = "buy";
 		constexpr std::string_view SELL = "sell";
 
 		switch (tradeAction)
 		{
-		case cb::trade_action::BUY:
+		case trade_action::BUY:
 			return BUY;
-		case cb::trade_action::SELL:
+		case trade_action::SELL:
 			return SELL;
 		default:
-			throw cb::cb_exception{ "Unknown order type" };
+			throw cb_exception{ "Unknown order type" };
 		}
 	}
 }
 
-namespace cb
+namespace mb
 {
 	coinbase_api::coinbase_api(
 		coinbase_config config,

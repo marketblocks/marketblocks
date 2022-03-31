@@ -3,7 +3,7 @@
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 
-namespace cb
+namespace mb
 {
 	constexpr double calculate_cost(double assetPrice, double volume) noexcept
 	{

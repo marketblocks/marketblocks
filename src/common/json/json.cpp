@@ -1,6 +1,6 @@
 #include "json.h"
 
-namespace cb
+namespace mb
 {
 	json_document parse_json(std::string_view jsonString)
 	{

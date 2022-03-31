@@ -5,7 +5,7 @@ namespace
 	constexpr std::string_view CONFIG_DIRECTORY = "configs";
 }
 
-namespace cb
+namespace mb
 {
 	void create_config_directory_if_not_exist()
 	{

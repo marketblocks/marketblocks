@@ -1,7 +1,7 @@
 #include "json_writer.h"
 #include "json.h"
 
-namespace cb
+namespace mb
 {
 	template<>
 	json_writer& json_writer::add(std::string_view propertyName, json_document value)

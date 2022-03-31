@@ -5,7 +5,7 @@
 
 namespace
 {
-	using namespace cb;
+	using namespace mb;
 
 	tradable_pair get_pair_from_id(std::string_view productId)
 	{
@@ -13,7 +13,7 @@ namespace
 		return tradable_pair{ parts[0], parts[1] };
 	}
 
-	std::pair<std::string, cb::order_book_entry> construct_order_book_map_pair(const cb::json_element& json)
+	std::pair<std::string, order_book_entry> construct_order_book_map_pair(const json_element& json)
 	{
 		std::string price{ json.get<std::string>(0) };
 		order_book_entry entry
@@ -103,7 +103,7 @@ namespace
 	}
 }
 
-namespace cb::internal
+namespace mb::internal
 {
 	void coinbase_websocket_stream::on_open()
 	{

@@ -18,7 +18,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	order_book_cache::order_book_cache(ask_map asks, bid_map bids, int depth)
 		: _asks{ std::move(asks) }, _bids{ std::move(bids) }, _depth{ depth }, _mutex{}

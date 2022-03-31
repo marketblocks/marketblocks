@@ -4,7 +4,7 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace cb
+namespace mb
 {
     struct string_hash
     {

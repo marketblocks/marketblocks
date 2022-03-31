@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace cb
+namespace mb
 {
 	class http_header
 	{

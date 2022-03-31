@@ -5,9 +5,9 @@
 #include "test_data/test_data_constants.h"
 #include "common/file/file.h"
 
-namespace cb::test
+namespace mb::test
 {
-	using namespace cb::internal;
+	using namespace mb::internal;
 
 	TEST(KrakenWebsocket, CreatesCorrectOrderBookSubscriptionMessage)
 	{

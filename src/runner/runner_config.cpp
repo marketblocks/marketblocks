@@ -3,7 +3,7 @@
 
 namespace
 {
-	using namespace cb;
+	using namespace mb;
 
 	static constexpr int DEFAULT_WEBSOCKET_TIMEOUT = 5000;
 	static constexpr int DEFAULT_HTTP_TIMEOUT = 5000;
@@ -44,7 +44,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	runner_config::runner_config()
 		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT }

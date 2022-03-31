@@ -6,7 +6,7 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 
-namespace cb
+namespace mb
 {
     template<typename Data>
     std::string b64_encode(const Data& data)

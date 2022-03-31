@@ -2,7 +2,7 @@
 
 #include "common/utils/financeutils.h"
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(FinanceUtils, CalculateCost)
 	{

@@ -29,7 +29,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	logger::logger()
 		: _log{ init_logger() }

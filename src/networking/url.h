@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace cb
+namespace mb
 {
 	class url_query_builder
 	{

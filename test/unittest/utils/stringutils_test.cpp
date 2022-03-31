@@ -5,7 +5,7 @@
 using testing::ElementsAre;
 using testing::IsEmpty;
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(StringUtils, SplitValidArgs)
 	{

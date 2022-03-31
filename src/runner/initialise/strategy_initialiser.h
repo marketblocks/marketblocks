@@ -4,7 +4,7 @@
 
 #include "exchanges/exchange.h"
 
-namespace cb
+namespace mb
 {
 	class strategy_initialiser
 	{

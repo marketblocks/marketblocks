@@ -13,45 +13,47 @@
 
 namespace
 {
-	constexpr std::string_view to_string(const cb::order_type& orderType)
+	using namespace mb;
+
+	constexpr std::string_view to_string(const order_type& orderType)
 	{
 		constexpr std::string_view LIMIT = "limit";
 		constexpr std::string_view MARKET = "market";
 
 		switch (orderType)
 		{
-		case cb::order_type::LIMIT:
+		case order_type::LIMIT:
 			return LIMIT;
-		case cb::order_type::MARKET:
+		case order_type::MARKET:
 			return MARKET;
 		default:
 			throw std::invalid_argument{ "Order Type not recognized" };
 		}
 	}
 
-	constexpr std::string_view to_string(const cb::trade_action& tradeAction)
+	constexpr std::string_view to_string(const trade_action& tradeAction)
 	{
 		constexpr std::string_view BUY = "buy";
 		constexpr std::string_view SELL = "sell";
 
 		switch (tradeAction)
 		{
-		case cb::trade_action::BUY:
+		case trade_action::BUY:
 			return BUY;
-		case cb::trade_action::SELL:
+		case trade_action::SELL:
 			return SELL;
 		default:
 			throw std::invalid_argument{ "Trade Action not recognized" };
 		}
 	}
 
-	constexpr std::string to_query_name(const cb::tradable_pair pair)
+	constexpr std::string to_query_name(const tradable_pair pair)
 	{
 		return pair.asset() + pair.price_unit();
 	}
 }
 
-namespace cb
+namespace mb
 {
 	kraken_api::kraken_api(
 		kraken_config config, 

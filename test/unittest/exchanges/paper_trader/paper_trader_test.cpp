@@ -5,7 +5,7 @@
 
 namespace
 {
-	using namespace cb;
+	using namespace mb;
 
 	paper_trader create_paper_trader(
 		double initialGbpBalance,
@@ -30,7 +30,7 @@ namespace
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(PaperTrader, AddBuyOrderCorrectlyAdjustsBalances)
 	{

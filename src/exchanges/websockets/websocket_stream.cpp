@@ -6,7 +6,7 @@ namespace
 	#define CB_ASSERT_CONNECTION_EXISTS(connection) (assert(connection, "Connection has not been created"))
 }
 
-namespace cb
+namespace mb
 {
 	websocket_stream::websocket_stream(
 		std::unique_ptr<internal::websocket_stream_implementation> implementation,

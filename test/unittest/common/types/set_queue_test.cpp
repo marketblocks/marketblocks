@@ -2,7 +2,7 @@
 
 #include "common/types/set_queue.h"
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(SetQueue, PushAddsItemsToQueue)
 	{

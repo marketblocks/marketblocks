@@ -2,23 +2,25 @@
 
 namespace
 {
-    cb::ws_connection_status map_connection_status(websocketpp::session::state::value state)
+    using namespace mb;
+
+    ws_connection_status map_connection_status(websocketpp::session::state::value state)
     {
         switch (state)
         {
         case websocketpp::session::state::closed:
-            return cb::ws_connection_status::CLOSED;
+            return ws_connection_status::CLOSED;
         case websocketpp::session::state::closing:
-            return cb::ws_connection_status::CLOSING;
+            return ws_connection_status::CLOSING;
         case websocketpp::session::state::connecting:
-            return cb::ws_connection_status::CONNECTING;
+            return ws_connection_status::CONNECTING;
         case websocketpp::session::state::open:
-            return cb::ws_connection_status::OPEN;
+            return ws_connection_status::OPEN;
         }
     }
 }
 
-namespace cb
+namespace mb
 {
     websocket_connection::websocket_connection(std::shared_ptr<websocket_client> client, websocketpp::connection_hdl connectionHandle)
         : _client{ client }, _connectionHandle{ std::move(connectionHandle) }

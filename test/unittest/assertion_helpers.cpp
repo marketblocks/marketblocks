@@ -1,6 +1,6 @@
 #include "assertion_helpers.h"
 
-namespace cb::test
+namespace mb::test
 {
 	void assert_order_book_entry_eq(const order_book_entry& lhs, const order_book_entry& rhs)
 	{
@@ -32,7 +32,7 @@ namespace cb::test
 		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
 	}
 
-	void assert_order_description_eq(const std::vector<cb::order_description>& lhs, const std::vector<cb::order_description>& rhs)
+	void assert_order_description_eq(const std::vector<order_description>& lhs, const std::vector<order_description>& rhs)
 	{
 		ASSERT_EQ(lhs.size(), rhs.size());
 

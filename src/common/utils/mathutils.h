@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace cb
+namespace mb
 {
 	template<typename T>
 	concept arithmetic = std::integral<T> || std::floating_point<T>;

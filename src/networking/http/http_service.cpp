@@ -6,6 +6,8 @@
 
 namespace
 {
+	using namespace mb;
+
 	size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
 	{
 		auto readBuffer = static_cast<std::string*>(userdata);
@@ -20,7 +22,7 @@ namespace
 		if (result != CURLcode::CURLE_OK)
 		{
 			std::string error = curl_easy_strerror(result);
-			throw cb::http_error{ std::move(error) };
+			throw http_error{ std::move(error) };
 		}
 	}
 
@@ -31,7 +33,7 @@ namespace
 		throw_if_error(result);
 	}
 
-	curl_slist* append_headers(curl_slist* chunk, const std::vector<cb::http_header>& headers)
+	curl_slist* append_headers(curl_slist* chunk, const std::vector<http_header>& headers)
 	{
 		for (auto& header : headers)
 		{
@@ -42,7 +44,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	http_service::http_service()
 		: easyHandle{ curl_easy_init() }

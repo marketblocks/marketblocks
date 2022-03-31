@@ -8,7 +8,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	fee_schedule::fee_schedule(std::map<double, double> fees)
 		: _fees{ std::move(fees) }

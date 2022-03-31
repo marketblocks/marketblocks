@@ -9,7 +9,8 @@
 
 namespace
 {
-	using namespace cb::test;
+	using namespace mb;
+	using namespace mb::test;
 	using ::testing::Return;
 
 	MATCHER_P(IsKrakenPrivateHttpRequest, expected, "")
@@ -28,7 +29,7 @@ namespace
 	}
 
 	template<typename HttpRequestMatcher>
-	std::unique_ptr<mock_http_service> create_mock_http_service(cb::http_request expectedRequest, cb::http_response response, HttpRequestMatcher httpRequestMatcher)
+	std::unique_ptr<mock_http_service> create_mock_http_service(http_request expectedRequest, http_response response, HttpRequestMatcher httpRequestMatcher)
 	{
 		std::unique_ptr<mock_http_service> mockHttpService{ std::make_unique<mock_http_service>() };
 		EXPECT_CALL(*mockHttpService, send(httpRequestMatcher(std::move(expectedRequest))))
@@ -38,18 +39,18 @@ namespace
 		return mockHttpService;
 	}
 
-	std::unique_ptr<mock_http_service> create_mock_http_service_public_test(cb::http_request expectedRequest, cb::http_response response)
+	std::unique_ptr<mock_http_service> create_mock_http_service_public_test(http_request expectedRequest, http_response response)
 	{
-		return create_mock_http_service(std::move(expectedRequest), std::move(response), IsHttpRequest<cb::http_request>);
+		return create_mock_http_service(std::move(expectedRequest), std::move(response), IsHttpRequest<http_request>);
 	}
 
-	std::unique_ptr<mock_http_service> create_mock_http_service_private_test(cb::http_request expectedRequest, cb::http_response response)
+	std::unique_ptr<mock_http_service> create_mock_http_service_private_test(http_request expectedRequest, http_response response)
 	{
-		return create_mock_http_service(std::move(expectedRequest), std::move(response), IsKrakenPrivateHttpRequest<cb::http_request>);
+		return create_mock_http_service(std::move(expectedRequest), std::move(response), IsKrakenPrivateHttpRequest<http_request>);
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(Kraken, GetStatus)
 	{

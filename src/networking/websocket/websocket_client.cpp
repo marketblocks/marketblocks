@@ -5,9 +5,11 @@
 
 namespace
 {
-    std::shared_ptr<cb::ssl_context> on_tls_init()
+    using namespace mb;
+
+    std::shared_ptr<ssl_context> on_tls_init()
     {
-        std::shared_ptr<cb::ssl_context> context = std::make_shared<cb::ssl_context>(cb::ssl_context::sslv23);
+        std::shared_ptr<ssl_context> context = std::make_shared<ssl_context>(ssl_context::sslv23);
 
         try
         {
@@ -19,14 +21,14 @@ namespace
         }
         catch (std::exception& e)
         {
-            throw cb::websocket_error{ std::format("Error occurred initialising TLS: {}", e.what()) };
+            throw websocket_error{ std::format("Error occurred initialising TLS: {}", e.what()) };
         }
 
         return context;
     }
 }
 
-namespace cb
+namespace mb
 {
     websocket_client::websocket_client(int timeout)
         :_client{}, _thread{}

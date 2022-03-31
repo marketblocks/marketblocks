@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <format>
 
-namespace cb
+namespace mb
 {
 	class not_implemented_exception : public std::exception
 	{

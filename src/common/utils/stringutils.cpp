@@ -1,6 +1,6 @@
 #include "stringutils.h"
 
-namespace cb
+namespace mb
 {
 	std::vector<std::string> split(std::string_view source, const char delimiter)
 	{

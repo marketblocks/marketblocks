@@ -5,15 +5,18 @@
 
 namespace
 {
-	std::unique_ptr<cb::exchange> create_api()
+	using namespace mb;
+	using namespace mb::test;
+
+	std::unique_ptr<exchange> create_api()
 	{
-		cb::coinbase_config config{ cb::test::load_test_config<cb::coinbase_config>() };
-		std::shared_ptr<cb::websocket_client> websocketClient{ std::make_shared<cb::websocket_client>() };
-		return cb::make_coinbase(std::move(config), websocketClient, true);
+		coinbase_config config{ load_test_config<coinbase_config>() };
+		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
+		return make_coinbase(std::move(config), websocketClient, true);
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(CoinbaseIntegration, GetStatus)
 	{

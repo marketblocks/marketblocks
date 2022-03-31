@@ -3,7 +3,7 @@
 #include <string_view>
 #include <nlohmann/json.hpp>
 
-namespace cb
+namespace mb
 {
 	static constexpr std::string_view JSON_FILE_EXTENSION = "json";
 

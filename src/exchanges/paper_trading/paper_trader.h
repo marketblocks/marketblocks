@@ -9,7 +9,7 @@
 #include "trading/trade_description.h"
 #include "trading/order_description.h"
 
-namespace cb
+namespace mb
 {
 	class paper_trader
 	{

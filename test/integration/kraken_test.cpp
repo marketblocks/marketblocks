@@ -5,15 +5,17 @@
 
 namespace
 {
-	std::unique_ptr<cb::exchange> create_api()
+	using namespace mb;
+
+	std::unique_ptr<exchange> create_api()
 	{
-		cb::kraken_config config{ cb::test::load_test_config<cb::kraken_config>() };
-		std::shared_ptr<cb::websocket_client> websocketClient{ std::make_shared<cb::websocket_client>() };
-		return cb::make_kraken(std::move(config), websocketClient);
+		kraken_config config{ test::load_test_config<kraken_config>() };
+		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
+		return make_kraken(std::move(config), websocketClient);
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(KrakenIntegration, GetStatus)
 	{

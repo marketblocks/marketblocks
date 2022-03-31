@@ -9,7 +9,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	paper_trading_config::paper_trading_config()
 		: _fees{ std::map<double, double>{} }, _balances{}

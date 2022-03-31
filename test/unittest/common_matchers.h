@@ -2,7 +2,7 @@
 
 #include <gmock/gmock.h>
 
-namespace cb::test
+namespace mb::test
 {
 	MATCHER_P(IsHttpRequest, expected, "")
 	{

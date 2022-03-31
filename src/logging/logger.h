@@ -3,7 +3,7 @@
 #include <string>
 #include <spdlog/async.h>
 
-namespace cb
+namespace mb
 {
 	class logger
 	{

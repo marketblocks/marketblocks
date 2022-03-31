@@ -10,7 +10,7 @@
 #include "json_iterator.h"
 #include "json_writer.h"
 
-namespace cb
+namespace mb
 {
 	template<typename json_object>
 	class json

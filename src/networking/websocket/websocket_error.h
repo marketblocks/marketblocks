@@ -2,7 +2,7 @@
 
 #include "common/exceptions/cb_exception.h"
 
-namespace cb
+namespace mb
 {
 	class websocket_error : public cb_exception
 	{

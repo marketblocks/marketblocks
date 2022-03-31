@@ -3,7 +3,7 @@
 #include "exchanges/websockets/websocket_stream_implementation.h"
 #include "common/json/json.h"
 
-namespace cb::internal
+namespace mb::internal
 {
 	class kraken_websocket_stream : public websocket_stream_implementation
 	{

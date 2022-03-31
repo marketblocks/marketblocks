@@ -7,7 +7,7 @@
 #include "common/json/json.h"
 #include "logging/logger.h"
 
-namespace cb
+namespace mb
 {
 	std::filesystem::path get_path(std::string_view fileName);
 	void create_config_directory_if_not_exist();
@@ -27,7 +27,7 @@ namespace cb
 	{
 		std::filesystem::path path{ get_path(Config::name()) };
 		std::string json{ to_json(config).to_string() };
-		cb::write_to_file(path, json);
+		write_to_file(path, json);
 	}
 
 	template<typename Config>

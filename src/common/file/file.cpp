@@ -4,7 +4,7 @@
 #include "common/exceptions/cb_exception.h"
 #include "common/exceptions/not_implemented_exception.h"
 
-namespace cb 
+namespace mb 
 {
 	file_handler::file_handler(const std::filesystem::path& path, std::ios_base::openmode openMode)
 		: _stream{ path, openMode }

@@ -19,7 +19,7 @@ namespace
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	/*TEST(Hash, ComputesCorrectSHA256)
 	{

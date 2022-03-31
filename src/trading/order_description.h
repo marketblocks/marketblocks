@@ -2,7 +2,7 @@
 
 #include "trade_description.h"
 
-namespace cb
+namespace mb
 {
 	class order_description
 	{

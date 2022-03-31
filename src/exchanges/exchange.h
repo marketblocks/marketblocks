@@ -15,7 +15,7 @@
 #include "trading/order_description.h"
 #include "paper_trading/paper_trader.h"
 
-namespace cb
+namespace mb
 {
 	class exchange
 	{

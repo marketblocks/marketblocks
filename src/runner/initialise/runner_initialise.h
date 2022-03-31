@@ -11,7 +11,7 @@
 #include "common/types/result.h"
 #include "logging/logger.h"
 
-namespace cb::internal
+namespace mb::internal
 {
 	void log_version();
 

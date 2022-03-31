@@ -5,7 +5,7 @@
 #include "exchanges/exchange_status.h"
 #include "trading/tradable_pair.h"
 
-namespace cb
+namespace mb
 {
 	class websocket_stream
 	{

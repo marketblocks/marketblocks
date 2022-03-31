@@ -4,7 +4,7 @@
 
 #include "common/json/json.h"
 
-namespace cb
+namespace mb
 {
 	enum class run_mode
 	{

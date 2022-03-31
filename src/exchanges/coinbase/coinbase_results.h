@@ -11,7 +11,7 @@
 #include "trading/pair_stats.h"
 #include "trading/order_description.h"
 
-namespace cb::coinbase
+namespace mb::coinbase
 {
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult);
 	result<pair_stats> read_24h_stats(std::string_view jsonResult);

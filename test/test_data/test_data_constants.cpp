@@ -2,16 +2,18 @@
 
 namespace
 {
+	using namespace mb::test;
+
 	std::filesystem::path get_file_path(std::string_view folder, std::string_view fileName)
 	{
-		std::filesystem::path path{ std::format("{0}\\{1}", cb::test::TEST_DATA_FOLDER, folder) };
+		std::filesystem::path path{ std::format("{0}\\{1}", TEST_DATA_FOLDER, folder) };
 		path.append(fileName);
 
 		return path;
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	std::filesystem::path kraken_results_test_data_path(std::string_view fileName)
 	{

@@ -2,7 +2,7 @@
 
 #include "exchanges/websockets/websocket_stream_implementation.h"
 
-namespace cb::internal
+namespace mb::internal
 {
 	class coinbase_websocket_stream : public websocket_stream_implementation
 	{

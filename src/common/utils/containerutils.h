@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace cb
+namespace mb
 {
 	template<typename Key, typename Value, typename Container, typename KeySelector, typename ValueSelector>
 	constexpr std::unordered_map<Key, Value> to_unordered_map(const Container& source, KeySelector keySelector, ValueSelector valueSelector)

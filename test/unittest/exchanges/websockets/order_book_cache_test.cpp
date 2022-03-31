@@ -5,8 +5,8 @@
 
 namespace
 {
-	using namespace cb;
-	using namespace cb::test;
+	using namespace mb;
+	using namespace mb::test;
 
 	void assert_snapshot_equal_to_maps(const ask_map& asks, const bid_map& bids, const order_book_state& snapshot, int expectedAsksDepth, int expectedBidsDepth)
 	{
@@ -33,7 +33,7 @@ namespace
 	}
 }
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(OrderBookCache, ValidInputs)
 	{

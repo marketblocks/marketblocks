@@ -3,7 +3,7 @@
 #include "common/utils/containerutils.h"
 #include "common/exceptions/cb_exception.h"
 
-namespace cb
+namespace mb
 {
 	paper_trader::paper_trader(paper_trading_config config)
 		: _feeSchedule{ std::move(config.fees()) }, _balances{ std::move(config.balances()) }, _nextOrderNumber{ 1 }

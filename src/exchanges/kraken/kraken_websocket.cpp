@@ -6,7 +6,7 @@
 
 namespace
 {
-	using namespace cb;
+	using namespace mb;
 
 	std::string create_message(std::string_view eventName, std::string_view channel, const std::vector<tradable_pair>& tradablePairs)
 	{
@@ -51,7 +51,7 @@ namespace
 
 	tradable_pair parse_tradable_pair(const std::string& pairName)
 	{
-		std::vector<std::string> assets{ cb::split(pairName, '/') };
+		std::vector<std::string> assets{ split(pairName, '/') };
 		return tradable_pair{ std::move(assets[0]), std::move(assets[1]) };
 	}
 
@@ -133,7 +133,7 @@ namespace
 	}
 }
 
-namespace cb::internal
+namespace mb::internal
 {
 	void kraken_websocket_stream::on_open()
 	{

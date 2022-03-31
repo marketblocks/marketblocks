@@ -7,7 +7,7 @@
 
 #include "common/exceptions/cb_exception.h"
 
-namespace cb
+namespace mb
 {
 	template<typename Value>
 	class result

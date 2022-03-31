@@ -2,7 +2,7 @@
 
 #include "common/utils/mathutils.h"
 
-namespace cb
+namespace mb
 {
 	TEST(MathUtils, CalculatePercentageDiffValidArgs)
 	{

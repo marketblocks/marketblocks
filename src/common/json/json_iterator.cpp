@@ -1,7 +1,7 @@
 #include "json_iterator.h"
 #include "json.h"
 
-namespace cb
+namespace mb
 {
 	json_iterator::json_iterator(iterator iter)
 		: _iter{ iter }

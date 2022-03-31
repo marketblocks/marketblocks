@@ -4,7 +4,7 @@
 #include "common/file/file.h"
 #include "common/json/json.h"
 
-namespace cb::test
+namespace mb::test
 {
 	template<typename Config>
 	Config load_test_config()

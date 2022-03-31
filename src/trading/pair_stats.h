@@ -1,6 +1,6 @@
 #pragma once
 
-namespace cb
+namespace mb
 {
 	class pair_stats
 	{

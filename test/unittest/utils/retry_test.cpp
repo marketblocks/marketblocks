@@ -7,7 +7,7 @@ using testing::_;
 using testing::MockFunction;
 using testing::Return;
 
-namespace cb::test
+namespace mb::test
 {
 	TEST(Functional, RetryOnFailOnlyExecutesOnceOnSuccess)
 	{

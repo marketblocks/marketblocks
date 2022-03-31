@@ -10,7 +10,7 @@ namespace
 	}
 }
 
-namespace cb
+namespace mb
 {
 	coinbase_config::coinbase_config(std::string apiKey, std::string apiSecret, std::string apiPassphrase)
 		: 

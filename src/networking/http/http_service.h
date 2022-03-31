@@ -9,7 +9,7 @@
 #include "http_response.h"
 #include "http_request.h"
 
-namespace cb
+namespace mb
 {
 	class http_service
 	{

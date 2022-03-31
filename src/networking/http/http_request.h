@@ -5,7 +5,7 @@
 #include "http_constants.h"
 #include "http_header.h"
 
-namespace cb
+namespace mb
 {
 	class http_request
 	{

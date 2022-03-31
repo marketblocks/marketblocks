@@ -4,7 +4,7 @@
 #include "common/exceptions/cb_exception.h"
 #include "common/types/result.h"
 
-namespace cb
+namespace mb
 {
 	template<typename Value, typename Action, typename ResultConverter>
 	Value retry_on_fail(const Action& action, const ResultConverter& toResult, int maxRetries)

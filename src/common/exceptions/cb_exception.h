@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace cb
+namespace mb
 {
 	class cb_exception : public std::exception
 	{

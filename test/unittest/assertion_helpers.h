@@ -7,7 +7,7 @@
 #include "trading/pair_stats.h"
 #include "trading/order_description.h"
 
-namespace cb::test
+namespace mb::test
 {
 	template<typename T>
 	void no_assert(const T&, const T&)
@@ -38,5 +38,5 @@ namespace cb::test
 	void assert_order_book_entry_eq(const order_book_entry& lhs, const order_book_entry& rhs);
 	void assert_order_book_state_eq(const order_book_state& lhs, const order_book_state& rhs);
 	void assert_pair_stats_eq(const pair_stats& lhs, const pair_stats& rhs);
-	void assert_order_description_eq(const std::vector<cb::order_description>& lhs, const std::vector<cb::order_description>& rhs);
+	void assert_order_description_eq(const std::vector<order_description>& lhs, const std::vector<order_description>& rhs);
 }

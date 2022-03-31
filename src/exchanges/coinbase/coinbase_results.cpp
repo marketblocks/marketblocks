@@ -3,45 +3,47 @@
 
 namespace
 {
+	using namespace mb;
+
 	template<typename T, typename Reader>
-	cb::result<T> read_result(std::string_view jsonResult, const Reader& reader)
+	result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
 		try
 		{
-			cb::json_document jsonDocument{ cb::parse_json(jsonResult) };
+			json_document jsonDocument{ parse_json(jsonResult) };
 
 			if (jsonDocument.has_member("message"))
 			{
-				return cb::result<T>::fail(jsonDocument.get<std::string>("message"));
+				return result<T>::fail(jsonDocument.get<std::string>("message"));
 			}
 
 			if constexpr (std::is_same_v<T, void>)
 			{
-				return cb::result<T>::success();
+				return result<T>::success();
 			}
 			else
 			{
-				return cb::result<T>::success(reader(jsonDocument));
+				return result<T>::success(reader(jsonDocument));
 			}
 		}
 		catch (const std::exception& e)
 		{
-			return cb::result<T>::fail(e.what());
+			return result<T>::fail(e.what());
 		}
 	}
 
-	cb::trade_action to_trade_action(std::string_view actionString)
+	trade_action to_trade_action(std::string_view actionString)
 	{
 		if (actionString == "buy")
 		{
-			return cb::trade_action::BUY;
+			return trade_action::BUY;
 		}
 
-		return cb::trade_action::SELL;
+		return trade_action::SELL;
 	}
 }
 
-namespace cb::coinbase
+namespace mb::coinbase
 {
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
 	{

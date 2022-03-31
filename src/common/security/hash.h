@@ -7,7 +7,7 @@
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 
-namespace cb
+namespace mb
 {
     namespace internal
     {
