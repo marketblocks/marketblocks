@@ -141,7 +141,7 @@ namespace mb::internal
 {
 	void log_version()
 	{
-		logger::instance().info("CryptoBot v{}", PROJECT_VERSION);
+		logger::instance().info("{0} v{1}", PROJECT_NAME, PROJECT_VERSION);
 	}
 
 	runner_config get_runner_config()
