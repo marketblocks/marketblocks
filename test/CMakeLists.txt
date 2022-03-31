@@ -7,7 +7,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(CryptoBotTest 
+add_executable(marketblocks_test 
 "unittest/mocks.h" 
 "unittest/utils/stringutils_test.cpp" 
 "unittest/utils/mathutils_test.cpp" 
@@ -33,14 +33,14 @@ add_executable(CryptoBotTest
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
 "unittest/exchanges/coinbase/coinbase_websocket_test.cpp"  "unittest/common/types/set_queue_test.cpp")
 
-target_link_libraries(CryptoBotTest LINK_PUBLIC CryptoBot_lib)
-target_link_libraries(CryptoBotTest PRIVATE gtest_main gmock_main)
+target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
+target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)
 
-add_custom_command(TARGET CryptoBotTest POST_BUILD
+add_custom_command(TARGET marketblocks_test POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-						   ${CMAKE_CURRENT_SOURCE_DIR}/test_data/ $<TARGET_FILE_DIR:CryptoBotTest>/test_data)
+						   ${CMAKE_CURRENT_SOURCE_DIR}/test_data/ $<TARGET_FILE_DIR:marketblocks_test>/test_data)
 
 include(GoogleTest)
-gtest_discover_tests(CryptoBotTest)
+gtest_discover_tests(marketblocks_test)
 
-target_include_directories (CryptoBotTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories (marketblocks_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

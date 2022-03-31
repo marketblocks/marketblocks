@@ -1,5 +1,5 @@
 ﻿# Add source to this project's executable.
-add_library(CryptoBot_lib 
+add_library(marketblocks_lib 
 
 "common/json/json.cpp"
 "common/json/json.h"
@@ -101,19 +101,19 @@ add_library(CryptoBot_lib
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)
-target_link_libraries(CryptoBot_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
+target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 
 find_package(CURL CONFIG REQUIRED)
-target_link_libraries(CryptoBot_lib PRIVATE CURL::libcurl)
+target_link_libraries(marketblocks_lib PRIVATE CURL::libcurl)
 
 find_package(websocketpp CONFIG REQUIRED)
-target_link_libraries(CryptoBot_lib PRIVATE websocketpp::websocketpp)
+target_link_libraries(marketblocks_lib PRIVATE websocketpp::websocketpp)
 
 find_package(OpenSSL REQUIRED)
-target_link_libraries(CryptoBot_lib PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(marketblocks_lib PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(CryptoBot_lib PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(marketblocks_lib PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
 
-target_include_directories (CryptoBot_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(CryptoBot_lib PRIVATE ${CMAKE_BINARY_DIR}/generated)
+target_include_directories (marketblocks_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(marketblocks_lib PRIVATE ${CMAKE_BINARY_DIR}/generated)
