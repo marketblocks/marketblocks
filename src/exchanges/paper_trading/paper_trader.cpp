@@ -6,7 +6,7 @@
 namespace mb
 {
 	paper_trader::paper_trader(paper_trading_config config)
-		: _feeSchedule{ std::move(config.fees()) }, _balances{ std::move(config.balances()) }, _nextOrderNumber{ 1 }
+		: _fee{ config.fee() }, _balances{ std::move(config.balances()) }, _nextOrderNumber{ 1 }
 	{}
 
 	bool paper_trader::has_sufficient_funds(const std::string& asset, double amount) const
@@ -35,13 +35,13 @@ namespace mb
 
 	double paper_trader::get_fee(const tradable_pair& tradablePair) const
 	{
-		return _feeSchedule.get_fee(0);
+		return _fee;
 	}
 
 	std::string paper_trader::add_order(const trade_description& description)
 	{
 		double cost = calculate_cost(description.asset_price(), description.volume());
-		double fee = cost * _feeSchedule.get_fee(0) * 0.01;
+		double fee = cost * _fee * 0.01;
 
 		if (description.action() == trade_action::BUY)
 		{

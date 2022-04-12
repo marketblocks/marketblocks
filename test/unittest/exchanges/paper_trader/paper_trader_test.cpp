@@ -18,15 +18,7 @@ namespace
 			{ "BTC", initialBtcBalance }
 		};
 
-		fee_schedule fees
-		{
-			std::map<double, double>
-			{
-				{ 0, fee }
-			}
-		};
-
-		return paper_trader{ paper_trading_config{ std::move(fees), std::move(initialBalances) } };
+		return paper_trader{ paper_trading_config{ fee, std::move(initialBalances) } };
 	}
 }
 

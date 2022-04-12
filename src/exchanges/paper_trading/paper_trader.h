@@ -14,7 +14,7 @@ namespace mb
 	class paper_trader
 	{
 	private:
-		fee_schedule _feeSchedule;
+		double _fee;
 		unordered_string_map<double> _balances;
 		int _nextOrderNumber;
 

@@ -9,16 +9,16 @@ namespace mb
 	class paper_trading_config
 	{
 	private:
-		fee_schedule _fees;
+		double _fee;
 		unordered_string_map<double> _balances;
 
 	public:
 		paper_trading_config();
-		paper_trading_config(fee_schedule fees, unordered_string_map<double> balances);
+		paper_trading_config(double fee, unordered_string_map<double> balances);
 		
 		static constexpr std::string name() noexcept { return "paper_trading"; }
 
-		const fee_schedule& fees() const noexcept { return _fees; }
+		double fee() const noexcept { return _fee; }
 		const unordered_string_map<double>& balances() const noexcept { return _balances; }
 	};
 
