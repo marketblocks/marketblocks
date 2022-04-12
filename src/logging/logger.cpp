@@ -10,15 +10,16 @@ namespace
 	std::shared_ptr<spdlog::logger> init_logger()
 	{
 		auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		//auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
-		
+		auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
+		fileSink->set_level(spdlog::level::err);
+
 		constexpr int QUEUE_SIZE = 8192;
 		constexpr int THREAD_COUNT = 1;
 		spdlog::init_thread_pool(QUEUE_SIZE, THREAD_COUNT);
 
 		auto logger = std::make_shared<spdlog::async_logger>(
 			"default", 
-			spdlog::sinks_init_list{ consoleSink },
+			spdlog::sinks_init_list{ consoleSink, fileSink },
 			spdlog::thread_pool(),
 			spdlog::async_overflow_policy::block);
 
