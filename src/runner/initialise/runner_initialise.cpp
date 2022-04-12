@@ -50,8 +50,8 @@ namespace
 			case run_mode::LIVETEST:
 				return [](std::unique_ptr<exchange> api)
 				{
-					paper_trading_config config{ get_config<paper_trading_config>() };
-					return assemble_live_test(std::move(api), std::move(config));
+					static paper_trading_config config{ get_config<paper_trading_config>() };
+					return assemble_live_test(std::move(api), config);
 				};
 			default:
 				throw initialisation_error{ "Run mode not supported" };
