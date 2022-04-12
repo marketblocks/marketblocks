@@ -37,6 +37,14 @@ namespace mb::test
 		ASSERT_NO_THROW(kraken->get_24h_stats(pair));
 	}
 
+	TEST(KrakenIntegration, GetPrice)
+	{
+		tradable_pair pair{ "BTC", "USD" };
+
+		auto kraken{ create_api() };
+		ASSERT_NO_THROW(kraken->get_price(pair));
+	}
+
 	TEST(KrakenIntegration, GetOrderBook)
 	{
 		tradable_pair pair{ "BTC", "USD" };

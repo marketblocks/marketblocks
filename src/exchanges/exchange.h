@@ -36,6 +36,7 @@ namespace mb
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
 		virtual pair_stats get_24h_stats(const tradable_pair& tradablePair) const = 0;
+		virtual double get_price(const tradable_pair& tradablePair) const = 0;
 		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual unordered_string_map<double> get_balances() const = 0;
 		virtual double get_fee(const tradable_pair& tradablePair) const = 0;
@@ -78,6 +79,11 @@ namespace mb
 		pair_stats get_24h_stats(const tradable_pair& tradablePair) const override
 		{
 			return _marketApi->get_24h_stats(tradablePair);
+		}
+
+		double get_price(const tradable_pair& tradablePair) const override
+		{
+			return _marketApi->get_price(tradablePair);
 		}
 
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override

@@ -38,6 +38,14 @@ namespace mb::test
 		ASSERT_NO_THROW(coinbase->get_24h_stats(pair));
 	}
 
+	TEST(CoinbaseIntegration, GetPrice)
+	{
+		tradable_pair pair{ "BTC", "USD" };
+
+		auto coinbase{ create_api() };
+		ASSERT_NO_THROW(coinbase->get_price(pair));
+	}
+
 	TEST(CoinbaseIntegration, GetOrderBook)
 	{
 		tradable_pair pair{ "BTC", "USD" };

@@ -67,6 +67,14 @@ namespace mb::test
 			assert_pair_stats_eq);
 	}
 
+	TEST(CoinbaseResults, ReadPrice)
+	{
+		execute_test(
+			"price.json",
+			coinbase::read_price,
+			6268.48);
+	}
+
 	TEST(CoinbaseResults, ReadOrderBook)
 	{
 		constexpr int depth = 2;

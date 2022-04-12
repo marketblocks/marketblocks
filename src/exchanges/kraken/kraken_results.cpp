@@ -138,6 +138,15 @@ namespace mb::kraken
 		});
 	}
 
+	result<double> read_price(std::string_view jsonResult)
+	{
+		return read_result<double>(jsonResult, [](const json_element& resultElement)
+		{
+			json_element dataElement{ resultElement.begin().value() };
+			return std::stod(dataElement.get<std::vector<std::string>>("c")[0]);
+		});
+	}
+
 	result<order_book_state> read_order_book(std::string_view jsonResult)
 	{
 		return read_result<order_book_state>(jsonResult, [](const json_element& resultElement)

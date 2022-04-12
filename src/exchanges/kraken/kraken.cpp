@@ -102,6 +102,15 @@ namespace mb
 		return send_public_request<pair_stats>(_constants.methods.TICKER, kraken::read_24h_stats, query);
 	}
 
+	double kraken_api::get_price(const tradable_pair& tradablePair) const
+	{
+		std::string query = url_query_builder{}
+			.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(tradablePair))
+			.to_string();
+
+		return send_public_request<double>(_constants.methods.TICKER, kraken::read_price, query);
+	}
+
 	order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
 		std::string query = url_query_builder{}

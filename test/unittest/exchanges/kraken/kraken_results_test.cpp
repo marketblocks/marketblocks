@@ -93,6 +93,14 @@ namespace mb::test
 			assert_pair_stats_eq);
 	}
 
+	TEST(KrakenResults, ReadPrice)
+	{
+		execute_test(
+			"24h_stats_success.json",
+			kraken::read_price,
+			1940.0);
+	}
+
 	TEST(KrakenResults, ReadOrderBook)
 	{
 		execute_test(

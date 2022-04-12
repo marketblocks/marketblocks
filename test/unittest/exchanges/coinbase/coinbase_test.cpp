@@ -68,6 +68,28 @@ namespace mb::test
 		api.get_24h_stats(pair);
 	}
 
+	TEST(Coinbase, GetPrice)
+	{
+		tradable_pair pair{ "ETH", "USD" };
+
+		http_request expectedRequest
+		{
+			http_verb::GET,
+			"https://api.exchange.coinbase.com/products/ETH-USD/ticker"
+		};
+
+		http_response response
+		{
+			200,
+			read_file(coinbase_results_test_data_path("price.json"))
+		};
+
+		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
+		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), mock_websocket_stream{} };
+
+		api.get_price(pair);
+	}
+
 	TEST(Coinbase, GetOrderBook)
 	{
 		tradable_pair pair{ "BTC", "GBP" };

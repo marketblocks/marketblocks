@@ -104,6 +104,18 @@ namespace mb
 		return send_public_request<pair_stats>(path, coinbase::read_24h_stats);
 	}
 
+	double coinbase_api::get_price(const tradable_pair& tradablePair) const
+	{
+		std::string path{ build_url_path(std::array<std::string_view, 3>
+		{
+			_constants.methods.PRODUCTS,
+			internal::to_exchange_id(tradablePair),
+			_constants.methods.TICKER
+		}) };
+
+		return send_public_request<double>(path, coinbase::read_price);
+	}
+
 	order_book_state coinbase_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
 		std::string path{ build_url_path(std::array<std::string_view, 3>

@@ -80,6 +80,14 @@ namespace mb::coinbase
 		});
 	}
 
+	result<double> read_price(std::string_view jsonResult)
+	{
+		return read_result<double>(jsonResult, [](const json_document& json)
+		{
+			return std::stod(json.get<std::string>("price"));
+		});
+	}
+
 	result<order_book_state> read_order_book(std::string_view jsonResult, int depth)
 	{
 		static constexpr int PRICE_INDEX = 0;

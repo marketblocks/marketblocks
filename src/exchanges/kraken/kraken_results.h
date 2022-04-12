@@ -17,6 +17,7 @@ namespace mb::kraken
 	result<exchange_status> read_system_status(std::string_view jsonResult);
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult);
 	result<pair_stats> read_24h_stats(std::string_view jsonResult);
+	result<double> read_price(std::string_view jsonResult);
 	result<order_book_state> read_order_book(std::string_view jsonResult);
 	result<unordered_string_map<double>> read_balances(std::string_view jsonResult);
 	result<double> read_fee(std::string_view jsonResult);
