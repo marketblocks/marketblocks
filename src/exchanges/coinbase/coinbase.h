@@ -106,7 +106,7 @@ namespace mb
 
 			if (response.response_code() != HttpResponseCodes::OK)
 			{
-				throw cb_exception{ response.message() };
+				throw mb_exception{ response.message() };
 			}
 
 			result<Value> result{ reader(response.message()) };
@@ -116,7 +116,7 @@ namespace mb
 				return result.value();
 			}
 
-			throw cb_exception{ result.error() };
+			throw mb_exception{ result.error() };
 		}
 
 		template<typename Value, typename ResponseReader>

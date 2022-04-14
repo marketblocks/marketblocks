@@ -1,5 +1,5 @@
 #include "local_order_book.h"
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace mb
 {
@@ -55,7 +55,7 @@ namespace mb
 
 		if (it == _orderBookCaches.end())
 		{
-			throw cb_exception{ std::format("Order book not subscribed for pair {}", pair.to_standard_string()) };
+			throw mb_exception{ std::format("Order book not subscribed for pair {}", pair.to_standard_string()) };
 		}
 
 		return it->second.snapshot(depth);

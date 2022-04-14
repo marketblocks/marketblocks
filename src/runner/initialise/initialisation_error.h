@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace mb
 {
-	class initialisation_error : public cb_exception
+	class initialisation_error : public mb_exception
 	{
 	public:
 		initialisation_error(std::string message)
-			: cb_exception{ std::move(message) }
+			: mb_exception{ std::move(message) }
 		{}
 	};
 }

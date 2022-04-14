@@ -13,7 +13,8 @@
 #include "trading/trade_description.h"
 #include "trading/pair_stats.h"
 #include "trading/order_description.h"
-#include "paper_trading/paper_trader.h"
+#include "testing/paper_trading/paper_trade_api.h"
+#include "testing/back_testing/backtest_market_api.h"
 
 namespace mb
 {
@@ -54,10 +55,10 @@ namespace mb
 		std::unique_ptr<TradeApi> _tradeApi;
 
 	public:
-		multi_component_exchange(std::unique_ptr<MarketApi> dataApi, std::unique_ptr<TradeApi> tradeApi)
+		multi_component_exchange(std::unique_ptr<MarketApi> marketApi, std::unique_ptr<TradeApi> tradeApi)
 			: 
-			exchange{ std::move(dataApi->get_websocket_stream()) },
-			_marketApi{ std::move(dataApi) }, 
+			exchange{ std::move(marketApi->get_websocket_stream()) },
+			_marketApi{ std::move(marketApi) }, 
 			_tradeApi{ std::move(tradeApi) }
 		{}
 
@@ -122,5 +123,6 @@ namespace mb
 		}
 	};
 
-	typedef multi_component_exchange<exchange, paper_trader> live_test_exchange;
+	typedef multi_component_exchange<exchange, paper_trade_api> live_test_exchange;
+	typedef multi_component_exchange<backtest_market_api, paper_trade_api> back_test_exchange;
 }

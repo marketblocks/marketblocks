@@ -11,7 +11,7 @@
 
 namespace mb
 {
-	class paper_trader
+	class paper_trade_api
 	{
 	private:
 		double _fee;
@@ -22,7 +22,7 @@ namespace mb
 		std::string execute_trade(std::string gainedAsset, double gainValue, std::string soldAsset, double soldValue);
 
 	public:
-		explicit paper_trader(paper_trading_config config);
+		explicit paper_trade_api(paper_trading_config config);
 
 		double get_fee(const tradable_pair& tradablePair) const;
 		unordered_string_map<double> get_balances() const noexcept { return _balances; }

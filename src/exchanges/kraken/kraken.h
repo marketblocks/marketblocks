@@ -135,7 +135,7 @@ namespace mb
 				return result<Value>::fail(responseResult.error());
 			}
 
-			throw cb_exception{ responseResult.error() };
+			throw mb_exception{ responseResult.error() };
 		}
 	}
 	

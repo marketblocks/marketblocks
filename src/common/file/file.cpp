@@ -1,7 +1,7 @@
 #include <fstream>
 
 #include "file.h"
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 #include "common/exceptions/not_implemented_exception.h"
 
 namespace mb 
@@ -40,7 +40,7 @@ namespace mb
 			return contents;
 		}
 	
-		throw cb_exception{ strerror(errno) };
+		throw mb_exception{ strerror(errno) };
 	}
 
 	void write_to_file(const std::filesystem::path& path, std::string_view content)
@@ -51,7 +51,7 @@ namespace mb
 
 		if (!handler.stream().good())
 		{
-			throw cb_exception{ strerror(errno) };
+			throw mb_exception{ strerror(errno) };
 		}
 	}
 }

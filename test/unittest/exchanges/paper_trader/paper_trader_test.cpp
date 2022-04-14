@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "exchanges/paper_trading/paper_trader.h"
-#include "common/exceptions/cb_exception.h"
+#include "testing/paper_trading/paper_trade_api.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace
 {
 	using namespace mb;
 
-	paper_trader create_paper_trader(
+	paper_trade_api create_paper_trade_api(
 		double initialGbpBalance,
 		double initialBtcBalance,
 		double fee)
@@ -18,7 +18,7 @@ namespace
 			{ "BTC", initialBtcBalance }
 		};
 
-		return paper_trader{ paper_trading_config{ fee, std::move(initialBalances) } };
+		return paper_trade_api{ paper_trading_config{ fee, std::move(initialBalances) } };
 	}
 }
 
@@ -32,7 +32,7 @@ namespace mb::test
 		constexpr double assetPrice = 20.0;
 		constexpr double volume = 2.0;
 
-		paper_trader trader{ create_paper_trader(initialGbpBalance, initialBtcBalance, fee) };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee) };
 
 		trade_description tradeDescription
 		{
@@ -63,7 +63,7 @@ namespace mb::test
 		constexpr double assetPrice = 20.0;
 		constexpr double volume = 1.0;
 
-		paper_trader trader{ create_paper_trader(initialGbpBalance, initialBtcBalance, fee) };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee) };
 
 		trade_description tradeDescription
 		{
@@ -94,7 +94,7 @@ namespace mb::test
 		constexpr double assetPrice = 50.0;
 		constexpr double volume = 1.0;
 
-		paper_trader trader{ create_paper_trader(initialGbpBalance, initialBtcBalance, fee) };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee) };
 
 		trade_description tradeDescription
 		{
@@ -105,7 +105,7 @@ namespace mb::test
 			volume
 		};
 
-		EXPECT_THROW(trader.add_order(tradeDescription), cb_exception);
+		EXPECT_THROW(trader.add_order(tradeDescription), mb_exception);
 	}
 
 	TEST(PaperTrader, AddSellOrderThrowsIfInsufficientFunds)
@@ -116,7 +116,7 @@ namespace mb::test
 		constexpr double assetPrice = 50.0;
 		constexpr double volume = 1.0;
 
-		paper_trader trader{ create_paper_trader(initialGbpBalance, initialBtcBalance, fee) };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee) };
 
 		trade_description tradeDescription
 		{
@@ -127,6 +127,6 @@ namespace mb::test
 			volume
 		};
 
-		EXPECT_THROW(trader.add_order(tradeDescription), cb_exception);
+		EXPECT_THROW(trader.add_order(tradeDescription), mb_exception);
 	}
 }

@@ -1,5 +1,6 @@
 #include "runner_config.h"
 #include "logging/logger.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace
 {
@@ -20,6 +21,8 @@ namespace
 	{
 		static constexpr std::string_view LIVE = "live";
 		static constexpr std::string_view LIVE_TEST = "live_test";
+		static constexpr std::string_view BACK_TEST = "back_test";
+		static constexpr std::string_view UNKNOWN = "unknown";
 	}
 
 	std::string_view to_string(run_mode runMode)
@@ -28,8 +31,12 @@ namespace
 		{
 		case run_mode::LIVE:
 			return run_mode_strings::LIVE;
-		default:
+		case run_mode::LIVETEST:
 			return run_mode_strings::LIVE_TEST;
+		case run_mode::BACKTEST:
+			return run_mode_strings::BACK_TEST;
+		default:
+			return run_mode_strings::UNKNOWN;
 		}
 	}
 
@@ -39,8 +46,16 @@ namespace
 		{
 			return run_mode::LIVE;
 		}
+		else if (runMode == run_mode_strings::LIVE_TEST)
+		{
+			return run_mode::LIVETEST;
+		}
+		else if (runMode == run_mode_strings::BACK_TEST)
+		{
+			return run_mode::BACKTEST;
+		}
 
-		return run_mode::LIVETEST;
+		return run_mode::UNKNOWN;
 	}
 }
 
@@ -71,6 +86,11 @@ namespace mb
 		if (_exchangeIds.empty())
 		{
 			log.warning("Exchange list is empty, all supported exchanges will be used");
+		}
+
+		if (_runMode == run_mode::UNKNOWN)
+		{
+			throw mb_exception{ std::format("Run mode not recognized. Options are: {0}, {1}, {2}", run_mode_strings::LIVE, run_mode_strings::LIVE_TEST, run_mode_strings::BACK_TEST) };
 		}
 	}
 

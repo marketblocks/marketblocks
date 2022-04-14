@@ -1,7 +1,7 @@
 #pragma once
 
 #include "logging/logger.h"
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 #include "common/types/result.h"
 
 namespace mb
@@ -25,6 +25,6 @@ namespace mb
 			log.warning("Retrying attempt {0}/{1}...", i + 1, maxRetries);
 		}
 
-		throw cb_exception{ "Max number of retries exceeded" };
+		throw mb_exception{ "Max number of retries exceeded" };
 	}
 }

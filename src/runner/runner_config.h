@@ -8,7 +8,7 @@ namespace mb
 {
 	enum class run_mode
 	{
-		LIVE, LIVETEST, BACKTEST
+		LIVE, LIVETEST, BACKTEST, UNKNOWN
 	};
 
 	class runner_config

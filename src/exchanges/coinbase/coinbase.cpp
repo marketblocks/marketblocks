@@ -20,7 +20,7 @@ namespace
 		case order_type::MARKET:
 			return MARKET;
 		default:
-			throw cb_exception{ "Unknown order type" };
+			throw mb_exception{ "Unknown order type" };
 		}
 	}
 
@@ -36,7 +36,7 @@ namespace
 		case trade_action::SELL:
 			return SELL;
 		default:
-			throw cb_exception{ "Unknown order type" };
+			throw mb_exception{ "Unknown order type" };
 		}
 	}
 }

@@ -4,7 +4,7 @@
 #include <cassert>
 
 #include "trading/trading_constants.h"
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace mb
 {
@@ -55,7 +55,7 @@ namespace mb
 	{
 		if (entries.size() == 0)
 		{
-			throw cb_exception{ "Order Book entries are empty" };
+			throw mb_exception{ "Order Book entries are empty" };
 		}
 
 		return entries[0];

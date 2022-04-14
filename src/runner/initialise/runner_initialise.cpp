@@ -3,13 +3,13 @@
 
 #include "runner_initialise.h"
 #include "initialisation_error.h"
+#include "exchange_assemblers.h"
 #include "exchanges/exchange_ids.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/coinbase/coinbase.h"
-#include "exchanges/exchange_assemblers.h"
 #include "exchanges/exchange_status.h"
 #include "common/file/file.h"
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 #include "logging/logger.h"
 #include "networking/websocket/websocket_client.h"
 #include "project_settings.h"
@@ -31,6 +31,7 @@ namespace
 			Config config = load_or_create_config<Config>();
 
 			log.info("{} created successfully", configName);
+
 			return config;
 		}
 		catch (const std::exception& e)
@@ -40,19 +41,19 @@ namespace
 		}
 	}
 
-	typedef std::shared_ptr<exchange>(*exchange_assembler)(std::unique_ptr<exchange> api);
-	exchange_assembler select_assembler(run_mode runMode)
+	std::unique_ptr<exchange_assembler> select_assembler(run_mode runMode)
 	{
 		switch (runMode)
 		{
 			case run_mode::LIVE:
-				return assemble_live;
+				return std::make_unique<assemble_live>();
 			case run_mode::LIVETEST:
-				return [](std::unique_ptr<exchange> api)
-				{
-					static paper_trading_config config{ get_config<paper_trading_config>() };
-					return assemble_live_test(std::move(api), config);
-				};
+				return std::make_unique<assemble_live_test>(
+					get_config<paper_trading_config>());
+			case run_mode::BACKTEST:
+				return std::make_unique<assemble_back_test>(
+					get_config<back_testing_config>(),
+					get_config<paper_trading_config>());
 			default:
 				throw initialisation_error{ "Run mode not supported" };
 		}
@@ -95,7 +96,7 @@ namespace
 	template<typename ExchangeIds>
 	std::vector<std::shared_ptr<exchange>> create_exchanges(
 		const ExchangeIds& exchangeIds,
-		const exchange_assembler& assembler,
+		std::unique_ptr<exchange_assembler> assembler,
 		std::shared_ptr<websocket_client> websocketClient)
 	{
 		std::vector<std::shared_ptr<exchange>> exchanges;
@@ -130,7 +131,7 @@ namespace
 				log.warning("Exchange status: {}", status_string);
 			}
 
-			exchanges.emplace_back(assembler(std::move(api)));
+			exchanges.emplace_back(assembler->assemble(std::move(api)));
 		}
 
 		return exchanges;
@@ -152,8 +153,9 @@ namespace mb::internal
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig)
 	{
 		std::vector<std::shared_ptr<exchange>> exchanges;
+
+		std::unique_ptr<exchange_assembler> assembler = select_assembler(runnerConfig.runmode());
 		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>(runnerConfig.websocket_timeout());
-		exchange_assembler assembler = select_assembler(runnerConfig.runmode());
 
 		http_service::set_timeout(runnerConfig.http_timeout());
 
@@ -161,11 +163,11 @@ namespace mb::internal
 
 		if (runnerConfig.exchange_ids().empty())
 		{
-			return ::create_exchanges(exchange_ids::all(), assembler, websocketClient);
+			return ::create_exchanges(exchange_ids::all(), std::move(assembler), websocketClient);
 		}
 		else
 		{
-			return ::create_exchanges(runnerConfig.exchange_ids(), assembler, websocketClient);
+			return ::create_exchanges(runnerConfig.exchange_ids(), std::move(assembler), websocketClient);
 		}
 	}
 }

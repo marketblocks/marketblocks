@@ -4,10 +4,10 @@
 
 namespace mb
 {
-	class cb_exception : public std::exception
+	class mb_exception : public std::exception
 	{
 	public:
-		cb_exception(std::string message)
+		mb_exception(std::string message)
 			: std::exception{ message.c_str() }
 		{}
 	};

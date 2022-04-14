@@ -2,7 +2,7 @@
 #include "logging/logger.h"
 #include "common/utils/containerutils.h"
 #include "common/utils/stringutils.h"
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace
 {

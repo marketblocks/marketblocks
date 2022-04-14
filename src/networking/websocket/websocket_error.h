@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace mb
 {
-	class websocket_error : public cb_exception
+	class websocket_error : public mb_exception
 	{
 	public:
 		websocket_error(std::string message)
-			: cb_exception{ "Websocket Error: " + std::move(message)}
+			: mb_exception{ "Websocket Error: " + std::move(message)}
 		{}
 	};
 }

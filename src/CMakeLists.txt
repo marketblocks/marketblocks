@@ -26,15 +26,15 @@ add_library(marketblocks_lib
 
 "common/utils/timeutils.h" 
 
-"common/exceptions/cb_exception.h" 
+"common/exceptions/mb_exception.h" 
 "common/exceptions/not_implemented_exception.h" 
 
 "common/types/result.h"
 "common/types/basic_iterator.h" 
 
 "exchanges/exchange.h"
-"exchanges/exchange_assemblers.cpp"  
-"exchanges/exchange_assemblers.h" 
+"runner/initialise/exchange_assemblers.cpp"  
+"runner/initialise/exchange_assemblers.h" 
 
 "exchanges/exchange_ids.h"
 "exchanges/exchange_helpers.cpp"
@@ -50,8 +50,8 @@ add_library(marketblocks_lib
 "exchanges/kraken/kraken_config.h"
 "exchanges/kraken/kraken_websocket.h"
 "exchanges/kraken/kraken_websocket.cpp"
-"exchanges/paper_trading/paper_trader.cpp"
-"exchanges/paper_trading/paper_trader.h"
+"testing/paper_trading/paper_trade_api.cpp"
+"testing/paper_trading/paper_trade_api.h"
 
 "exchanges/websockets/websocket_stream.cpp"
 "exchanges/websockets/order_book_cache.h"  
@@ -97,7 +97,7 @@ add_library(marketblocks_lib
 
 "trading/trading_constants.h"
 
- "trading/pair_stats.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp" "exchanges/websockets/local_order_book.cpp"    "exchanges/websockets/websocket_stream_implementation.h"   "common/types/set_queue.h" "exchanges/paper_trading/paper_trading_config.h" "exchanges/paper_trading/paper_trading_config.cpp" "common/json/json_constants.h" "common/json/json_writer.h"  "common/json/json_writer.cpp")
+ "trading/pair_stats.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp" "exchanges/websockets/local_order_book.cpp"    "exchanges/websockets/websocket_stream_implementation.h"   "common/types/set_queue.h" "testing/paper_trading/paper_trading_config.h" "testing/paper_trading/paper_trading_config.cpp" "common/json/json_constants.h" "common/json/json_writer.h"  "common/json/json_writer.cpp" "testing/back_testing/backtest_market_api.h" "testing/back_testing/backtest_market_api.cpp" "testing/back_testing/back_testing_config.h" "testing/back_testing/back_testing_config.cpp")
 
 # TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)

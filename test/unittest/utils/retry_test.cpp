@@ -30,6 +30,6 @@ namespace mb::test
 
 		auto toResult = [](int value) { return result<int>::fail(""); };
 
-		EXPECT_THROW(retry_on_fail<int>(mockAction.AsStdFunction(), toResult, maxRetries), cb_exception);
+		EXPECT_THROW(retry_on_fail<int>(mockAction.AsStdFunction(), toResult, maxRetries), mb_exception);
 	}
 }

@@ -5,7 +5,7 @@
 #include <string>
 #include <cassert>
 
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace mb
 {

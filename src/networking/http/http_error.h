@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common/exceptions/cb_exception.h"
+#include "common/exceptions/mb_exception.h"
 
 namespace mb
 {
-	class http_error : public cb_exception
+	class http_error : public mb_exception
 	{
 	public:
 		http_error(std::string message)
-			: cb_exception{ "HTTP Error: " + std::move(message)}
+			: mb_exception{ "HTTP Error: " + std::move(message)}
 		{}
 	};
 }

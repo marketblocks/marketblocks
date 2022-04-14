@@ -52,7 +52,7 @@ namespace mb
 		{
 			if (!_initialised)
 			{
-				throw cb_exception{ "Runner must be initialized" };
+				throw mb_exception{ "Runner must be initialized" };
 			}
 
 			while (true)
