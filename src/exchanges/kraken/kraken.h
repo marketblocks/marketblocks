@@ -46,6 +46,7 @@ namespace mb
 				static constexpr std::string_view QUERY_ORDERS = "QueryOrders";
 				static constexpr std::string_view ADD_ORDER = "AddOrder";
 				static constexpr std::string_view CANCEL_ORDER = "CancelOrder";
+				static constexpr std::string_view TRADES = "Trades";
 			};
 
 			struct query_constants
@@ -58,6 +59,7 @@ namespace mb
 				static constexpr std::string_view VOLUME = "volume";
 				static constexpr std::string_view TXID = "txid";
 				static constexpr std::string_view NONCE = "nonce";
+				static constexpr std::string_view SINCE = "since";
 			};
 
 			struct http_constants
@@ -218,7 +220,8 @@ namespace mb
 		
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
-		pair_stats get_24h_stats(const tradable_pair& tradablePair) const override;
+		ohlc_data get_24h_stats(const tradable_pair& tradablePair) const override;
+		std::vector<historical_trade> get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const override;
 		double get_price(const tradable_pair& tradablePair) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;

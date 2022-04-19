@@ -3,9 +3,11 @@
 #include <gtest/gtest.h>
 
 #include "common/types/result.h"
+#include "common/types/partial_data_result.h"
 #include "trading/order_book.h"
-#include "trading/pair_stats.h"
+#include "trading/ohlc_data.h"
 #include "trading/order_description.h"
+#include "trading/historical_trade.h"
 
 namespace mb::test
 {
@@ -35,8 +37,33 @@ namespace mb::test
 		}
 	}
 
+	template<typename T, typename ValueAsserter>
+	auto create_vector_equal_asserter(ValueAsserter valueAsserter)
+	{
+		return [valueAsserter](const std::vector<T>& lhs, const std::vector<T>& rhs)
+		{
+			ASSERT_EQ(lhs.size(), rhs.size());
+
+			for (int i = 0; i < lhs.size(); ++i)
+			{
+				valueAsserter(lhs[i], rhs[i]);
+			}
+		};
+	}
+
+	template<typename DataType, typename SequenceId, typename ValueAsserter>
+	auto create_partial_data_result_asserter(ValueAsserter valueAsserter)
+	{
+		return [valueAsserter](const partial_data_result<DataType, SequenceId>& lhs, const partial_data_result<DataType, SequenceId>& rhs)
+		{
+			ASSERT_EQ(lhs.id(), rhs.id());
+			create_vector_equal_asserter<DataType>(valueAsserter)(lhs.data(), rhs.data());
+		};
+	}
+
 	void assert_order_book_entry_eq(const order_book_entry& lhs, const order_book_entry& rhs);
 	void assert_order_book_state_eq(const order_book_state& lhs, const order_book_state& rhs);
-	void assert_pair_stats_eq(const pair_stats& lhs, const pair_stats& rhs);
-	void assert_order_description_eq(const std::vector<order_description>& lhs, const std::vector<order_description>& rhs);
+	void assert_pair_stats_eq(const ohlc_data& lhs, const ohlc_data& rhs);
+	void assert_order_description_eq(const order_description& lhs, const order_description& rhs);
+	void assert_historical_trade_eq(const historical_trade& lhs, const historical_trade& rhs);
 }

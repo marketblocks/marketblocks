@@ -80,7 +80,7 @@ namespace mb::test
 			std::vector<tradable_pair>
 		{
 			tradable_pair{ "ETH", "XBT" },
-			tradable_pair{ "XBT", "USD" }
+				tradable_pair{ "XBT", "USD" }
 		});
 	}
 
@@ -89,8 +89,27 @@ namespace mb::test
 		execute_test(
 			"24h_stats_success.json",
 			kraken::read_24h_stats,
-			pair_stats{ 369.71101684, 1917.23, 2056.45, 2034.26 },
+			ohlc_data{ 2034.26, 2056.45, 1917.23, 1940.0, 369.71101684 },
 			assert_pair_stats_eq);
+	}
+
+
+	TEST(KrakenResults, ReadHistoricalTrades)
+	{
+		execute_test(
+			"historical_trades.json",
+			kraken::read_historical_trades,
+			kraken::historical_trades_result
+			{
+				std::vector<historical_trade>
+				{
+					historical_trade{ std::time_t{ 1616663618 }, trade_action::BUY, 52478.9, 0.0064 },
+					historical_trade{ std::time_t{ 1616663618 }, trade_action::BUY, 52490.5, 0.01169993 },
+					historical_trade{ std::time_t{ 1616663622 }, trade_action::SELL, 52478.8, 0.04107375 },
+				},
+				std::time_t{ 1616663622136576459 }
+			},
+			create_partial_data_result_asserter<historical_trade, std::time_t>(assert_historical_trade_eq));
 	}
 
 	TEST(KrakenResults, ReadPrice)
@@ -152,7 +171,7 @@ namespace mb::test
 			"open_orders_success.json",
 			kraken::read_open_orders,
 			get_expected_open_closed_orders(),
-			assert_order_description_eq);
+			create_vector_equal_asserter<order_description>(assert_order_description_eq));
 	}
 
 	TEST(KrakenResults, ReadClosedOrders)
@@ -161,7 +180,7 @@ namespace mb::test
 			"closed_orders_success.json",
 			kraken::read_closed_orders,
 			get_expected_open_closed_orders(),
-			assert_order_description_eq);
+			create_vector_equal_asserter<order_description>(assert_order_description_eq));
 	}
 
 	TEST(KrakenResults, ReadAddOrder)

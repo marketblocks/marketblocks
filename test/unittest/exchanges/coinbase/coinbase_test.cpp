@@ -68,6 +68,74 @@ namespace mb::test
 		api.get_24h_stats(pair);
 	}
 
+	TEST(Coinbase, GetHistoricalTrades)
+	{
+		tradable_pair pair{ "BTC", "GBP" };
+		time_t startTime{ 1650302630 };
+
+		http_request expectedRequest
+		{
+			http_verb::GET,
+			"https://api.exchange.coinbase.com/products/BTC-GBP/trades"
+		};
+
+		http_response response
+		{
+			200,
+			read_file(coinbase_results_test_data_path("historical_trades.json"))
+		};
+
+		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
+		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), mock_websocket_stream{} };
+
+		api.get_historical_trades(pair, startTime);
+	}
+
+	TEST(Coinbase, GetHistoricalTradesWithPartialResult)
+	{
+		tradable_pair pair{ "BTC", "GBP" };
+		time_t startTime{ 1650351650 };
+
+		http_request expectedFirstRequest
+		{
+			http_verb::GET,
+			"https://api.exchange.coinbase.com/products/BTC-GBP/trades"
+		};
+
+		http_response firstResponse
+		{
+			200,
+			read_file(coinbase_results_test_data_path("historical_trades_1000_1.json"))
+		};
+
+		http_request expectedSecondRequest
+		{
+			http_verb::GET,
+			"https://api.exchange.coinbase.com/products/BTC-GBP/trades?after=29745544"
+		};
+
+		http_response secondResponse
+		{
+			200,
+			read_file(coinbase_results_test_data_path("historical_trades_1000_2.json"))
+		};
+
+		std::unique_ptr<mock_http_service> mockHttpService{ std::make_unique<mock_http_service>() };
+
+		EXPECT_CALL(*mockHttpService, send(IsHttpRequest(std::move(expectedFirstRequest))))
+			.Times(1)
+			.WillOnce(Return(std::move(firstResponse)));
+
+		EXPECT_CALL(*mockHttpService, send(IsHttpRequest(std::move(expectedSecondRequest))))
+			.Times(1)
+			.WillOnce(Return(std::move(secondResponse)));
+
+		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), mock_websocket_stream{} };
+
+		std::vector<historical_trade> trades = api.get_historical_trades(pair, startTime);
+		ASSERT_TRUE(trades.size() == 1003);
+	}
+
 	TEST(Coinbase, GetPrice)
 	{
 		tradable_pair pair{ "ETH", "USD" };

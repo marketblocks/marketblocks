@@ -2,12 +2,13 @@
 
 #include "test_data/test_exchange_configs/test_config_loader.h"
 #include "exchanges/kraken/kraken.h"
+#include "common/utils/timeutils.h"
 
 namespace
 {
 	using namespace mb;
 
-	std::unique_ptr<exchange> create_api()
+	std::unique_ptr<kraken_api> create_api()
 	{
 		kraken_config config{ test::load_test_config<kraken_config>() };
 		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
@@ -35,6 +36,15 @@ namespace mb::test
 
 		auto kraken{ create_api() };
 		ASSERT_NO_THROW(kraken->get_24h_stats(pair));
+	}
+
+	TEST(KrakenIntegration, GetHistoricalData)
+	{
+		tradable_pair pair{ "BTC", "USD" };
+		std::time_t startTime{ time_since_epoch<std::chrono::seconds>() - 600 };
+
+		auto kraken{ create_api() };
+		ASSERT_NO_THROW(kraken->get_historical_trades(pair, startTime));
 	}
 
 	TEST(KrakenIntegration, GetPrice)

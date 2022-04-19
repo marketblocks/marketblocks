@@ -5,8 +5,9 @@
 #include "exchanges/exchange_status.h"
 #include "exchanges/websockets/websocket_stream.h"
 #include "trading/tradable_pair.h"
-#include "trading/pair_stats.h"
+#include "trading/ohlc_data.h"
 #include "trading/order_book.h"
+#include "trading/historical_trade.h"
 
 namespace mb
 {
@@ -36,7 +37,8 @@ namespace mb
 
 		exchange_status get_status() const;
 		std::vector<tradable_pair> get_tradable_pairs() const;
-		pair_stats get_24h_stats(const tradable_pair& tradablePair) const;
+		ohlc_data get_24h_stats(const tradable_pair& tradablePair) const;
+		std::vector<historical_trade> get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const;
 		double get_price(const tradable_pair& tradablePair) const;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const;
 	};

@@ -7,16 +7,21 @@
 #include "exchanges/exchange_status.h"
 #include "trading/order_book.h"
 #include "trading/tradable_pair.h"
-#include "trading/pair_stats.h"
+#include "trading/ohlc_data.h"
 #include "trading/order_description.h"
+#include "trading/historical_trade.h"
 #include "common/types/result.h"
+#include "common/types/partial_data_result.h"
 #include "common/types/unordered_string_map.h"
 
 namespace mb::kraken
 {
+	using historical_trades_result = partial_data_result<historical_trade, std::time_t>;
+
 	result<exchange_status> read_system_status(std::string_view jsonResult);
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult);
-	result<pair_stats> read_24h_stats(std::string_view jsonResult);
+	result<ohlc_data> read_24h_stats(std::string_view jsonResult);
+	result<historical_trades_result> read_historical_trades(std::string_view jsonResult);
 	result<double> read_price(std::string_view jsonResult);
 	result<order_book_state> read_order_book(std::string_view jsonResult);
 	result<unordered_string_map<double>> read_balances(std::string_view jsonResult);

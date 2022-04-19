@@ -24,25 +24,29 @@ namespace mb::test
 		}
 	}
 
-	void assert_pair_stats_eq(const pair_stats& lhs, const pair_stats& rhs)
+	void assert_pair_stats_eq(const ohlc_data& lhs, const ohlc_data& rhs)
 	{
+		EXPECT_DOUBLE_EQ(lhs.open(), rhs.open());
 		EXPECT_DOUBLE_EQ(lhs.high(), rhs.high());
 		EXPECT_DOUBLE_EQ(lhs.low(), rhs.low());
-		EXPECT_DOUBLE_EQ(lhs.open(), rhs.open());
+		EXPECT_DOUBLE_EQ(lhs.close(), rhs.close());
 		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
 	}
 
-	void assert_order_description_eq(const std::vector<order_description>& lhs, const std::vector<order_description>& rhs)
+	void assert_order_description_eq(const order_description& lhs, const order_description& rhs)
 	{
-		ASSERT_EQ(lhs.size(), rhs.size());
+		EXPECT_EQ(lhs.order_id(), rhs.order_id());
+		EXPECT_EQ(lhs.pair_name(), rhs.pair_name());
+		EXPECT_EQ(lhs.action(), rhs.action());
+		EXPECT_DOUBLE_EQ(lhs.price(), rhs.price());
+		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
+	}
 
-		for (int i = 0; i < lhs.size(); ++i)
-		{
-			EXPECT_EQ(lhs[i].order_id(), rhs[i].order_id());
-			EXPECT_EQ(lhs[i].pair_name(), rhs[i].pair_name());
-			EXPECT_EQ(lhs[i].action(), rhs[i].action());
-			EXPECT_DOUBLE_EQ(lhs[i].price(), rhs[i].price());
-			EXPECT_DOUBLE_EQ(lhs[i].volume(), rhs[i].volume());
-		}
+	void assert_historical_trade_eq(const historical_trade& lhs, const historical_trade& rhs)
+	{
+		EXPECT_EQ(lhs.time_stamp(), rhs.time_stamp());
+		EXPECT_EQ(lhs.action(), rhs.action());
+		EXPECT_DOUBLE_EQ(lhs.asset_price(), rhs.asset_price());
+		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
 	}
 }

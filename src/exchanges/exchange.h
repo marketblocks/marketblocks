@@ -11,8 +11,9 @@
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 #include "trading/trade_description.h"
-#include "trading/pair_stats.h"
+#include "trading/ohlc_data.h"
 #include "trading/order_description.h"
+#include "trading/historical_trade.h"
 #include "testing/paper_trading/paper_trade_api.h"
 #include "testing/back_testing/backtest_market_api.h"
 
@@ -36,7 +37,8 @@ namespace mb
 
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
-		virtual pair_stats get_24h_stats(const tradable_pair& tradablePair) const = 0;
+		virtual ohlc_data get_24h_stats(const tradable_pair& tradablePair) const = 0;
+		virtual std::vector<historical_trade> get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const = 0;
 		virtual double get_price(const tradable_pair& tradablePair) const = 0;
 		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual unordered_string_map<double> get_balances() const = 0;
@@ -77,9 +79,14 @@ namespace mb
 			return _marketApi->get_tradable_pairs();
 		}
 
-		pair_stats get_24h_stats(const tradable_pair& tradablePair) const override
+		ohlc_data get_24h_stats(const tradable_pair& tradablePair) const override
 		{
 			return _marketApi->get_24h_stats(tradablePair);
+		}
+
+		std::vector<historical_trade> get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const override
+		{
+			return _marketApi->get_historical_trades(tradablePair, startTime);
 		}
 
 		double get_price(const tradable_pair& tradablePair) const override

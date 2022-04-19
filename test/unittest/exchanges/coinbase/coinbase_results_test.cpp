@@ -63,8 +63,27 @@ namespace mb::test
 		execute_test(
 			"24h_stats.json",
 			coinbase::read_24h_stats,
-			pair_stats{ 53687.76764233, 5261.69, 6441.37, 5414.18 },
+			ohlc_data{ 5414.18, 6441.37, 5261.69, 6250.02, 53687.76764233 },
 			assert_pair_stats_eq);
+	}
+
+	TEST(CoinbaseResults, ReadHistoricalTrades)
+	{
+		execute_test(
+			"historical_trades.json",
+			coinbase::read_historical_trades,
+			coinbase::historical_trades_result
+			{
+				std::vector<historical_trade>
+				{
+					historical_trade{ std::time_t{ 1650302643 }, trade_action::SELL, 30694.92, 0.000057 },
+					historical_trade{ std::time_t{ 1650302633 }, trade_action::SELL, 30704.07, 0.01125099 },
+					historical_trade{ std::time_t{ 1650302633 }, trade_action::BUY, 30699.85, 0.11486104 },
+					historical_trade{ std::time_t{ 1650302573 }, trade_action::SELL, 30699.83, 0.02763573 },
+				},
+				29740531
+			},
+			create_partial_data_result_asserter<historical_trade, int>(assert_historical_trade_eq));
 	}
 
 	TEST(CoinbaseResults, ReadPrice)
@@ -137,7 +156,7 @@ namespace mb::test
 					1.0
 				}
 			},
-			assert_order_description_eq);
+			create_vector_equal_asserter<order_description>(assert_order_description_eq));
 	}
 
 	TEST(CoinbaseResults, ReadAddOrder)

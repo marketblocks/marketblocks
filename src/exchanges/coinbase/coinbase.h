@@ -49,12 +49,14 @@ namespace mb
 				static constexpr std::string_view FEES = "fees";
 				static constexpr std::string_view COINBASE_ACCOUNTS = "coinbase-accounts"; 
 				static constexpr std::string_view ORDERS = "orders"; 
+				static constexpr std::string_view TRADES = "trades"; 
 			};
 
 			struct query_constants
 			{
 				static constexpr std::string_view LEVEL = "level";
 				static constexpr std::string_view STATUS = "status";
+				static constexpr std::string_view AFTER = "after";
 			};
 
 			struct http_constants
@@ -103,7 +105,7 @@ namespace mb
 			request.add_header(common_http_headers::ACCEPT, common_http_headers::APPLICATION_JSON);
 			
 			http_response response{ _httpService->send(request) };
-
+			
 			if (response.response_code() != HttpResponseCodes::OK)
 			{
 				throw mb_exception{ response.message() };
@@ -158,7 +160,8 @@ namespace mb
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
-		pair_stats get_24h_stats(const tradable_pair& tradablePair) const override;
+		ohlc_data get_24h_stats(const tradable_pair& tradablePair) const override;
+		std::vector<historical_trade> get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const override;
 		double get_price(const tradable_pair& tradablePair) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;

@@ -1,6 +1,7 @@
 #include "kraken_results.h"
 #include "common/json/json.h"
 #include "common/utils/stringutils.h"
+#include "common/utils/timeutils.h"
 #include "logging/logger.h"
 
 namespace
@@ -117,24 +118,51 @@ namespace mb::kraken
 		});
 	}
 
-	result<pair_stats> read_24h_stats(std::string_view jsonResult)
+	result<ohlc_data> read_24h_stats(std::string_view jsonResult)
 	{
-		return read_result<pair_stats>(jsonResult, [](const json_element& resultElement)
+		return read_result<ohlc_data>(jsonResult, [](const json_element& resultElement)
 		{
 			json_element dataElement{ resultElement.begin().value() };
 
-			std::vector<std::string> volumes{ dataElement.get<std::vector<std::string>>("v") };
-			std::vector<std::string> lows{ dataElement.get<std::vector<std::string>>("l") };
-			std::vector<std::string> highs{ dataElement.get<std::vector<std::string>>("h") };
 			std::string openingPrice{ dataElement.get<std::string>("o") };
+			std::vector<std::string> highs{ dataElement.get<std::vector<std::string>>("h") };
+			std::vector<std::string> lows{ dataElement.get<std::vector<std::string>>("l") };
+			std::vector<std::string> close{ dataElement.get<std::vector<std::string>>("c") };
+			std::vector<std::string> volumes{ dataElement.get<std::vector<std::string>>("v") };
 
-			return pair_stats
+			return ohlc_data
 			{
-				std::stod(volumes[1]),
-				std::stod(lows[1]),
+				std::stod(openingPrice),
 				std::stod(highs[1]),
-				std::stod(openingPrice)
+				std::stod(lows[1]),
+				std::stod(close[0]),
+				std::stod(volumes[1]),
 			};
+		});
+	}
+
+	result<historical_trades_result> read_historical_trades(std::string_view jsonResult)
+	{
+		return read_result<historical_trades_result>(jsonResult, [](const json_element& resultElement)
+		{
+			json_element dataElement{ resultElement.begin().value() };
+			std::vector<historical_trade> trades;
+			trades.reserve(dataElement.size());
+
+			for (auto it = dataElement.begin(); it != dataElement.end(); ++it)
+			{
+				json_element dataItem{ it.value() };
+
+				trades.emplace_back(
+					std::time_t{ dataItem.get<std::time_t>(2) },
+					dataItem.get<std::string>(3) == "b" ? trade_action::BUY : trade_action::SELL,
+					std::stod(dataItem.get<std::string>(0)),
+					std::stod(dataItem.get<std::string>(1)));
+			}
+
+			std::string lastTimeStamp{ resultElement.get<std::string>("last") };
+
+			return historical_trades_result{ std::move(trades), std::time_t{ std::stoll(lastTimeStamp) } };
 		});
 	}
 

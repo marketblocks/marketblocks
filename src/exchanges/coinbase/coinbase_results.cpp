@@ -1,5 +1,8 @@
+#include <chrono>
+
 #include "coinbase_results.h"
 #include "common/json/json.h"
+#include "common/utils/timeutils.h"
 
 namespace
 {
@@ -66,17 +69,46 @@ namespace mb::coinbase
 		});
 	}
 
-	result<pair_stats> read_24h_stats(std::string_view jsonResult)
+	result<ohlc_data> read_24h_stats(std::string_view jsonResult)
 	{
-		return read_result<pair_stats>(jsonResult, [](const json_document& json)
+		return read_result<ohlc_data>(jsonResult, [](const json_document& json)
 		{
-			return pair_stats
+			return ohlc_data
 			{
-				std::stod(json.get<std::string>("volume")),
-				std::stod(json.get<std::string>("low")),
+				std::stod(json.get<std::string>("open")),
 				std::stod(json.get<std::string>("high")),
-				std::stod(json.get<std::string>("open"))
+				std::stod(json.get<std::string>("low")),
+				std::stod(json.get<std::string>("last")),
+				std::stod(json.get<std::string>("volume"))
 			};
+		});
+	}
+
+	result<historical_trades_result> read_historical_trades(std::string_view jsonResult)
+	{
+		return read_result<historical_trades_result>(jsonResult, [](const json_document& json)
+		{
+			static constexpr std::string_view dateTimeFormat = "%Y-%m-%dT%H:%M:%S";
+
+			std::vector<historical_trade> trades;
+			trades.reserve(json.size());
+
+			int id = 0;
+
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				json_element tradeElement{ it.value() };
+
+				trades.emplace_back(
+					to_time_t(tradeElement.get<std::string>("time"), dateTimeFormat),
+					tradeElement.get<std::string>("side") == "buy" ? trade_action::BUY : trade_action::SELL,
+					std::stod(tradeElement.get<std::string>("price")),
+					std::stod(tradeElement.get<std::string>("size")));
+
+				id = tradeElement.get<int>("trade_id");
+			}
+				
+			return historical_trades_result{ trades, id };
 		});
 	}
 
@@ -184,7 +216,7 @@ namespace mb::coinbase
 	result<void> read_cancel_order(std::string_view jsonResult)
 	{
 		return read_result<void>(jsonResult, [](const json_document& json)
-		{
-		});
+			{
+			});
 	}
 }
