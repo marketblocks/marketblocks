@@ -1,31 +1,32 @@
 #pragma once
 
-template<typename T>
-class basic_iterator
+namespace mb
 {
-private:
-	T* _data;
-
-public:
-	basic_iterator(T* data)
-		: _data{ data }
-	{}
-
-	virtual ~basic_iterator() = default;
-
-	virtual basic_iterator operator++()
+	template<typename Item, typename Iterator>
+	class basic_iterator
 	{
-		++_data;
-		return *this;
-	}
+	private:
+		Iterator _iterator;
 
-	virtual bool operator!=(const basic_iterator& other)
-	{
-		return _data != other._data;
-	}
+	public:
+		constexpr explicit basic_iterator(Iterator iterator)
+			: _iterator{ std::move(iterator) }
+		{}
 
-	virtual const T& operator*()
-	{
-		return *_data;
-	}
-};
+		constexpr basic_iterator& operator++()
+		{
+			_iterator++;
+			return *this;
+		}
+
+		constexpr bool operator!=(const basic_iterator& other) const noexcept
+		{
+			return _iterator != other._iterator;
+		}
+
+		constexpr const Item* operator->() const noexcept
+		{
+			return _iterator.operator->();
+		}
+	};
+}

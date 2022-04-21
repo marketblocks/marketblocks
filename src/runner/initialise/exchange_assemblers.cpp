@@ -1,4 +1,5 @@
 #include "exchange_assemblers.h"
+#include "common/csv/csv.h"
 
 namespace mb
 {
@@ -24,6 +25,8 @@ namespace mb
 
 	std::shared_ptr<exchange> assemble_back_test::assemble(std::unique_ptr<exchange> api) const
 	{
+		csv_document csv{ parse_csv("") };
+
 		return std::make_shared<back_test_exchange>(
 			std::make_unique<backtest_market_api>(api->id()),
 			std::make_unique<paper_trade_api>(_paperTradingConfig));

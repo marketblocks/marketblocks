@@ -29,4 +29,9 @@ namespace mb::test
 	{
 		return get_file_path("coinbase_results_test", fileName);
 	}
+
+	std::filesystem::path csv_test_data_path(std::string_view fileName)
+	{
+		return get_file_path("csv_test", fileName);
+	}
 }
