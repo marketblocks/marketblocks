@@ -9,7 +9,7 @@ namespace mb
 
 	std::vector<tradable_pair> backtest_market_api::get_tradable_pairs() const
 	{
-		return {};
+		return _data.tradable_pairs();
 	}
 
 	ohlc_data backtest_market_api::get_24h_stats(const tradable_pair& tradablePair) const

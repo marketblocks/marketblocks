@@ -6,6 +6,7 @@
 
 #include "csv_row.h"
 #include "common/types/basic_iterator.h"
+#include "common/file/file.h"
 
 namespace mb
 {
@@ -44,4 +45,40 @@ namespace mb
 	};
 
 	csv_document parse_csv(std::string_view csvString);
+
+	template<typename T>
+	T from_csv_row(const csv_row& row)
+	{
+		static_assert(sizeof(T) == 0, "No specialization of from_csv_row found");
+	}
+
+	template<typename T>
+	csv_row to_csv_row(const T& data)
+	{
+		static_assert(sizeof(T) == 0, "No specialization of from_csv_row found");
+	}
+
+	template<typename T>
+	std::vector<T> read_csv_file(const std::filesystem::path& path)
+	{
+		std::vector<T> result;
+		stream_file(path, [&result](std::string_view line)
+			{
+				csv_row row{ parse_row(line) };
+				result.emplace_back(from_csv_row<T>(row));
+			});
+
+		return result;
+	}
+
+	template<typename T, typename CsvData>
+	void write_to_csv_file(const std::filesystem::path& path, const CsvData& data)
+	{
+		file_handler fileHandler{ file_handler::write(path) };
+
+		for (const T& item : data)
+		{
+			fileHandler.stream() << to_csv_row(item).to_string() << std::endl;
+		}
+	}
 }

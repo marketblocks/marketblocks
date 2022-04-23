@@ -51,11 +51,11 @@ namespace mb
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		auto it = _orderBookCaches.find(pair.to_standard_string());
+		auto it = _orderBookCaches.find(pair.to_string());
 
 		if (it == _orderBookCaches.end())
 		{
-			throw mb_exception{ std::format("Order book not subscribed for pair {}", pair.to_standard_string()) };
+			throw mb_exception{ std::format("Order book not subscribed for pair {}", pair.to_string()) };
 		}
 
 		return it->second.snapshot(depth);
@@ -65,14 +65,14 @@ namespace mb
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		return _orderBookCaches.contains(pair.to_standard_string());
+		return _orderBookCaches.contains(pair.to_string());
 	}
 
 	void local_order_book::initialise_book(const tradable_pair& pair, ask_map asks, bid_map bids, int depth)
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		_orderBookCaches.emplace(pair.to_standard_string(), order_book_cache{ std::move(asks), std::move(bids), depth });
+		_orderBookCaches.emplace(pair.to_string(), order_book_cache{ std::move(asks), std::move(bids), depth });
 		_messageQueue.push(tradable_pair{ pair });
 	}
 
@@ -80,7 +80,7 @@ namespace mb
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
+		auto cacheIterator = _orderBookCaches.find(pair.to_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{
 			cacheIterator->second.update_cache(std::move(cacheEntry));
@@ -92,7 +92,7 @@ namespace mb
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
+		auto cacheIterator = _orderBookCaches.find(pair.to_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{
 			cacheIterator->second.remove(price, side);
@@ -104,7 +104,7 @@ namespace mb
 	{
 		std::lock_guard<std::mutex> lock{ _mutex };
 
-		auto cacheIterator = _orderBookCaches.find(pair.to_standard_string());
+		auto cacheIterator = _orderBookCaches.find(pair.to_string());
 		if (cacheIterator != _orderBookCaches.end())
 		{
 			cacheIterator->second.remove(oldPrice, cacheEntry.side);

@@ -12,13 +12,13 @@ namespace mb
 	class exchange_assembler
 	{
 	public:
-		virtual std::shared_ptr<exchange> assemble(std::unique_ptr<exchange> api) const = 0;
+		virtual std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const = 0;
 	};
 
 	class assemble_live : public exchange_assembler
 	{
 	public:
-		std::shared_ptr<exchange> assemble(std::unique_ptr<exchange> api) const override;	
+		std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const override;
 	};
 
 	class assemble_live_test : public exchange_assembler
@@ -29,7 +29,7 @@ namespace mb
 	public:
 		assemble_live_test(paper_trading_config paperTradingConfig);
 
-		std::shared_ptr<exchange> assemble(std::unique_ptr<exchange> api) const override;
+		std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const override;
 	};
 
 	class assemble_back_test : public exchange_assembler
@@ -41,6 +41,6 @@ namespace mb
 	public:
 		assemble_back_test(back_testing_config backTestingConfig, paper_trading_config paperTradingConfig);
 
-		std::shared_ptr<exchange> assemble(std::unique_ptr<exchange> api) const override;
+		std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const override;
 	};
 }

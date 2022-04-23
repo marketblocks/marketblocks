@@ -53,11 +53,11 @@ namespace mb
 	class multi_component_exchange final : public exchange
 	{
 	private:
-		std::unique_ptr<MarketApi> _marketApi;
-		std::unique_ptr<TradeApi> _tradeApi;
+		std::shared_ptr<MarketApi> _marketApi;
+		std::shared_ptr<TradeApi> _tradeApi;
 
 	public:
-		multi_component_exchange(std::unique_ptr<MarketApi> marketApi, std::unique_ptr<TradeApi> tradeApi)
+		multi_component_exchange(std::shared_ptr<MarketApi> marketApi, std::shared_ptr<TradeApi> tradeApi)
 			: 
 			exchange{ std::move(marketApi->get_websocket_stream()) },
 			_marketApi{ std::move(marketApi) }, 

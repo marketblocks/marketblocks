@@ -17,7 +17,7 @@ namespace mb
 
 	file_handler file_handler::write(const std::filesystem::path& path)
 	{
-		return file_handler{ path, std::ios::out };
+		return file_handler{ path, std::ios::app };
 	}
 
 	file_handler file_handler::read_write(const std::filesystem::path& path)

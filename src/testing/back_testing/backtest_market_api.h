@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "back_testing_data.h"
 #include "exchanges/exchange_status.h"
 #include "exchanges/websockets/websocket_stream.h"
 #include "trading/tradable_pair.h"
@@ -23,11 +24,12 @@ namespace mb
 	{
 	private:
 		std::string _id;
+		back_testing_data _data;
 		null_websocket_stream _websocketStream;
 
 	public:
-		backtest_market_api(std::string_view apiName)
-			: _id{ apiName }, _websocketStream{}
+		backtest_market_api(std::string_view apiName, back_testing_data data)
+			: _id{ apiName }, _data{ std::move(data) }, _websocketStream{}
 		{ 
 			_id += "-back_test";
 		}

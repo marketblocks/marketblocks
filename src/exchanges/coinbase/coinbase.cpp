@@ -140,7 +140,7 @@ namespace mb
 			else
 			{
 				trades.insert(trades.end(), result.data().begin(), result.data().end());
-
+				
 				if (startTime == 0 && result.id() == 1)
 				{
 					startReached = true;
@@ -154,6 +154,7 @@ namespace mb
 			}
 		}
 
+		std::sort(trades.begin(), trades.end());
 		return trades;
 	}
 

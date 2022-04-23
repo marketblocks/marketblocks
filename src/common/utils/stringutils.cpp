@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "stringutils.h"
 
 namespace mb
@@ -15,6 +17,11 @@ namespace mb
 		}
 
 		return seglist;
+	}
+
+	void to_upper(std::string& source)
+	{
+		std::transform(source.begin(), source.end(), source.begin(), ::toupper);
 	}
 
 	bool numeric_string_less::operator()(const std::string& l, const std::string& r) const

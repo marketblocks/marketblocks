@@ -188,6 +188,7 @@ namespace mb
 			startTime = result.id();
 		}
 
+		std::sort(trades.begin(), trades.end());
 		return trades;
 	}
 

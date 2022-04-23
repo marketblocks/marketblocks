@@ -26,4 +26,16 @@ namespace mb
 
 	std::string read_file(const std::filesystem::path& path);
 	void write_to_file(const std::filesystem::path& path, std::string_view content);
+
+	template<typename OnNewLine>
+	void stream_file(const std::filesystem::path& path, OnNewLine onNewLine)
+	{
+		file_handler handler{ file_handler::read(path) };
+		std::string line;
+
+		while (std::getline(handler.stream(), line))
+		{
+			onNewLine(line);
+		}
+	}
 }

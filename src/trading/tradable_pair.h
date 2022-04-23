@@ -32,9 +32,9 @@ namespace mb
 			return _asset == assetTicker || _priceUnit == assetTicker;
 		}
 
-		constexpr std::string to_standard_string() const
+		constexpr std::string to_string(char separator = '/') const
 		{
-			return _asset + "/" + _priceUnit;
+			return _asset + separator + _priceUnit;
 		}
 
 		constexpr bool operator==(const tradable_pair& other) const noexcept
@@ -49,6 +49,8 @@ namespace mb
 			? pair.asset()
 			: pair.price_unit();
 	}
+
+	tradable_pair parse_tradable_pair(std::string_view string, char seperator = '/');
 }
 
 namespace std

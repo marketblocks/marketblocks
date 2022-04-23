@@ -12,21 +12,7 @@ namespace mb
 
 		while (std::getline(inputStream, line))
 		{
-			std::vector<std::string> cells;
-			std::stringstream lineStream{ line };
-			std::string cell;
-
-			while (std::getline(lineStream, cell, ','))
-			{
-				cells.push_back(cell);
-			}
-
-			if (!lineStream && cell.empty())
-			{
-				cells.push_back("");
-			}
-
-			rows.emplace_back(std::move(cells));
+			rows.emplace_back(parse_row(line));
 		}
 
 		return csv_document{ std::move(rows) };

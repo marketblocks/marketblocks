@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <cassert>
 
 #include "common/types/basic_iterator.h"
@@ -43,6 +44,11 @@ namespace mb
 
 		constexpr std::string to_string() const
 		{
+			if (_cells.size() == 0)
+			{
+				return "";
+			}
+
 			std::string result{ _cells.front() };
 
 			for (int i = 1; i < _cells.size(); ++i)
@@ -54,4 +60,6 @@ namespace mb
 			return result;
 		}
 	};
+
+	csv_row parse_row(std::string_view line);
 }

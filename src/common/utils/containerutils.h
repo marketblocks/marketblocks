@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <algorithm>
 #include <iterator>
@@ -17,6 +18,20 @@ namespace mb
 		}
 
 		return map;
+	}
+
+	template<typename T, typename Container>
+	constexpr std::unordered_set<T> to_unordered_set(const Container& source)
+	{
+		std::unordered_set<T> set;
+		set.reserve(source.size());
+
+		for (auto& item : source)
+		{
+			set.emplace(item);
+		}
+
+		return set;
 	}
 
 	template<typename T, typename Container>
@@ -52,5 +67,19 @@ namespace mb
 	constexpr bool contains(const Container& source, T element)
 	{
 		return std::find(source.begin(), source.end(), element) != source.end();
+	}
+
+	template<typename T, typename Container, typename Matcher>
+	constexpr auto find(const Container& source, Matcher matcher)
+	{
+		for (auto it = source.begin(); it != source.end(); ++it)
+		{
+			if (matcher(*it))
+			{
+				return it;
+			}
+		}
+
+		return source.end();
 	}
 }
