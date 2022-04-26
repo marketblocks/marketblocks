@@ -24,7 +24,7 @@ namespace mb::test
 		}
 	}
 
-	void assert_pair_stats_eq(const ohlc_data& lhs, const ohlc_data& rhs)
+	void assert_pair_stats_eq(const ohlcv_data& lhs, const ohlcv_data& rhs)
 	{
 		EXPECT_DOUBLE_EQ(lhs.open(), rhs.open());
 		EXPECT_DOUBLE_EQ(lhs.high(), rhs.high());
@@ -39,14 +39,6 @@ namespace mb::test
 		EXPECT_EQ(lhs.pair_name(), rhs.pair_name());
 		EXPECT_EQ(lhs.action(), rhs.action());
 		EXPECT_DOUBLE_EQ(lhs.price(), rhs.price());
-		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
-	}
-
-	void assert_historical_trade_eq(const historical_trade& lhs, const historical_trade& rhs)
-	{
-		EXPECT_EQ(lhs.time_stamp(), rhs.time_stamp());
-		EXPECT_EQ(lhs.action(), rhs.action());
-		EXPECT_DOUBLE_EQ(lhs.asset_price(), rhs.asset_price());
 		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
 	}
 }

@@ -6,5 +6,5 @@
 
 namespace mb
 {
-	back_testing_data load_back_testing_data(const back_testing_config& config, std::shared_ptr<exchange> exchange);
+	back_testing_data load_back_testing_data(const back_testing_config& config);
 }

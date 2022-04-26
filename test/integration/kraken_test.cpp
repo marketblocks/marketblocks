@@ -38,15 +38,6 @@ namespace mb::test
 		ASSERT_NO_THROW(kraken->get_24h_stats(pair));
 	}
 
-	TEST(KrakenIntegration, GetHistoricalData)
-	{
-		tradable_pair pair{ "BTC", "USD" };
-		std::time_t startTime{ time_since_epoch<std::chrono::seconds>() - 600 };
-
-		auto kraken{ create_api() };
-		ASSERT_NO_THROW(kraken->get_historical_trades(pair, startTime));
-	}
-
 	TEST(KrakenIntegration, GetPrice)
 	{
 		tradable_pair pair{ "BTC", "USD" };

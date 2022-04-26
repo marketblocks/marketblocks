@@ -32,15 +32,5 @@ namespace mb
 		std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const override;
 	};
 
-	class assemble_back_test : public exchange_assembler
-	{
-	private:
-		back_testing_config _backTestingConfig;
-		paper_trading_config _paperTradingConfig;
-
-	public:
-		assemble_back_test(back_testing_config backTestingConfig, paper_trading_config paperTradingConfig);
-
-		std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const override;
-	};
+    std::shared_ptr<exchange> create_back_test_exchange(back_testing_config backTestingConfig, paper_trading_config paperTradingConfig);
 }

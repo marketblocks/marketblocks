@@ -10,7 +10,7 @@ namespace
 
 	std::string create_message(std::string_view eventName, std::string_view channel, const std::vector<tradable_pair>& tradablePairs)
 	{
-		std::vector<std::string> tradablePairList{ to_vector<std::string>(tradablePairs, [](const tradable_pair& pair) { return pair.to_string(); }) };
+		std::vector<std::string> tradablePairList{ to_vector<std::string>(tradablePairs, [](const tradable_pair& pair) { return pair.to_string('/'); })};
 
 		return json_writer{}
 			.add("event", eventName)
@@ -72,7 +72,7 @@ namespace
 		}
 
 		localOrderBook.initialise_book(pair, std::move(askMap), std::move(bidMap), depth);
-		logger::instance().info("Kraken: initialised order book for {}", pair.to_string());
+		logger::instance().info("Kraken: initialised order book for {}", pair.to_string('/'));
 	}
 
 	void process_order_book_object(const tradable_pair& pair, local_order_book& localOrderBook, const json_element& json)

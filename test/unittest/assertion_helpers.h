@@ -5,9 +5,8 @@
 #include "common/types/result.h"
 #include "common/types/partial_data_result.h"
 #include "trading/order_book.h"
-#include "trading/ohlc_data.h"
+#include "trading/ohlcv_data.h"
 #include "trading/order_description.h"
-#include "trading/historical_trade.h"
 
 namespace mb::test
 {
@@ -63,7 +62,6 @@ namespace mb::test
 
 	void assert_order_book_entry_eq(const order_book_entry& lhs, const order_book_entry& rhs);
 	void assert_order_book_state_eq(const order_book_state& lhs, const order_book_state& rhs);
-	void assert_pair_stats_eq(const ohlc_data& lhs, const ohlc_data& rhs);
+	void assert_pair_stats_eq(const ohlcv_data& lhs, const ohlcv_data& rhs);
 	void assert_order_description_eq(const order_description& lhs, const order_description& rhs);
-	void assert_historical_trade_eq(const historical_trade& lhs, const historical_trade& rhs);
 }

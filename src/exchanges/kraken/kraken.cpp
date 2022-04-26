@@ -93,13 +93,13 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>(_constants.methods.TRADABLE_PAIRS, kraken::read_tradable_pairs);
 	}
 
-	ohlc_data kraken_api::get_24h_stats(const tradable_pair& tradablePair) const
+	ohlcv_data kraken_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
 			.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(tradablePair))
 			.to_string();
 
-		return send_public_request<ohlc_data>(_constants.methods.TICKER, kraken::read_24h_stats, query);
+		return send_public_request<ohlcv_data>(_constants.methods.TICKER, kraken::read_24h_stats, query);
 	}
 
 	double kraken_api::get_price(const tradable_pair& tradablePair) const
@@ -165,31 +165,6 @@ namespace mb
 			.to_string();
 
 		send_private_request<void>(_constants.methods.CANCEL_ORDER, kraken::read_cancel_order, query);
-	}
-
-	std::vector<historical_trade> kraken_api::get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const
-	{
-		std::vector<historical_trade> trades;
-		bool limitReached = true;
-
-		while (limitReached)
-		{
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-
-			std::string query = url_query_builder{}
-				.add_parameter(_constants.queryKeys.PAIR, ::to_query_name(tradablePair))
-				.add_parameter(_constants.queryKeys.SINCE, std::to_string(startTime))
-				.to_string();
-
-			kraken::historical_trades_result result{ send_public_request<kraken::historical_trades_result>(_constants.methods.TRADES, kraken::read_historical_trades, query) };
-
-			trades.insert(trades.end(), result.data().begin(), result.data().end());
-			limitReached = result.data().size() == 1000;
-			startTime = result.id();
-		}
-
-		std::sort(trades.begin(), trades.end());
-		return trades;
 	}
 
 	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)

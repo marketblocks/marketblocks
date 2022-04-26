@@ -92,7 +92,7 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>(path, coinbase::read_tradable_pairs);
 	}
 
-	ohlc_data coinbase_api::get_24h_stats(const tradable_pair& tradablePair) const
+	ohlcv_data coinbase_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
 		std::string path{ build_url_path(std::array<std::string_view, 3>
 		{
@@ -101,61 +101,7 @@ namespace mb
 			_constants.methods.STATS
 		})};
 
-		return send_public_request<ohlc_data>(path, coinbase::read_24h_stats);
-	}
-
-	std::vector<historical_trade> coinbase_api::get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const
-	{
-		std::vector<historical_trade> trades;
-
-		std::string path{ build_url_path(std::array<std::string_view, 3>
-		{
-			_constants.methods.PRODUCTS,
-			internal::to_exchange_id(tradablePair),
-			_constants.methods.TRADES
-		}) };
-
-		bool startReached = false;
-		std::string query = "";
-
-		while (!startReached)
-		{
-			coinbase::historical_trades_result result{ send_public_request<coinbase::historical_trades_result>(path, coinbase::read_historical_trades, query) };
-
-			if (result.data().back().time_stamp() < startTime)
-			{
-				for (auto& trade : result.data())
-				{
-					if (trade.time_stamp() < startTime)
-					{
-						startReached = true;
-						break;
-					}
-					else
-					{
-						trades.push_back(trade);
-					}
-				}
-			}
-			else
-			{
-				trades.insert(trades.end(), result.data().begin(), result.data().end());
-				
-				if (startTime == 0 && result.id() == 1)
-				{
-					startReached = true;
-				}
-				else
-				{
-					query = url_query_builder{}
-						.add_parameter(_constants.queries.AFTER, std::to_string(result.id()))
-						.to_string();
-				}
-			}
-		}
-
-		std::sort(trades.begin(), trades.end());
-		return trades;
+		return send_public_request<ohlcv_data>(path, coinbase::read_24h_stats);
 	}
 
 	double coinbase_api::get_price(const tradable_pair& tradablePair) const

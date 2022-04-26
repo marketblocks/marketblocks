@@ -50,10 +50,6 @@ namespace
 			case run_mode::LIVETEST:
 				return std::make_unique<assemble_live_test>(
 					get_config<paper_trading_config>());
-			case run_mode::BACKTEST:
-				return std::make_unique<assemble_back_test>(
-					get_config<back_testing_config>(),
-					get_config<paper_trading_config>());
 			default:
 				throw initialisation_error{ "Run mode not supported" };
 		}
@@ -152,7 +148,16 @@ namespace mb::internal
 
 	std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig)
 	{
-		std::vector<std::shared_ptr<exchange>> exchanges;
+		if (runnerConfig.runmode() == run_mode::BACKTEST)
+		{
+			logger::instance().info("Creating back test API...");
+
+			return {
+				create_back_test_exchange(
+				load_config_file<back_testing_config>(),
+				load_config_file<paper_trading_config>())
+			};
+		}
 
 		std::unique_ptr<exchange_assembler> assembler = select_assembler(runnerConfig.runmode());
 		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>(runnerConfig.websocket_timeout());

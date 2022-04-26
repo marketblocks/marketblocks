@@ -160,8 +160,7 @@ namespace mb
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
-		ohlc_data get_24h_stats(const tradable_pair& tradablePair) const override;
-		std::vector<historical_trade> get_historical_trades(const tradable_pair& tradablePair, std::time_t startTime) const override;
+		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const override;
 		double get_price(const tradable_pair& tradablePair) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;

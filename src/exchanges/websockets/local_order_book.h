@@ -16,7 +16,7 @@ namespace mb
 	{
 	private:
 		set_queue<tradable_pair> _messageQueue;
-		unordered_string_map<order_book_cache> _orderBookCaches;
+		std::unordered_map<tradable_pair, order_book_cache> _orderBookCaches;
 		mutable std::mutex _mutex;
 
 	public:

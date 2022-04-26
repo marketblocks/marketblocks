@@ -89,27 +89,8 @@ namespace mb::test
 		execute_test(
 			"24h_stats_success.json",
 			kraken::read_24h_stats,
-			ohlc_data{ 2034.26, 2056.45, 1917.23, 1940.0, 369.71101684 },
+			ohlcv_data{ 2034.26, 2056.45, 1917.23, 1940.0, 369.71101684 },
 			assert_pair_stats_eq);
-	}
-
-
-	TEST(KrakenResults, ReadHistoricalTrades)
-	{
-		execute_test(
-			"historical_trades.json",
-			kraken::read_historical_trades,
-			kraken::historical_trades_result
-			{
-				std::vector<historical_trade>
-				{
-					historical_trade{ std::time_t{ 1616663618 }, trade_action::BUY, 52478.9, 0.0064 },
-					historical_trade{ std::time_t{ 1616663618 }, trade_action::BUY, 52490.5, 0.01169993 },
-					historical_trade{ std::time_t{ 1616663622 }, trade_action::SELL, 52478.8, 0.04107375 },
-				},
-				std::time_t{ 1616663622136576459 }
-			},
-			create_partial_data_result_asserter<historical_trade, std::time_t>(assert_historical_trade_eq));
 	}
 
 	TEST(KrakenResults, ReadPrice)

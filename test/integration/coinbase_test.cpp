@@ -39,15 +39,6 @@ namespace mb::test
 		ASSERT_NO_THROW(coinbase->get_24h_stats(pair));
 	}
 
-	TEST(CoinbaseIntegration, GetHistoricalTrades)
-	{
-		tradable_pair pair{ "BTC", "USD" };
-		std::time_t startTime{ time_since_epoch<std::chrono::seconds>() - 600 };
-
-		auto coinbase{ create_api() };
-		ASSERT_NO_THROW(coinbase->get_historical_trades(pair, startTime));
-	}
-
 	TEST(CoinbaseIntegration, GetPrice)
 	{
 		tradable_pair pair{ "BTC", "USD" };
