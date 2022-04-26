@@ -58,14 +58,14 @@ namespace mb
 	kraken_api::kraken_api(
 		kraken_config config, 
 		std::unique_ptr<http_service> httpService,
-		websocket_stream websocketStream)
+		std::unique_ptr<websocket_stream> websocketStream)
 		:
-		exchange{ std::move(websocketStream) },
 		_constants{},
 		_publicKey{ config.public_key() },
 		_decodedPrivateKey{ b64_decode(config.private_key()) },
 		_httpRetries{ config.http_retries() },
-		_httpService{ std::move(httpService) }
+		_httpService{ std::move(httpService) },
+		_websocketStream{ std::move(websocketStream) }
 	{}
 
 	std::string kraken_api::get_nonce() const
@@ -172,6 +172,6 @@ namespace mb
 		return std::make_unique<kraken_api>(
 			std::move(config), 
 			std::make_unique<http_service>(),
-			websocket_stream{ std::make_unique<internal::kraken_websocket_stream>(), websocketClient });
+			std::make_unique<exchange_websocket_stream>(std::make_unique<internal::kraken_websocket_stream>(), websocketClient));
 	}
 }

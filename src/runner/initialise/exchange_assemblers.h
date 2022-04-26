@@ -3,8 +3,7 @@
 #include <memory>
 
 #include "exchanges/exchange.h"
-#include "testing/paper_trading/paper_trade_api.h"
-#include "testing/back_testing/backtest_market_api.h"
+#include "testing/paper_trading/paper_trading_config.h"
 #include "testing/back_testing/back_testing_config.h"
 
 namespace mb

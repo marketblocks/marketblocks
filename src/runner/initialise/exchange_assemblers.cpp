@@ -1,5 +1,7 @@
 #include "exchange_assemblers.h"
 #include "common/csv/csv.h"
+#include "testing/paper_trading/paper_trade_api.h"
+#include "testing/back_testing/backtest_market_api.h"
 #include "testing/back_testing/data_loading.h"
 
 namespace mb
@@ -22,8 +24,11 @@ namespace mb
 
 	std::shared_ptr<exchange> create_back_test_exchange(back_testing_config backTestingConfig, paper_trading_config paperTradingConfig)
 	{
+		back_testing_data data{ load_back_testing_data(backTestingConfig) };
+		std::unique_ptr<backtest_websocket_stream> websocketStream{ std::make_unique<backtest_websocket_stream>() };
+
 		return std::make_shared<back_test_exchange>(
-			std::make_unique<backtest_market_api>("BACK TEST", load_back_testing_data(backTestingConfig)),
+			std::make_unique<backtest_market_api>(std::move(data), std::move(websocketStream)),
 			std::make_unique<paper_trade_api>(paperTradingConfig));
 	}
 }

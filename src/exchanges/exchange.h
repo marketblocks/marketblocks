@@ -20,20 +20,12 @@ namespace mb
 {
 	class exchange
 	{
-	private:
-		websocket_stream _websocketStream;
-
 	public:
-		exchange(websocket_stream websocketStream)
-			: _websocketStream{ std::move(websocketStream) }
-		{}
-
 		virtual ~exchange() = default;
 
 		constexpr virtual std::string_view id() const noexcept = 0;
 		
-		websocket_stream& get_websocket_stream() noexcept { return _websocketStream; }
-
+		virtual std::weak_ptr<websocket_stream> get_websocket_stream() = 0;
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
 		virtual ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const = 0;
@@ -57,7 +49,6 @@ namespace mb
 	public:
 		multi_component_exchange(std::shared_ptr<MarketApi> marketApi, std::shared_ptr<TradeApi> tradeApi)
 			: 
-			exchange{ std::move(marketApi->get_websocket_stream()) },
 			_marketApi{ std::move(marketApi) }, 
 			_tradeApi{ std::move(tradeApi) }
 		{}
@@ -65,6 +56,11 @@ namespace mb
 		constexpr std::string_view id() const noexcept
 		{
 			return _marketApi->id();
+		}
+
+		std::weak_ptr<websocket_stream> get_websocket_stream() override
+		{
+			return _marketApi->get_websocket_stream();
 		}
 
 		exchange_status get_status() const override

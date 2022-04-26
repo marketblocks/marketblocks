@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "back_testing_data.h"
+#include "backtest_websocket_stream.h"
 #include "exchanges/exchange_status.h"
 #include "exchanges/websockets/websocket_stream.h"
 #include "trading/tradable_pair.h"
@@ -11,30 +12,20 @@
 
 namespace mb
 {
-	class null_websocket_stream : public websocket_stream
-	{
-	public:
-		null_websocket_stream()
-			: websocket_stream{nullptr, nullptr}
-		{}
-	};
-
 	class backtest_market_api
 	{
 	private:
-		std::string _id;
 		back_testing_data _data;
-		null_websocket_stream _websocketStream;
+		std::shared_ptr<backtest_websocket_stream> _websocketStream;
 
 	public:
-		backtest_market_api(std::string_view apiName, back_testing_data data)
-			: _id{ apiName }, _data{ std::move(data) }, _websocketStream{}
-		{ 
-			_id += "-back_test";
-		}
+		backtest_market_api(back_testing_data data, std::unique_ptr<backtest_websocket_stream> websocketStream)
+			: _data{ std::move(data) }, _websocketStream{ std::move(websocketStream) }
+		{}
 
-		constexpr std::string_view id() const noexcept { return _id; }
-		websocket_stream& get_websocket_stream() noexcept { return _websocketStream; }
+		constexpr std::string_view id() const noexcept { return "BACK TEST"; }
+		
+		std::weak_ptr<websocket_stream> get_websocket_stream() noexcept { return _websocketStream; }
 
 		exchange_status get_status() const;
 		std::vector<tradable_pair> get_tradable_pairs() const;

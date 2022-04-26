@@ -12,6 +12,8 @@ namespace mb::internal
 		local_order_book _localOrderBook;
 
 	public:
+		virtual ~websocket_stream_implementation() = default;
+
 		virtual std::string stream_url() const noexcept = 0;
 
 		virtual void on_open() = 0;

@@ -8,7 +8,7 @@ namespace
 
 namespace mb
 {
-	websocket_stream::websocket_stream(
+	exchange_websocket_stream::exchange_websocket_stream(
 		std::unique_ptr<internal::websocket_stream_implementation> implementation,
 		std::shared_ptr<websocket_client> websocketClient)
 		: 
@@ -17,7 +17,7 @@ namespace mb
 		_connection{}
 	{}
 
-	void websocket_stream::connect()
+	void exchange_websocket_stream::connect()
 	{
 		if (connection_status() == ws_connection_status::OPEN)
 		{
@@ -34,7 +34,7 @@ namespace mb
 				[this](const std::string& message) { _implementation->on_message(message); }));
 	}
 
-	ws_connection_status websocket_stream::connection_status() const
+	ws_connection_status exchange_websocket_stream::connection_status() const
 	{
 		if (_connection)
 		{
@@ -44,14 +44,14 @@ namespace mb
 		return ws_connection_status::CLOSED;
 	}
 
-	void websocket_stream::send_message(std::string_view message) const
+	void exchange_websocket_stream::send_message(std::string_view message) const
 	{
 		CB_ASSERT_CONNECTION_EXISTS(_connection);
 
 		_connection->send_message(message);
 	}
 
-	void websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	void exchange_websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
 	{
 		assert(tradablePairs.size() > 0);
 
@@ -59,7 +59,7 @@ namespace mb
 		send_message(subscriptionMessage);
 	}
 
-	void websocket_stream::unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	void exchange_websocket_stream::unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
 	{
 		assert(tradablePairs.size() > 0);
 
