@@ -1,7 +1,20 @@
 #include "backtest_websocket_stream.h"
+#include "trading/ohlcv_data.h"
 
 namespace mb
 {
+	backtest_websocket_stream::backtest_websocket_stream(std::shared_ptr<back_testing_data_source> dataSource)
+		: _dataSource{ std::move(dataSource) }
+	{}
+
+	void backtest_websocket_stream::notify_data_incremented()
+	{
+		for (auto& pair : _subscribedPairs)
+		{
+			_messageQueue.push(tradable_pair{ pair });
+		}
+	}
+
 	void backtest_websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
 	{
 		_subscribedPairs.insert(tradablePairs.begin(), tradablePairs.end());
@@ -17,6 +30,22 @@ namespace mb
 
 	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
 	{
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data{ internal::get_data(*_dataSource, pair) };
+
+		if (data.has_value())
+		{
+			const ohlcv_data& ohlcvData = data.value().get().data();
+			return order_book_state
+			{
+				{
+					order_book_entry{ ohlcvData.low(), ohlcvData.volume() }
+				},
+				{
+					order_book_entry{ ohlcvData.high(), ohlcvData.volume() }
+				}
+			};
+		}
+
 		return order_book_state{ {},{} };
 	}
 

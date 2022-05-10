@@ -1,5 +1,6 @@
 #pragma once
 
+#include "back_testing_data.h"
 #include "exchanges/websockets/websocket_stream.h"
 
 namespace mb
@@ -7,10 +8,15 @@ namespace mb
 	class backtest_websocket_stream : public websocket_stream
 	{
 	private:
+		std::shared_ptr<back_testing_data_source> _dataSource;
 		std::unordered_set<tradable_pair> _subscribedPairs;
 		set_queue<tradable_pair> _messageQueue;
 
 	public:
+		backtest_websocket_stream(std::shared_ptr<back_testing_data_source> dataSource);
+
+		void notify_data_incremented();
+
 		void connect() override {}
 		ws_connection_status connection_status() const override { return ws_connection_status::OPEN; }
 

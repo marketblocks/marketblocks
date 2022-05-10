@@ -11,6 +11,9 @@ namespace mb
 		LIVE, LIVETEST, BACKTEST, UNKNOWN
 	};
 
+	std::string_view to_string(run_mode runMode);
+	run_mode run_mode_from_string(std::string_view runMode);
+
 	class runner_config
 	{
 	private:

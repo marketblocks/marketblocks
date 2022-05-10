@@ -30,6 +30,4 @@ namespace mb
 
 		std::shared_ptr<exchange> assemble(std::shared_ptr<exchange> api) const override;
 	};
-
-    std::shared_ptr<exchange> create_back_test_exchange(back_testing_config backTestingConfig, paper_trading_config paperTradingConfig);
 }

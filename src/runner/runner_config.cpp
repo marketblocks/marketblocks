@@ -24,7 +24,10 @@ namespace
 		static constexpr std::string_view BACK_TEST = "back_test";
 		static constexpr std::string_view UNKNOWN = "unknown";
 	}
+}
 
+namespace mb
+{
 	std::string_view to_string(run_mode runMode)
 	{
 		switch (runMode)
@@ -57,10 +60,7 @@ namespace
 
 		return run_mode::UNKNOWN;
 	}
-}
 
-namespace mb
-{
 	runner_config::runner_config()
 		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT }
 	{}

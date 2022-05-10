@@ -66,15 +66,34 @@ namespace mb
 	{
 		std::vector<tradable_pair> pairs{ parse_tradable_pairs(config.pairs()) };
 		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> ohlcvData;
+		int size = 0;
+		std::time_t startTime = MAXLONGLONG;
 
 		for (auto& pair : pairs)
 		{
 			std::vector<timed_ohlcv_data> data{ load_cached_data(config.data_directory(), pair, config.start_time())};
 			sort_and_filter(data, config.start_time(), config.step_size());
 
+			if (data.size() > size)
+			{
+				size = data.size();
+			}
+
+			if (data.front().time_stamp() < startTime)
+			{
+				startTime = data.front().time_stamp();
+			}
+
 			ohlcvData.emplace(pair, std::move(data));
 		}
 
-		return back_testing_data{ std::move(pairs), std::move(ohlcvData) };
+		return back_testing_data
+		{
+			std::move(pairs),
+			std::move(ohlcvData),
+			startTime,
+			config.step_size(),
+			size
+		};
 	}
 }
