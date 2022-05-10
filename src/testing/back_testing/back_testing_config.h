@@ -13,27 +13,23 @@ namespace mb
 		std::time_t _startTime;
 		int _stepSize;
 		std::string _dataDirectory;
-		std::vector<std::string> _pairs;
 
 	public:
 		constexpr back_testing_config()
 			: 
 			_startTime{ 0 }, 
 			_stepSize{ 60 }, 
-			_dataDirectory{ "back_test_data" },
-			_pairs{}
+			_dataDirectory{ "back_test_data" }
 		{}
 
 		constexpr back_testing_config(
 			std::time_t startTime,
 			int stepSize,
-			std::string dataDirectory,
-			std::vector<std::string> pairs)
+			std::string dataDirectory)
 			:
 			_startTime{ startTime },
 			_stepSize{ stepSize },
-			_dataDirectory{ std::move(dataDirectory) },
-			_pairs{ std::move(pairs) }
+			_dataDirectory{ std::move(dataDirectory) }
 		{}
 
 		static constexpr std::string name() noexcept { return "back_testing"; }
@@ -41,7 +37,6 @@ namespace mb
 		constexpr std::time_t start_time() const noexcept { return _startTime; }
 		constexpr int step_size() const noexcept { return _stepSize; }
 		constexpr const std::string& data_directory() const noexcept { return _dataDirectory; }
-		constexpr const std::vector<std::string>& pairs() const noexcept { return _pairs; }
 	};
 
 	template<>
