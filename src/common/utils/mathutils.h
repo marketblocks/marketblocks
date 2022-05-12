@@ -13,4 +13,23 @@ namespace mb
 	{
 		return (b - a) * 100 / static_cast<double>(a);
 	}
+
+	template<typename T>
+	class mean_calculator
+	{
+	private:
+		T _mean;
+		T _valueSum;
+		int count;
+
+	public:
+		constexpr void add_value(T value)
+		{
+			_valueSum += value;
+			++count;
+			_mean = _valueSum / count;
+		}
+
+		constexpr T mean() const noexcept { return _mean; }
+	};
 }

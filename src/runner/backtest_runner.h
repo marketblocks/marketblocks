@@ -37,8 +37,15 @@ namespace mb::internal
 			{
 				logger::instance().info("Running back test iteration {0}/{1}", i, dataSize);
 
-				strategy.run_iteration();
-				
+				try
+				{
+					strategy.run_iteration();
+				}
+				catch (const mb_exception& e)
+				{
+					logger::instance().error(e.what());
+				}
+
 				_backtestMarketApi->increment_data();
 			}
 		}

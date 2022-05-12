@@ -24,7 +24,7 @@ namespace mb::internal
 				{
 					strategy.run_iteration();
 				}
-				catch (const std::exception& e)
+				catch (const mb_exception& e)
 				{
 					logger::instance().error(e.what());
 				}

@@ -8,7 +8,14 @@ namespace mb
 		{
 			for (int i = 0; i < data.size(); ++i)
 			{
-				if (data[i].time_stamp() == time)
+				std::time_t timeStamp = data[i].time_stamp();
+
+				if (timeStamp > time)
+				{
+					return i - 1;
+				}
+
+				if (timeStamp == time)
 				{
 					return i;
 				}
