@@ -3,8 +3,8 @@
 
 namespace mb
 {
-	backtest_websocket_stream::backtest_websocket_stream(std::shared_ptr<back_testing_data_source> dataSource)
-		: _dataSource{ std::move(dataSource) }
+	backtest_websocket_stream::backtest_websocket_stream(std::shared_ptr<back_testing_data_navigator> dataSource)
+		: _dataNavigator{ std::move(dataSource) }
 	{}
 
 	void backtest_websocket_stream::notify_data_incremented()
@@ -30,7 +30,7 @@ namespace mb
 
 	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data{ internal::get_data(*_dataSource, pair) };
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data{ internal::get_data(*_dataNavigator, pair) };
 
 		if (data.has_value())
 		{

@@ -2,14 +2,14 @@
 
 namespace mb
 {
-	backtest_market_api::backtest_market_api(std::shared_ptr<back_testing_data_source> dataSource, std::unique_ptr<backtest_websocket_stream> websocketStream)
-	: _dataSource{ std::move(dataSource) }, _websocketStream{ std::move(websocketStream) }
+	backtest_market_api::backtest_market_api(std::shared_ptr<back_testing_data_navigator> dataSource, std::unique_ptr<backtest_websocket_stream> websocketStream)
+	: _dataNavigator{ std::move(dataSource) }, _websocketStream{ std::move(websocketStream) }
 	{
 	}
 
 	void backtest_market_api::increment_data()
 	{ 
-		_dataSource->increment_data();
+		_dataNavigator->increment_data();
 		_websocketStream->notify_data_incremented();
 	}
 
@@ -20,14 +20,14 @@ namespace mb
 
 	std::vector<tradable_pair> backtest_market_api::get_tradable_pairs() const
 	{
-		return _dataSource->data().tradable_pairs();
+		return _dataNavigator->data().tradable_pairs();
 	}
 
 	ohlcv_data backtest_market_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
-		const std::vector<timed_ohlcv_data>& pairData = _dataSource->data().get_ohlcv_data(tradablePair);
-		std::time_t targetTime = _dataSource->data_time() - 86400; // -24hrs
-		int startIndex = internal::get_data_index(pairData, _dataSource->data_time());
+		const std::vector<timed_ohlcv_data>& pairData = _dataNavigator->data().get_ohlcv_data(tradablePair);
+		std::time_t targetTime = _dataNavigator->data_time() - 86400; // -24hrs
+		int startIndex = internal::get_data_index(pairData, _dataNavigator->data_time());
 
 		double open = 0.0;
 		double high = 0.0;
@@ -60,7 +60,7 @@ namespace mb
 
 	double backtest_market_api::get_price(const tradable_pair& tradablePair) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data{ internal::get_data(*_dataSource, tradablePair) };
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data{ internal::get_data(*_dataNavigator, tradablePair) };
 
 		if (data.has_value())
 		{

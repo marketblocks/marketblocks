@@ -24,10 +24,10 @@ namespace mb
 			return -1;
 		}
 
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> get_data(const back_testing_data_source& dataSource, const tradable_pair& tradablePair)
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> get_data(const back_testing_data_navigator& dataNavigator, const tradable_pair& tradablePair)
 		{
-			const std::vector<timed_ohlcv_data>& pairData = dataSource.data().get_ohlcv_data(tradablePair);
-			int index = get_data_index(pairData, dataSource.data_time());
+			const std::vector<timed_ohlcv_data>& pairData = dataNavigator.data().get_ohlcv_data(tradablePair);
+			int index = get_data_index(pairData, dataNavigator.data_time());
 
 			if (index != -1)
 			{
@@ -63,7 +63,7 @@ namespace mb
 		return {};
 	}
 
-	back_testing_data_source::back_testing_data_source(back_testing_data data)
+	back_testing_data_navigator::back_testing_data_navigator(back_testing_data data)
 		: _data{ std::move(data) }, _dataTime{ _data.start_time() }
 	{}
 }

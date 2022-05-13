@@ -9,10 +9,10 @@ namespace mb::internal
 	{
 		back_testing_config config = load_or_create_config<back_testing_config>();
 		back_testing_data data = load_back_testing_data(config);
-		std::shared_ptr<back_testing_data_source> dataSource = std::make_shared<back_testing_data_source>(std::move(data));
+		std::shared_ptr<back_testing_data_navigator> dataNavigator = std::make_shared<back_testing_data_navigator>(std::move(data));
 
-		std::unique_ptr<backtest_websocket_stream> websocketStream{ std::make_unique<backtest_websocket_stream>(dataSource) };
-		return std::make_shared<backtest_market_api>(dataSource, std::move(websocketStream));
+		std::unique_ptr<backtest_websocket_stream> websocketStream{ std::make_unique<backtest_websocket_stream>(dataNavigator) };
+		return std::make_shared<backtest_market_api>(dataNavigator, std::move(websocketStream));
 	}
 
 	std::shared_ptr<paper_trade_api> create_paper_trade_api()

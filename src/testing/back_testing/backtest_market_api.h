@@ -15,13 +15,13 @@ namespace mb
 	class backtest_market_api
 	{
 	private:
-		std::shared_ptr<back_testing_data_source> _dataSource;
+		std::shared_ptr<back_testing_data_navigator> _dataNavigator;
 		std::shared_ptr<backtest_websocket_stream> _websocketStream;
 
 	public:
-		backtest_market_api(std::shared_ptr<back_testing_data_source> dataSource, std::unique_ptr<backtest_websocket_stream> websocketStream);
+		backtest_market_api(std::shared_ptr<back_testing_data_navigator> dataNavigator, std::unique_ptr<backtest_websocket_stream> websocketStream);
 
-		const back_testing_data& get_back_testing_data() const noexcept { return _dataSource->data(); }
+		const back_testing_data& get_back_testing_data() const noexcept { return _dataNavigator->data(); }
 		void increment_data();
 
 		constexpr std::string_view id() const noexcept { return "BACK TEST"; }

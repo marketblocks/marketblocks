@@ -8,12 +8,12 @@ namespace mb
 	class backtest_websocket_stream : public websocket_stream
 	{
 	private:
-		std::shared_ptr<back_testing_data_source> _dataSource;
+		std::shared_ptr<back_testing_data_navigator> _dataNavigator;
 		std::unordered_set<tradable_pair> _subscribedPairs;
 		set_queue<tradable_pair> _messageQueue;
 
 	public:
-		backtest_websocket_stream(std::shared_ptr<back_testing_data_source> dataSource);
+		backtest_websocket_stream(std::shared_ptr<back_testing_data_navigator> dataSource);
 
 		void notify_data_incremented();
 

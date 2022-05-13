@@ -32,14 +32,14 @@ namespace mb
 		const std::vector<timed_ohlcv_data>& get_ohlcv_data(const tradable_pair& pair) const;
 	};
 
-	class back_testing_data_source
+	class back_testing_data_navigator
 	{
 	private:
 		back_testing_data _data;
 		std::time_t _dataTime;
 
 	public:
-		back_testing_data_source(back_testing_data data);
+		back_testing_data_navigator(back_testing_data data);
 
 		void increment_data() { _dataTime += _data.interval(); };
 		const back_testing_data& data() const noexcept { return _data; }
@@ -49,6 +49,6 @@ namespace mb
 	namespace internal
 	{
 		int get_data_index(const std::vector<timed_ohlcv_data>& data, std::time_t time);
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> get_data(const back_testing_data_source& dataSource, const tradable_pair& tradablePair);
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> get_data(const back_testing_data_navigator& dataNavigator, const tradable_pair& tradablePair);
 	}
 }
