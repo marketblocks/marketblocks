@@ -18,11 +18,12 @@ namespace mb::internal
 		std::shared_ptr<paper_trade_api> _paperTradeApi;
 
 	public:
+		backtest_runner(std::shared_ptr<backtest_market_api> backtestMarketApi, std::shared_ptr<paper_trade_api> paperTradeApi)
+			: _backtestMarketApi{ backtestMarketApi }, _paperTradeApi{ paperTradeApi }
+		{}
+
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
-			_backtestMarketApi = create_backtest_market_api();
-			_paperTradeApi = create_paper_trade_api();
-
 			return
 			{
 				std::make_shared<back_test_exchange>(_backtestMarketApi, _paperTradeApi)
@@ -50,4 +51,13 @@ namespace mb::internal
 			}
 		}
 	};
+
+	template<typename Strategy>
+	std::unique_ptr<backtest_runner<Strategy>> create_backtest_runner()
+	{
+		std::shared_ptr<backtest_market_api> backtestMarketApi = create_backtest_market_api();
+		std::shared_ptr<paper_trade_api> paperTradeApi = create_paper_trade_api();
+
+		return std::make_unique<backtest_runner<Strategy>>(backtestMarketApi, paperTradeApi);
+	}
 }

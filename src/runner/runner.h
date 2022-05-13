@@ -76,7 +76,7 @@ namespace mb
 		
 		if (config.runmode() == run_mode::BACKTEST)
 		{
-			implementation = std::make_unique<internal::backtest_runner<Strategy>>();
+			implementation = internal::create_backtest_runner<Strategy>();
 		}
 		else
 		{
