@@ -27,8 +27,8 @@ namespace mb
 	{
 		std::vector<tradable_pair> pairs;
 		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> ohlcvData;
-		int size = 0;
 		std::time_t startTime = MAXLONGLONG;
+		std::time_t endTime = 0;
 		tradable_pair pair{ "abc", "def" };
 
 		for (const auto& directoryEntry : std::filesystem::directory_iterator(config.data_directory()))
@@ -58,12 +58,14 @@ namespace mb
 
 			sort_and_filter(data, config.start_time(), config.step_size());
 
-			size = std::max<int>(size, data.size());
 			startTime = std::min(startTime, data.front().time_stamp());
+			endTime = std::max(endTime, data.back().time_stamp());
 
 			pairs.push_back(pair);
 			ohlcvData.emplace(pair, std::move(data));
 		}
+
+		int timeSteps = ((endTime - startTime) / config.step_size()) + 1;
 
 		return back_testing_data
 		{
@@ -71,7 +73,7 @@ namespace mb
 			std::move(ohlcvData),
 			startTime,
 			config.step_size(),
-			size
+			timeSteps
 		};
 	}
 }
