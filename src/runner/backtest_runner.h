@@ -32,11 +32,12 @@ namespace mb::internal
 
 		void run(Strategy& strategy) override
 		{
-			int dataSize = _backtestMarketApi->get_back_testing_data().size();
+			const back_testing_data& data = _backtestMarketApi->get_back_testing_data();
+			int timeSteps = data.time_steps();
 
-			for (int i = 0; i < dataSize; ++i)
+			for (int i = 0; i < timeSteps; ++i)
 			{
-				logger::instance().info("Running back test iteration {0}/{1}", i, dataSize);
+				logger::instance().info("Running back test iteration {0}/{1}", i + 1, timeSteps);
 
 				try
 				{

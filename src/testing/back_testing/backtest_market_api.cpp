@@ -10,7 +10,11 @@ namespace mb
 	void backtest_market_api::increment_data()
 	{ 
 		_dataNavigator->increment_data();
-		_websocketStream->notify_data_incremented();
+
+		if (_websocketStream)
+		{
+			_websocketStream->notify_data_incremented();
+		}
 	}
 
 	exchange_status backtest_market_api::get_status() const

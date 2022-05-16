@@ -41,4 +41,16 @@ namespace mb::test
 		MOCK_METHOD(std::string, add_order, (const trade_description& description), (override));
 		MOCK_METHOD(void, cancel_order, (std::string_view orderId), (override));
 	};
+
+	class test_strategy_base
+	{
+	public:
+		virtual void run_iteration() {}
+	};
+
+	class mock_strategy : public test_strategy_base
+	{
+	public:
+		MOCK_METHOD(void, run_iteration, (), (override));
+	};
 }

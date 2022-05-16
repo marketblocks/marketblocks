@@ -14,20 +14,20 @@ namespace mb
 		std::vector<tradable_pair> _tradablePairs;
 		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> _data;
 		std::time_t _startTime;
-		int _interval;
-		int _size;
+		int _stepSize;
+		int _timeSteps;
 
 	public:
 		back_testing_data(
 			std::vector<tradable_pair> tradablePairs,
 			std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> data,
 			std::time_t startTime,
-			int interval,
-			int size);
+			int stepSize,
+			int timeSteps);
 
 		std::time_t start_time() const noexcept { return _startTime; }
-		int interval() const noexcept { return _interval; }
-		int size() const noexcept { return _size; }
+		int step_size() const noexcept { return _stepSize; }
+		int time_steps() const noexcept { return _timeSteps; }
 		const std::vector<tradable_pair>& tradable_pairs() const noexcept { return _tradablePairs; }
 		const std::vector<timed_ohlcv_data>& get_ohlcv_data(const tradable_pair& pair) const;
 	};
@@ -41,7 +41,7 @@ namespace mb
 	public:
 		back_testing_data_navigator(back_testing_data data);
 
-		void increment_data() { _dataTime += _data.interval(); };
+		void increment_data() { _dataTime += _data.step_size(); };
 		const back_testing_data& data() const noexcept { return _data; }
 		std::time_t data_time() const noexcept { return _dataTime; }
 	};

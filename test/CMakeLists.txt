@@ -12,7 +12,6 @@ add_executable(marketblocks_test
 "unittest/utils/stringutils_test.cpp" 
 "unittest/utils/mathutils_test.cpp" 
 "unittest/utils/financeutils_test.cpp" 
-"unittest/strategies/tri_arb_test.cpp" 
 "unittest/exchanges/paper_trader/paper_trader_test.cpp" 
  
 "unittest/common/security/hash_test.cpp"

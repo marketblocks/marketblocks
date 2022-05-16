@@ -9,7 +9,7 @@ namespace
 {
 	using namespace mb;
 
-	void sort_and_filter(std::vector<timed_ohlcv_data>& data, std::time_t startTime, int interval)
+	void sort_and_filter(std::vector<timed_ohlcv_data>& data, std::time_t startTime, int step_size)
 	{
 		std::sort(data.begin(), data.end());
 
