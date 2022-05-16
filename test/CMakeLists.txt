@@ -30,7 +30,7 @@ add_executable(marketblocks_test
 "integration/kraken_test.cpp"
 "unittest/exchanges/kraken/kraken_websocket_test.cpp" 
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
-"unittest/exchanges/coinbase/coinbase_websocket_test.cpp"  "unittest/common/types/set_queue_test.cpp" "unittest/common/csv/csv_test.cpp" "unittest/common/csv/csv_row_test.cpp"  "unittest/testing/back_testing/data_loading_test.cpp" "unittest/runner/backtest_runner_test.cpp" "unittest/testing/back_testing/back_testing_data.cpp" "unittest/testing/back_testing/backtest_market_api_test.cpp" "unittest/testing/back_testing/backtest_websocket_stream.cpp")
+"unittest/exchanges/coinbase/coinbase_websocket_test.cpp"  "unittest/common/types/set_queue_test.cpp" "unittest/common/csv/csv_test.cpp" "unittest/common/csv/csv_row_test.cpp"  "unittest/testing/back_testing/data_loading_test.cpp" "unittest/runner/backtest_runner_test.cpp" "unittest/testing/back_testing/back_testing_data_test.cpp" "unittest/testing/back_testing/backtest_market_api_test.cpp" "unittest/testing/back_testing/backtest_websocket_stream_test.cpp")
 
 target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
 target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)

@@ -6,6 +6,18 @@ namespace mb
 	{
 		int get_data_index(const std::vector<timed_ohlcv_data>& data, std::time_t time)
 		{
+			constexpr int NOT_FOUND = -1;
+
+			if (data.empty() || time < data.front().time_stamp())
+			{
+				return NOT_FOUND;
+			}
+
+			if (time > data.back().time_stamp())
+			{
+				return data.size() - 1;
+			}
+
 			for (int i = 0; i < data.size(); ++i)
 			{
 				std::time_t timeStamp = data[i].time_stamp();
@@ -21,7 +33,7 @@ namespace mb
 				}
 			}
 
-			return -1;
+			return NOT_FOUND;
 		}
 
 		std::optional<std::reference_wrapper<const timed_ohlcv_data>> get_data(const back_testing_data_navigator& dataNavigator, const tradable_pair& tradablePair)
