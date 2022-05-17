@@ -15,6 +15,15 @@ namespace mb
 	}
 
 	template<typename T>
+	requires std::floating_point<T>
+	constexpr std::string to_string(T number, int precision)
+	{
+		std::stringstream stream;
+		stream << std::fixed << std::setprecision(2) << number;
+		return stream.str();
+	}
+
+	template<typename T>
 	class mean_calculator
 	{
 	private:

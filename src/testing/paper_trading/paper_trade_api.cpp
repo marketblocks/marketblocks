@@ -20,7 +20,7 @@ namespace mb
 		return balanceIt->second >= amount;
 	}
 
-	std::string paper_trade_api::execute_trade(std::string gainedAsset, double gainValue, std::string soldAsset, double soldValue)
+	void paper_trade_api::execute_trade(std::string gainedAsset, double gainValue, std::string soldAsset, double soldValue)
 	{
 		if (!has_sufficient_funds(soldAsset, soldValue))
 		{
@@ -29,8 +29,16 @@ namespace mb
 
 		_balances[gainedAsset] += gainValue;
 		_balances[soldAsset] -= soldValue;
+	}
 
-		return std::to_string(_nextOrderNumber++);
+	void paper_trade_api::record_order_description(const trade_description& tradeDescription, std::string_view orderId)
+	{
+		_closedOrders.emplace_back(
+			std::string{ orderId },
+			tradeDescription.pair().to_string('/'),
+			tradeDescription.action(),
+			tradeDescription.asset_price(),
+			tradeDescription.volume());
 	}
 
 	double paper_trade_api::get_fee(const tradable_pair& tradablePair) const
@@ -45,7 +53,7 @@ namespace mb
 
 		if (description.action() == trade_action::BUY)
 		{
-			return execute_trade(
+			execute_trade(
 				description.pair().asset(),
 				description.volume(),
 				description.pair().price_unit(),
@@ -53,12 +61,17 @@ namespace mb
 		}
 		else
 		{
-			return execute_trade(
+			execute_trade(
 				description.pair().price_unit(),
 				cost - fee,
 				description.pair().asset(),
 				description.volume());
 		}
+
+		std::string orderId = std::to_string(_nextOrderNumber++);
+		record_order_description(description, orderId);
+
+		return orderId;
 	}
 
 	void paper_trade_api::cancel_order(std::string_view orderId)

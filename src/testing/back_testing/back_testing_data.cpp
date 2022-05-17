@@ -54,12 +54,14 @@ namespace mb
 		std::vector<tradable_pair> tradablePairs,
 		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> data,
 		std::time_t startTime,
+		std::time_t endTime,
 		int step_size,
 		int size)
 		: 
 		_tradablePairs{ std::move(tradablePairs) }, 
 		_data{ std::move(data) }, 
 		_startTime{ startTime },
+		_endTime{ endTime },
 		_stepSize{ step_size },
 		_timeSteps{ size } 
 	{}

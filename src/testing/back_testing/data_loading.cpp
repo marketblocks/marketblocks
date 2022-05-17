@@ -12,12 +12,6 @@ namespace
 	void sort_and_filter(std::vector<timed_ohlcv_data>& data, std::time_t startTime, int step_size)
 	{
 		std::sort(data.begin(), data.end());
-
-		if (startTime != 0)
-		{
-			auto dataCutoff = find<timed_ohlcv_data>(data, [startTime](const timed_ohlcv_data& trade) { return trade.time_stamp() > startTime; });
-			data.erase(data.begin(), std::prev(dataCutoff));
-		}
 	}
 }
 
@@ -72,6 +66,7 @@ namespace mb
 			std::move(pairs),
 			std::move(ohlcvData),
 			startTime,
+			endTime,
 			config.step_size(),
 			timeSteps
 		};

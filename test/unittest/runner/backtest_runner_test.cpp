@@ -14,13 +14,15 @@ namespace mb::test
 			{},
 			{},
 			0,
+			9,
 			1,
 			timeSteps
 		};
 
 		auto dataNavigator = std::make_shared<back_testing_data_navigator>(backTestingData);
 		auto marketApi = std::make_shared<backtest_market_api>(dataNavigator, nullptr);
-		internal::backtest_runner<mock_strategy> runner{ marketApi, nullptr };
+		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{});
+		internal::backtest_runner<mock_strategy> runner{ marketApi, paperTradeApi };
 
 		mock_strategy mockStrategy{};
 		EXPECT_CALL(mockStrategy, run_iteration)
@@ -38,13 +40,15 @@ namespace mb::test
 			{},
 			{},
 			0,
+			2,
 			1,
 			timeSteps
 		};
 
 		auto dataNavigator = std::make_shared<back_testing_data_navigator>(backTestingData);
 		auto marketApi = std::make_shared<backtest_market_api>(dataNavigator, nullptr);
-		internal::backtest_runner<mock_strategy> runner{ marketApi, nullptr };
+		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{});
+		internal::backtest_runner<mock_strategy> runner{ marketApi, paperTradeApi };
 
 		mock_strategy mockStrategy{};
 		EXPECT_CALL(mockStrategy, run_iteration)

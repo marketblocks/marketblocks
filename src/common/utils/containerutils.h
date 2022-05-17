@@ -69,17 +69,16 @@ namespace mb
 		return std::find(source.begin(), source.end(), element) != source.end();
 	}
 
-	template<typename T, typename Container, typename Matcher>
-	constexpr auto find(const Container& source, Matcher matcher)
+	template<typename Key, typename Value, typename Container>
+	constexpr Value find_or_default(const Container& source, Key key, Value defaultValue)
 	{
-		for (auto it = source.begin(); it != source.end(); ++it)
+		auto it = source.find(key);
+
+		if (it != source.end())
 		{
-			if (matcher(*it))
-			{
-				return it;
-			}
+			return it->second;
 		}
 
-		return source.end();
+		return defaultValue;
 	}
 }

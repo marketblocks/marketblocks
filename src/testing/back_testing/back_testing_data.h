@@ -14,6 +14,7 @@ namespace mb
 		std::vector<tradable_pair> _tradablePairs;
 		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> _data;
 		std::time_t _startTime;
+		std::time_t _endTime;
 		int _stepSize;
 		int _timeSteps;
 
@@ -22,10 +23,12 @@ namespace mb
 			std::vector<tradable_pair> tradablePairs,
 			std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> data,
 			std::time_t startTime,
+			std::time_t endTime,
 			int stepSize,
 			int timeSteps);
 
 		std::time_t start_time() const noexcept { return _startTime; }
+		std::time_t end_time() const noexcept { return _endTime; }
 		int step_size() const noexcept { return _stepSize; }
 		int time_steps() const noexcept { return _timeSteps; }
 		const std::vector<tradable_pair>& tradable_pairs() const noexcept { return _tradablePairs; }
