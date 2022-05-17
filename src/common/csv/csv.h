@@ -72,9 +72,14 @@ namespace mb
 	}
 
 	template<typename T, typename CsvData>
-	void write_to_csv_file(const std::filesystem::path& path, const CsvData& data)
+	void write_to_csv_file(const std::filesystem::path& path, const CsvData& data, const std::vector<std::string>& headers = {})
 	{
 		file_handler fileHandler{ file_handler::write(path) };
+
+		if (!headers.empty())
+		{
+			fileHandler.stream() << csv_row{ headers }.to_string() << std::endl;
+		}
 
 		for (const T& item : data)
 		{

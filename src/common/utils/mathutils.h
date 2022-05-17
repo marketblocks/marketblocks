@@ -11,7 +11,14 @@ namespace mb
 	requires arithmetic<T1> && arithmetic<T2>
 	constexpr double calculate_percentage_diff(T1 a, T2 b) noexcept
 	{
-		return (b - a) * 100 / static_cast<double>(a);
+		return (b - a) * 100.0 / a;
+	}
+
+	template<typename T1, typename T2, typename T3>
+	requires arithmetic<T1> && arithmetic<T2> && arithmetic<T3>
+	constexpr double calculate_percentage_proportion(T1 a, T2 b, T3 t) noexcept
+	{
+		return (t - a) * 100.0 / (b - a);
 	}
 
 	template<typename T>

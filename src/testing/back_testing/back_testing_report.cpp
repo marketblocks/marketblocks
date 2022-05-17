@@ -121,7 +121,7 @@ namespace mb
 			stream << INDENT << "End Balance: " << assetReport.end_balance() << std::endl;
 			stream << INDENT << "Change: " << assetReport.change() << std::endl;
 			stream << INDENT << "Percentage Change: " << assetReport.percentage_change() << std::endl;
-			stream << INDENT << "Annural Return: " << assetReport.annual_return() << std::endl;
+			stream << INDENT << "Annual Return: " << assetReport.annual_return() << std::endl;
 			stream << std::endl;
 		}
 

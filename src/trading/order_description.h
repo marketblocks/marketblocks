@@ -1,6 +1,7 @@
 #pragma once
 
 #include "trade_description.h"
+#include "common/csv/csv.h"
 
 namespace mb
 {
@@ -24,4 +25,7 @@ namespace mb
 		constexpr double price() const noexcept { return _price; }
 		constexpr double volume() const noexcept { return _volume; }
 	};
+
+	template<>
+	csv_row to_csv_row(const order_description& data);
 }

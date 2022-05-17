@@ -23,22 +23,6 @@ namespace
 			throw mb_exception{ "Unknown order type" };
 		}
 	}
-
-	constexpr std::string_view to_string(trade_action tradeAction)
-	{
-		constexpr std::string_view BUY = "buy";
-		constexpr std::string_view SELL = "sell";
-
-		switch (tradeAction)
-		{
-		case trade_action::BUY:
-			return BUY;
-		case trade_action::SELL:
-			return SELL;
-		default:
-			throw mb_exception{ "Unknown order type" };
-		}
-	}
 }
 
 namespace mb
@@ -200,7 +184,7 @@ namespace mb
 
 		std::string content{ json_writer{}
 			.add(TYPE, ::to_string(description.order_type()))
-			.add(SIDE, ::to_string(description.action()))
+			.add(SIDE, to_string(description.action()))
 			.add(PRODUCT_ID, internal::to_exchange_id(description.pair()))
 			.add(PRICE, std::to_string(description.asset_price()))
 			.add(SIZE, std::to_string(description.volume()))
