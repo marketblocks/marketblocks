@@ -27,7 +27,7 @@ namespace mb
 		void exit_on_key()
 		{
 			std::cin.get();
-			std::exit();
+			std::exit(-1);
 		}
 
 	public:
