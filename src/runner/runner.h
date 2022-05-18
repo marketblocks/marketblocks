@@ -24,6 +24,12 @@ namespace mb
 		bool _initialised;
 		logger& _logger;
 
+		void exit_on_key()
+		{
+			std::cin.get();
+			std::exit();
+		}
+
 	public:
 		explicit constexpr runner(
 			std::unique_ptr<internal::runner_implementation<Strategy>> implementation,
@@ -37,28 +43,39 @@ namespace mb
 			_logger{ logger::instance() }
 		{}
 
-		void initialise()
+		void initialise() noexcept
 		{
-			_logger.info("Starting initialisation...");
+			try
+			{
+				_logger.info("Starting initialisation...");
 
-			std::vector<std::shared_ptr<exchange>> exchanges = _implementation->create_exchanges(_config);
+				std::vector<std::shared_ptr<exchange>> exchanges = _implementation->create_exchanges(_config);
+				_strategy.initialise(std::move(exchanges));
+
+				_logger.info("Initialisation complete");
+				_initialised = true;
+			}
+			catch (const std::exception& e)
+			{
+				_logger.critical("An error has occurred during initialisation which cannot be recovered from. The program will now terminate. Details: \n{}", e.what());
+				exit_on_key();
+			}
 			
-			_logger.info("Initialising strategy...");
-				
-			_strategy.initialise(std::move(exchanges));
-
-			_logger.info("Initialisation complete");
-			_initialised = true;
 		}
 
-		void run()
+		void run() noexcept
 		{
-			if (!_initialised)
-			{
-				throw mb_exception{ "Runner must be initialized" };
-			}
+			assert(_initialised);
 
-			_implementation->run(_strategy);
+			try
+			{
+				_implementation->run(_strategy);
+			}
+			catch (const std::exception& e)
+			{
+				_logger.critical("An error has occurred which cannot be recovered from. The program will now terminate. Details: \n{}", e.what());
+				exit_on_key();
+			}
 		}
 	};
 
