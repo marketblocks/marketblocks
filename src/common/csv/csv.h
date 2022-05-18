@@ -71,6 +71,24 @@ namespace mb
 		return result;
 	}
 
+	template<typename T, typename RowSelector>
+	std::vector<T> read_csv_file(const std::filesystem::path& path, RowSelector rowSelector)
+	{
+		std::vector<T> result;
+		stream_file(path, [&result, &rowSelector](std::string_view line)
+			{
+				csv_row row{ parse_row(line) };
+				T item = from_csv_row<T>(row);
+
+				if (rowSelector(item))
+				{
+					result.emplace_back(std::move(item));
+				}
+			});
+
+		return result;
+	}
+
 	template<typename T, typename CsvData>
 	void write_to_csv_file(const std::filesystem::path& path, const CsvData& data, const std::vector<std::string>& headers = {})
 	{
