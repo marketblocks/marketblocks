@@ -18,7 +18,7 @@ namespace mb::test
 
 		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{});
 
-		back_testing_report report = generate_back_testing_report(data, {}, paperTradeApi);
+		back_testing_report report = generate_back_testing_report(data, {}, paperTradeApi, std::chrono::seconds{});
 
 		EXPECT_EQ("01-01-1970 00:00:02", report.start_time());
 		EXPECT_EQ("01-01-1970 00:00:20", report.end_time());
@@ -36,7 +36,7 @@ namespace mb::test
 		paperTradeApi->add_order(tradeDescription);
 		paperTradeApi->add_order(tradeDescription);
 
-		back_testing_report report = generate_back_testing_report(data, {}, paperTradeApi);
+		back_testing_report report = generate_back_testing_report(data, {}, paperTradeApi, std::chrono::seconds{});
 
 		EXPECT_EQ("3", report.trades_count());
 	}
@@ -49,7 +49,7 @@ namespace mb::test
 		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{0, initialBalances});
 		paperTradeApi->add_order(trade_description{ order_type::LIMIT, tradable_pair{"BTC", "GBP"}, trade_action::BUY, 100.0, 1.0 });
 
-		back_testing_report report = generate_back_testing_report(data, initialBalances, paperTradeApi);
+		back_testing_report report = generate_back_testing_report(data, initialBalances, paperTradeApi, std::chrono::seconds{});
 		const std::vector<asset_report>& assetReports = report.asset_reports();
 
 		ASSERT_EQ(2, assetReports.size());

@@ -40,6 +40,7 @@ namespace mb
 	private:
 		back_testing_data _data;
 		std::time_t _dataTime;
+		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>::const_iterator> _iteratorCache;
 
 	public:
 		back_testing_data_navigator(back_testing_data data);
@@ -47,11 +48,8 @@ namespace mb
 		void increment_data() { _dataTime += _data.step_size(); };
 		const back_testing_data& data() const noexcept { return _data; }
 		std::time_t data_time() const noexcept { return _dataTime; }
-	};
 
-	namespace internal
-	{
-		int get_data_index(const std::vector<timed_ohlcv_data>& data, std::time_t time);
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> get_data(const back_testing_data_navigator& dataNavigator, const tradable_pair& tradablePair);
-	}
+		std::vector<timed_ohlcv_data>::const_iterator find_data_position(const std::vector<timed_ohlcv_data>& pairData, const tradable_pair& tradablePair);
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> find_data_point(const tradable_pair& tradablePair);
+	};
 }

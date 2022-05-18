@@ -31,7 +31,7 @@ namespace mb
 	{
 		const std::vector<timed_ohlcv_data>& pairData = _dataNavigator->data().get_ohlcv_data(tradablePair);
 		std::time_t targetTime = _dataNavigator->data_time() - 86400; // -24hrs
-		int startIndex = internal::get_data_index(pairData, _dataNavigator->data_time());
+		auto startIterator = _dataNavigator->find_data_position(pairData, tradablePair);
 
 		double open = 0.0;
 		double high = 0.0;
@@ -39,16 +39,16 @@ namespace mb
 		double close = 0.0;
 		double volume = 0.0;
 
-		for (int i = startIndex; i > -1; --i)
+		for (auto it = startIterator; it >= pairData.begin(); --it)
 		{
-			const timed_ohlcv_data& data = pairData.at(i);
+			const timed_ohlcv_data& data = *it;
 
 			if (data.time_stamp() < targetTime)
 			{
 				break;
 			}
 
-			if (i == startIndex)
+			if (it == startIterator)
 			{
 				close = data.data().close();
 			}
@@ -64,7 +64,7 @@ namespace mb
 
 	double backtest_market_api::get_price(const tradable_pair& tradablePair) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data{ internal::get_data(*_dataNavigator, tradablePair) };
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(tradablePair);
 
 		if (data.has_value())
 		{

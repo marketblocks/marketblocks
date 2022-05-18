@@ -4,7 +4,7 @@
 
 namespace mb::test
 {
-	TEST(BackTestingData, GetIndexReturnsNotFoundIfTimeIsBeforeFirstDataPoint)
+	TEST(BackTestingData, FindDataPositionReturnsEndIfTimeIsBeforeFirstDataPoint)
 	{
 		std::vector<timed_ohlcv_data> data
 		{
@@ -13,12 +13,27 @@ namespace mb::test
 			timed_ohlcv_data{ 4, ohlcv_data{ 0, 0, 0, 0, 0 } },
 		};
 
-		EXPECT_EQ(-1, internal::get_data_index(data, 1));
-		EXPECT_EQ(-1, internal::get_data_index(data, 0));
-		EXPECT_EQ(-1, internal::get_data_index(data, -1));
+		tradable_pair pair{ "BTC", "GBP" };
+
+		back_testing_data_navigator navigator
+		{
+			back_testing_data
+			{
+				std::vector<tradable_pair>{ pair },
+				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				1,
+				4,
+				1,
+				3
+			}
+		};
+
+		auto iteratedData = navigator.data().get_ohlcv_data(pair);
+
+		EXPECT_EQ(iteratedData.end(), navigator.find_data_position(iteratedData, pair));
 	}
 
-	TEST(BackTestingData, GetIndexReturnsCorrectlyIfTimeIsEqualToDataPoint)
+	TEST(BackTestingData, FindDataPositionReturnsCorrectlyIfTimeIsEqualToDataPoint)
 	{
 		std::vector<timed_ohlcv_data> data
 		{
@@ -27,12 +42,34 @@ namespace mb::test
 			timed_ohlcv_data{ 4, ohlcv_data{ 0, 0, 0, 0, 0 } },
 		};
 
-		EXPECT_EQ(0, internal::get_data_index(data, 2));
-		EXPECT_EQ(1, internal::get_data_index(data, 3));
-		EXPECT_EQ(2, internal::get_data_index(data, 4));
+		tradable_pair pair{ "BTC", "GBP" };
+
+		back_testing_data_navigator navigator
+		{
+			back_testing_data
+			{
+				std::vector<tradable_pair>{ pair },
+				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				1,
+				4,
+				1,
+				3
+			}
+		};
+
+		auto iteratedData = navigator.data().get_ohlcv_data(pair);
+
+		navigator.increment_data();
+		EXPECT_EQ(iteratedData.begin(), navigator.find_data_position(iteratedData, pair));
+
+		navigator.increment_data();
+		EXPECT_EQ(iteratedData.begin() + 1, navigator.find_data_position(iteratedData, pair));
+
+		navigator.increment_data();
+		EXPECT_EQ(iteratedData.begin() + 2, navigator.find_data_position(iteratedData, pair));
 	}
 
-	TEST(BackTestingData, GetIndexReturnsLastIndexIfTimeIsPastEndDataPoint)
+	TEST(BackTestingData, FindDataPositionReturnsLastIfTimeIsPastEndDataPoint)
 	{
 		std::vector<timed_ohlcv_data> data
 		{
@@ -41,11 +78,30 @@ namespace mb::test
 			timed_ohlcv_data{ 4, ohlcv_data{ 0, 0, 0, 0, 0 } },
 		};
 
-		EXPECT_EQ(2, internal::get_data_index(data, 5));
-		EXPECT_EQ(2, internal::get_data_index(data, 10));
+		tradable_pair pair{ "BTC", "GBP" };
+
+		back_testing_data_navigator navigator
+		{
+			back_testing_data
+			{
+				std::vector<tradable_pair>{ pair },
+				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				5,
+				6,
+				1,
+				5
+			}
+		};
+
+		auto iteratedData = navigator.data().get_ohlcv_data(pair);
+
+		EXPECT_EQ(iteratedData.end() - 1, navigator.find_data_position(iteratedData, pair));
+
+		navigator.increment_data();
+		EXPECT_EQ(iteratedData.end() - 1, navigator.find_data_position(iteratedData, pair));
 	}
 
-	TEST(BackTestingData, GetIndexReturnsMostRecentIndexIfTimeIsBetweenDataPoints)
+	TEST(BackTestingData, FindDataPositionReturnsMostRecentIfTimeIsBetweenDataPoints)
 	{
 		std::vector<timed_ohlcv_data> data
 		{
@@ -54,7 +110,29 @@ namespace mb::test
 			timed_ohlcv_data{ 7, ohlcv_data{ 0, 0, 0, 0, 0 } },
 		};
 
-		EXPECT_EQ(0, internal::get_data_index(data, 4));
-		EXPECT_EQ(1, internal::get_data_index(data, 6));
+		tradable_pair pair{ "BTC", "GBP" };
+
+		back_testing_data_navigator navigator
+		{
+			back_testing_data
+			{
+				std::vector<tradable_pair>{ pair },
+				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				2,
+				7,
+				1,
+				3
+			}
+		};
+
+		auto iteratedData = navigator.data().get_ohlcv_data(pair);
+
+		navigator.increment_data();
+		navigator.increment_data();
+		EXPECT_EQ(iteratedData.begin(), navigator.find_data_position(iteratedData, pair));
+
+		navigator.increment_data();
+		navigator.increment_data();
+		EXPECT_EQ(iteratedData.begin() + 1, navigator.find_data_position(iteratedData, pair));
 	}
 }

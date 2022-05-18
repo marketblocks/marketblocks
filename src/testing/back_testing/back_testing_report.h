@@ -45,6 +45,7 @@ namespace mb
 	class back_testing_report
 	{
 	private:
+		std::string _elapsedTime;
 		std::string _startTime;
 		std::string _endTime;
 		std::string _stepSize;
@@ -54,6 +55,7 @@ namespace mb
 
 	public:
 		constexpr back_testing_report(
+			std::string elapsedTime,
 			std::string startTime,
 			std::string endTime,
 			std::string stepSize,
@@ -61,6 +63,7 @@ namespace mb
 			std::string tradesCount,
 			std::vector<asset_report> assetReports)
 			: 
+			_elapsedTime{ std::move(elapsedTime) },
 			_startTime{ std::move(startTime) },
 			_endTime{ std::move(endTime) },
 			_stepSize{ std::move(stepSize) },
@@ -69,6 +72,7 @@ namespace mb
 			_assetReports{ std::move(assetReports) }
 		{}
 
+		constexpr const std::string& elapsed_time() const noexcept { return _elapsedTime; }
 		constexpr const std::string& start_time() const noexcept { return _startTime; }
 		constexpr const std::string& end_time() const noexcept { return _endTime; }
 		constexpr const std::string& step_size() const noexcept { return _stepSize; }
@@ -80,7 +84,8 @@ namespace mb
 	back_testing_report generate_back_testing_report(
 		const back_testing_data& backTestingData,
 		const unordered_string_map<double>& initialBalances,
-		std::shared_ptr<paper_trade_api> paperTradeApi);
+		std::shared_ptr<paper_trade_api> paperTradeApi,
+		std::chrono::seconds elapsedTime);
 
 	std::string generate_report_string(const back_testing_report& report);
 }

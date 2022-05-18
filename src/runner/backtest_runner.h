@@ -49,10 +49,18 @@ namespace mb::internal
 
 			unordered_string_map<double> initialBalances = _paperTradeApi->get_balances();
 
+			int lastLoggedPercentage = -1;
+			auto startTime = std::chrono::system_clock::now();
+
 			for (int i = 0; i < timeSteps; ++i)
 			{
 				int percentageComplete = calculate_percentage_proportion(1, timeSteps, i + 1);
-				logger::instance().info("Running back test iteration {0}/{1} ({2}%)", i + 1, timeSteps, percentageComplete);
+				
+				if (percentageComplete > lastLoggedPercentage)
+				{
+					logger::instance().info("Running back test {}% complete", percentageComplete);
+					lastLoggedPercentage = percentageComplete;
+				}
 
 				try
 				{
@@ -66,9 +74,12 @@ namespace mb::internal
 				_backtestMarketApi->increment_data();
 			}
 
+			auto endTime = std::chrono::system_clock::now();
+			auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+
 			logger::instance().info("Back test complete. Generating report...");
 
-			back_testing_report report{ generate_back_testing_report(data, initialBalances, _paperTradeApi) };
+			back_testing_report report{ generate_back_testing_report(data, initialBalances, _paperTradeApi, elapsedTime) };
 			std::string reportString{ generate_report_string(report) };
 
 			std::filesystem::path outputPath = get_full_output_path(_outputDirectory);

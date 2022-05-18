@@ -83,12 +83,14 @@ namespace mb
 	back_testing_report generate_back_testing_report(
 		const back_testing_data& backTestingData,
 		const unordered_string_map<double>& initialBalances, 
-		std::shared_ptr<paper_trade_api> paperTradeApi)
+		std::shared_ptr<paper_trade_api> paperTradeApi,
+		std::chrono::seconds elapsedTime)
 	{
 		static constexpr std::string_view DATE_FORMAT = "%d-%m-%Y %H:%M:%S";
 
 		return back_testing_report
-		{ 
+		{
+			std::to_string(elapsedTime.count()) + "s",
 			to_string(backTestingData.start_time(), DATE_FORMAT),
 			to_string(backTestingData.end_time(), DATE_FORMAT),
 			std::to_string(backTestingData.step_size()),
@@ -105,8 +107,9 @@ namespace mb
 		std::stringstream stream;
 		stream << "Back Test Report" << std::endl;
 		stream << "--------------------" << std::endl;
-		stream << "Start Time: " << report.start_time() << std::endl;
-		stream << "End Time: " << report.end_time() << std::endl;
+		stream << "Elapsed Time: " << report.elapsed_time() << std::endl;
+		stream << "Data Start Time: " << report.start_time() << std::endl;
+		stream << "Data End Time: " << report.end_time() << std::endl;
 		stream << "Step Size: " << report.step_size() << std::endl;
 		stream << "Time Steps: " << report.time_steps() << std::endl;
 		stream << "Total Number of Trades: " << report.trades_count() << std::endl;
