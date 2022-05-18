@@ -74,8 +74,9 @@ namespace mb
 			catch (const std::exception& e)
 			{
 				_logger.critical("An error has occurred which cannot be recovered from. The program will now terminate. Details: \n{}", e.what());
-				exit_on_key();
 			}
+			
+			exit_on_key();
 		}
 	};
 
