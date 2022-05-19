@@ -3,6 +3,7 @@
 #include <cassert>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "trading_constants.h"
 
@@ -56,6 +57,20 @@ namespace mb
 	}
 
 	tradable_pair parse_tradable_pair(std::string_view string, char seperator = '/');
+
+	template<typename Container>
+	std::vector<tradable_pair> parse_tradable_pairs(const Container& source, char seperator = '/')
+	{
+		std::vector<tradable_pair> pairs;
+		pairs.reserve(source.size());
+
+		for (auto& name : source)
+		{
+			pairs.emplace_back(parse_tradable_pair(name, seperator));
+		}
+
+		return pairs;
+	}
 }
 
 namespace std

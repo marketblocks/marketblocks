@@ -49,12 +49,6 @@ namespace
 		};
 	}
 
-	tradable_pair parse_tradable_pair(const std::string& pairName)
-	{
-		std::vector<std::string> assets{ split(pairName, '/') };
-		return tradable_pair{ std::move(assets[0]), std::move(assets[1]) };
-	}
-
 	void process_order_book_initialisation(const tradable_pair& pair, local_order_book& localOrderBook, const json_element& json)
 	{
 		json_element asks = json.element("as");
@@ -112,7 +106,7 @@ namespace
 	{
 		if (json.size() == 4)
 		{
-			tradable_pair pair{ parse_tradable_pair(json.element(3).get<std::string>()) };
+			tradable_pair pair{ parse_tradable_pair(json.element(3).get<std::string>(), '/')};
 			json_element entryObject = json.element(1);
 
 			if (localOrderBook.is_subscribed(pair))
@@ -126,7 +120,7 @@ namespace
 		}
 		else
 		{
-			tradable_pair pair{ parse_tradable_pair(json.element(4).get<std::string>()) };
+			tradable_pair pair{ parse_tradable_pair(json.element(4).get<std::string>(), '/')};
 			process_order_book_object(pair, localOrderBook, json.element(1));
 			process_order_book_object(pair, localOrderBook, json.element(2));
 		}

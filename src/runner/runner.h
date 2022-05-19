@@ -20,7 +20,7 @@ namespace mb
 	private:
 		std::unique_ptr<internal::runner_implementation<Strategy>> _implementation;
 		runner_config _config;
-		Strategy _strategy;
+		std::unique_ptr<Strategy> _strategy;
 		bool _initialised;
 		logger& _logger;
 
@@ -33,24 +33,25 @@ namespace mb
 	public:
 		explicit constexpr runner(
 			std::unique_ptr<internal::runner_implementation<Strategy>> implementation,
-			runner_config config,
-			Strategy strategy)
+			runner_config config)
 			: 
 			_implementation{ std::move(implementation) }, 
 			_config{ std::move(config) },
-			_strategy { std::move(strategy) },
 			_initialised{ false },
 			_logger{ logger::instance() }
 		{}
 
-		void initialise() noexcept
+		template<typename... Args>
+		void initialise(Args&&... args) noexcept
 		{
 			try
 			{
 				_logger.info("Starting initialisation...");
 
+				_strategy = std::make_unique<Strategy>(std::forward<Args>(args)...);
+
 				std::vector<std::shared_ptr<exchange>> exchanges = _implementation->create_exchanges(_config);
-				_strategy.initialise(std::move(exchanges));
+				_strategy->initialise(std::move(exchanges));
 
 				_logger.info("Initialisation complete");
 				_initialised = true;
@@ -69,7 +70,7 @@ namespace mb
 
 			try
 			{
-				_implementation->run(_strategy);
+				_implementation->run(*_strategy);
 			}
 			catch (const std::exception& e)
 			{
@@ -80,8 +81,8 @@ namespace mb
 		}
 	};
 
-	template<typename Strategy, typename... Args>
-	runner<Strategy> create_runner(Args&&... args)
+	template<typename Strategy>
+	runner<Strategy> create_runner()
 	{
 		log_version();
 		create_config_directory_if_not_exist();
@@ -104,8 +105,7 @@ namespace mb
 		return runner<Strategy>
 		{
 			std::move(implementation),
-			std::move(config),
-			Strategy{ std::forward<Args>(args)... }
+			std::move(config)
 		};
 	}
 }

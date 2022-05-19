@@ -7,6 +7,23 @@ namespace
 
 namespace mb
 {
+	namespace internal
+	{
+		std::filesystem::path get_path(std::string_view fileName)
+		{
+			std::filesystem::path path{ CONFIG_DIRECTORY };
+			path.append(fileName);
+			path.replace_extension(JSON_FILE_EXTENSION);
+
+			return path;
+		}
+
+		bool file_exists(std::string_view fileName)
+		{
+			return std::filesystem::exists(get_path(fileName));
+		}
+	}
+
 	void create_config_directory_if_not_exist()
 	{
 		std::filesystem::path path{ CONFIG_DIRECTORY };
@@ -14,19 +31,5 @@ namespace mb
 		{
 			std::filesystem::create_directory(path);
 		}
-	}
-
-	std::filesystem::path get_path(std::string_view fileName)
-	{
-		std::filesystem::path path{ CONFIG_DIRECTORY };
-		path.append(fileName);
-		path.replace_extension(JSON_FILE_EXTENSION);
-
-		return path;
-	}
-
-	bool file_exists(std::string_view fileName)
-	{
-		return std::filesystem::exists(get_path(fileName));
 	}
 }
