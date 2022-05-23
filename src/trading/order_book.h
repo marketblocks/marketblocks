@@ -53,11 +53,7 @@ namespace mb
 	
 	constexpr const order_book_entry& get_best_entry(const std::vector<order_book_entry>& entries)
 	{
-		if (entries.size() == 0)
-		{
-			throw mb_exception{ "Order Book entries are empty" };
-		}
-
+		assert(!entries.empty());
 		return entries[0];
 	}
 

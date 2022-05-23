@@ -21,6 +21,7 @@ namespace mb::test
 		MOCK_METHOD(ws_connection_status, connection_status, (), (const, override));
 		MOCK_METHOD(void, subscribe_order_book, (const std::vector<tradable_pair>& tradablePairs), (override));
 		MOCK_METHOD(void, unsubscribe_order_book, (const std::vector<tradable_pair>& tradablePairs), (override));
+		MOCK_METHOD(bool, is_order_book_subscribed, (const tradable_pair& pair), (const, override));
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
 		MOCK_METHOD(set_queue<tradable_pair>&, get_order_book_message_queue, (), (noexcept, override));
 	};

@@ -28,6 +28,11 @@ namespace mb
 		}
 	}
 
+	bool backtest_websocket_stream::is_order_book_subscribed(const tradable_pair& pair) const
+	{
+		return _subscribedPairs.contains(pair);
+	}
+
 	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
 	{
 		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);

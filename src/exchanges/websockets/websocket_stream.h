@@ -16,6 +16,7 @@ namespace mb
 		virtual ws_connection_status connection_status() const = 0;
 		virtual void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs) = 0;
 		virtual void unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs) = 0;
+		virtual bool is_order_book_subscribed(const tradable_pair& pair) const = 0;
 		virtual order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const = 0;
 		virtual set_queue<tradable_pair>& get_order_book_message_queue() = 0;
 	};
@@ -38,6 +39,11 @@ namespace mb
 		ws_connection_status connection_status() const override;
 		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
 		void unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
+		
+		bool is_order_book_subscribed(const tradable_pair& pair) const override
+		{
+			return _implementation->is_order_book_subscribed(pair);
+		}
 
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override
 		{ 

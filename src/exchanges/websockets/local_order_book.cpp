@@ -55,7 +55,7 @@ namespace mb
 
 		if (it == _orderBookCaches.end())
 		{
-			throw mb_exception{ std::format("Order book not subscribed for pair {}", pair.to_string('/'))};
+			return order_book_state{ {}, {} };
 		}
 
 		return it->second.snapshot(depth);

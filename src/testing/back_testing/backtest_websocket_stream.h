@@ -22,6 +22,7 @@ namespace mb
 
 		void subscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
 		void unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs) override;
+		bool is_order_book_subscribed(const tradable_pair& pair) const override;
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		set_queue<tradable_pair>& get_order_book_message_queue() override;
 	};
