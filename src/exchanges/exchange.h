@@ -53,6 +53,16 @@ namespace mb
 			_tradeApi{ std::move(tradeApi) }
 		{}
 
+		std::shared_ptr<MarketApi> market_api() const noexcept
+		{
+			return _marketApi;
+		}
+
+		std::shared_ptr<TradeApi> trade_api() const noexcept
+		{
+			return _tradeApi;
+		}
+
 		constexpr std::string_view id() const noexcept
 		{
 			return _marketApi->id();

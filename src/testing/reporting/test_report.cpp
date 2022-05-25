@@ -1,6 +1,7 @@
 #include <unordered_set>
 
-#include "back_testing_report.h"
+#include "test_report.h"
+#include "logging/logger.h"
 #include "common/utils/timeutils.h"
 #include "common/utils/containerutils.h"
 #include "common/utils/mathutils.h"
@@ -42,7 +43,7 @@ namespace
 
 		std::vector<asset_report> assetReports;
 		assetReports.reserve(assets.size());
-		
+
 		std::string percentageChange;
 		std::string annualReturn;
 
@@ -76,48 +77,28 @@ namespace
 
 		return assetReports;
 	}
-}
 
-namespace mb
-{
-	back_testing_report generate_back_testing_report(
-		const back_testing_data& backTestingData,
-		const unordered_string_map<double>& initialBalances, 
-		std::shared_ptr<paper_trade_api> paperTradeApi,
-		std::chrono::seconds elapsedTime)
-	{
-		static constexpr std::string_view DATE_FORMAT = "%d-%m-%Y %H:%M:%S";
-
-		return back_testing_report
-		{
-			std::to_string(elapsedTime.count()) + "s",
-			to_string(backTestingData.start_time(), DATE_FORMAT),
-			to_string(backTestingData.end_time(), DATE_FORMAT),
-			std::to_string(backTestingData.step_size()),
-			std::to_string(backTestingData.time_steps()),
-			std::to_string(paperTradeApi->get_closed_orders().size()),
-			create_asset_reports(backTestingData.start_time(), backTestingData.end_time(), initialBalances, paperTradeApi)
-		};
-	}
-
-	std::string generate_report_string(const back_testing_report& report)
+	std::string generate_report_string(const test_report& report)
 	{
 		static constexpr std::string_view INDENT = "    ";
+		const generic_test_results& genericResults = report.get_generic_results();
 
 		std::stringstream stream;
 		stream << "Back Test Report" << std::endl;
 		stream << "--------------------" << std::endl;
-		stream << "Elapsed Time: " << report.elapsed_time() << std::endl;
-		stream << "Data Start Time: " << report.start_time() << std::endl;
-		stream << "Data End Time: " << report.end_time() << std::endl;
-		stream << "Step Size: " << report.step_size() << std::endl;
-		stream << "Time Steps: " << report.time_steps() << std::endl;
-		stream << "Total Number of Trades: " << report.trades_count() << std::endl;
+		stream << "Elapsed Time: " << genericResults.elapsed_time() << std::endl;
+		stream << "Total Number of Trades: " << genericResults.trades_count() << std::endl;
+
+		for (auto& [resultName, resultValue] : report.get_specific_results())
+		{
+			stream << resultName << ": " << resultValue << std::endl;
+		}
+
 		stream << std::endl;
 		stream << "Asset Reports" << std::endl;
 		stream << "--------------------" << std::endl;
 
-		for (auto& assetReport : report.asset_reports())
+		for (auto& assetReport : genericResults.asset_reports())
 		{
 			stream << assetReport.asset() << ":" << std::endl;
 			stream << INDENT << "Starting Balance: " << assetReport.start_balance() << std::endl;
@@ -129,5 +110,76 @@ namespace mb
 		}
 
 		return stream.str();
+	}
+
+	std::filesystem::path get_output_path()
+	{
+		static constexpr std::string_view outputDirectory = "test_results";
+
+		std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		std::string resultsFolderName = to_string(time, "%d%m%Y_%H%M%S");
+
+		std::filesystem::path path{ outputDirectory };
+		path /= resultsFolderName;
+
+		return path;
+	}
+
+	void save_results_to_file(std::string_view report, const std::vector<order_description>& orders, const std::filesystem::path& path)
+	{
+		static constexpr std::string_view TRADES_FILENAME = "trades.csv";
+		static constexpr std::string_view REPORT_FILENAME = "report.txt";
+
+		std::vector<std::string> tradesCsvHeaders
+		{
+			"Order ID", "Market", "Action", "Price", "Volume"
+		};
+
+		try
+		{
+			std::filesystem::create_directories(path);
+
+			write_to_csv_file<order_description>(path / TRADES_FILENAME, orders, tradesCsvHeaders);
+			write_to_file(path / REPORT_FILENAME, report);
+		}
+		catch (const std::exception& e)
+		{
+			logger::instance().error("An error occurred whilst saving back test results: {}", e.what());
+		}
+	}
+}
+
+namespace mb
+{
+	generic_test_results create_generic_results(
+		std::chrono::milliseconds elapsedTime,
+		std::time_t startTime,
+		std::time_t endTime,
+		const unordered_string_map<double>& initialBalances,
+		std::shared_ptr<paper_trade_api> paperTradeApi)
+	{
+		static constexpr std::string_view DATE_TIME_FORMAT = "%d-%m-%Y %H:%M:%S";
+
+		return generic_test_results
+		{
+			std::to_string(elapsedTime.count()) + "ms",
+			to_string(startTime, DATE_TIME_FORMAT),
+			to_string(endTime, DATE_TIME_FORMAT),
+			std::to_string(paperTradeApi->get_closed_orders().size()),
+			create_asset_reports(startTime, endTime, initialBalances, paperTradeApi),
+			paperTradeApi->get_closed_orders()
+		};
+	}
+
+	void log_test_results(const test_report& report)
+	{
+		std::string reportString{ generate_report_string(report) };
+
+		std::filesystem::path outputPath = get_output_path();
+		logger::instance().info("Writing results to {}", outputPath.string());
+
+		save_results_to_file(reportString, report.get_generic_results().trades(), outputPath);
+
+		logger::instance().info("\n" + reportString);
 	}
 }

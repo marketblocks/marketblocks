@@ -22,14 +22,14 @@ namespace mb
 		{
 			return std::filesystem::exists(get_path(fileName));
 		}
-	}
 
-	void create_config_directory_if_not_exist()
-	{
-		std::filesystem::path path{ CONFIG_DIRECTORY };
-		if (!std::filesystem::exists(path))
+		void create_config_directory_if_not_exist()
 		{
-			std::filesystem::create_directory(path);
+			std::filesystem::path path{ CONFIG_DIRECTORY };
+			if (!std::filesystem::exists(path))
+			{
+				std::filesystem::create_directory(path);
+			}
 		}
 	}
 }

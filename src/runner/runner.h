@@ -3,16 +3,36 @@
 #include <stdexcept>
 
 #include "runner_implementation.h"
-#include "default_runner.h"
-#include "backtest_runner.h"
+#include "live_runner.h"
+#include "live_test_runner.h"
+#include "back_test_runner.h"
 #include "runner_config.h"
 #include "config_file_reader.h"
 #include "logging/logger.h"
 
 namespace mb
 {
-	void log_version();
-	void log_run_mode(run_mode runMode);
+	namespace internal
+	{
+		void log_version();
+		void log_run_mode(run_mode runMode);
+
+		template<typename Strategy>
+		std::unique_ptr<internal::runner_implementation<Strategy>> create_runner_implementation(run_mode runMode)
+		{
+			switch (runMode)
+			{
+			case run_mode::LIVE:
+				return create_live_runner<Strategy>();
+			case run_mode::LIVETEST:
+				return create_live_test_runner<Strategy>();
+			case run_mode::BACKTEST:
+				return create_back_test_runner<Strategy>();
+			default:
+				throw std::invalid_argument{ std::format("Run mode '{}' is not supported") };
+			}
+		}
+	}
 
 	template<typename Strategy>
 	class runner
@@ -20,9 +40,10 @@ namespace mb
 	private:
 		std::unique_ptr<internal::runner_implementation<Strategy>> _implementation;
 		runner_config _config;
-		std::unique_ptr<Strategy> _strategy;
 		bool _initialised;
 		logger& _logger;
+
+		std::unique_ptr<Strategy> _strategy;
 
 		void exit_on_key()
 		{
@@ -84,23 +105,14 @@ namespace mb
 	template<typename Strategy>
 	runner<Strategy> create_runner()
 	{
-		log_version();
-		create_config_directory_if_not_exist();
+		internal::log_version();
+		internal::create_config_directory_if_not_exist();
 
 		runner_config config = load_or_create_config<runner_config>();
 
-		log_run_mode(config.runmode());
+		internal::log_run_mode(config.runmode());
 
-		std::unique_ptr<internal::runner_implementation<Strategy>> implementation;
-		
-		if (config.runmode() == run_mode::BACKTEST)
-		{
-			implementation = internal::create_backtest_runner<Strategy>();
-		}
-		else
-		{
-			implementation = std::make_unique<internal::default_runner<Strategy>>();
-		}
+		auto implementation = internal::create_runner_implementation<Strategy>(config.runmode());
 
 		return runner<Strategy>
 		{

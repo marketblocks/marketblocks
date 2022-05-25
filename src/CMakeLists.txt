@@ -33,8 +33,8 @@ add_library(marketblocks_lib
 "common/types/basic_iterator.h" 
 
 "exchanges/exchange.h"
-"runner/exchange_assemblers.cpp"  
-"runner/exchange_assemblers.h" 
+"runner/exchange_factory.cpp"  
+"runner/exchange_factory.h" 
 
 "exchanges/exchange_ids.h"
 "exchanges/exchange_helpers.cpp"
@@ -97,9 +97,8 @@ add_library(marketblocks_lib
 
 "trading/trading_constants.h"
 
- "trading/ohlcv_data.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp" "exchanges/websockets/local_order_book.cpp"    "exchanges/websockets/websocket_stream_implementation.h"   "common/types/set_queue.h" "testing/paper_trading/paper_trading_config.h" "testing/paper_trading/paper_trading_config.cpp" "common/json/json_constants.h" "common/json/json_writer.h"  "common/json/json_writer.cpp" "testing/back_testing/backtest_market_api.h" "testing/back_testing/backtest_market_api.cpp" "testing/back_testing/back_testing_config.h" "testing/back_testing/back_testing_config.cpp" "common/types/partial_data_result.h" "common/utils/timeutils.cpp" "common/csv/csv.h"   "common/csv/csv_row.h" "common/csv/csv.cpp" "testing/back_testing/back_testing_data.h" "testing/back_testing/back_testing_data.cpp" "testing/back_testing/data_loading.h" "testing/back_testing/data_loading.cpp" "common/csv/csv_row.cpp" "trading/tradable_pair.cpp" "trading/ohlcv_data.cpp" "testing/back_testing/backtest_websocket_stream.h" "testing/back_testing/backtest_websocket_stream.cpp" "runner/runner_implementation.h" "runner/default_runner.h" "runner/default_runner.cpp" "runner/backtest_runner.h"  "runner/backtest_runner.cpp" "runner/runner.cpp" "testing/back_testing/back_testing_report.h" "testing/back_testing/back_testing_report.cpp" "trading/order_description.cpp")
+ "trading/ohlcv_data.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp" "exchanges/websockets/local_order_book.cpp"    "exchanges/websockets/websocket_stream_implementation.h"   "common/types/set_queue.h" "testing/paper_trading/paper_trading_config.h" "testing/paper_trading/paper_trading_config.cpp" "common/json/json_constants.h" "common/json/json_writer.h"  "common/json/json_writer.cpp" "testing/back_testing/backtest_market_api.h" "testing/back_testing/backtest_market_api.cpp" "testing/back_testing/back_testing_config.h" "testing/back_testing/back_testing_config.cpp" "common/types/partial_data_result.h" "common/utils/timeutils.cpp" "common/csv/csv.h"   "common/csv/csv_row.h" "common/csv/csv.cpp" "testing/back_testing/back_testing_data.h" "testing/back_testing/back_testing_data.cpp" "testing/back_testing/data_loading.h" "testing/back_testing/data_loading.cpp" "common/csv/csv_row.cpp" "trading/tradable_pair.cpp" "trading/ohlcv_data.cpp" "testing/back_testing/backtest_websocket_stream.h" "testing/back_testing/backtest_websocket_stream.cpp" "runner/runner_implementation.h" "runner/live_runner.h"  "runner/back_test_runner.h"  "runner/back_test_runner.cpp" "runner/runner.cpp"   "trading/order_description.cpp"  "runner/live_test_runner.h" "testing/reporting/asset_report.h" "testing/reporting/test_report.h" "testing/reporting/test_report.cpp" "testing/reporting/back_test_report.h" "testing/reporting/back_test_report.cpp")
 
-# TODO: Add tests and install targets if needed.
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 

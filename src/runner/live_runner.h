@@ -1,19 +1,18 @@
 #pragma once
 
 #include "runner_implementation.h"
+#include "exchange_factory.h"
 #include "logging/logger.h"
 
 namespace mb::internal
 {
-	std::vector<std::shared_ptr<exchange>> do_create_exchanges(const runner_config& runnerConfig);
-
 	template<typename Strategy>
-	class default_runner : public runner_implementation<Strategy>
+	class live_runner : public runner_implementation<Strategy>
 	{
 	public:
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
-			return do_create_exchanges(runnerConfig);
+			return create_exchange_apis(runnerConfig);
 		}
 
 		void run(Strategy& strategy) override
@@ -31,4 +30,10 @@ namespace mb::internal
 			}
 		}
 	};
+
+	template<typename Strategy>
+	std::unique_ptr<live_runner<Strategy>> create_live_runner()
+	{
+		return std::make_unique<live_runner<Strategy>>();
+	}
 }

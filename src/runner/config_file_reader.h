@@ -13,6 +13,7 @@ namespace mb
 	{
 		std::filesystem::path get_path(std::string_view fileName);
 		bool file_exists(std::string_view fileName);
+		void create_config_directory_if_not_exist();
 
 		template<typename Config>
 		Config load_config_file_or_default()
@@ -48,8 +49,6 @@ namespace mb
 			}
 		}
 	}
-
-	void create_config_directory_if_not_exist();
 
 	template<typename Config>
 	Config load_or_create_config()

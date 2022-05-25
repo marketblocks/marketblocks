@@ -1,7 +1,7 @@
 #include "runner.h"
 #include "project_settings.h"
 
-namespace mb
+namespace mb::internal
 {
 	void log_version()
 	{
