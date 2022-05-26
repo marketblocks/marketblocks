@@ -18,6 +18,6 @@ namespace mb::internal
 	{
 		paper_trading_config config = load_or_create_config<paper_trading_config>();
 
-		return std::make_unique<paper_trade_api>(std::move(config));
+		return std::make_unique<paper_trade_api>(std::move(config), backtest_market_api::id());
 	}
 }

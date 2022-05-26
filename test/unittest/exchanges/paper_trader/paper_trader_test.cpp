@@ -18,7 +18,7 @@ namespace
 			{ "BTC", initialBtcBalance }
 		};
 
-		return paper_trade_api{ paper_trading_config{ fee, std::move(initialBalances) } };
+		return paper_trade_api{ paper_trading_config{ fee, std::move(initialBalances) }, "" };
 	}
 }
 

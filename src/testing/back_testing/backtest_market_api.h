@@ -24,7 +24,7 @@ namespace mb
 		const back_testing_data& get_back_testing_data() const noexcept { return _dataNavigator->data(); }
 		void increment_data();
 
-		constexpr std::string_view id() const noexcept { return "BACK TEST"; }
+		static constexpr std::string_view id() noexcept { return "BACK TEST"; }
 		
 		std::weak_ptr<websocket_stream> get_websocket_stream() noexcept { return _websocketStream; }
 

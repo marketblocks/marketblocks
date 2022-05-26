@@ -21,6 +21,9 @@ namespace mb
 
 		~file_handler();
 
+		file_handler(file_handler&& other) noexcept;
+		file_handler& operator=(file_handler&& other) noexcept;
+
 		std::fstream& stream() noexcept { return _stream; }
 	};
 

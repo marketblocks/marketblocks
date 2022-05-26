@@ -30,6 +30,16 @@ namespace mb
 		_stream.close();
 	}
 
+	file_handler::file_handler(file_handler&& other) noexcept
+		: _stream{ std::move(other._stream) }
+	{}
+	
+	file_handler& file_handler::operator=(file_handler&& other) noexcept
+	{
+		_stream = std::move(other._stream);
+		return *this;
+	}
+
 	std::string read_file(const std::filesystem::path& path)
 	{
 		file_handler handler{ file_handler::read(path) };

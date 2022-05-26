@@ -1,35 +1,23 @@
 #include "back_test_report.h"
+#include "test_logger.h"
 #include "common/utils/timeutils.h"
 
 namespace mb
 {
-	report_result_list back_test_report::get_specific_results() const
-	{
-		return
-		{
-			{ "Step Size", _stepSize },
-			{ "Time Steps", _timeSteps }
-		};
-	}
-
-	back_test_report generate_back_test_report(
+	test_report generate_back_test_report(
 		const back_testing_data& backTestingData,
-		const unordered_string_map<double>& initialBalances,
-		std::shared_ptr<paper_trade_api> paperTradeApi,
-		std::chrono::milliseconds elapsedTime)
+		const test_logger& testLogger)
 	{
-		generic_test_results genericResults{ create_generic_results(
-			elapsedTime,
-			backTestingData.start_time(),
-			backTestingData.end_time(),
-			initialBalances,
-			paperTradeApi) };
-
-		return back_test_report
+		report_result_list additionalResults
 		{
-			std::move(genericResults),
-			std::to_string(backTestingData.step_size()),
-			std::to_string(backTestingData.time_steps()),
+			{ "Data Start Time", to_string(backTestingData.start_time(), DATE_TIME_FORMAT) },
+			{ "Data End Time", to_string(backTestingData.end_time(), DATE_TIME_FORMAT) },
+			{ "Step Size", std::to_string(backTestingData.step_size()) },
+			{ "Time Steps", std::to_string(backTestingData.time_steps()) }
 		};
+
+		std::time_t dataTimeRange = backTestingData.end_time() - backTestingData.start_time();
+
+		return testLogger.generate_test_report(dataTimeRange, std::move(additionalResults));
 	}
 }

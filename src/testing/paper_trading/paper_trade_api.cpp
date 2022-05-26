@@ -5,8 +5,8 @@
 
 namespace mb
 {
-	paper_trade_api::paper_trade_api(paper_trading_config config)
-		: _fee{ config.fee() }, _balances{ std::move(config.balances()) }, _nextOrderNumber{ 1 }
+	paper_trade_api::paper_trade_api(paper_trading_config config, std::string_view exchangeId)
+		: _exchangeId{ exchangeId }, _fee{ config.fee() }, _balances{std::move(config.balances())}, _nextOrderNumber{1}
 	{}
 
 	bool paper_trade_api::has_sufficient_funds(const std::string& asset, double amount) const

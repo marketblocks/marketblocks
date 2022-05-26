@@ -2,6 +2,11 @@
 
 namespace mb
 {
+	std::time_t now_t()
+	{
+		return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	}
+
 	std::time_t to_time_t(std::string_view dateTime, std::string_view format)
 	{
 		std::tm time{};

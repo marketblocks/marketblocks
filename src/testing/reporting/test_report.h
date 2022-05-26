@@ -12,7 +12,9 @@ namespace mb
 {
 	using report_result_list = std::vector<std::pair<std::string, std::string>>;
 
-	class generic_test_results
+	static constexpr std::string_view DATE_TIME_FORMAT = "%d-%m-%Y %H:%M:%S";
+
+	class test_report
 	{
 	private:
 		std::string _elapsedTime;
@@ -20,23 +22,25 @@ namespace mb
 		std::string _endTime;
 		std::string _tradesCount;
 		std::vector<asset_report> _assetReports;
-		const std::vector<order_description>& _trades;
+		report_result_list _additionalResults;
 
 	public:
-		constexpr generic_test_results(
+		virtual ~test_report() = default;
+
+		constexpr test_report(
 			std::string elapsedTime,
 			std::string startTime,
 			std::string endTime,
 			std::string tradesCount,
 			std::vector<asset_report> assetReports,
-			const std::vector<order_description>& trades)
+			report_result_list additionalResults)
 			:
 			_elapsedTime{ std::move(elapsedTime) },
 			_startTime{ std::move(startTime) },
 			_endTime{ std::move(endTime) },
 			_tradesCount{ std::move(tradesCount) },
 			_assetReports{ std::move(assetReports) },
-			_trades{ trades }
+			_additionalResults{ std::move(additionalResults) }
 		{}
 
 		constexpr const std::string& elapsed_time() const noexcept { return _elapsedTime; }
@@ -44,31 +48,8 @@ namespace mb
 		constexpr const std::string& end_time() const noexcept { return _endTime; }
 		constexpr const std::string& trades_count() const noexcept { return _tradesCount; }
 		constexpr const std::vector<asset_report>& asset_reports() const noexcept { return _assetReports; }
-		constexpr const std::vector<order_description>& trades() const noexcept { return _trades; }
+		constexpr const report_result_list& get_additional_results() const noexcept { return _additionalResults; };
 	};
 
-	class test_report
-	{
-	private:
-		generic_test_results _genericResults;
-
-	public:
-		virtual ~test_report() = default;
-
-		constexpr test_report(generic_test_results genericResults)
-			: _genericResults{ std::move(genericResults) }
-		{}
-
-		const generic_test_results& get_generic_results() const noexcept { return _genericResults; }
-		virtual report_result_list get_specific_results() const = 0;
-	};
-
-	generic_test_results create_generic_results(
-		std::chrono::milliseconds elapsedTime,
-		std::time_t startTime,
-		std::time_t endTime,
-		const unordered_string_map<double>& initialBalances,
-		std::shared_ptr<paper_trade_api> paperTradeApi);
-
-	void log_test_results(const test_report& report);
+	std::string generate_report_string(const test_report& report);
 }

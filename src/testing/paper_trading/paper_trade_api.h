@@ -14,6 +14,7 @@ namespace mb
 	class paper_trade_api
 	{
 	private:
+		std::string_view _exchangeId;
 		double _fee;
 		unordered_string_map<double> _balances;
 		std::vector<order_description> _closedOrders;
@@ -24,7 +25,9 @@ namespace mb
 		void record_order_description(const trade_description& tradeDescription, std::string_view orderId);
 
 	public:
-		explicit paper_trade_api(paper_trading_config config);
+		explicit paper_trade_api(paper_trading_config config, std::string_view exchangeId);
+
+		std::string_view exchange_id() const noexcept { return _exchangeId; }
 
 		double get_fee(const tradable_pair& tradablePair) const;
 		unordered_string_map<double> get_balances() const noexcept { return _balances; }
