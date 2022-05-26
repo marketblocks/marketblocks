@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "runner_implementation.h"
 #include "exchange_factory.h"
 #include "testing/reporting/test_report.h"
@@ -9,12 +11,14 @@
 namespace mb::internal
 {
 	test_logger create_test_logger(const std::vector<std::shared_ptr<live_test_exchange>>& liveTestExchanges);
+	void check_for_stop(std::atomic_bool& run);
 
 	template<typename Strategy>
 	class live_test_runner : public runner_implementation<Strategy>
 	{
 	private:
 		std::vector<std::shared_ptr<live_test_exchange>> _liveTestExchanges;
+		std::atomic_bool _run;
 
 	public:
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
@@ -38,8 +42,11 @@ namespace mb::internal
 		void run(Strategy& strategy) override
 		{
 			test_logger testLogger{ create_test_logger(_liveTestExchanges) };
+			_run = true;
 
-			while (true)
+			std::thread stopThread{ check_for_stop, std::ref(_run) };
+
+			while (_run)
 			{
 				try
 				{
@@ -51,6 +58,8 @@ namespace mb::internal
 					logger::instance().error(e.what());
 				}
 			}
+
+			stopThread.join();
 
 			logger::instance().info("Live test complete. Generating report...");
 

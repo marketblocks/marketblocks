@@ -1,5 +1,6 @@
 #include "live_test_runner.h"
 #include "common/utils/containerutils.h"
+#include "common/utils/timeutils.h"
 
 namespace mb::internal
 {
@@ -9,5 +10,13 @@ namespace mb::internal
 			[](std::shared_ptr<live_test_exchange> liveTestExchange) { return liveTestExchange->trade_api(); });
 
 		return create_test_logger(std::move(paperTradeApis));
+	}
+
+	void check_for_stop(std::atomic_bool& run)
+	{
+		if (std::cin.get())
+		{
+			run = false;
+		}
 	}
 }
