@@ -19,7 +19,7 @@ namespace mb
 		_timeSteps{ size } 
 	{}
 
-	const std::vector<timed_ohlcv_data>& back_testing_data::get_ohlcv_data(const tradable_pair& pair) const
+	const std::vector<timed_ohlcv_data>& back_testing_data::get_ohlcv_data(const tradable_pair& pair)
 	{
 		auto it = _data.find(pair);
 		if (it != _data.end())
@@ -27,7 +27,7 @@ namespace mb
 			return it->second;
 		}
 
-		return {};
+		return _data[pair] = {};
 	}
 
 	back_testing_data_navigator::back_testing_data_navigator(back_testing_data data)

@@ -135,4 +135,22 @@ namespace mb::test
 		navigator.increment_data();
 		EXPECT_EQ(iteratedData.begin() + 1, navigator.find_data_position(iteratedData, pair));
 	}
+
+	TEST(BackTestingData, FindDataPointShouldReturnNullOptIfNoDataFound)
+	{
+		back_testing_data_navigator navigator
+		{
+			back_testing_data
+			{
+				std::vector<tradable_pair>{},
+				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{},
+				0,
+				0,
+				0,
+				0
+			}
+		};
+
+		EXPECT_FALSE(navigator.find_data_point(tradable_pair{"BTC", "GBP"}).has_value());
+	}
 }

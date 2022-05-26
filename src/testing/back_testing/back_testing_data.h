@@ -32,7 +32,7 @@ namespace mb
 		int step_size() const noexcept { return _stepSize; }
 		int time_steps() const noexcept { return _timeSteps; }
 		const std::vector<tradable_pair>& tradable_pairs() const noexcept { return _tradablePairs; }
-		const std::vector<timed_ohlcv_data>& get_ohlcv_data(const tradable_pair& pair) const;
+		const std::vector<timed_ohlcv_data>& get_ohlcv_data(const tradable_pair& pair);
 	};
 
 	class back_testing_data_navigator
@@ -46,7 +46,7 @@ namespace mb
 		back_testing_data_navigator(back_testing_data data);
 
 		void increment_data() { _dataTime += _data.step_size(); };
-		const back_testing_data& data() const noexcept { return _data; }
+		back_testing_data& data() noexcept { return _data; }
 		std::time_t data_time() const noexcept { return _dataTime; }
 
 		std::vector<timed_ohlcv_data>::const_iterator find_data_position(const std::vector<timed_ohlcv_data>& pairData, const tradable_pair& tradablePair);

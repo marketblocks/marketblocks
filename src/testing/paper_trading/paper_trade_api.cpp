@@ -24,7 +24,7 @@ namespace mb
 	{
 		if (!has_sufficient_funds(soldAsset, soldValue))
 		{
-			throw mb_exception{ "Insufficient funds" };
+			throw mb_exception{ std::format("Insufficient funds ({0})", soldAsset) };
 		}
 
 		_balances[gainedAsset] += gainValue;

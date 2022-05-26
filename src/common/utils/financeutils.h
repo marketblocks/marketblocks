@@ -12,11 +12,21 @@ namespace mb
 
 	constexpr double calculate_volume(double assetPrice, double cost) noexcept
 	{
+		if (cost == 0.0 || assetPrice == 0.0)
+		{
+			return 0.0;
+		}
+
 		return cost / assetPrice;
 	}
 
 	constexpr double calculate_asset_price(double cost, double volume) noexcept
 	{
+		if (cost == 0.0 || volume == 0.0)
+		{
+			return 0.0;
+		}
+
 		return cost / volume;
 	}
 
