@@ -1,4 +1,5 @@
 #include "data_loading.h"
+#include "back_testing_data_source.h"
 #include "common/csv/csv.h"
 #include "common/file/file.h"
 #include "common/utils/containerutils.h"
@@ -8,34 +9,6 @@
 namespace
 {
 	using namespace mb;
-
-	class timed_ohlcv_data_csv_selector
-	{
-	private:
-		int _stepSize;
-		std::time_t _lastTime;
-
-	public:
-		timed_ohlcv_data_csv_selector(int stepSize)
-			: _stepSize{ stepSize }, _lastTime{ -1 }
-		{}
-
-		bool operator()(const timed_ohlcv_data& data)
-		{
-			if (data.time_stamp() - _lastTime < _stepSize)
-			{
-				return false;
-			}
-
-			_lastTime = data.time_stamp();
-			return true;
-		}
-	};
-
-	void sort_and_filter(std::vector<timed_ohlcv_data>& data, std::time_t startTime, int step_size)
-	{
-		std::sort(data.begin(), data.end());
-	}
 
 	std::vector<tradable_pair> get_available_pairs(std::string_view directory)
 	{
@@ -62,6 +35,11 @@ namespace
 
 		return pairs;
 	}
+
+	int calculate_time_steps(std::time_t startTime, std::time_t endTime, int stepSize)
+	{
+		return ((endTime - startTime) / stepSize) + 1;
+	}
 }
 
 namespace mb
@@ -72,46 +50,44 @@ namespace mb
 		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> ohlcvData;
 		ohlcvData.reserve(pairs.size());
 
-		std::time_t startTime = MAXLONGLONG;
-		std::time_t endTime = 0;
-
 		int count = pairs.size();
 		logger::instance().info("Found data for {} tradable pairs", count);
 
-		for (int i = 0; i < count; ++i)
+		if (config.dynamic_load())
 		{
-			std::string pairName{ pairs[i].to_string('_') };
-
-			logger::instance().info("Loading data for {0} ({1}/{2})", pairName, i + 1, count);
-
-			std::filesystem::path path = config.data_directory();
-			path /= pairName;
-			path.replace_extension(".csv");
-
-			std::vector<timed_ohlcv_data> data{
-				read_csv_file<timed_ohlcv_data>(path, timed_ohlcv_data_csv_selector{config.step_size()}) };
-
-			if (data.empty())
+			logger::instance().info("Dynamic data loading is enabled");
+			return back_testing_data
 			{
-				logger::instance().warning("Data for {} is invalid or empty", pairName);
-				continue;
-			}
+				std::move(pairs),
+				std::move(ohlcvData),
+				config.start_time(),
+				config.end_time(),
+				config.step_size(),
+				calculate_time_steps(config.start_time(), config.end_time(), config.step_size()),
+				std::make_unique<back_testing_data_source>(config.data_directory(), config.step_size())
+			};
+		}
 
-			std::sort(data.begin(), data.end());
+		std::time_t startTime = MAXLONGLONG;
+		std::time_t endTime = 0;
+		back_testing_data_source dataSource{ config.data_directory(), config.step_size() };
+
+		for (auto& pair : pairs)
+		{
+			std::vector<timed_ohlcv_data> data{ dataSource.load_data(pair) };
 
 			startTime = std::min(startTime, data.front().time_stamp());
 			endTime = std::max(endTime, data.back().time_stamp());
 
-			ohlcvData.emplace(pairs[i], std::move(data));
-		}
-
-		if (ohlcvData.empty())
-		{
-			throw mb_exception{ "Failed to load any back testing data" };
+			ohlcvData.emplace(pair, std::move(data));
 		}
 
 		startTime = std::max(startTime, config.start_time());
-		int timeSteps = ((endTime - startTime) / config.step_size()) + 1;
+
+		if (config.end_time() != 0)
+		{
+			endTime = std::min(endTime, config.end_time());
+		}
 
 		return back_testing_data
 		{
@@ -120,7 +96,7 @@ namespace mb
 			startTime,
 			endTime,
 			config.step_size(),
-			timeSteps
+			calculate_time_steps(startTime, endTime, config.step_size())
 		};
 	}
 }

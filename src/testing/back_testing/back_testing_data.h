@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "back_testing_data_source.h"
 #include "trading/tradable_pair.h"
 #include "trading/ohlcv_data.h"
 
@@ -18,6 +19,8 @@ namespace mb
 		int _stepSize;
 		int _timeSteps;
 
+		std::unique_ptr<back_testing_data_source> _dataSource;
+
 	public:
 		back_testing_data(
 			std::vector<tradable_pair> tradablePairs,
@@ -25,7 +28,8 @@ namespace mb
 			std::time_t startTime,
 			std::time_t endTime,
 			int stepSize,
-			int timeSteps);
+			int timeSteps,
+			std::unique_ptr<back_testing_data_source> dataSource = nullptr);
 
 		std::time_t start_time() const noexcept { return _startTime; }
 		std::time_t end_time() const noexcept { return _endTime; }

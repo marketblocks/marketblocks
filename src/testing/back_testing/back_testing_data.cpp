@@ -9,14 +9,16 @@ namespace mb
 		std::time_t startTime,
 		std::time_t endTime,
 		int step_size,
-		int size)
+		int size,
+		std::unique_ptr<back_testing_data_source> dataSource)
 		: 
 		_tradablePairs{ std::move(tradablePairs) }, 
 		_data{ std::move(data) }, 
 		_startTime{ startTime },
 		_endTime{ endTime },
 		_stepSize{ step_size },
-		_timeSteps{ size } 
+		_timeSteps{ size },
+		_dataSource{ std::move(dataSource) }
 	{}
 
 	const std::vector<timed_ohlcv_data>& back_testing_data::get_ohlcv_data(const tradable_pair& pair)
@@ -25,6 +27,12 @@ namespace mb
 		if (it != _data.end())
 		{
 			return it->second;
+		}
+
+		if (_dataSource)
+		{
+			std::vector<timed_ohlcv_data> data = _dataSource->load_data(pair);
+			return _data[pair] = std::move(data);
 		}
 
 		return _data[pair] = {};
