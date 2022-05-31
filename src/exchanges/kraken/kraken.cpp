@@ -19,6 +19,8 @@ namespace
 	{
 		constexpr std::string_view LIMIT = "limit";
 		constexpr std::string_view MARKET = "market";
+		constexpr std::string_view STOP_LOSS = "stop-loss";
+		constexpr std::string_view TAKE_PROFIT = "take-profit";
 
 		switch (orderType)
 		{
@@ -26,6 +28,10 @@ namespace
 			return LIMIT;
 		case order_type::MARKET:
 			return MARKET;
+		case order_type::STOP_LOSS:
+			return STOP_LOSS;
+		case order_type::TAKE_PROFIT:
+			return TAKE_PROFIT;
 		default:
 			throw std::invalid_argument{ "Order Type not recognized" };
 		}

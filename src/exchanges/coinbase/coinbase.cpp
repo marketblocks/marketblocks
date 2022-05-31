@@ -12,6 +12,8 @@ namespace
 	{
 		constexpr std::string_view LIMIT = "limit";
 		constexpr std::string_view MARKET = "market";
+		constexpr std::string_view STOP_LOSS = "loss";
+		constexpr std::string_view STOP_ENTRY = "entry";
 
 		switch (orderType)
 		{
@@ -19,9 +21,18 @@ namespace
 			return LIMIT;
 		case order_type::MARKET:
 			return MARKET;
+		case order_type::STOP_LOSS:
+			return STOP_LOSS;
+		case order_type::TAKE_PROFIT:
+			return STOP_ENTRY;
 		default:
 			throw mb_exception{ "Unknown order type" };
 		}
+	}
+
+	constexpr bool is_stop_order(order_type orderType)
+	{
+		return orderType == order_type::STOP_LOSS || orderType == order_type::TAKE_PROFIT;
 	}
 }
 
@@ -176,19 +187,37 @@ namespace mb
 		static constexpr std::string_view PRODUCT_ID = "product_id";
 		static constexpr std::string_view PRICE = "price";
 		static constexpr std::string_view SIZE = "size";
+		static constexpr std::string_view STOP = "stop";
+		static constexpr std::string_view STOP_PRICE = "stop_price";
 
 		std::string path{ build_url_path(std::array<std::string_view, 1>
 		{
 			_constants.methods.ORDERS
 		}) };
 
-		std::string content{ json_writer{}
-			.add(TYPE, ::to_string(description.order_type()))
+		json_writer json = json_writer{}
 			.add(SIDE, to_string(description.action()))
 			.add(PRODUCT_ID, internal::to_exchange_id(description.pair()))
-			.add(PRICE, std::to_string(description.asset_price()))
-			.add(SIZE, std::to_string(description.volume()))
-			.to_string() };
+			.add(SIZE, std::to_string(description.volume()));
+
+		if (is_stop_order(description.order_type()))
+		{
+			json.add(TYPE, ::to_string(order_type::LIMIT));
+			json.add(PRICE, std::to_string(description.asset_price()));
+			json.add(STOP, ::to_string(description.order_type()));
+			json.add(STOP_PRICE, std::to_string(description.asset_price()));
+		}
+		else
+		{
+			json.add(TYPE, ::to_string(description.order_type()));
+
+			if (description.order_type() != order_type::MARKET)
+			{
+				json.add(PRICE, std::to_string(description.asset_price()));
+			}
+		}
+
+		std::string content{ json.to_string() };
 
 		return send_private_request<std::string>(http_verb::POST, path, coinbase::read_add_order, "", content);
 	}

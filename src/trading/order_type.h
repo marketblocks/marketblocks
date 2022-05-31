@@ -5,6 +5,8 @@ namespace mb
 	enum class order_type
 	{
 		MARKET,
-		LIMIT
+		LIMIT,
+		STOP_LOSS,
+		TAKE_PROFIT
 	};
 }

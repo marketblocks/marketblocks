@@ -81,7 +81,7 @@ namespace mb::test
 		ASSERT_NO_THROW(coinbase->get_closed_orders());
 	}
 
-	TEST(CoinbaseIntegration, AddCancelOrder)
+	TEST(CoinbaseIntegration, AddCancelLimitOrder)
 	{
 		trade_description trade
 		{
@@ -89,6 +89,59 @@ namespace mb::test
 			tradable_pair{ "BTC", "USD" },
 			trade_action::BUY,
 			1.0,
+			1.0
+		};
+
+		auto coinbase{ create_api() };
+		std::string orderId;
+
+		ASSERT_NO_THROW(orderId = coinbase->add_order(trade));
+		ASSERT_NO_THROW(coinbase->cancel_order(orderId));
+	}
+
+	TEST(CoinbaseIntegration, AddMarketOrder)
+	{
+		trade_description trade
+		{
+			order_type::MARKET,
+			tradable_pair{ "BTC", "USD" },
+			trade_action::BUY,
+			1.0,
+			1.0
+		};
+
+		auto coinbase{ create_api() };
+		std::string orderId;
+
+		ASSERT_NO_THROW(orderId = coinbase->add_order(trade));
+	}
+
+	TEST(CoinbaseIntegration, AddCancelStopLossOrder)
+	{
+		trade_description trade
+		{
+			order_type::STOP_LOSS,
+			tradable_pair{ "BTC", "USD" },
+			trade_action::SELL,
+			1.0,
+			1.0
+		};
+
+		auto coinbase{ create_api() };
+		std::string orderId;
+
+		ASSERT_NO_THROW(orderId = coinbase->add_order(trade));
+		ASSERT_NO_THROW(coinbase->cancel_order(orderId));
+	}
+
+	TEST(CoinbaseIntegration, AddCancelTakeProfitOrder)
+	{
+		trade_description trade
+		{
+			order_type::TAKE_PROFIT,
+			tradable_pair{ "BTC", "USD" },
+			trade_action::SELL,
+			1e9,
 			1.0
 		};
 
