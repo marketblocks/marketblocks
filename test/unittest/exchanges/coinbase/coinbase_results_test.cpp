@@ -1,55 +1,17 @@
 #include <gtest/gtest.h>
 
 #include "unittest/assertion_helpers.h"
+#include "unittest/exchanges/results_test_common.h"
 #include "test_data/test_data_constants.h"
 #include "exchanges/coinbase/coinbase_results.h"
-
-#include "common/file/file.h"
-
-namespace
-{
-	using namespace mb;
-	using namespace mb::test;
-
-	static const std::string ERROR_MESSAGE = "This is an error";
-	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";
-
-	template<typename ResultReader>
-	auto execute_reader(const std::string& dataFileName, ResultReader reader)
-	{
-		std::filesystem::path dataPath{ coinbase_results_test_data_path(dataFileName) };
-		std::string json = read_file(dataPath);
-
-		return reader(json);
-	}
-
-	template<typename T, typename ResultReader, typename ValueAsserter>
-	void execute_test(const std::string& testDataFileName, const ResultReader& reader, T expectedValue, const ValueAsserter& valueAsserter)
-	{
-		assert_result_equal(
-			execute_reader(testDataFileName, reader),
-			result<T>::success(std::move(expectedValue)),
-			valueAsserter);
-
-		assert_result_equal(
-			execute_reader(ERROR_RESPONSE_FILE_NAME, reader),
-			result<T>::fail(ERROR_MESSAGE),
-			no_assert<T>);
-	}
-
-	template<typename T, typename ResultReader>
-	void execute_test(const std::string& testDataFileName, const ResultReader& reader, const T& expectedValue)
-	{
-		execute_test(testDataFileName, reader, expectedValue, default_expect_eq<T>);
-	}
-}
 
 namespace mb::test
 {
 	TEST(CoinbaseResults, ReadTradablePairs)
 	{
 		execute_test(
-			"tradable_pairs.json",
+			coinbase_results_test_data_path("tradable_pairs.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_tradable_pairs,
 			std::vector<tradable_pair>
 		{
@@ -61,7 +23,8 @@ namespace mb::test
 	TEST(CoinbaseResults, Read24hStats)
 	{
 		execute_test(
-			"24h_stats.json",
+			coinbase_results_test_data_path("24h_stats.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_24h_stats,
 			ohlcv_data{ 5414.18, 6441.37, 5261.69, 6250.02, 53687.76764233 },
 			assert_pair_stats_eq);
@@ -70,7 +33,8 @@ namespace mb::test
 	TEST(CoinbaseResults, ReadPrice)
 	{
 		execute_test(
-			"price.json",
+			coinbase_results_test_data_path("price.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_price,
 			6268.48);
 	}
@@ -80,7 +44,8 @@ namespace mb::test
 		constexpr int depth = 2;
 
 		execute_test(
-			"order_book.json",
+			coinbase_results_test_data_path("order_book.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			[depth](std::string_view jsonResult) { return coinbase::read_order_book(jsonResult, depth); },
 			order_book_state
 			{ 
@@ -101,7 +66,8 @@ namespace mb::test
 	TEST(CoinbaseResults, ReadFee)
 	{
 		execute_test(
-			"get_fee.json",
+			coinbase_results_test_data_path("get_fee.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_fee,
 			0.60);
 	}
@@ -109,7 +75,8 @@ namespace mb::test
 	TEST(CoinbaseResults, ReadBalances)
 	{
 		execute_test(
-			"get_balances.json",
+			coinbase_results_test_data_path("get_balances.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_balances,
 			unordered_string_map<double>
 		{
@@ -124,7 +91,8 @@ namespace mb::test
 	TEST(CoinbaseResults, ReadOrders)
 	{
 		execute_test(
-			"get_orders.json",
+			coinbase_results_test_data_path("get_orders.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_orders,
 			std::vector<order_description>
 			{
@@ -143,15 +111,17 @@ namespace mb::test
 	TEST(CoinbaseResults, ReadAddOrder)
 	{
 		execute_test<std::string>(
-			"add_order.json",
+			coinbase_results_test_data_path("add_order.json"),
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_add_order,
 			"a9625b04-fc66-4999-a876-543c3684d702");
 	}
 
 	TEST(CoinbaseResults, ReadCancelOrder)
 	{
-		EXPECT_EQ(execute_reader("cancel_order.json", coinbase::read_cancel_order).is_success(), true);
-
-		EXPECT_EQ(execute_reader(ERROR_RESPONSE_FILE_NAME, coinbase::read_cancel_order).error(), ERROR_MESSAGE);
+		execute_test(
+			coinbase_results_test_data_path("cancel_order.json"), 
+			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
+			coinbase::read_cancel_order);
 	}
 }

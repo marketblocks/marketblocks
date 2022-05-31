@@ -1,15 +1,18 @@
 #include <gtest/gtest.h>
 
+#include "test_data/test_exchange_configs/test_config_loader.h"
 #include "exchanges/bybit/bybit.h"
 
 namespace
 {
 	using namespace mb;
+	using namespace mb::test;
 
 	std::unique_ptr<exchange> create_api()
 	{
+		bybit_config config{ load_test_config<bybit_config>() };
 		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
-		return make_bybit(websocketClient);
+		return make_bybit(std::move(config), websocketClient);
 	}
 }
 

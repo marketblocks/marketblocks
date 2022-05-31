@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <sstream>
 #include <stdexcept>
 
 #include <openssl/evp.h>
@@ -46,5 +47,20 @@ namespace mb
             throw std::runtime_error("failed while decoding base64.");
 
         return output;
+    }
+
+    template<typename Data>
+    std::string hex_encode(const Data& data)
+    {
+        std::stringstream stream;
+        for (auto& value : data)
+        {
+            stream << std::setfill('0')
+                   << std::setw(2)
+                   << std::hex 
+                   << static_cast<int>(value);
+        }
+
+        return stream.str();
     }
 }

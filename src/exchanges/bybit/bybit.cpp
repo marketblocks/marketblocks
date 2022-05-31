@@ -1,16 +1,33 @@
 #include "bybit.h"
-#include "bybit_results.h"
 #include "common/exceptions/not_implemented_exception.h"
+#include "common/security/hash.h"
+#include "common/security/encoding.h"
 
 namespace mb
 {
 	bybit_api::bybit_api(
+		bybit_config config,
 		std::unique_ptr<http_service> httpService,
-		std::shared_ptr<websocket_stream> websocketStream)
+		std::shared_ptr<websocket_stream> websocketStream,
+		bool enableTesting)
 		: 
+		_constants{ enableTesting },
+		_apiKey{ config.api_key() },
+		_apiSecret{ config.api_secret() },
 		_httpService{ std::move(httpService) },
 		_websocketStream{ websocketStream }
 	{}
+
+	std::string bybit_api::get_time_stamp() const
+	{
+		return std::to_string(time_since_epoch<std::chrono::milliseconds>());
+	}
+
+	std::string bybit_api::compute_api_sign(std::string_view query) const
+	{
+		std::vector<unsigned char> signData{ hmac_sha256(query, _apiSecret) };
+		return hex_encode(signData);
+	}
 
 	exchange_status bybit_api::get_status() const
 	{
@@ -19,7 +36,7 @@ namespace mb
 
 	std::vector<tradable_pair> bybit_api::get_tradable_pairs() const
 	{
-		return mb::bybit::read_tradable_pairs("").value();
+		return send_public_request<std::vector<tradable_pair>>(_constants.methods.SYMBOLS, bybit::read_tradable_pairs);
 	}
 
 	ohlcv_data bybit_api::get_24h_stats(const tradable_pair& tradablePair) const
@@ -44,7 +61,7 @@ namespace mb
 
 	unordered_string_map<double> bybit_api::get_balances() const
 	{
-		return mb::bybit::read_balances("").value();
+		return send_private_request<unordered_string_map<double>>(_constants.methods.BALANCE, bybit::read_balances);
 	}
 
 	std::vector<order_description> bybit_api::get_open_orders() const
@@ -67,8 +84,12 @@ namespace mb
 		mb::bybit::read_cancel_order("").value();
 	}
 
-	std::unique_ptr<exchange> make_bybit(std::shared_ptr<websocket_client> websocketClient)
+	std::unique_ptr<exchange> make_bybit(bybit_config config, std::shared_ptr<websocket_client> websocketClient, bool enableTesting)
 	{
-		throw not_implemented_exception{ "TEMPLATE" };
+		return std::make_unique<bybit_api>(
+			std::move(config),
+			std::make_unique<http_service>(),
+			nullptr,
+			enableTesting);
 	}
 }
