@@ -15,6 +15,7 @@ namespace
 		static constexpr std::string_view RUN_MODE = "runMode";
 		static constexpr std::string_view WEBSOCKET_TIMEOUT = "websocketTimeout";
 		static constexpr std::string_view HTTP_TIMEOUT = "httpTimeout";
+		static constexpr std::string_view RUN_INTERVAL = "runInterval";
 	}
 
 	namespace run_mode_strings
@@ -62,19 +63,21 @@ namespace mb
 	}
 
 	runner_config::runner_config()
-		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT }
+		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT, 0 }
 	{}
 
 	runner_config::runner_config(
 		std::vector<std::string> exchangeIds,
 		run_mode runMode,
 		int websocketTimeout,
-		int httpTimeout)
+		int httpTimeout,
+		int runInterval)
 		:
 		_exchangeIds{ std::move(exchangeIds) },
 		_runMode{ runMode },
 		_websocketTimeout{ websocketTimeout },
-		_httpTimeout{ httpTimeout }
+		_httpTimeout{ httpTimeout },
+		_runInterval{ runInterval }
 	{
 		validate();
 	}
@@ -92,6 +95,12 @@ namespace mb
 		{
 			throw mb_exception{ std::format("Run mode not recognized. Options are: {0}, {1}, {2}", run_mode_strings::LIVE, run_mode_strings::LIVE_TEST, run_mode_strings::BACK_TEST) };
 		}
+
+		if (_runInterval < 0)
+		{
+			_runInterval = 0;
+			log.warning("Run interval cannot be less than zero");
+		}
 	}
 
 	template<>
@@ -102,7 +111,8 @@ namespace mb
 			json.get<std::vector<std::string>>(json_property_names::EXCHANGE_IDS),
 			run_mode_from_string(json.get<std::string>(json_property_names::RUN_MODE)),
 			json.get<int>(json_property_names::WEBSOCKET_TIMEOUT),
-			json.get<int>(json_property_names::HTTP_TIMEOUT)
+			json.get<int>(json_property_names::HTTP_TIMEOUT),
+			json.get<int>(json_property_names::RUN_INTERVAL)
 		};
 	}
 
@@ -113,5 +123,6 @@ namespace mb
 		writer.add(json_property_names::RUN_MODE, to_string(config.runmode()));
 		writer.add(json_property_names::WEBSOCKET_TIMEOUT, config.websocket_timeout());
 		writer.add(json_property_names::HTTP_TIMEOUT, config.http_timeout());
+		writer.add(json_property_names::RUN_INTERVAL, config.run_interval());
 	}
 }

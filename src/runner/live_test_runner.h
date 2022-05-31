@@ -19,10 +19,13 @@ namespace mb::internal
 	private:
 		std::vector<std::shared_ptr<live_test_exchange>> _liveTestExchanges;
 		std::atomic_bool _run;
+		int _runInterval;
 
 	public:
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
+			_runInterval = runnerConfig.run_interval();
+
 			std::vector<std::shared_ptr<exchange>> exchangeApis{ create_exchange_apis(runnerConfig) };
 			_liveTestExchanges.reserve(exchangeApis.size());
 
@@ -56,6 +59,11 @@ namespace mb::internal
 				catch (const mb_exception& e)
 				{
 					logger::instance().error(e.what());
+				}
+
+				if (_runInterval > 0)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(_runInterval));
 				}
 			}
 

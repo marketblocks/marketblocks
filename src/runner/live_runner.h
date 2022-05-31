@@ -9,9 +9,14 @@ namespace mb::internal
 	template<typename Strategy>
 	class live_runner : public runner_implementation<Strategy>
 	{
+	private:
+		int _runInterval;
+
 	public:
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
+			_runInterval = runnerConfig.run_interval();
+
 			return create_exchange_apis(runnerConfig);
 		}
 
@@ -26,6 +31,11 @@ namespace mb::internal
 				catch (const mb_exception& e)
 				{
 					logger::instance().error(e.what());
+				}
+
+				if (_runInterval > 0)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(_runInterval));
 				}
 			}
 		}

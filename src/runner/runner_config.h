@@ -21,6 +21,7 @@ namespace mb
 		run_mode _runMode;
 		int _websocketTimeout;
 		int _httpTimeout;
+		int _runInterval;
 
 		void validate();
 
@@ -31,7 +32,8 @@ namespace mb
 			std::vector<std::string> exchangeIds,
 			run_mode runMode,
 			int websocketTimeout,
-			int httpTimeout);
+			int httpTimeout,
+			int runInterval);
 			
 		static constexpr std::string name() noexcept { return "runner"; }
 		
@@ -39,6 +41,7 @@ namespace mb
 		constexpr run_mode runmode() const noexcept { return _runMode; }
 		constexpr int websocket_timeout() const noexcept { return _websocketTimeout; }
 		constexpr int http_timeout() const noexcept { return _httpTimeout; }
+		constexpr int run_interval() const noexcept { return _runInterval; }
 	};
 
 	template<>
