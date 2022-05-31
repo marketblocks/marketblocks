@@ -3,6 +3,7 @@
 #include "coinbase_results.h"
 #include "common/json/json.h"
 #include "common/utils/timeutils.h"
+#include "common/utils/financeutils.h"
 
 namespace
 {
@@ -165,12 +166,27 @@ namespace mb::coinbase
 			{
 				json_element orderElement{ it.value() };
 
+				double size = std::stod(orderElement.get<std::string>("size"));
+				double price;
+				if (orderElement.has_member("price"))
+				{
+					price = std::stod(orderElement.get<std::string>("price"));
+				}
+				else
+				{
+					double cost = orderElement.has_member("funds")
+						? std::stod(orderElement.get<std::string>("funds"))
+						: std::stod(orderElement.get<std::string>("executed_value"));
+
+					price = calculate_asset_price(cost, size);
+				}
+
 				orders.emplace_back(
 					orderElement.get<std::string>("id"),
 					orderElement.get<std::string>("product_id"),
 					to_trade_action(orderElement.get<std::string>("side")),
-					std::stod(orderElement.get<std::string>("price")),
-					std::stod(orderElement.get<std::string>("size")));
+					price,
+					size);
 			}
 
 			return orders;

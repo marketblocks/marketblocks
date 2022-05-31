@@ -101,7 +101,7 @@ namespace mb::test
 
 	TEST(CoinbaseIntegration, AddMarketOrder)
 	{
-		trade_description trade
+		trade_description buyTrade
 		{
 			order_type::MARKET,
 			tradable_pair{ "BTC", "USD" },
@@ -110,10 +110,19 @@ namespace mb::test
 			1.0
 		};
 
-		auto coinbase{ create_api() };
-		std::string orderId;
+		trade_description sellTrade
+		{
+			order_type::MARKET,
+			tradable_pair{ "BTC", "USD" },
+			trade_action::SELL,
+			1.0,
+			1.0
+		};
 
-		ASSERT_NO_THROW(orderId = coinbase->add_order(trade));
+		auto coinbase{ create_api() };
+
+		ASSERT_NO_THROW(coinbase->add_order(buyTrade));
+		ASSERT_NO_THROW(coinbase->add_order(sellTrade));
 	}
 
 	TEST(CoinbaseIntegration, AddCancelStopLossOrder)
