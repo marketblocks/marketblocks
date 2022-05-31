@@ -1,5 +1,3 @@
-#pragma once
-
 #include <gtest/gtest.h>
 #include "unittest/assertion_helpers.h"
 #include "test_data/test_data_constants.h"

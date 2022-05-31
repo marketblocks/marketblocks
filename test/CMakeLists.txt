@@ -18,19 +18,18 @@ add_executable(marketblocks_test
 "unittest/utils/retry_test.cpp" 
 "unittest/exchanges/kraken/kraken_results_test.cpp"
 "unittest/assertion_helpers.h" 
-"unittest/exchanges/kraken/kraken_test.cpp" 
 "unittest/common_matchers.h"
 "test_data/test_data_constants.h"
 "test_data/test_data_constants.cpp" 
 "unittest/exchanges/coinbase/coinbase_test.cpp" 
 "unittest/exchanges/coinbase/coinbase_results_test.cpp"
 "unittest/assertion_helpers.cpp" 
-"integration/coinbase_test.cpp"
 "test_data/test_exchange_configs/test_config_loader.h"
-"integration/kraken_test.cpp"
 "unittest/exchanges/kraken/kraken_websocket_test.cpp" 
+"unittest/exchanges/kraken/kraken_integration_test.cpp" 
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
-"unittest/exchanges/coinbase/coinbase_websocket_test.cpp"  "unittest/common/types/set_queue_test.cpp" "unittest/common/csv/csv_test.cpp" "unittest/common/csv/csv_row_test.cpp"   "unittest/runner/backtest_runner_test.cpp" "unittest/testing/back_testing/back_testing_data_test.cpp"   "unittest/testing/back_testing/back_testing_report_test.cpp")
+"unittest/exchanges/coinbase/coinbase_integration_test.cpp"
+"unittest/exchanges/coinbase/coinbase_websocket_test.cpp"  "unittest/common/types/set_queue_test.cpp" "unittest/common/csv/csv_test.cpp" "unittest/common/csv/csv_row_test.cpp"   "unittest/runner/backtest_runner_test.cpp" "unittest/testing/back_testing/back_testing_data_test.cpp"   "unittest/testing/back_testing/back_testing_report_test.cpp" "unittest/exchanges/bybit/bybit_integration_test.cpp" "unittest/exchanges/template/template_results_test.cpp" "unittest/exchanges/template/template_test.cpp"  "unittest/exchanges/bybit/bybit_integration_test.cpp" "unittest/exchanges/bybit/bybit_results_test.cpp" "unittest/exchanges/bybit/bybit_test.cpp" "unittest/exchanges/digifinex/digifinex_integration_test.cpp" "unittest/exchanges/digifinex/digifinex_results_test.cpp" "unittest/exchanges/digifinex/digifinex_test.cpp")
 
 target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
 target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)
