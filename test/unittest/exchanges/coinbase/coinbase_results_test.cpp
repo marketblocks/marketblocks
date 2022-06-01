@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "unittest/assertion_helpers.h"
-#include "unittest/exchanges/results_test_common.h"
+#include "unittest/exchanges/exchange_test_common.h"
 #include "test_data/test_data_constants.h"
 #include "exchanges/coinbase/coinbase_results.h"
 
@@ -9,7 +9,7 @@ namespace mb::test
 {
 	TEST(CoinbaseResults, ReadTradablePairs)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("tradable_pairs.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_tradable_pairs,
@@ -22,7 +22,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, Read24hStats)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("24h_stats.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_24h_stats,
@@ -32,7 +32,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, ReadPrice)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("price.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_price,
@@ -43,7 +43,7 @@ namespace mb::test
 	{
 		constexpr int depth = 2;
 
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("order_book.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			[depth](std::string_view jsonResult) { return coinbase::read_order_book(jsonResult, depth); },
@@ -65,7 +65,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, ReadFee)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("get_fee.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_fee,
@@ -74,7 +74,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, ReadBalances)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("get_balances.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_balances,
@@ -90,7 +90,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, ReadOrders)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("get_orders.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_orders,
@@ -110,7 +110,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, ReadAddOrder)
 	{
-		execute_test<std::string>(
+		execute_reader_test<std::string>(
 			coinbase_results_test_data_path("add_order.json"),
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_add_order,
@@ -119,7 +119,7 @@ namespace mb::test
 
 	TEST(CoinbaseResults, ReadCancelOrder)
 	{
-		execute_test(
+		execute_reader_test(
 			coinbase_results_test_data_path("cancel_order.json"), 
 			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			coinbase::read_cancel_order);

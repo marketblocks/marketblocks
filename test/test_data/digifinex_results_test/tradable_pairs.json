@@ -1,0 +1,49 @@
+{
+  "code": 0,
+  "symbol_list": [
+    {
+      "order_types": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "quote_asset": "USD",
+      "minimum_value": 2,
+      "amount_precision": 8,
+      "status": "TRADING",
+      "minimum_amount": 5e-05,
+      "symbol": "BTC_USD",
+      "zone": "MAIN",
+      "base_asset": "BTC",
+      "price_precision": 2
+    },
+    {
+      "order_types": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "quote_asset": "USD",
+      "minimum_value": 2,
+      "amount_precision": 4,
+      "status": "TRADING",
+      "minimum_amount": 0.0006,
+      "symbol": "ETH_USD",
+      "zone": "MAIN",
+      "base_asset": "ETH",
+      "price_precision": 2
+    },
+    {
+      "order_types": [
+        "LIMIT"
+      ],
+      "quote_asset": "GBP",
+      "minimum_value": 1,
+      "amount_precision": 2,
+      "status": "TRADING",
+      "minimum_amount": 2,
+      "symbol": "DFT_GBP",
+      "zone": "MAIN",
+      "base_asset": "DFT",
+      "price_precision": 6
+    }
+  ]
+}

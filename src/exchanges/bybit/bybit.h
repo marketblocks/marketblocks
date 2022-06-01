@@ -4,6 +4,7 @@
 #include "bybit_results.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_ids.h"
+#include "exchanges/exchange_common.h"
 #include "networking/http/http_service.h"
 #include "networking/url.h"
 #include "common/utils/timeutils.h"
@@ -84,31 +85,11 @@ namespace mb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_request(http_request& request, const ResponseReader& reader) const
-		{
-			http_response response{ _httpService->send(request) };
-
-			if (response.response_code() != HttpResponseCodes::OK)
-			{
-				throw mb_exception{ response.message() };
-			}
-
-			result<Value> result{ reader(response.message()) };
-
-			if (result.is_success())
-			{
-				return result.value();
-			}
-
-			throw mb_exception{ result.error() };
-		}
-
-		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view method, const ResponseReader& reader, std::string_view query = "") const
 		{
 			std::string path{ build_bybit_url_path(_constants.general.PUBLIC, method) };
 			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
-			return send_request<Value>(request, reader);
+			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
@@ -130,7 +111,7 @@ namespace mb
 			std::string query{ queryBuilder.to_string() };
 
 			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
-			return send_request<Value>(request, reader);
+			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 	public:

@@ -39,12 +39,25 @@ namespace mb
 		constexpr std::string to_string() const noexcept { return _query; }
 	};
 
-	constexpr void append_query(std::string& url, std::string_view _query)
+	constexpr void append_query(std::string& url, std::string_view query)
 	{
-		if (!_query.empty())
+		if (!query.empty())
 		{
 			url.append("?");
-			url.append(_query);
+			url.append(query);
+		}
+	}
+
+	constexpr void append_path(std::string& url, std::string_view path)
+	{
+		if (!path.empty())
+		{
+			if (url.back() != '/' && path.front() != '/')
+			{
+				url.append("/");
+			}
+
+			url.append(path);
 		}
 	}
 
@@ -52,8 +65,7 @@ namespace mb
 	{
 		std::string url{ baseUrl };
 		
-		url.append(path);
-
+		append_path(url, path);
 		append_query(url, _query);
 
 		return url;

@@ -10,6 +10,7 @@
 #include "kraken_websocket.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_ids.h"
+#include "exchanges/exchange_common.h"
 #include "common/utils/retry.h"
 #include "networking/url.h"
 #include "networking/http/http_service.h"
@@ -78,67 +79,6 @@ namespace mb
 				: general{}, methods{}, queryKeys{}, http{}
 			{}
 		};
-
-		inline bool should_retry(std::string_view errorMessage)
-		{
-			static unordered_string_map<bool> errorBehaviours
-			{
-				{ "EGeneral:Permission denied", false },
-				{ "EAPI:Invalid key", false },
-				{ "EQuery:Unknown asset pair", false },
-				{ "EGeneral:Invalid arguments", false },
-				{ "EAPI:Invalid signature", false },
-				{ "EAPI:Invalid nonce", false },
-				{ "ESession:Invalid session", false },
-				{ "EAPI:Rate limit exceeded", true },
-				{ "EOrder:Rate limit exceeded", true },
-				{ "EGeneral:Temporary lockout", true },
-				{ "EOrder:Cannot open position", true },
-				{ "EOrder:Cannot open opposing position", false },
-				{ "EOrder:Margin allowance exceeded", false },
-				{ "EOrder:Insufficient margin", false },
-				{ "EOrder:Insufficient funds (insufficient user funds)", false },
-				{ "EOrder:Order minimum not met (volume too low)", false },
-				{ "EOrder:Orders limit exceeded", false },
-				{ "EOrder:Positions limit exceeded", false },
-				{ "EService:Unavailable", true },
-				{ "EService:Busy", true },
-				{ "EGeneral:Internal error", true },
-				{ "ETrade:Locked", false },
-				{ "EAPI:Feature disabled", false },
-			};
-
-			auto behaviourIterator = errorBehaviours.find(errorMessage);
-			if (behaviourIterator == errorBehaviours.end())
-			{
-				return false;
-			}
-
-			return behaviourIterator->second;
-		}
-
-		template<typename Value, typename ResponseReader>
-		result<Value> http_retry_result_converter(const http_response& response, const ResponseReader& reader)
-		{
-			if (response.response_code() != HttpResponseCodes::OK)
-			{
-				return result<Value>::fail(response.message());
-			}
-
-			result<Value> responseResult{ reader(response.message()) };
-
-			if (responseResult.is_success())
-			{
-				return responseResult;
-			}
-
-			if (internal::should_retry(responseResult.error()))
-			{
-				return result<Value>::fail(responseResult.error());
-			}
-
-			throw mb_exception{ responseResult.error() };
-		}
 	}
 	
 	class kraken_api : public exchange
@@ -169,19 +109,10 @@ namespace mb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_request(const http_request& request, const ResponseReader& reader) const
-		{
-			return retry_on_fail<Value>(
-				[this, &request]() { return _httpService->send(request); },
-				[this, &reader](const http_response& response) { return internal::http_retry_result_converter<Value>(response, reader); },
-				_httpRetries);
-		}
-
-		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view method, const ResponseReader& reader, std::string_view query = "") const
 		{
 			http_request request{ http_verb::GET, build_kraken_url(_constants.general.PUBLIC, method, query) };
-			return send_request<Value>(request, reader);
+			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
@@ -208,7 +139,7 @@ namespace mb
 			request.add_header(common_http_headers::ACCEPT, common_http_headers::APPLICATION_JSON);
 			request.set_content(postData);
 
-			return send_request<Value>(request, reader);
+			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 	public:

@@ -2,7 +2,7 @@
 
 #include "exchanges/coinbase/coinbase.h"
 #include "unittest/mocks.h"
-#include "unittest/common_matchers.h"
+#include "unittest/exchanges/exchange_test_common.h"
 #include "test_data/test_data_constants.h"
 #include "common/file/file.h"
 #include "common/json/json.h"
@@ -11,16 +11,11 @@ namespace
 {
 	using namespace mb;
 	using namespace mb::test;
-	using ::testing::Return;
 
-	std::unique_ptr<mock_http_service> create_mock_http_service(http_request expectedRequest, http_response response)
+	coinbase_api create_api(http_request expectedRequest, http_response response)
 	{
-		std::unique_ptr<mock_http_service> mockHttpService{ std::make_unique<mock_http_service>() };
-		EXPECT_CALL(*mockHttpService, send(IsHttpRequest(std::move(expectedRequest))))
-			.Times(1)
-			.WillOnce(Return(std::move(response)));
-
-		return mockHttpService;
+		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response), IsHttpRequest<http_request>) };
+		return coinbase_api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
 	}
 }
 
@@ -40,8 +35,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("tradable_pairs.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };		
 
 		api.get_tradable_pairs();
 	}
@@ -62,8 +56,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("24h_stats.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_24h_stats(pair);
 	}
@@ -84,8 +77,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("price.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_price(pair);
 	}
@@ -107,8 +99,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("order_book.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_order_book(pair, depth);
 	}
@@ -129,8 +120,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("get_fee.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_fee(pair);
 	}
@@ -149,8 +139,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("get_balances.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_balances();
 	}
@@ -169,8 +158,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("get_orders.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_open_orders();
 	}
@@ -189,8 +177,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("get_orders.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.get_closed_orders();
 	}
@@ -227,8 +214,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("add_order.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.add_order(trade);
 	}
@@ -249,8 +235,7 @@ namespace mb::test
 			read_file(coinbase_results_test_data_path("cancel_order.json"))
 		};
 
-		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response)) };
-		coinbase_api api{ coinbase_config{}, std::move(mockHttpService), std::make_unique<mock_websocket_stream>() };
+		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
 
 		api.cancel_order(orderId);
 	}

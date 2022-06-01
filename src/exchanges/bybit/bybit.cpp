@@ -1,5 +1,4 @@
 #include "bybit.h"
-#include "common/exceptions/not_implemented_exception.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 

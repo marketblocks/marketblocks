@@ -6,6 +6,7 @@
 #include "coinbase_websocket.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_ids.h"
+#include "exchanges/exchange_common.h"
 #include "networking/http/http_service.h"
 #include "networking/url.h"
 #include "common/utils/retry.h"
@@ -105,21 +106,7 @@ namespace mb
 			request.add_header(common_http_headers::USER_AGENT, _userAgentId);
 			request.add_header(common_http_headers::ACCEPT, common_http_headers::APPLICATION_JSON);
 			
-			http_response response{ _httpService->send(request) };
-			
-			if (response.response_code() != HttpResponseCodes::OK)
-			{
-				throw mb_exception{ response.message() };
-			}
-
-			result<Value> result{ reader(response.message()) };
-
-			if (result.is_success())
-			{
-				return result.value();
-			}
-
-			throw mb_exception{ result.error() };
+			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>

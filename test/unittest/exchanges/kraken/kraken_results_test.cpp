@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "unittest/exchanges/results_test_common.h"
+#include "unittest/exchanges/exchange_test_common.h"
 #include "unittest/assertion_helpers.h"
 #include "test_data/test_data_constants.h"
 
@@ -22,15 +22,15 @@ namespace mb::test
 {
 	TEST(KrakenResults, ReadSystemStatus)
 	{
-		execute_test(kraken_results_test_data_path("system_status_online.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::ONLINE);
-		execute_test(kraken_results_test_data_path("system_status_maintenance.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::MAINTENANCE);
-		execute_test(kraken_results_test_data_path("system_status_cancel_only.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::CANCEL_ONLY);
-		execute_test(kraken_results_test_data_path("system_status_post_only.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::POST_ONLY);
+		execute_reader_test(kraken_results_test_data_path("system_status_online.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::ONLINE);
+		execute_reader_test(kraken_results_test_data_path("system_status_maintenance.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::MAINTENANCE);
+		execute_reader_test(kraken_results_test_data_path("system_status_cancel_only.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::CANCEL_ONLY);
+		execute_reader_test(kraken_results_test_data_path("system_status_post_only.json"), kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME), kraken::read_system_status, exchange_status::POST_ONLY);
 	}
 
 	TEST(KrakenResults, ReadTradablePairs)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("tradable_pairs_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_tradable_pairs,
@@ -43,7 +43,7 @@ namespace mb::test
 
 	TEST(KrakenResults, Read24hStats)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("24h_stats_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_24h_stats,
@@ -53,7 +53,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadPrice)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("24h_stats_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_price,
@@ -62,7 +62,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadOrderBook)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("order_book_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_order_book,
@@ -84,7 +84,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadBalances)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("balances_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_balances,
@@ -101,7 +101,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadFee)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("fee_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_fee,
@@ -110,7 +110,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadOpenOrders)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("open_orders_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_open_orders,
@@ -120,7 +120,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadClosedOrders)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("closed_orders_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_closed_orders,
@@ -130,7 +130,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadAddOrder)
 	{
-		execute_test<std::string>(
+		execute_reader_test<std::string>(
 			kraken_results_test_data_path("add_order_success.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_add_order,
@@ -139,7 +139,7 @@ namespace mb::test
 
 	TEST(KrakenResults, ReadCancelOrder)
 	{
-		execute_test(
+		execute_reader_test(
 			kraken_results_test_data_path("cancel_order.json"),
 			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			kraken::read_cancel_order);

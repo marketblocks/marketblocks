@@ -1,15 +1,18 @@
 #include <gtest/gtest.h>
 
+#include "test_data/test_exchange_configs/test_config_loader.h"
 #include "exchanges/digifinex/digifinex.h"
 
 namespace
 {
 	using namespace mb;
+	using namespace mb::test;
 
 	std::unique_ptr<exchange> create_api()
 	{
+		digifinex_config config{ load_test_config<digifinex_config>() };
 		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
-		return make_digifinex(websocketClient);
+		return make_digifinex(std::move(config), websocketClient);
 	}
 }
 

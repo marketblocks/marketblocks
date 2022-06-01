@@ -5,10 +5,19 @@
 #include "exchanges/exchange_ids.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/coinbase/coinbase.h"
+#include "exchanges/bybit/bybit.h"
+#include "exchanges/digifinex/digifinex.h"
 
 namespace
 {
 	using namespace mb;
+
+	template<typename Config, typename MakeApi>
+	std::unique_ptr<exchange> create_api(std::shared_ptr<websocket_client> websocketClient, MakeApi makeApi)
+	{
+		Config config = load_or_create_config<Config>();
+		return makeApi(std::move(config), websocketClient);
+	}
 
 	std::unique_ptr<exchange> create_api_from_id(
 		std::string_view identifier,
@@ -16,18 +25,26 @@ namespace
 	{
 		if (identifier == exchange_ids::KRAKEN)
 		{
-			kraken_config config = load_or_create_config<kraken_config>();
-			return make_kraken(std::move(config), websocketClient);
+			return create_api<kraken_config>(websocketClient, make_kraken);
 		}
-		else if (identifier == exchange_ids::COINBASE)
+		if (identifier == exchange_ids::COINBASE)
 		{
-			coinbase_config config = load_or_create_config<coinbase_config>();
-			return make_coinbase(std::move(config), websocketClient);
+			return create_api<coinbase_config>(
+				websocketClient, 
+				[](coinbase_config config, std::shared_ptr<websocket_client> client) { return make_coinbase(std::move(config), client); });
 		}
-		else
+		if (identifier == exchange_ids::BYBIT)
 		{
-			return nullptr;
+			return create_api<bybit_config>(
+				websocketClient,
+				[](bybit_config config, std::shared_ptr<websocket_client> client) { return make_bybit(std::move(config), client); });
 		}
+		if (identifier == exchange_ids::DIGIFINEX)
+		{
+			return create_api<digifinex_config>(websocketClient, make_digifinex);
+		}
+
+		return nullptr;
 	}
 
 	template<typename ExchangeIds>
