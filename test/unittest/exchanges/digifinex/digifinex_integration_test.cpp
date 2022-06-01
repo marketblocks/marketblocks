@@ -32,7 +32,7 @@ namespace mb::test
 
 	TEST(DigifinexIntegration, Get24hStats)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto digifinex{ create_api() };
 		ASSERT_NO_THROW(digifinex->get_24h_stats(pair));
@@ -40,7 +40,7 @@ namespace mb::test
 
 	TEST(DigifinexIntegration, GetPrice)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto digifinex{ create_api() };
 		ASSERT_NO_THROW(digifinex->get_price(pair));
@@ -48,7 +48,7 @@ namespace mb::test
 
 	TEST(DigifinexIntegration, GetOrderBook)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto digifinex{ create_api() };
 		ASSERT_NO_THROW(digifinex->get_order_book(pair, 5));
@@ -56,7 +56,7 @@ namespace mb::test
 
 	TEST(DigifinexIntegration, GetFee)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto digifinex{ create_api() };
 		ASSERT_NO_THROW(digifinex->get_fee(pair));
@@ -85,7 +85,7 @@ namespace mb::test
 		trade_description trade
 		{
 			order_type::LIMIT,
-			tradable_pair{ "BTC", "USD" },
+			tradable_pair{ "BTC", "USDT" },
 			trade_action::BUY,
 			37500,
 			1.25

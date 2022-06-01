@@ -76,6 +76,27 @@ namespace mb::test
 		api.get_24h_stats(pair);
 	}
 
+	TEST(Digifinex, GetPrice)
+	{
+		tradable_pair pair{ "BTC", "USDT" };
+
+		http_request expectedRequest
+		{
+			http_verb::GET,
+			"https://openapi.digifinex.com/v3/ticker?symbol=BTC_USDT"
+		};
+
+		http_response response
+		{
+			200,
+			read_file(digifinex_results_test_data_path("get_price.json"))
+		};
+
+		digifinex_api api{ create_api(std::move(expectedRequest), std::move(response)) };
+
+		api.get_price(pair);
+	}
+
 	TEST(Digifinex, GetOrderBook)
 	{
 		tradable_pair pair{ "ETH", "GBP" };
@@ -102,7 +123,7 @@ namespace mb::test
 		http_request expectedRequest
 		{
 			http_verb::GET,
-			""
+			"https://openapi.digifinex.com/v3/spot/assets"
 		};
 
 		http_response response
@@ -161,7 +182,7 @@ namespace mb::test
 		http_request expectedRequest
 		{
 			http_verb::POST,
-			"https://openapi.digifinex.com/v3/spot/order/new?symbol=BTC_USD&type=buy&amount=1.0&price=1.0"
+			"https://openapi.digifinex.com/v3/spot/order/new?market=spot&symbol=BTC_USD&type=buy&amount=1.000000&price=1.000000"
 		};
 
 		http_response response

@@ -24,8 +24,21 @@ namespace mb
 
 			struct method_constants
 			{
+				static constexpr std::string_view PING = "ping";
 				static constexpr std::string_view SYMBOLS = "spot/symbols";
 				static constexpr std::string_view ASSETS = "spot/assets";
+				static constexpr std::string_view TICKER = "ticker";
+				static constexpr std::string_view NEW_ORDER = "spot/order/new";
+				static constexpr std::string_view SPOT = "spot";
+			};
+
+			struct query_constants
+			{
+				static constexpr std::string_view SYMBOL = "symbol";
+				static constexpr std::string_view MARKET = "market";
+				static constexpr std::string_view TYPE = "type";
+				static constexpr std::string_view AMOUNT = "amount";
+				static constexpr std::string_view PRICE = "price";
 			};
 
 			struct http_constants
@@ -38,10 +51,11 @@ namespace mb
 		public:
 			general_constants general;
 			method_constants methods;
+			query_constants queries;
 			http_constants http;
 
 			constexpr digifinex_constants()
-				: general{}, methods{}, http{}
+				: general{}, methods{}, queries{}, http{}
 			{}
 		};
 	}
@@ -66,9 +80,9 @@ namespace mb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
+		Value send_private_request(http_verb verb, std::string_view path, const ResponseReader& reader, std::string_view query = "") const
 		{
-			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
+			http_request request{ verb, build_url(_constants.general.BASE_URL, path, query) };
 
 			std::string timestamp{ std::to_string(time_since_epoch<std::chrono::seconds>()) };
 

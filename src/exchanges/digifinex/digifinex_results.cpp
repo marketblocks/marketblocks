@@ -27,6 +27,7 @@ namespace
 			{ 20008, "Amount precision error" },
 			{ 20009, "Amount is less than the minimum requirement" },
 			{ 20010, "Cash Amount is less than the minimum requirement" },
+			{ 20011, "Insufficient balance" },
 			{ 20012, "Invalid trade type (valid value: buy/sell)" },
 			{ 20013, "No order info found" },
 			{ 20014, "Invalid date (Valid format: 2018-07-25)" },
@@ -94,7 +95,10 @@ namespace mb::digifinex
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_system_status" };
+		return read_result<exchange_status>(jsonResult, "msg", [](const json_element& resultElement)
+		{
+			return exchange_status::ONLINE;
+		});
 	}
 
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
@@ -125,7 +129,11 @@ namespace mb::digifinex
 
 	result<double> read_price(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_price" };
+		return read_result<double>(jsonResult, "ticker", [](const json_element& resultElement)
+		{
+			json_element tickerElement{ resultElement.begin().value() };
+			return tickerElement.get<double>("last");
+		});
 	}
 
 	result<order_book_state> read_order_book(std::string_view jsonResult)
@@ -166,7 +174,10 @@ namespace mb::digifinex
 
 	result<std::string> read_add_order(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_add_order" };
+		return read_result<std::string>(jsonResult, "order_id", [](const json_element& resultElement)
+		{
+			return resultElement.get<std::string>();
+		});
 	}
 
 	result<void> read_cancel_order(std::string_view jsonResult)

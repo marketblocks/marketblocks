@@ -3,6 +3,40 @@
 #include "common/security/encoding.h"
 #include "common/exceptions/not_implemented_exception.h"
 
+namespace
+{
+	using namespace mb;
+
+	constexpr std::string_view get_order_type(order_type orderType, trade_action action)
+	{
+		constexpr std::string_view BUY = "buy";
+		constexpr std::string_view SELL = "sell";
+		constexpr std::string_view BUY_MARKET = "buy_market";
+		constexpr std::string_view SELL_MARKET = "sell_market";
+
+		if (orderType == order_type::LIMIT)
+		{
+			return action == trade_action::BUY ? BUY : SELL;
+		}
+		else if (orderType == order_type::MARKET)
+		{
+			return action == trade_action::BUY ? BUY_MARKET : SELL_MARKET;
+		}
+
+		throw mb_exception{ "Order type not supported" };
+	}
+
+	constexpr double get_amount(const trade_description& tradeDescription)
+	{
+		if (tradeDescription.order_type() == order_type::LIMIT)
+		{
+			return tradeDescription.volume();
+		}
+
+		return calculate_cost(tradeDescription.asset_price(), tradeDescription.volume());
+	}
+}
+
 namespace mb
 {
 	digifinex_api::digifinex_api(
@@ -25,7 +59,7 @@ namespace mb
 
 	exchange_status digifinex_api::get_status() const
 	{
-		throw not_implemented_exception{ "digifinex::get_status" };
+		return send_public_request<exchange_status>(_constants.methods.PING, digifinex::read_system_status);
 	}
 
 	std::vector<tradable_pair> digifinex_api::get_tradable_pairs() const
@@ -40,7 +74,11 @@ namespace mb
 
 	double digifinex_api::get_price(const tradable_pair& tradablePair) const
 	{
-		throw not_implemented_exception{ "digifinex::get_price" };
+		std::string query = url_query_builder{}
+			.add_parameter(_constants.queries.SYMBOL, tradablePair.to_string('_'))
+			.to_string();
+
+		return send_public_request<double>(_constants.methods.TICKER, digifinex::read_price, query);
 	}
 
 	order_book_state digifinex_api::get_order_book(const tradable_pair& tradablePair, int depth) const
@@ -55,7 +93,7 @@ namespace mb
 
 	unordered_string_map<double> digifinex_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>(_constants.methods.ASSETS, digifinex::read_balances);
+		return send_private_request<unordered_string_map<double>>(http_verb::GET, _constants.methods.ASSETS, digifinex::read_balances);
 	}
 
 	std::vector<order_description> digifinex_api::get_open_orders() const
@@ -70,7 +108,15 @@ namespace mb
 
 	std::string digifinex_api::add_order(const trade_description& description)
 	{
-		throw not_implemented_exception{ "digifinex::add_order" };
+		std::string query = url_query_builder{}
+			.add_parameter(_constants.queries.MARKET, _constants.methods.SPOT)
+			.add_parameter(_constants.queries.SYMBOL, description.pair().to_string('_'))
+			.add_parameter(_constants.queries.TYPE, get_order_type(description.order_type(), description.action()))
+			.add_parameter(_constants.queries.AMOUNT, std::to_string(get_amount(description)))
+			.add_parameter(_constants.queries.PRICE, std::to_string(description.asset_price()))
+			.to_string();				
+
+		return send_private_request<std::string>(http_verb::POST, _constants.methods.NEW_ORDER, digifinex::read_add_order, query);
 	}
 
 	void digifinex_api::cancel_order(std::string_view orderId)
