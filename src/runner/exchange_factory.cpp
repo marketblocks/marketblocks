@@ -5,7 +5,6 @@
 #include "exchanges/exchange_ids.h"
 #include "exchanges/kraken/kraken.h"
 #include "exchanges/coinbase/coinbase.h"
-#include "exchanges/bybit/bybit.h"
 #include "exchanges/digifinex/digifinex.h"
 
 namespace
@@ -32,12 +31,6 @@ namespace
 			return create_api<coinbase_config>(
 				websocketClient, 
 				[](coinbase_config config, std::shared_ptr<websocket_client> client) { return make_coinbase(std::move(config), client); });
-		}
-		if (identifier == exchange_ids::BYBIT)
-		{
-			return create_api<bybit_config>(
-				websocketClient,
-				[](bybit_config config, std::shared_ptr<websocket_client> client) { return make_bybit(std::move(config), client); });
 		}
 		if (identifier == exchange_ids::DIGIFINEX)
 		{
