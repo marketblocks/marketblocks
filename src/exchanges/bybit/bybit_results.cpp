@@ -3,6 +3,8 @@
 #include "bybit_results.h"
 #include "common/json/json.h"
 
+#include "common/exceptions/not_implemented_exception.h"
+
 namespace
 {
 	using namespace mb;
@@ -19,12 +21,55 @@ namespace
 				return result<T>::fail(jsonDocument.get<std::string>("ret_msg"));
 			}
 
-			return result<T>::success(reader(jsonDocument.element("result")));
+			if constexpr (std::is_same_v<T, void>)
+			{
+				return result<T>::success();
+			}
+			else
+			{
+				return result<T>::success(reader(jsonDocument.element("result")));
+			}
 		}
 		catch (const std::exception& e)
 		{
 			return result<T>::fail(e.what());
 		}
+	}
+
+	trade_action to_trade_action(std::string_view sideString)
+	{
+		return sideString == "BUY"
+			? trade_action::BUY : trade_action::SELL;
+	}
+
+	order_book_entry read_order_book_entry(const json_element& entryElement)
+	{
+		return order_book_entry
+		{
+			std::stod(entryElement.element(0).get<std::string>()),
+			std::stod(entryElement.element(1).get<std::string>())
+		};
+	}
+
+	order_description read_order_description(const json_element& orderElement)
+	{
+		trade_action action = to_trade_action(orderElement.get<std::string>("side"));
+		double price = std::stod(orderElement.get<std::string>("price"));
+		double qty = std::stod(orderElement.get<std::string>("origQty"));
+
+		if (action == trade_action::BUY && orderElement.get<std::string>("type") == "MARKET")
+		{
+			qty = calculate_volume(price, qty);
+		}
+		
+		return order_description
+		{
+			orderElement.get<std::string>("orderId"),
+			orderElement.get<std::string>("symbol"),
+			action,
+			price,
+			qty
+		};
 	}
 }
 
@@ -32,58 +77,111 @@ namespace mb::bybit
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult)
 	{
-		return result<exchange_status>::success(exchange_status::ONLINE);
+		return read_result<exchange_status>(jsonResult, [](const json_element& resultElement)
+		{
+			return exchange_status::ONLINE;
+		});
 	}
 
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
 	{
 		return read_result<std::vector<tradable_pair>>(jsonResult, [](const json_element& resultElement)
 		{
-			std::unordered_set<tradable_pair> pairs;
+			std::vector<tradable_pair> pairs;
 			pairs.reserve(resultElement.size());
 
 			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
 			{
 				json_element pairElement{ it.value() };
 
-				std::string asset{ pairElement.get<std::string>("base_currency") };
-				std::string priceUnit{ pairElement.get<std::string>("quote_currency") };
+				std::string asset{ pairElement.get<std::string>("baseCurrency") };
+				std::string priceUnit{ pairElement.get<std::string>("quoteCurrency") };
 
-				pairs.emplace(std::move(asset), std::move(priceUnit));
+				pairs.emplace_back(std::move(asset), std::move(priceUnit));
 			}
 
-			return std::vector<tradable_pair>{ pairs.begin(), pairs.end() };
+			return pairs;
 		});
 	}
 
 	result<ohlcv_data> read_24h_stats(std::string_view jsonResult)
 	{
-		return result<ohlcv_data>::success(ohlcv_data{ 0.0,0.0,0.0,0.0,0.0 });
+		return read_result<ohlcv_data>(jsonResult, [](const json_element& resultElement)
+		{
+			return ohlcv_data
+			{
+				std::stod(resultElement.get<std::string>("openPrice")),
+				std::stod(resultElement.get<std::string>("highPrice")),
+				std::stod(resultElement.get<std::string>("lowPrice")),
+				std::stod(resultElement.get<std::string>("lastPrice")),
+				std::stod(resultElement.get<std::string>("volume"))
+			};
+		});
 	}
 
 	result<double> read_price(std::string_view jsonResult)
 	{
-		return result<double>::success(0.0);
+		return read_result<double>(jsonResult, [](const json_element& resultElement)
+		{
+			return std::stod(resultElement.get<std::string>("price"));
+		});
 	}
 
 	result<order_book_state> read_order_book(std::string_view jsonResult)
 	{
-		return result<order_book_state>::success(order_book_state{ {},{} });
+		return read_result<order_book_state>(jsonResult, [](const json_element& resultElement)
+		{
+			json_element asksElement{ resultElement.element("asks") };
+			json_element bidsElement{ resultElement.element("bids") };
+
+			std::vector<order_book_entry> askEntries;
+			askEntries.reserve(asksElement.size());
+
+			std::vector<order_book_entry> bidEntries;
+			bidEntries.reserve(bidsElement.size());
+
+			int depth = std::max(asksElement.size(), bidsElement.size());
+
+			auto asksIt = asksElement.begin();
+			auto bidsIt = bidsElement.begin();
+
+			for (int i = 0; i < depth; ++i)
+			{
+				if (asksIt != asksElement.end())
+				{
+					json_element entryElement{ asksIt.value() };
+					askEntries.emplace_back(read_order_book_entry(entryElement));
+
+					++asksIt;
+				}
+				if (bidsIt != bidsElement.end())
+				{
+					json_element entryElement{ bidsIt.value() };
+					bidEntries.emplace_back(read_order_book_entry(entryElement));
+
+					++bidsIt;
+				}
+			}
+
+			return order_book_state{ std::move(askEntries), std::move(bidEntries) };
+		});
 	}
 
 	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
 	{
 		return read_result<unordered_string_map<double>>(jsonResult, [](const json_element& resultElement)
 		{
+			json_element balancesElement{ resultElement.element("balances") };
+
 			unordered_string_map<double> balances;
-			balances.reserve(resultElement.size());
+			balances.reserve(balancesElement.size());
 
-			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
+			for (auto it = balancesElement.begin(); it != balancesElement.end(); ++it)
 			{
-				json_element pairElement{ it.value() };
+				json_element assetElement{ it.value() };
 
-				std::string asset{ it.key() };
-				double balance{ pairElement.get<double>("available_balance") };
+				std::string asset{ assetElement.get<std::string>("coin") };
+				double balance{ std::stod(assetElement.get<std::string>("free")) };
 
 				balances.emplace(std::move(asset), std::move(balance));
 			}
@@ -92,28 +190,57 @@ namespace mb::bybit
 		});
 	}
 
-	result<double> read_fee(std::string_view jsonResult)
-	{
-		return result<double>::success(0.0);
-	}
-
 	result<std::vector<order_description>> read_open_orders(std::string_view jsonResult)
 	{
-		return result<std::vector<order_description>>::success({});
+		return read_result<std::vector<order_description>>(jsonResult, [](const json_element& resultElement)
+		{
+			std::vector<order_description> orders;
+			orders.reserve(resultElement.size());
+
+			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
+			{
+				json_element orderElement{ it.value() };
+
+				orders.emplace_back(read_order_description(orderElement));
+			}
+
+			return orders;
+		});
 	}
 
 	result<std::vector<order_description>> read_closed_orders(std::string_view jsonResult)
 	{
-		return result<std::vector<order_description>>::success({});
+		return read_result<std::vector<order_description>>(jsonResult, [](const json_element& resultElement)
+		{
+			std::vector<order_description> orders;
+			orders.reserve(resultElement.size());
+
+			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
+			{
+				json_element orderElement{ it.value() };
+
+				if (orderElement.get<std::string>("status") == "FILLED")
+				{
+					orders.emplace_back(read_order_description(orderElement));
+				}
+			}
+
+			return orders;
+		});
 	}
 
 	result<std::string> read_add_order(std::string_view jsonResult)
 	{
-		return result<std::string>::success("");
+		return read_result<std::string>(jsonResult, [](const json_element& resultElement)
+		{
+			return resultElement.get<std::string>("orderId");
+		});
 	}
 
 	result<void> read_cancel_order(std::string_view jsonResult)
 	{
-		return result<void>::success();
+		return read_result<void>(jsonResult, [](const json_element& resultElement)
+		{
+		});
 	}
 }

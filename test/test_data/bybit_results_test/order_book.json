@@ -1,33 +1,21 @@
 {
   "ret_code": 0,
-  "ret_msg": "OK",
-  "ext_code": "",
-  "ext_info": "",
-  "result": [
-    {
-      "symbol": "BTCUSD",
-      "price": "9559.45",
-      "size": 1.3766,
-      "side": "Buy"
-    },
-    {
-      "symbol": "BTCUSD",
-      "price": "9559.04",
-      "size": 0.0127,
-      "side": "Buy"
-    },
-    {
-      "symbol": "BTCUSD",
-      "price": "9563.45",
-      "size": 0.6312,
-      "side": "Sell"
-    },
-    {
-      "symbol": "BTCUSD",
-      "price": "9563.34",
-      "size": 0.0087,
-      "side": "Sell"
-    }
-  ],
-  "time_now": "1567108756.834357"
+  "ret_msg": null,
+  "result": {
+    "time": 1620886105740,
+    "bids": [
+      [
+        "50005.12",
+        "403.0416"
+      ]
+    ],
+    "asks": [
+      [
+        "50006.34",
+        "0.2297"
+      ]
+    ]
+  },
+  "ext_code": null,
+  "ext_info": null
 }

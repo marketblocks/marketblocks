@@ -1,8 +1,9 @@
 {
   "ret_code": 0,
-  "ret_msg": "OK",
-  "ext_code": "",
-  "ext_info": "",
-  "result": {},
-  "time_now": "1577444332.192859"
+  "ret_msg": "",
+  "ext_code": null,
+  "ext_info": null,
+  "result": {
+    "serverTime": 1625799317787
+  }
 }

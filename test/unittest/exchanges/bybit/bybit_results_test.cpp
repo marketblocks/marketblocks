@@ -24,21 +24,20 @@ namespace mb::test
 			bybit::read_tradable_pairs,
 			std::vector<tradable_pair>
 			{
-				tradable_pair{ "BTC", "USD" },
-				tradable_pair{ "EOS", "USD" },
-				tradable_pair{ "BTC", "USDT" }
+				tradable_pair{ "BTC", "USDT" },
+				tradable_pair{ "ETH", "USDT" }
 			});
 	}
 
 	TEST(ByBitResults, Read24hStats)
 	{
 		execute_reader_test(
-			bybit_results_test_data_path("symbol_stats.json"),
+			bybit_results_test_data_path("24hr_stats.json"),
 			bybit_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			bybit::read_24h_stats,
 			ohlcv_data
 			{
-				7163.00, 7267.50, 7067.00, 7230.00, 78053288
+				50005.12, 70000, 50005.12, 50008, 26.7308
 			},
 			assert_pair_stats_eq);
 	}
@@ -46,10 +45,10 @@ namespace mb::test
 	TEST(ByBitResults, ReadPrice)
 	{
 		execute_reader_test(
-			bybit_results_test_data_path("symbol_stats.json"),
+			bybit_results_test_data_path("price.json"),
 			bybit_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			bybit::read_price,
-			7230.00);
+			50008.0);
 	}
 
 	TEST(ByBitResults, ReadOrderBook)
@@ -62,13 +61,11 @@ namespace mb::test
 			{
 				std::vector<order_book_entry>
 				{
-					order_book_entry{9563.45, 0.6312},
-					order_book_entry{9563.34, 0.0087}
+					order_book_entry{50006.34, 0.2297}
 				},
 				std::vector<order_book_entry>
 				{
-					order_book_entry{9559.45, 1.3766},
-					order_book_entry{9559.04, 0.0127}
+					order_book_entry{50005.12, 403.0416}
 				}
 			},
 			assert_order_book_state_eq);
@@ -82,17 +79,8 @@ namespace mb::test
 			bybit::read_balances,
 			unordered_string_map<double>
 		{
-			{ "BTC", 999.99987471 }
+			{ "USDT", 10.0 }
 		});
-	}
-
-	TEST(ByBitResults, ReadFee)
-	{
-		execute_reader_test(
-			bybit_results_test_data_path("fee.json"),
-			bybit_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
-			bybit::read_fee,
-			0.1);
 	}
 
 	TEST(ByBitResults, ReadOpenOrders)
@@ -103,7 +91,8 @@ namespace mb::test
 			bybit::read_open_orders,
 			std::vector<order_description>
 		{
-			order_description{ "dd3164b333a4afa9d5730bb87f6db8b3", "BTC_USDT", trade_action::BUY, 0.1, 1.0 }
+			order_description{ "889788838461927936", "ETHUSDT", trade_action::BUY, 20000, 10 },
+			order_description{ "888376530389004800", "BTCUSDT", trade_action::BUY, 30000, 5 }
 		},
 			create_vector_equal_asserter<order_description>(assert_order_description_eq));
 	}
@@ -111,12 +100,12 @@ namespace mb::test
 	TEST(ByBitResults, ReadClosedOrders)
 	{
 		execute_reader_test(
-			bybit_results_test_data_path("all_orders.json"),
+			bybit_results_test_data_path("closed_orders.json"),
 			bybit_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			bybit::read_open_orders,
 			std::vector<order_description>
 		{
-			order_description{ "198361cecdc65f9c8c9bb2fa68faec40", "ETH_USD", trade_action::SELL, 0.7, 2.0 }
+			order_description{ "888183901021893120", "ETHUSDT", trade_action::SELL, 5000, 1.0 }
 		},
 			create_vector_equal_asserter<order_description>(assert_order_description_eq));
 	}
@@ -127,7 +116,7 @@ namespace mb::test
 			bybit_results_test_data_path("add_order.json"),
 			bybit_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
 			bybit::read_add_order,
-			"335fd977-e5a5-4781-b6d0-c772d5bfb95b");
+			"889208273689997824");
 	}
 
 	TEST(ByBitResults, ReadCancelOrder)

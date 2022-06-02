@@ -32,7 +32,7 @@ namespace mb::test
 
 	TEST(ByBitIntegration, Get24hStats)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto bybit{ create_api() };
 		ASSERT_NO_THROW(bybit->get_24h_stats(pair));
@@ -40,7 +40,7 @@ namespace mb::test
 
 	TEST(ByBitIntegration, GetPrice)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto bybit{ create_api() };
 		ASSERT_NO_THROW(bybit->get_price(pair));
@@ -48,7 +48,7 @@ namespace mb::test
 
 	TEST(ByBitIntegration, GetOrderBook)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto bybit{ create_api() };
 		ASSERT_NO_THROW(bybit->get_order_book(pair, 5));
@@ -56,7 +56,7 @@ namespace mb::test
 
 	TEST(ByBitIntegration, GetFee)
 	{
-		tradable_pair pair{ "BTC", "USD" };
+		tradable_pair pair{ "BTC", "USDT" };
 
 		auto bybit{ create_api() };
 		ASSERT_NO_THROW(bybit->get_fee(pair));
@@ -85,10 +85,10 @@ namespace mb::test
 		trade_description trade
 		{
 			order_type::LIMIT,
-			tradable_pair{ "BTC", "USD" },
+			tradable_pair{ "BTC", "USDT" },
 			trade_action::BUY,
-			37500,
-			1.25
+			100,
+			0.1
 		};
 
 		auto bybit{ create_api() };

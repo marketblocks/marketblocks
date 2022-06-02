@@ -11,65 +11,10 @@
 
 namespace mb
 {
-	namespace internal
-	{
-		struct bybit_constants
-		{
-		private:
-			struct general_constants
-			{
-			private:
-				static constexpr std::string_view LIVE_BASE_URL = "https://api-testnet.bybit.com";
-				static constexpr std::string_view TEST_BASE_URL = "https://api.bybit.com";
-
-				constexpr std::string_view select_base_url(bool enableTesting)
-				{
-					if (enableTesting)
-					{
-						return TEST_BASE_URL;
-					}
-					return LIVE_BASE_URL;
-				}
-
-			public:
-				const std::string_view BASE_URL;
-				static constexpr std::string_view VERSION = "v2";
-				static constexpr std::string_view PUBLIC = "public";
-				static constexpr std::string_view PRIVATE = "private";
-
-				constexpr general_constants(bool enableTesting)
-					: BASE_URL{ select_base_url(enableTesting) }
-				{}
-			};
-
-			struct method_constants
-			{
-				static constexpr std::string_view SYMBOLS = "symbols";
-				static constexpr std::string_view BALANCE = "wallet/balance";
-			};
-
-			struct query_constants
-			{
-				static constexpr std::string_view API_KEY = "api_key";
-				static constexpr std::string_view TIMESTAMP = "timestamp";
-				static constexpr std::string_view SIGN = "sign";
-			};
-
-		public:
-			general_constants general;
-			method_constants methods;
-			query_constants queries;
-
-			constexpr bybit_constants(bool enableTesting)
-				: general{ enableTesting }, methods{}, queries{}
-			{}
-		};
-	}
-
 	class bybit_api : public exchange
 	{
 	private:
-		internal::bybit_constants _constants;
+		std::string_view _baseUrl;
 
 		std::string _apiKey;
 		std::string _apiSecret;
@@ -79,26 +24,18 @@ namespace mb
 		std::string get_time_stamp() const;
 		std::string compute_api_sign(std::string_view query) const;
 
-		constexpr std::string build_bybit_url_path(std::string_view access, std::string_view method) const
-		{
-			return build_url_path(std::array<std::string_view, 3>{ _constants.general.VERSION, access, method });
-		}
-
 		template<typename Value, typename ResponseReader>
-		Value send_public_request(std::string_view method, const ResponseReader& reader, std::string_view query = "") const
+		Value send_public_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
 		{
-			std::string path{ build_bybit_url_path(_constants.general.PUBLIC, method) };
-			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
+			http_request request{ http_verb::GET, build_url(_baseUrl, path, query) };
 			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(std::string_view method, const ResponseReader& reader, std::map<std::string_view, std::string> queryParams = {}) const
+		Value send_private_request(http_verb verb, std::string_view path, const ResponseReader& reader, std::map<std::string, std::string> queryParams = {}) const
 		{
-			std::string path{ build_bybit_url_path(_constants.general.PRIVATE, method) };
-
-			queryParams.emplace(_constants.queries.API_KEY, _apiKey);
-			queryParams.emplace(_constants.queries.TIMESTAMP, get_time_stamp());
+			queryParams.emplace("api_key", _apiKey);
+			queryParams.emplace("timestamp", get_time_stamp());
 
 			url_query_builder queryBuilder{};
 			for (auto& [key, value] : queryParams)
@@ -106,11 +43,23 @@ namespace mb
 				queryBuilder.add_parameter(key, value);
 			}
 
-			queryBuilder.add_parameter(_constants.queries.SIGN, compute_api_sign(queryBuilder.to_string()));
-			
-			std::string query{ queryBuilder.to_string() };
+			queryBuilder.add_parameter("sign", compute_api_sign(queryBuilder.to_string()));
 
-			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
+			std::string query;
+			std::string content;
+
+			if (verb == http_verb::POST)
+			{
+				content = queryBuilder.to_string();
+			}
+			else
+			{
+				query = queryBuilder.to_string();
+			}
+
+			http_request request{ verb, build_url(_baseUrl, path, query) };
+			request.set_content(content);
+
 			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
