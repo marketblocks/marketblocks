@@ -1,6 +1,8 @@
 #include "backtest_websocket_stream.h"
 #include "trading/ohlcv_data.h"
 
+#include "common/exceptions/not_implemented_exception.h"
+
 namespace mb
 {
 	backtest_websocket_stream::backtest_websocket_stream(std::shared_ptr<back_testing_data_navigator> dataSource)
@@ -57,5 +59,61 @@ namespace mb
 	set_queue<tradable_pair>& backtest_websocket_stream::get_order_book_message_queue()
 	{
 		return _messageQueue;
+	}
+
+	void backtest_websocket_stream::subscribe_price(const std::vector<tradable_pair>& tradablePairs)
+	{
+		//throw not_implemented_exception{ "backtest_websocket::price" };
+	}
+
+	void backtest_websocket_stream::unsubscribe_price(const std::vector<tradable_pair>& tradablePairs)
+	{
+		//throw not_implemented_exception{ "backtest_websocket::price" };
+	}
+
+	bool backtest_websocket_stream::is_price_subscribed(const tradable_pair& pair) const
+	{
+		return true;
+		//throw not_implemented_exception{ "backtest_websocket::price" };
+	}
+
+	double backtest_websocket_stream::get_price(const tradable_pair& pair) const
+	{
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
+
+		if (data.has_value())
+		{
+			return data.value().get().data().close();
+		}
+
+		return 0.0;
+	}
+
+	void backtest_websocket_stream::subscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval) 
+	{
+		//throw not_implemented_exception{ "backtest_websocket::candles" };
+	}
+
+	void backtest_websocket_stream::unsubscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval)
+	{
+		//throw not_implemented_exception{ "backtest_websocket::candles" };
+	}
+
+	bool backtest_websocket_stream::is_candles_subscribed(const tradable_pair& pair, int interval) const
+	{
+		return true;
+		//throw not_implemented_exception{ "backtest_websocket::candles" };
+	}
+
+	ohlcv_data backtest_websocket_stream::get_candle(const tradable_pair& pair, int interval) const
+	{
+		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
+
+		if (data.has_value())
+		{
+			return data.value().get().data();
+		}
+
+		return ohlcv_data{ 0,0,0,0,0 };
 	}
 }

@@ -64,15 +64,7 @@ namespace mb
 
 	double backtest_market_api::get_price(const tradable_pair& tradablePair) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(tradablePair);
-
-		if (data.has_value())
-		{
-			const ohlcv_data& ohlcvData = data.value().get().data();
-			return ohlcvData.open();
-		}
-
-		return 0.0;
+		return _websocketStream->get_price(tradablePair);
 	}
 
 	order_book_state backtest_market_api::get_order_book(const tradable_pair& tradablePair, int depth) const

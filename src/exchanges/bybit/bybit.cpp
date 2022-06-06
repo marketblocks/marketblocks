@@ -1,8 +1,7 @@
 #include "bybit.h"
+#include "bybit_websocket.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
-
-#include "common/exceptions/not_implemented_exception.h"
 
 namespace
 {
@@ -156,7 +155,7 @@ namespace mb
 		return std::make_unique<bybit_api>(
 			std::move(config),
 			std::make_unique<http_service>(),
-			nullptr,
+			std::make_unique<exchange_websocket_stream>(std::make_unique<internal::bybit_websocket_stream>(), websocketClient),
 			enableTesting);
 	}
 }

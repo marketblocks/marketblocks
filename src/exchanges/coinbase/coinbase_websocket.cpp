@@ -110,12 +110,12 @@ namespace mb::internal
 		logger::instance().info("Successfully connected to Coinbase websocket feed");
 	}
 
-	void coinbase_websocket_stream::on_close(std::string_view reason)
+	void coinbase_websocket_stream::on_close(std::error_code reason)
 	{
 
 	}
 
-	void coinbase_websocket_stream::on_fail(std::string_view reason)
+	void coinbase_websocket_stream::on_fail(std::error_code reason)
 	{
 
 	}

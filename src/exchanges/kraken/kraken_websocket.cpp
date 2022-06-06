@@ -134,14 +134,14 @@ namespace mb::internal
 		logger::instance().info("Successfully connected Kraken websocket feed");
 	}
 
-	void kraken_websocket_stream::on_close(std::string_view reason)
+	void kraken_websocket_stream::on_close(std::error_code reason)
 	{
-		logger::instance().info("Kraken websocket connection closed: {}", reason);
+		logger::instance().info("Kraken websocket connection closed: {}", reason.message());
 	}
 
-	void kraken_websocket_stream::on_fail(std::string_view reason)
+	void kraken_websocket_stream::on_fail(std::error_code reason)
 	{
-		logger::instance().error("Kraken websocket connection failed: {}", reason);
+		logger::instance().error("Kraken websocket connection failed: {}", reason.message());
 	}
 
 	void kraken_websocket_stream::on_message(std::string_view message)

@@ -57,14 +57,14 @@ namespace mb
         connectionPtr->set_close_handler(
             [onCloseHandler, client](websocketpp::connection_hdl handle) 
             { 
-                std::string reason = client->get_connection(handle)->get_ec().message();
+                std::error_code reason = client->get_connection(handle)->get_ec();
                 onCloseHandler(reason);
             });
 
         connectionPtr->set_fail_handler(
             [onFailHandler, client](websocketpp::connection_hdl handle) 
             { 
-                std::string reason = client->get_connection(handle)->get_ec().message();
+                std::error_code reason = client->get_connection(handle)->get_ec();
                 onFailHandler(reason);
             });
 

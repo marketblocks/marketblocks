@@ -24,6 +24,16 @@ namespace mb::test
 		MOCK_METHOD(bool, is_order_book_subscribed, (const tradable_pair& pair), (const, override));
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
 		MOCK_METHOD(set_queue<tradable_pair>&, get_order_book_message_queue, (), (noexcept, override));
+
+		MOCK_METHOD(void, subscribe_price, (const std::vector<tradable_pair>& tradablePairs), (override));
+		MOCK_METHOD(void, unsubscribe_price, (const std::vector<tradable_pair>& tradablePairs), (override));
+		MOCK_METHOD(bool, is_price_subscribed, (const tradable_pair& pair), (const, override));
+		MOCK_METHOD(double, get_price, (const tradable_pair& pair), (const, override));
+		
+		MOCK_METHOD(void, subscribe_candles, (const std::vector<tradable_pair>& tradablePairs, int interval), (override));
+		MOCK_METHOD(void, unsubscribe_candles, (const std::vector<tradable_pair>& tradablePairs, int interval), (override));
+		MOCK_METHOD(bool, is_candles_subscribed, (const tradable_pair& pair, int interval), (const, override));
+		MOCK_METHOD(ohlcv_data, get_candle, (const tradable_pair& pair, int interval), (const, override));
 	};
 
 	class mock_exchange : public exchange

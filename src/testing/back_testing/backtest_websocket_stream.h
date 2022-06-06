@@ -25,5 +25,15 @@ namespace mb
 		bool is_order_book_subscribed(const tradable_pair& pair) const override;
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		set_queue<tradable_pair>& get_order_book_message_queue() override;
+
+		void subscribe_price(const std::vector<tradable_pair>& tradablePairs) override;
+		void unsubscribe_price(const std::vector<tradable_pair>& tradablePairs) override;
+		bool is_price_subscribed(const tradable_pair& pair) const override;
+		double get_price(const tradable_pair& pair) const override;
+
+		void subscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval) override;
+		void unsubscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval) override;
+		bool is_candles_subscribed(const tradable_pair& pair, int interval) const override;
+		ohlcv_data get_candle(const tradable_pair& pair, int interval) const override;
 	};
 }

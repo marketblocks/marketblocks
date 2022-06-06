@@ -29,8 +29,8 @@ namespace mb
 				_websocketClient,
 				_implementation->stream_url(),
 				[this]() { _implementation->on_open(); },
-				[this](const std::string& reason) { _implementation->on_close(reason); },
-				[this](const std::string& reason) { _implementation->on_fail(reason); },
+				[this](std::error_code reason) { _implementation->on_close(reason); },
+				[this](std::error_code reason) { _implementation->on_fail(reason); },
 				[this](const std::string& message) { _implementation->on_message(message); }));
 	}
 
@@ -64,6 +64,30 @@ namespace mb
 		assert(tradablePairs.size() > 0);
 
 		std::string unsubscriptionMessage{ _implementation->get_order_book_unsubscription_message(tradablePairs) };
+		send_message(unsubscriptionMessage);
+	}
+
+	void exchange_websocket_stream::subscribe_price(const std::vector<tradable_pair>& tradablePairs)
+	{
+		std::string subscriptionMessage{ _implementation->get_price_subscription_message(tradablePairs) };
+		send_message(subscriptionMessage);
+	}
+
+	void exchange_websocket_stream::unsubscribe_price(const std::vector<tradable_pair>& tradablePairs)
+	{
+		std::string unsubscriptionMessage{ _implementation->get_price_unsubscription_message(tradablePairs) };
+		send_message(unsubscriptionMessage);
+	}
+
+	void exchange_websocket_stream::subscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval)
+	{
+		std::string subscriptionMessage{ _implementation->get_candles_subscription_message(tradablePairs, interval) };
+		send_message(subscriptionMessage);
+	}
+
+	void exchange_websocket_stream::unsubscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval)
+	{
+		std::string unsubscriptionMessage{ _implementation->get_candles_unsubscription_message(tradablePairs, interval) };
 		send_message(unsubscriptionMessage);
 	}
 }
