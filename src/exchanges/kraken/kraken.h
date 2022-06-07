@@ -74,12 +74,11 @@ namespace mb
 	public:
 		kraken_api(
 			kraken_config config, 
-			std::unique_ptr<http_service> httpService, 
-			std::unique_ptr<websocket_stream> websocketStream);
+			std::unique_ptr<http_service> httpService);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::KRAKEN; }
 		
-		std::weak_ptr<websocket_stream> get_websocket_stream() override { return _websocketStream; }
+		std::shared_ptr<websocket_stream> get_websocket_stream() override { return _websocketStream; }
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
@@ -94,5 +93,5 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient);
+	std::unique_ptr<exchange> make_kraken(kraken_config config);
 } 

@@ -25,7 +25,7 @@ namespace mb
 
 		constexpr virtual std::string_view id() const noexcept = 0;
 		
-		virtual std::weak_ptr<websocket_stream> get_websocket_stream() = 0;
+		virtual std::shared_ptr<websocket_stream> get_websocket_stream() = 0;
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
 		virtual ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const = 0;
@@ -68,7 +68,7 @@ namespace mb
 			return _marketApi->id();
 		}
 
-		std::weak_ptr<websocket_stream> get_websocket_stream() override
+		std::shared_ptr<websocket_stream> get_websocket_stream() override
 		{
 			return _marketApi->get_websocket_stream();
 		}

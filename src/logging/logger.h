@@ -18,10 +18,10 @@ namespace mb
 		static logger& instance();
 
 		logger(const logger&) = delete;
-		logger(logger&&) noexcept = default;
+		logger(logger&&) noexcept = delete;
 
 		logger& operator=(const logger&) = delete;
-		logger& operator=(logger&&) noexcept = default;
+		logger& operator=(logger&&) noexcept = delete;
 
 		template<typename... Args>
 		void info(std::string message, Args&&... args)

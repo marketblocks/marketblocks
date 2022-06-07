@@ -2,12 +2,34 @@
 #include "logging/logger.h"
 #include "common/utils/containerutils.h"
 #include "common/json/json.h"
+#include "exchanges/exchange_ids.h"
 
 #include "common/exceptions/not_implemented_exception.h"
 
 namespace
 {
 	using namespace mb;
+
+	std::string get_kline_topic_name(ohlcv_interval interval)
+	{
+		switch (interval)
+		{
+		case ohlcv_interval::M1:
+			return "kline_1m";
+		case ohlcv_interval::M5:
+			return "kline_5m";
+		case ohlcv_interval::M15:
+			return "kline_15m";
+		case ohlcv_interval::H1:
+			return "kline_1h";
+		case ohlcv_interval::D1:
+			return "kline_1d";
+		case ohlcv_interval::W1:
+			return "kline_1w";
+		default:
+			throw mb_exception{ std::format("OHLCV interval not supported on ByBit") };
+		}
+	}
 
 	std::string create_message(std::string_view topic, std::string_view eventName, const std::vector<tradable_pair>& tradablePairs, std::unordered_map<std::string, std::string> params = {})
 	{
@@ -35,9 +57,18 @@ namespace
 			.to_string();
 	}
 
-	std::string get_kline_topic_name(int interval)
+	std::string create_message(const websocket_subscription& subscription, std::string_view eventName)
 	{
-		return "kline_1m";
+		switch (subscription.channel())
+		{
+		case websocket_channel::PRICE:
+			return create_message("trade", eventName, subscription.pairs());
+		case websocket_channel::OHLCV:
+			return create_message(get_kline_topic_name(subscription.get_ohlcv_interval()), eventName, subscription.pairs());
+		case websocket_channel::ORDER_BOOK:
+		default:
+			throw mb_exception{ std::format("Websocket channel not supported on ByBit") };
+		}
 	}
 
 	void process_price_message(std::unordered_map<std::string, double>& prices, std::string symbol, json_element data)
@@ -62,20 +93,9 @@ namespace
 
 namespace mb::internal
 {
-	void bybit_websocket_stream::on_open()
-	{
-		logger::instance().info("Bybit websocket connection opened");
-	}
-
-	void bybit_websocket_stream::on_close(std::error_code reason)
-	{
-		logger::instance().error("Connection has been closed: {}", reason.message());
-	}
-
-	void bybit_websocket_stream::on_fail(std::error_code reason)
-	{
-		logger::instance().info("Connection failed: {}", reason.message());
-	}
+	bybit_websocket_stream::bybit_websocket_stream(std::unique_ptr<websocket_connection> connection)
+		: exchange_websocket_stream{ exchange_ids::BYBIT, std::move(connection) }
+	{}
 
 	void bybit_websocket_stream::on_message(std::string_view message)
 	{
@@ -111,55 +131,20 @@ namespace mb::internal
 		}
 	}
 
-	std::string bybit_websocket_stream::get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
+	void bybit_websocket_stream::subscribe(const websocket_subscription& subscription)
 	{
-		throw not_implemented_exception{ "bybit_websocket::order_book" };
+		std::string message{ create_message(subscription, "sub") };
+		_connection->send_message(message);
 	}
 
-	std::string bybit_websocket_stream::get_order_book_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const
+	void bybit_websocket_stream::unsubscribe(const websocket_subscription& subscription)
 	{
-		throw not_implemented_exception{ "bybit_websocket::order_book" };
+		std::string message{ create_message(subscription, "cancel") };
+		_connection->send_message(message);
 	}
 
-	std::string bybit_websocket_stream::get_price_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
-	{
-		return create_message("trade", "sub", tradablePairs);
-	}
-
-	std::string bybit_websocket_stream::get_price_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const
-	{
-		return create_message("trade", "cancel", tradablePairs);
-	}
-
-	bool bybit_websocket_stream::is_price_subscribed(const tradable_pair& pair) const
+	bool bybit_websocket_stream::is_subscribed(const websocket_subscription& subscription)
 	{
 		return true;
-	}
-
-	double bybit_websocket_stream::get_price(const tradable_pair& pair) const
-	{
-		return find_or_default(_prices, pair.to_string(), 0.0);
-	}
-
-	std::string bybit_websocket_stream::get_candles_subscription_message(const std::vector<tradable_pair>& tradablePairs, int interval) const
-	{
-		std::string topic{ get_kline_topic_name(interval) };
-		return create_message(topic, "sub", tradablePairs);
-	}
-
-	std::string bybit_websocket_stream::get_candles_unsubscription_message(const std::vector<tradable_pair>& tradablePairs, int interval) const
-	{
-		std::string topic{ get_kline_topic_name(interval) };
-		return create_message(topic, "cancel", tradablePairs);
-	}
-
-	bool bybit_websocket_stream::is_candles_subscribed(const tradable_pair& pair, int interval) const
-	{
-		return true;
-	}
-
-	ohlcv_data bybit_websocket_stream::get_candle(const tradable_pair& pair, int interval) const
-	{
-		return find_or_default(_ohlcvData, pair.to_string(), ohlcv_data{0,0,0,0,0});
 	}
 }

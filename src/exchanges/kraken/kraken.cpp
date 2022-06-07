@@ -42,13 +42,11 @@ namespace mb
 {
 	kraken_api::kraken_api(
 		kraken_config config, 
-		std::unique_ptr<http_service> httpService,
-		std::unique_ptr<websocket_stream> websocketStream)
+		std::unique_ptr<http_service> httpService)
 		:
 		_publicKey{ config.public_key() },
 		_decodedPrivateKey{ b64_decode(config.private_key()) },
-		_httpService{ std::move(httpService) },
-		_websocketStream{ std::move(websocketStream) }
+		_httpService{ std::move(httpService) }
 	{}
 
 	std::string kraken_api::get_nonce() const
@@ -155,11 +153,10 @@ namespace mb
 		send_private_request<void>("CancelOrder", kraken::read_cancel_order, query);
 	}
 
-	std::unique_ptr<exchange> make_kraken(kraken_config config, std::shared_ptr<websocket_client> websocketClient)
+	std::unique_ptr<exchange> make_kraken(kraken_config config)
 	{
 		return std::make_unique<kraken_api>(
-			std::move(config), 
-			std::make_unique<http_service>(),
-			std::make_unique<exchange_websocket_stream>(std::make_unique<internal::kraken_websocket_stream>(), websocketClient));
+			std::move(config),
+			std::make_unique<http_service>());
 	}
 }

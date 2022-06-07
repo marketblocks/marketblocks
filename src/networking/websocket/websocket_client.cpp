@@ -2,6 +2,7 @@
 
 #include "websocket_client.h"
 #include "websocket_error.h"
+#include "websocket_connection.h"
 
 namespace
 {
@@ -21,7 +22,7 @@ namespace
         }
         catch (std::exception& e)
         {
-            throw websocket_error{ std::format("Error occurred initialising TLS: {}", e.what()) };
+            throw websocket_error{ std::format("Initialising TLS: {}", e.what()) };
         }
 
         return context;
@@ -30,18 +31,15 @@ namespace
 
 namespace mb
 {
-    websocket_client::websocket_client(int timeout)
+    websocket_client::websocket_client()
         :_client{}, _thread{}
     {
-        //_client.set_access_channels(websocketpp::log::alevel::none);
         _client.clear_access_channels(websocketpp::log::alevel::all);
         _client.clear_error_channels(websocketpp::log::elevel::all);
-
         _client.init_asio();
         _client.start_perpetual();
         _client.set_tls_init_handler(bind(&on_tls_init));
-        _client.set_open_handshake_timeout(timeout);
-
+        
         _thread = std::make_unique<std::thread>(&client::run, &_client);
     }
 
@@ -49,6 +47,23 @@ namespace mb
     {
         _client.stop_perpetual();
         _thread->join();
+    }
+
+    websocket_client& websocket_client::instance()
+    {
+        static websocket_client client;
+        return client;
+    }
+
+    void websocket_client::set_open_handshake_timeout(int timeout)
+    {
+        _client.set_open_handshake_timeout(timeout);
+    }
+
+    websocket_connection websocket_client::create_connection(std::string_view url)
+    {
+        client::connection_ptr connectionPtr = get_connection(url);
+        return websocket_connection{ connectionPtr->get_handle()};
     }
 
     void websocket_client::connect(client::connection_ptr connectionPtr)
@@ -65,7 +80,7 @@ namespace mb
         }
         catch (const std::exception& e)
         {
-            throw websocket_error{ std::format("Error occured connecting to websocket: {}", e.what()) };
+            throw websocket_error{ e.what() };
         }
     }
 
@@ -76,7 +91,7 @@ namespace mb
 
         if (errorCode)
         {
-            throw websocket_error{ std::format("Error occured getting connection for {0}: {1}", url, errorCode.message()) };
+            throw websocket_error{ std::format("Getting connection for {0}: {1}", url, errorCode.message()) };
         }
 
         return connectionPtr;
@@ -92,7 +107,7 @@ namespace mb
             return connectionPtr;
         }
 
-        throw websocket_error{ std::format("Error occurred getting connection: {}", errorCode.message()) };
+        throw websocket_error{ std::format("Hetting connection: {}", errorCode.message()) };
     }
 
     void websocket_client::close_connection(websocketpp::connection_hdl connectionHandle)
@@ -107,7 +122,7 @@ namespace mb
 
         if (errorCode)
         {
-            throw websocket_error{ std::format("Error occured closing connection: {}", errorCode.message()) };
+            throw websocket_error{ std::format("Closing connection: {}", errorCode.message()) };
         }
     }
 
@@ -121,7 +136,7 @@ namespace mb
             return connectionPtr->get_state();
         }
 
-        throw websocket_error{ std::format("Could not get connection from handle: {}", errorCode.message()) };
+        throw websocket_error{ std::format("Getting state: {}", errorCode.message()) };
     }
 
     void websocket_client::send_message(websocketpp::connection_hdl connectionHandle, std::string_view message)
@@ -132,7 +147,7 @@ namespace mb
 
         if (errorCode)
         {
-            throw websocket_error{ std::format("Error occurred sending message: {}", errorCode.message()) };
+            throw websocket_error{ std::format("Sending message: {}", errorCode.message()) };
         }
     }
 }
