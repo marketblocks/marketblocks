@@ -1,7 +1,5 @@
 #pragma once
 
-#include "string_view"
-
 #include "coinbase_config.h"
 #include "coinbase_websocket.h"
 #include "exchanges/exchange.h"
@@ -9,86 +7,14 @@
 #include "exchanges/exchange_common.h"
 #include "networking/http/http_service.h"
 #include "networking/url.h"
-#include "common/utils/retry.h"
 
 namespace mb
 {
-	namespace internal
-	{
-		struct coinbase_constants
-		{
-		private:
-			struct general_constants
-			{
-			private:
-				static constexpr std::string_view LIVE_BASE_URL = "https://api.exchange.coinbase.com";
-				static constexpr std::string_view SANDBOX_BASE_URL = "https://api-public.sandbox.exchange.coinbase.com";
-
-				constexpr std::string_view select_base_url(bool enableTesting)
-				{
-					if (enableTesting)
-					{
-						return SANDBOX_BASE_URL;
-					}
-					return LIVE_BASE_URL;
-				}
-
-			public:
-				const std::string_view BASE_URL;
-
-				constexpr general_constants(bool enableTesting)
-					: BASE_URL{ select_base_url(enableTesting) }
-				{}
-			};
-
-			struct method_constants
-			{
-				static constexpr std::string_view PRODUCTS = "products";
-				static constexpr std::string_view STATS = "stats";
-				static constexpr std::string_view TICKER = "ticker";
-				static constexpr std::string_view BOOK = "book";
-				static constexpr std::string_view FEES = "fees";
-				static constexpr std::string_view COINBASE_ACCOUNTS = "coinbase-accounts"; 
-				static constexpr std::string_view ORDERS = "orders"; 
-				static constexpr std::string_view TRADES = "trades"; 
-			};
-
-			struct query_constants
-			{
-				static constexpr std::string_view LEVEL = "level";
-				static constexpr std::string_view STATUS = "status";
-				static constexpr std::string_view AFTER = "after";
-			};
-
-			struct http_constants
-			{
-				static constexpr std::string_view ACCESS_KEY_HEADER = "CB-ACCESS-KEY";
-				static constexpr std::string_view ACCESS_SIGN_HEADER = "CB-ACCESS-SIGN";
-				static constexpr std::string_view ACCESS_TIMESTAMP_HEADER = "CB-ACCESS-TIMESTAMP";
-				static constexpr std::string_view ACCESS_PASSPHRASE_HEADER = "CB-ACCESS-PASSPHRASE";
-			};
-
-		public:
-			general_constants general;
-			method_constants methods;
-			query_constants queries;
-			http_constants http;
-
-			constexpr coinbase_constants(bool enableTesting)
-				: general{ enableTesting }, methods{}, queries{}, http{}
-			{}
-		};
-
-		constexpr std::string to_exchange_id(const tradable_pair& pair)
-		{
-			return pair.asset() + "-" + pair.price_unit();
-		}
-	}
-
 	class coinbase_api final : public exchange
 	{
 	private:
-		internal::coinbase_constants _constants;
+		static constexpr const char _pairSeparator = '-';
+		std::string_view _baseUrl;
 
 		std::string _userAgentId;
 		std::string _apiKey;
@@ -112,14 +38,14 @@ namespace mb
 		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
 		{
-			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
+			http_request request{ http_verb::GET, build_url(_baseUrl, path, query) };
 			return send_request<Value>(request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(http_verb httpVerb, std::string_view path, const ResponseReader& reader, std::string_view query = "", std::string_view content = "") const
+		Value send_private_request(http_verb httpVerb, std::string path, const ResponseReader& reader, std::string_view query = "", std::string_view content = "") const
 		{
-			http_request request{ httpVerb, build_url(_constants.general.BASE_URL, path, query) };
+			http_request request{ httpVerb, build_url(_baseUrl, path, query) };
 
 			if (!content.empty())
 			{
@@ -129,10 +55,10 @@ namespace mb
 
 			std::string timestamp{ get_timestamp() };
 
-			request.add_header(_constants.http.ACCESS_KEY_HEADER, _apiKey);
-			request.add_header(_constants.http.ACCESS_SIGN_HEADER, compute_access_sign(timestamp, httpVerb, path, query, content));
-			request.add_header(_constants.http.ACCESS_TIMESTAMP_HEADER, timestamp);
-			request.add_header(_constants.http.ACCESS_PASSPHRASE_HEADER, _apiPassphrase);
+			request.add_header("CB-ACCESS-KEY", _apiKey);
+			request.add_header("CB-ACCESS-SIGN", compute_access_sign(timestamp, httpVerb, path, query, content));
+			request.add_header("CB-ACCESS-TIMESTAMP", timestamp);
+			request.add_header("CB-ACCESS-PASSPHRASE", _apiPassphrase);
 
 			return send_request<Value>(request, reader);
 		}

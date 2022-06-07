@@ -14,7 +14,7 @@ namespace
 namespace mb
 {
 	kraken_config::kraken_config(std::string publicKey, std::string privateKey)
-		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }, _httpRetries{ DEFAULT_RETRIES }
+		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
 	{
 		validate();
 	}

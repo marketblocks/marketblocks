@@ -8,23 +8,31 @@ namespace
 {
 	using namespace mb;
 
-	constexpr std::string_view to_string(order_type orderType)
+	constexpr std::string_view select_base_url(bool enableTesting)
 	{
-		constexpr std::string_view LIMIT = "limit";
-		constexpr std::string_view MARKET = "market";
-		constexpr std::string_view STOP_LOSS = "loss";
-		constexpr std::string_view STOP_ENTRY = "entry";
+		constexpr std::string_view LIVE_BASE_URL = "https://api.exchange.coinbase.com";
+		constexpr std::string_view SANDBOX_BASE_URL = "https://api-public.sandbox.exchange.coinbase.com";
 
+		if (enableTesting)
+		{
+			return SANDBOX_BASE_URL;
+		}
+
+		return LIVE_BASE_URL;
+	}
+
+	constexpr std::string to_string(order_type orderType)
+	{
 		switch (orderType)
 		{
 		case order_type::LIMIT:
-			return LIMIT;
+			return "limit";
 		case order_type::MARKET:
-			return MARKET;
+			return "market";
 		case order_type::STOP_LOSS:
-			return STOP_LOSS;
+			return "loss";
 		case order_type::TAKE_PROFIT:
-			return STOP_ENTRY;
+			return "entry";
 		default:
 			throw mb_exception{ "Unknown order type" };
 		}
@@ -44,7 +52,7 @@ namespace mb
 		std::unique_ptr<websocket_stream> websocketStream,
 		bool enableTesting)
 		:
-		_constants{ enableTesting },
+		_baseUrl{ select_base_url(enableTesting) },
 		_userAgentId{ get_timestamp() },
 		_apiKey{ config.api_key() },
 		_decodedApiSecret{ b64_decode(config.api_secret()) },
@@ -79,53 +87,33 @@ namespace mb
 
 	std::vector<tradable_pair> coinbase_api::get_tradable_pairs() const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 1>
-		{
-			_constants.methods.PRODUCTS
-		}) };
-
-		return send_public_request<std::vector<tradable_pair>>(path, coinbase::read_tradable_pairs);
+		return send_public_request<std::vector<tradable_pair>>("/products", coinbase::read_tradable_pairs);
 	}
 
 	ohlcv_data coinbase_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 3>
-		{
-			_constants.methods.PRODUCTS,
-			internal::to_exchange_id(tradablePair),
-			_constants.methods.STATS
-		})};
+		std::string path = "/products/" + tradablePair.to_string(_pairSeparator) + "/stats";
 
 		return send_public_request<ohlcv_data>(path, coinbase::read_24h_stats);
 	}
 
 	double coinbase_api::get_price(const tradable_pair& tradablePair) const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 3>
-		{
-			_constants.methods.PRODUCTS,
-			internal::to_exchange_id(tradablePair),
-			_constants.methods.TICKER
-		}) };
+		std::string path = "/products/" + tradablePair.to_string(_pairSeparator) + "/ticker";
 
 		return send_public_request<double>(path, coinbase::read_price);
 	}
 
 	order_book_state coinbase_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 3>
-		{
-			_constants.methods.PRODUCTS,
-			internal::to_exchange_id(tradablePair),
-			_constants.methods.BOOK
-		})};
+		std::string path = "/products/" + tradablePair.to_string(_pairSeparator) + "/book";
 
 		int level = depth == 1 
 			? 1 
 			: 2;
 
 		std::string query{ url_query_builder{}
-			.add_parameter(_constants.queries.LEVEL, std::to_string(level))
+			.add_parameter("level", std::to_string(level))
 			.to_string() };
 
 		return send_public_request<order_book_state>(
@@ -136,99 +124,60 @@ namespace mb
 
 	double coinbase_api::get_fee(const tradable_pair& tradablePair) const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 1>
-		{
-			_constants.methods.FEES
-		}) };
-
-		return send_private_request<double>(http_verb::GET, path, coinbase::read_fee);
+		return send_private_request<double>(http_verb::GET, "/fees", coinbase::read_fee);
 	}
 
 	unordered_string_map<double> coinbase_api::get_balances() const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 1>
-		{
-			_constants.methods.COINBASE_ACCOUNTS
-		}) };
-
-		return send_private_request<unordered_string_map<double>>(http_verb::GET, path, coinbase::read_balances);
+		return send_private_request<unordered_string_map<double>>(http_verb::GET, "/coinbase-accounts", coinbase::read_balances);
 	}
 
 	std::vector<order_description> coinbase_api::get_open_orders() const
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 1>
-		{
-			_constants.methods.ORDERS
-		}) };
-
-		return send_private_request<std::vector<order_description>>(http_verb::GET, path, coinbase::read_orders);
+		return send_private_request<std::vector<order_description>>(http_verb::GET, "/orders", coinbase::read_orders);
 	}
 
 	std::vector<order_description> coinbase_api::get_closed_orders() const
 	{
-		static constexpr std::string_view DONE = "done";
-
-		std::string path{ build_url_path(std::array<std::string_view, 1>
-		{
-			_constants.methods.ORDERS
-		}) };
-
 		std::string query{ url_query_builder{}
-			.add_parameter(_constants.queries.STATUS, DONE)
+			.add_parameter("status", "done")
 			.to_string() };
 
-		return send_private_request<std::vector<order_description>>(http_verb::GET, path, coinbase::read_orders, query);
+		return send_private_request<std::vector<order_description>>(http_verb::GET, "/orders", coinbase::read_orders, query);
 	}
 
 	std::string coinbase_api::add_order(const trade_description& description)
 	{
-		static constexpr std::string_view TYPE = "type";
-		static constexpr std::string_view SIDE = "side";
-		static constexpr std::string_view PRODUCT_ID = "product_id";
-		static constexpr std::string_view PRICE = "price";
-		static constexpr std::string_view SIZE = "size";
-		static constexpr std::string_view STOP = "stop";
-		static constexpr std::string_view STOP_PRICE = "stop_price";
-
-		std::string path{ build_url_path(std::array<std::string_view, 1>
-		{
-			_constants.methods.ORDERS
-		}) };
-
 		json_writer json = json_writer{}
-			.add(SIDE, to_string(description.action()))
-			.add(PRODUCT_ID, internal::to_exchange_id(description.pair()))
-			.add(SIZE, std::to_string(description.volume()));
+			.add("side", to_string(description.action()))
+			.add("product_id", description.pair().to_string(_pairSeparator))
+			.add("size", std::to_string(description.volume()));
 
 		if (is_stop_order(description.order_type()))
 		{
-			json.add(TYPE, ::to_string(order_type::LIMIT));
-			json.add(PRICE, std::to_string(description.asset_price()));
-			json.add(STOP, ::to_string(description.order_type()));
-			json.add(STOP_PRICE, std::to_string(description.asset_price()));
+			json.add("type", ::to_string(order_type::LIMIT));
+			json.add("price", std::to_string(description.asset_price()));
+			json.add("stop", ::to_string(description.order_type()));
+			json.add("stop_price", std::to_string(description.asset_price()));
 		}
 		else
 		{
-			json.add(TYPE, ::to_string(description.order_type()));
+			json.add("type", ::to_string(description.order_type()));
 
 			if (description.order_type() != order_type::MARKET)
 			{
-				json.add(PRICE, std::to_string(description.asset_price()));
+				json.add("price", std::to_string(description.asset_price()));
 			}
 		}
 
 		std::string content{ json.to_string() };
 
-		return send_private_request<std::string>(http_verb::POST, path, coinbase::read_add_order, "", content);
+		return send_private_request<std::string>(http_verb::POST, "/orders", coinbase::read_add_order, "", content);
 	}
 
 	void coinbase_api::cancel_order(std::string_view orderId)
 	{
-		std::string path{ build_url_path(std::array<std::string_view, 2>
-		{
-			_constants.methods.ORDERS,
-			orderId
-		}) };
+		std::string path = "/orders/" + std::string{ orderId };
 
 		send_private_request<void>(http_verb::HTTP_DELETE, path, coinbase::read_cancel_order);
 	}

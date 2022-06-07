@@ -1,15 +1,18 @@
 #include "coinbase_websocket.h"
 
-#include "coinbase.h"
 #include "common/utils/containerutils.h"
+#include "common/json/json.h"
+#include "logging/logger.h"
 
 namespace
 {
 	using namespace mb;
 
+	constexpr const char PAIR_SEPARATOR = '-';
+
 	tradable_pair get_pair_from_id(std::string_view productId)
 	{
-		std::vector<std::string> parts = split(productId, '-');
+		std::vector<std::string> parts = split(productId, PAIR_SEPARATOR);
 		return tradable_pair{ parts[0], parts[1] };
 	}
 
@@ -27,7 +30,10 @@ namespace
 
 	std::string create_message(std::string_view type, std::string channel, const std::vector<tradable_pair>& pairs)
 	{
-		std::vector<std::string> tradablePairList{ to_vector<std::string>(pairs, [](const tradable_pair& pair) { return internal::to_exchange_id(pair); }) };
+		std::vector<std::string> tradablePairList{ to_vector<std::string>(pairs, [](const tradable_pair& pair)
+		{
+			return pair.to_string(PAIR_SEPARATOR);
+		}) };
 
 		return json_writer{}
 			.add("type", type)

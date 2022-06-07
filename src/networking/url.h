@@ -61,7 +61,7 @@ namespace mb
 		}
 	}
 
-	constexpr std::string build_url(std::string_view baseUrl, std::string_view path, std::string_view _query)
+	constexpr std::string build_url(std::string_view baseUrl, std::string_view path, std::string_view _query = "")
 	{
 		std::string url{ baseUrl };
 		

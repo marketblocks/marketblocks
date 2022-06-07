@@ -12,58 +12,11 @@
 
 namespace mb
 {
-	namespace internal
-	{
-		struct digifinex_constants
-		{
-		private:
-			struct general_constants
-			{
-				static constexpr std::string_view BASE_URL = "https://openapi.digifinex.com/v3";
-			};
-
-			struct method_constants
-			{
-				static constexpr std::string_view PING = "ping";
-				static constexpr std::string_view SYMBOLS = "spot/symbols";
-				static constexpr std::string_view ASSETS = "spot/assets";
-				static constexpr std::string_view TICKER = "ticker";
-				static constexpr std::string_view NEW_ORDER = "spot/order/new";
-				static constexpr std::string_view SPOT = "spot";
-			};
-
-			struct query_constants
-			{
-				static constexpr std::string_view SYMBOL = "symbol";
-				static constexpr std::string_view MARKET = "market";
-				static constexpr std::string_view TYPE = "type";
-				static constexpr std::string_view AMOUNT = "amount";
-				static constexpr std::string_view PRICE = "price";
-			};
-
-			struct http_constants
-			{
-				static constexpr std::string_view ACCESS_KEY_HEADER = "ACCESS-KEY";
-				static constexpr std::string_view ACCESS_TIMESTAMP_HEADER = "ACCESS-TIMESTAMP";
-				static constexpr std::string_view ACCESS_SIGN_HEADER = "ACCESS-SIGN";
-			};
-
-		public:
-			general_constants general;
-			method_constants methods;
-			query_constants queries;
-			http_constants http;
-
-			constexpr digifinex_constants()
-				: general{}, methods{}, queries{}, http{}
-			{}
-		};
-	}
-
 	class digifinex_api : public exchange
 	{
 	private:
-		internal::digifinex_constants _constants;
+		static constexpr const char _pairSeparator = '_';
+		static constexpr std::string_view _baseUrl = "https://openapi.digifinex.com/v3";
 
 		std::string _apiKey;
 		std::string _apiSecret;
@@ -75,20 +28,20 @@ namespace mb
 		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
 		{
-			http_request request{ http_verb::GET, build_url(_constants.general.BASE_URL, path, query) };
+			http_request request{ http_verb::GET, build_url(_baseUrl, path, query) };
 			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
 
 		template<typename Value, typename ResponseReader>
 		Value send_private_request(http_verb verb, std::string_view path, const ResponseReader& reader, std::string_view query = "") const
 		{
-			http_request request{ verb, build_url(_constants.general.BASE_URL, path, query) };
+			http_request request{ verb, build_url(_baseUrl, path, query) };
 
 			std::string timestamp{ std::to_string(time_since_epoch<std::chrono::seconds>()) };
 
-			request.add_header(_constants.http.ACCESS_KEY_HEADER, _apiKey);
-			request.add_header(_constants.http.ACCESS_TIMESTAMP_HEADER, timestamp);
-			request.add_header(_constants.http.ACCESS_SIGN_HEADER, compute_api_sign(query));
+			request.add_header("ACCESS-KEY", _apiKey);
+			request.add_header("ACCESS-TIMESTAMP", timestamp);
+			request.add_header("ACCESS-SIGN", compute_api_sign(query));
 
 			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
