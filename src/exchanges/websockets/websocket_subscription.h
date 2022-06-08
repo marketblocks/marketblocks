@@ -8,43 +8,44 @@
 
 namespace mb
 {
-	class websocket_subscription
+	template<typename TradablePairItem>
+	class basic_websocket_subscription
 	{
 	private:
 		using parameter_variant = std::variant<std::monostate, ohlcv_interval, order_book_depth>;
 
 		websocket_channel _channel;
-		std::vector<tradable_pair> _pairs;
+		TradablePairItem _pairItem;
 		parameter_variant _parameter;
 
-		constexpr websocket_subscription(
+		constexpr basic_websocket_subscription(
 			websocket_channel channel,
-			std::vector<tradable_pair> pairs,
-			parameter_variant parameter)
+			TradablePairItem pairItem,
+			parameter_variant parameter = {})
 			:
 			_channel{ channel },
-			_pairs{ std::move(pairs) },
+			_pairItem{ std::move(pairItem) },
 			_parameter{ std::move(parameter) }
 		{}
 
 	public:
-		static constexpr websocket_subscription create_price_sub(std::vector<tradable_pair> pairs)
+		static constexpr basic_websocket_subscription<TradablePairItem> create_price_sub(TradablePairItem pairItem)
 		{
-			return websocket_subscription{ websocket_channel::PRICE, std::move(pairs), std::monostate{} };
+			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::PRICE, std::move(pairItem) };
 		}
 
-		static constexpr websocket_subscription create_order_book_sub(std::vector<tradable_pair> pairs, order_book_depth depth)
+		static constexpr basic_websocket_subscription<TradablePairItem> create_order_book_sub(TradablePairItem pairItem, order_book_depth depth)
 		{
-			return websocket_subscription{ websocket_channel::ORDER_BOOK, std::move(pairs), depth };
+			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::ORDER_BOOK, std::move(pairItem), depth };
 		}
 
-		static constexpr websocket_subscription create_ohclv_sub(std::vector<tradable_pair> pairs, ohlcv_interval interval)
+		static constexpr basic_websocket_subscription<TradablePairItem> create_ohlcv_sub(TradablePairItem pairItem, ohlcv_interval interval)
 		{
-			return websocket_subscription{ websocket_channel::OHLCV, std::move(pairs), interval };
+			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::OHLCV, std::move(pairItem), interval };
 		}
 
 		constexpr websocket_channel channel() const noexcept { return _channel; }
-		constexpr const std::vector<tradable_pair>& pairs() const noexcept { return _pairs; }
+		constexpr const TradablePairItem& pair_item() const noexcept { return _pairItem; }
 
 		constexpr ohlcv_interval get_ohlcv_interval() const
 		{
@@ -58,4 +59,7 @@ namespace mb
 			return std::get<order_book_depth>(_parameter);
 		}
 	};
+
+	using websocket_subscription = basic_websocket_subscription<std::vector<tradable_pair>>;
+	using unique_websocket_subscription = basic_websocket_subscription<tradable_pair>;
 }

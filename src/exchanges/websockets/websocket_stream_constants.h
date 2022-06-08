@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace mb
 {
 	enum class websocket_channel

@@ -25,13 +25,8 @@ namespace mb
     websocket_connection::websocket_connection(websocketpp::connection_hdl connectionHandle)
         : 
         _client{ websocket_client::instance() }, 
-        _connectionHandle{std::move(connectionHandle)}
+        _connectionHandle{ connectionHandle }
     {}
-
-    void websocket_connection::connect()
-    {
-        _client.connect(_client.get_connection(_connectionHandle));
-    }
 
     void websocket_connection::close()
     {
@@ -49,5 +44,11 @@ namespace mb
     ws_connection_status websocket_connection::connection_status() const
     {
         return map_connection_status(_client.get_state(_connectionHandle));
+    }
+
+    std::unique_ptr<websocket_connection> websocket_connection_factory::create_connection(std::string url) const
+    {
+        auto handle =  websocket_client::instance().create_connection(url, _onOpen, _onClose, _onFail, _onMessage);
+        return std::make_unique<websocket_connection>(handle);
     }
 }

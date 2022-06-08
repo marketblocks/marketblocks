@@ -14,7 +14,7 @@ namespace mb
 	public:
 		virtual ~websocket_stream() = default;
 
-		virtual void connect() = 0;
+		virtual void reset() = 0;
 		virtual void disconnect() = 0;
 		virtual ws_connection_status connection_status() const = 0;
 

@@ -17,7 +17,7 @@ namespace mb::test
 	class mock_websocket_stream : public websocket_stream
 	{
 	public:
-		MOCK_METHOD(void, connect, (), (override));
+		MOCK_METHOD(void, reset, (), (override));
 		MOCK_METHOD(void, disconnect, (), (override));
 		MOCK_METHOD(ws_connection_status, connection_status, (), (const, override));
 

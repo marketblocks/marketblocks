@@ -130,8 +130,8 @@
 
 namespace mb::internal
 {
-	kraken_websocket_stream::kraken_websocket_stream(std::unique_ptr<websocket_connection> connection)
-		: exchange_websocket_stream{ exchange_ids::KRAKEN, std::move(connection) }
+	kraken_websocket_stream::kraken_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
+		: exchange_websocket_stream{ exchange_ids::KRAKEN, URL, std::move(connectionFactory) }
 	{}
 
 	void kraken_websocket_stream::on_message(std::string_view message)

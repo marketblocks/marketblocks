@@ -37,52 +37,31 @@ namespace mb
         websocket_connection& operator=(websocket_connection&&) noexcept = default;
 
         ws_connection_status connection_status() const;
-        void connect();
         void close();
         void send_message(std::string_view message);
+    };
 
-        template<typename OnOpenHandler>
-        void set_on_open_handler(OnOpenHandler handler)
-        {
-            _client.get_connection(_connectionHandle)->set_open_handler(
-                [handler](websocketpp::connection_hdl)
-                {
-                    handler();
-                });
-        }
+    class websocket_connection_factory
+    {
+    private:
+        using on_open = std::function<void()>;
+        using on_close = std::function<void(std::error_code)>;
+        using on_fail = std::function<void(std::error_code)>;
+        using on_message = std::function<void(std::string_view)>;
 
-        template<typename OnCloseHandler>
-        void set_on_close_handler(OnCloseHandler handler)
-        {
-            auto connection = _client.get_connection(_connectionHandle);
+        on_open _onOpen;
+        on_close _onClose;
+        on_fail _onFail;
+        on_message _onMessage;
 
-            connection->set_close_handler(
-                [handler, connection](websocketpp::connection_hdl)
-                {
-                    handler(connection->get_ec());
-                });
-        }
+    public:
+        virtual ~websocket_connection_factory() = default;
 
-        template<typename OnFailHandler>
-        void set_on_fail_handler(OnFailHandler handler)
-        {
-            auto connection = _client.get_connection(_connectionHandle);
+        void set_on_open(on_open onOpen) noexcept { _onOpen = std::move(onOpen); }
+        void set_on_close(on_close onClose) noexcept { _onClose = std::move(onClose); }
+        void set_on_fail(on_fail onFail) noexcept { _onFail = std::move(onFail); }
+        void set_on_message(on_message onMessage) noexcept { _onMessage = std::move(onMessage); }
 
-            connection->set_fail_handler(
-                [handler, connection](websocketpp::connection_hdl)
-                {
-                    handler(connection->get_ec());
-                });
-        }
-
-        template<typename OnMessageHandler>
-        void set_on_message_handler(OnMessageHandler handler)
-        {
-            _client.get_connection(_connectionHandle)->set_message_handler(
-                [handler](websocketpp::connection_hdl, client::message_ptr message)
-                {
-                    handler(message->get_payload());
-                });
-        }
+        virtual std::unique_ptr<websocket_connection> create_connection(std::string url) const;
     };
 }

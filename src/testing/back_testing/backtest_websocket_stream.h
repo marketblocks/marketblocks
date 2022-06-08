@@ -17,7 +17,7 @@ namespace mb
 
 		void notify_data_incremented();
 
-		void connect() override {}
+		void reset() override {}
 		void disconnect()  override {}
 		ws_connection_status connection_status() const override { return ws_connection_status::OPEN; }
 

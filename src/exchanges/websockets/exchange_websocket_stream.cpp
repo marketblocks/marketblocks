@@ -1,21 +1,30 @@
 #include "exchange_websocket_stream.h"
 #include "logging/logger.h"
+#include "common/utils/containerutils.h"
 
 #include "common/exceptions/not_implemented_exception.h"
 
 namespace mb
 {
-	exchange_websocket_stream::exchange_websocket_stream(std::string_view id, std::unique_ptr<websocket_connection> connection)
+	exchange_websocket_stream::exchange_websocket_stream(
+		std::string_view id, 
+		std::string_view url,
+		std::unique_ptr<websocket_connection_factory> connectionFactory)
 		: 
-		_id{ std::move(id) },
-		_connection{ std::move(connection) }
+		_id{ id },
+		_url{ url },
+		_connectionFactory{ std::move(connectionFactory) }
 	{
-		_connection->set_on_open_handler([this]() { on_open(); });
-		_connection->set_on_close_handler([this](std::error_code error) { on_close(error); });
-		_connection->set_on_fail_handler([this](std::error_code error) { on_fail(error); });
-		_connection->set_on_message_handler([this](std::string_view message) { on_message(message); });
+		initialise_connection_factory();
+		reset();
+	}
 
-		connect();
+	void exchange_websocket_stream::initialise_connection_factory()
+	{
+		_connectionFactory->set_on_open([this]() { on_open(); });
+		_connectionFactory->set_on_close([this](std::error_code error) { on_close(error); });
+		_connectionFactory->set_on_fail([this](std::error_code error) { on_fail(error); });
+		_connectionFactory->set_on_message([this](std::string_view message) { on_message(message); });
 	}
 
 	void exchange_websocket_stream::on_open() const
@@ -33,6 +42,36 @@ namespace mb
 
 	}
 
+	void exchange_websocket_stream::reset()
+	{
+		if (_connection->connection_status() != ws_connection_status::CLOSED)
+		{
+			disconnect();
+		}
+
+		_connection = _connectionFactory->create_connection(_url.data());
+	}
+
+	void exchange_websocket_stream::disconnect()
+	{
+		_connection->close();
+	}
+
+	ws_connection_status exchange_websocket_stream::connection_status() const
+	{
+		return _connection->connection_status();
+	}
+
+	void exchange_websocket_stream::update_price(std::string subscriptionId, double price)
+	{
+		_prices.insert_or_assign(std::move(subscriptionId), price);
+	}
+
+	void exchange_websocket_stream::update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData)
+	{
+		_ohlcv.insert_or_assign(std::move(subscriptionId), std::move(ohlcvData));
+	}
+
 	order_book_state exchange_websocket_stream::get_order_book(const tradable_pair& pair, order_book_depth depth) const
 	{
 		throw not_implemented_exception{ "exchange_websocket_stream::get_order_book" };
@@ -40,11 +79,13 @@ namespace mb
 
 	double exchange_websocket_stream::get_price(const tradable_pair& pair) const
 	{
-		throw not_implemented_exception{ "exchange_websocket_stream::get_price" };
+		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_price_sub(pair)) };
+		return find_or_default(_prices, subId, 0.0);
 	}
 
 	ohlcv_data exchange_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
 	{
-		throw not_implemented_exception{ "exchange_websocket_stream::get_last_candle" };
+		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_ohlcv_sub(pair, interval)) };
+		return find_or_default(_ohlcv, subId, ohlcv_data{ 0, 0, 0, 0, 0 });
 	}
 }

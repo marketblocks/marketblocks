@@ -2,7 +2,6 @@
 
 #include "websocket_client.h"
 #include "websocket_error.h"
-#include "websocket_connection.h"
 
 namespace
 {
@@ -55,17 +54,6 @@ namespace mb
         return client;
     }
 
-    void websocket_client::set_open_handshake_timeout(int timeout)
-    {
-        _client.set_open_handshake_timeout(timeout);
-    }
-
-    websocket_connection websocket_client::create_connection(std::string_view url)
-    {
-        client::connection_ptr connectionPtr = get_connection(url);
-        return websocket_connection{ connectionPtr->get_handle()};
-    }
-
     void websocket_client::connect(client::connection_ptr connectionPtr)
     {
         try
@@ -84,37 +72,16 @@ namespace mb
         }
     }
 
-    client::connection_ptr websocket_client::get_connection(std::string_view url)
+    void websocket_client::set_open_handshake_timeout(int timeout)
     {
-        std::error_code errorCode;
-        auto connectionPtr = _client.get_connection(url.data(), errorCode);
-
-        if (errorCode)
-        {
-            throw websocket_error{ std::format("Getting connection for {0}: {1}", url, errorCode.message()) };
-        }
-
-        return connectionPtr;
-    }
-
-    client::connection_ptr websocket_client::get_connection(websocketpp::connection_hdl connectionHandle)
-    {
-        std::error_code errorCode;
-        auto connectionPtr = _client.get_con_from_hdl(connectionHandle, errorCode);
-
-        if (connectionPtr)
-        {
-            return connectionPtr;
-        }
-
-        throw websocket_error{ std::format("Hetting connection: {}", errorCode.message()) };
+        _client.set_open_handshake_timeout(timeout);
     }
 
     void websocket_client::close_connection(websocketpp::connection_hdl connectionHandle)
     {
         std::error_code errorCode;
         auto connectionPtr = _client.get_con_from_hdl(connectionHandle, errorCode);
-
+        
         if (connectionPtr)
         {
             connectionPtr->close(websocketpp::close::status::going_away, "", errorCode);
@@ -130,7 +97,7 @@ namespace mb
     {
         std::error_code errorCode;
         auto connectionPtr = _client.get_con_from_hdl(connectionHandle, errorCode);
-     
+        
         if (connectionPtr)
         {
             return connectionPtr->get_state();

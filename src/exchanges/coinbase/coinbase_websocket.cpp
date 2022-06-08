@@ -112,8 +112,8 @@
 
 namespace mb::internal
 {
-	coinbase_websocket_stream::coinbase_websocket_stream(std::unique_ptr<websocket_connection> connection)
-		: exchange_websocket_stream{ exchange_ids::COINBASE, std::move(connection) }
+	coinbase_websocket_stream::coinbase_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
+		: exchange_websocket_stream{ exchange_ids::COINBASE, URL, std::move(connectionFactory) }
 	{}
 
 	void coinbase_websocket_stream::on_message(std::string_view message)
