@@ -172,12 +172,14 @@ namespace mb::kraken
 				json_element asks_i{ asks.element(i) };
 				askEntries.emplace_back(
 					std::stod(asks_i.element(0).get<std::string>()),
-					std::stod(asks_i.element(1).get<std::string>()));
+					std::stod(asks_i.element(1).get<std::string>()),
+					order_book_side::ASK);
 
 				json_element bids_i{ bids.element(i) };
 				bidEntries.emplace_back(
 					std::stod(bids_i.element(0).get<std::string>()),
-					std::stod(bids_i.element(1).get<std::string>()));
+					std::stod(bids_i.element(1).get<std::string>()),
+					order_book_side::BID);
 			}
 
 			return order_book_state{ std::move(askEntries), std::move(bidEntries) };

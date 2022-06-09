@@ -20,12 +20,4 @@ namespace mb
 		D1,
 		W1
 	};
-
-	enum class order_book_depth
-	{
-		DEPTH_1,
-		DEPTH_10,
-		DEPTH_100,
-		DEPTH_MAX
-	};
 }

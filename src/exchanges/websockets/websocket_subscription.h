@@ -12,7 +12,7 @@ namespace mb
 	class basic_websocket_subscription
 	{
 	private:
-		using parameter_variant = std::variant<std::monostate, ohlcv_interval, order_book_depth>;
+		using parameter_variant = std::variant<std::monostate, ohlcv_interval>;
 
 		websocket_channel _channel;
 		TradablePairItem _pairItem;
@@ -34,9 +34,9 @@ namespace mb
 			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::PRICE, std::move(pairItem) };
 		}
 
-		static constexpr basic_websocket_subscription<TradablePairItem> create_order_book_sub(TradablePairItem pairItem, order_book_depth depth)
+		static constexpr basic_websocket_subscription<TradablePairItem> create_order_book_sub(TradablePairItem pairItem)
 		{
-			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::ORDER_BOOK, std::move(pairItem), depth };
+			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::ORDER_BOOK, std::move(pairItem) };
 		}
 
 		static constexpr basic_websocket_subscription<TradablePairItem> create_ohlcv_sub(TradablePairItem pairItem, ohlcv_interval interval)
@@ -51,12 +51,6 @@ namespace mb
 		{
 			assert(_channel == websocket_channel::OHLCV);
 			return std::get<ohlcv_interval>(_parameter);
-		}
-
-		constexpr order_book_depth get_order_book_depth() const
-		{
-			assert(_channel == websocket_channel::ORDER_BOOK);
-			return std::get<order_book_depth>(_parameter);
 		}
 	};
 

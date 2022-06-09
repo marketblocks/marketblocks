@@ -69,6 +69,6 @@ namespace mb
 
 	order_book_state backtest_market_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
-		return _websocketStream->get_order_book(tradablePair, order_book_depth::DEPTH_1);
+		return _websocketStream->get_order_book(tradablePair, depth);
 	}
 }

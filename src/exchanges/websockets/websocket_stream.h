@@ -22,7 +22,7 @@ namespace mb
 		virtual void unsubscribe(const websocket_subscription& subscription) = 0;
 		virtual bool is_subscribed(const websocket_subscription& subscription) = 0;
 
-		virtual order_book_state get_order_book(const tradable_pair& pair, order_book_depth depth) const = 0;
+		virtual order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const = 0;
 		virtual double get_price(const tradable_pair& pair) const = 0;
 		virtual ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const = 0;
 

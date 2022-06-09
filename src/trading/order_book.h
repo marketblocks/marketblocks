@@ -19,18 +19,16 @@ namespace mb
 	private:
 		double _price;
 		double _volume;
+		order_book_side _side;
 
 	public:
-		constexpr order_book_entry()
-			: _price{}, _volume{}
-		{}
-
-		constexpr order_book_entry(double price, double volume)
-			: _price{ price }, _volume{ volume }
+		constexpr order_book_entry(double price, double volume, order_book_side side)
+			: _price{ price }, _volume{ volume }, _side{ side }
 		{}
 
 		constexpr double price() const noexcept { return _price; }
 		constexpr double volume() const noexcept { return _volume; }
+		constexpr order_book_side side() const noexcept { return _side; }
 	};
 
 	class order_book_state

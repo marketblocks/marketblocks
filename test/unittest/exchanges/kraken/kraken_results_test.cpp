@@ -70,13 +70,13 @@ namespace mb::test
 			{
 				std::vector<order_book_entry>
 				{
-					order_book_entry{52523.0, 1.199},
-					order_book_entry{52536.0, 0.30}
+					order_book_entry{52523.0, 1.199, order_book_side::ASK},
+					order_book_entry{52536.0, 0.30, order_book_side::ASK}
 				},
 				std::vector<order_book_entry>
 				{
-					order_book_entry{52522.9, 0.753},
-					order_book_entry{52522.8, 0.006}
+					order_book_entry{52522.9, 0.753, order_book_side::BID },
+					order_book_entry{52522.8, 0.006, order_book_side::BID }
 				}
 			},
 			assert_order_book_state_eq);

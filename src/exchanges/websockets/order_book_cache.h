@@ -1,35 +1,39 @@
 
 #pragma once
 
-#include <string>
-#include <map>
 #include <mutex>
+#include <set>
 
 #include "trading/order_book.h"
 #include "common/utils/stringutils.h"
 
 namespace mb
 {
-	struct order_book_cache_entry
+	namespace internal
 	{
-		order_book_side side;
-		std::string price;
-		order_book_entry entry;
-	};
+		struct entry_less_than
+		{
+			bool operator()(const order_book_entry& l, const order_book_entry& r) const;
+		};
 
-	using ask_map = std::map<std::string, order_book_entry, numeric_string_less>;
-	using bid_map = std::map<std::string, order_book_entry, numeric_string_greater>;
+		struct entry_greater_than
+		{
+			bool operator()(const order_book_entry& l, const order_book_entry& r) const;
+		};
+	}
+	
+	using ask_cache = std::set<order_book_entry, internal::entry_less_than>;
+	using bid_cache = std::set<order_book_entry, internal::entry_greater_than>;
 
 	class order_book_cache
 	{
 	private:
-		int _depth;
-		ask_map _asks;
-		bid_map _bids;
+		ask_cache _asks;
+		bid_cache _bids;
 		mutable std::mutex _mutex;
 
 	public:
-		order_book_cache(ask_map asks, bid_map bids, int depth);
+		order_book_cache(ask_cache asks, bid_cache bids);
 
 		order_book_cache(const order_book_cache&);
 		order_book_cache(order_book_cache&&) noexcept;
@@ -37,8 +41,7 @@ namespace mb
 		order_book_cache& operator=(const order_book_cache&);
 		order_book_cache& operator=(order_book_cache&&) noexcept;
 
-		void update_cache(order_book_cache_entry cacheEntry);
-		void remove(std::string_view price, order_book_side side);
+		void update_cache(order_book_entry entry);
 
 		order_book_state snapshot(int depth = 0) const;
 	};

@@ -72,9 +72,35 @@ namespace mb
 		_ohlcv.insert_or_assign(std::move(subscriptionId), std::move(ohlcvData));
 	}
 
-	order_book_state exchange_websocket_stream::get_order_book(const tradable_pair& pair, order_book_depth depth) const
+	void exchange_websocket_stream::initialise_order_book(std::string subscriptionId, order_book_cache cache)
 	{
-		throw not_implemented_exception{ "exchange_websocket_stream::get_order_book" };
+		_orderBooks.insert_or_assign(std::move(subscriptionId), std::move(cache));
+	}
+
+	void exchange_websocket_stream::update_order_book(std::string subscriptionId, order_book_entry entry)
+	{
+		auto it = _orderBooks.find(subscriptionId);
+
+		if (it != _orderBooks.end())
+		{
+			it->second.update_cache(std::move(entry));
+		}
+
+		throw mb_exception{ "Order book must be initialised before update" };
+	}
+
+	order_book_state exchange_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
+	{
+		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_order_book_sub(pair)) };
+
+		auto it = _orderBooks.find(subId);
+
+		if (it != _orderBooks.end())
+		{
+			return it->second.snapshot(depth);
+		}
+
+		return order_book_state{ {}, {} };
 	}
 
 	double exchange_websocket_stream::get_price(const tradable_pair& pair) const

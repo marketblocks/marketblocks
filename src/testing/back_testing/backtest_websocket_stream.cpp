@@ -32,7 +32,7 @@ namespace mb
 		return true;
 	}
 
-	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, order_book_depth depth) const
+	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
 	{
 		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
 
@@ -42,10 +42,10 @@ namespace mb
 			return order_book_state
 			{
 				{
-					order_book_entry{ ohlcvData.low(), ohlcvData.volume() }
+					order_book_entry{ ohlcvData.low(), ohlcvData.volume(), order_book_side::ASK }
 				},
 				{
-					order_book_entry{ ohlcvData.high(), ohlcvData.volume() }
+					order_book_entry{ ohlcvData.high(), ohlcvData.volume(), order_book_side::BID }
 				}
 			};
 		}
