@@ -17,6 +17,5 @@ namespace mb::internal
 
 		void subscribe(const websocket_subscription& subscription) override;
 		void unsubscribe(const websocket_subscription& subscription) override;
-		bool is_subscribed(const websocket_subscription& subscription) override;
 	};
 }

@@ -62,6 +62,33 @@ namespace mb
 		return _connection->connection_status();
 	}
 
+	void exchange_websocket_stream::update_subscription_status(std::string subscriptionId, websocket_channel channel, subscription_status status)
+	{
+		if (status == subscription_status::UNSUBSCRIBED)
+		{
+			_subscriptionStatus.erase(subscriptionId);
+
+			switch (channel)
+			{
+			case websocket_channel::PRICE:
+				_prices.erase(subscriptionId);
+				break;
+			case websocket_channel::OHLCV:
+				_ohlcv.erase(subscriptionId);
+				break;
+			case websocket_channel::ORDER_BOOK:
+				_orderBooks.erase(subscriptionId);
+				break;
+			default:
+				throw std::invalid_argument{ "Websocket channel not recognized" };
+			}
+		}
+		else
+		{
+			_subscriptionStatus.insert_or_assign(subscriptionId, status);
+		}
+	}
+
 	void exchange_websocket_stream::update_price(std::string subscriptionId, double price)
 	{
 		_prices.insert_or_assign(std::move(subscriptionId), price);
@@ -87,6 +114,12 @@ namespace mb
 		}
 
 		throw mb_exception{ "Order book must be initialised before update" };
+	}
+
+	subscription_status exchange_websocket_stream::get_subscription_status(const unique_websocket_subscription& subscription) const
+	{
+		std::string subId{ generate_subscription_id(subscription) };
+		return find_or_default(_subscriptionStatus, subId, subscription_status::UNSUBSCRIBED);
 	}
 
 	order_book_state exchange_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const

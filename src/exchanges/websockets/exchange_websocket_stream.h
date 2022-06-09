@@ -15,6 +15,8 @@ namespace mb
 
 		std::string_view _id;
 		std::string_view _url;
+
+		unordered_string_map<subscription_status> _subscriptionStatus;
 		unordered_string_map<double> _prices;
 		unordered_string_map<ohlcv_data> _ohlcv;
 		unordered_string_map<order_book_cache> _orderBooks;
@@ -32,6 +34,7 @@ namespace mb
 	protected:
 		std::unique_ptr<websocket_connection> _connection;
 
+		void update_subscription_status(std::string subscriptionId, websocket_channel channel, subscription_status status);
 		void update_price(std::string subscriptionId, double price);
 		void update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData);
 		void initialise_order_book(std::string subscriptionId, order_book_cache cache);
@@ -46,7 +49,8 @@ namespace mb
 		void reset() override;
 		void disconnect() override;
 		ws_connection_status connection_status() const override;
-
+		
+		subscription_status get_subscription_status(const unique_websocket_subscription& subscription) const override;
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		double get_price(const tradable_pair& pair) const override;
 		ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const override;

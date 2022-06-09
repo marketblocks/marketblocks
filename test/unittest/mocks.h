@@ -23,7 +23,7 @@ namespace mb::test
 
 		MOCK_METHOD(void, subscribe, (const websocket_subscription& subscription), (override));
 		MOCK_METHOD(void, unsubscribe, (const websocket_subscription& subscription), (override));
-		MOCK_METHOD(bool, is_subscribed, (const websocket_subscription& subscription), (override));
+		MOCK_METHOD(subscription_status, get_subscription_status, (const unique_websocket_subscription& subscription), (const, override));
 
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& pair), (const, override));

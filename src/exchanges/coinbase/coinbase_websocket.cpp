@@ -151,9 +151,4 @@ namespace mb::internal
 	{
 
 	}
-
-	bool coinbase_websocket_stream::is_subscribed(const websocket_subscription& subscription)
-	{
-		return true;
-	}
 }

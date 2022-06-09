@@ -23,7 +23,7 @@ namespace mb
 
 		void subscribe(const websocket_subscription& subscription) override;
 		void unsubscribe(const websocket_subscription& subscription) override;
-		bool is_subscribed(const websocket_subscription& subscription) override;
+		subscription_status get_subscription_status(const unique_websocket_subscription& subscription) const override;
 
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		double get_price(const tradable_pair& pair) const override;

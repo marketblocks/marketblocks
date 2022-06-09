@@ -27,9 +27,9 @@ namespace mb
 
 	}
 
-	bool backtest_websocket_stream::is_subscribed(const websocket_subscription& subscription)
+	subscription_status backtest_websocket_stream::get_subscription_status(const unique_websocket_subscription& subscription) const
 	{
-		return true;
+		return subscription_status::SUBSCRIBED;
 	}
 
 	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const

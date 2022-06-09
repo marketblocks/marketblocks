@@ -169,9 +169,4 @@ namespace mb::internal
 	{
 
 	}
-
-	bool kraken_websocket_stream::is_subscribed(const websocket_subscription& subscription)
-	{
-		return true;
-	}
 }

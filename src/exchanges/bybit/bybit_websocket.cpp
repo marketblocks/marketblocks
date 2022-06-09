@@ -91,6 +91,24 @@ namespace mb::internal
 		return ::generate_subscription_id(std::move(symbol), std::move(topic));
 	}
 
+	void bybit_websocket_stream::set_sub_status(std::string_view topic, const websocket_subscription& subscription, subscription_status status)
+	{
+		for (auto& pair : subscription.pair_item())
+		{
+			std::string subId{ ::generate_subscription_id(pair.to_string(), topic.data()) };
+			update_subscription_status(subId, subscription.channel(), status);
+		}
+	}
+
+	void bybit_websocket_stream::set_subscribed_if_first(std::string_view subscriptionId, websocket_channel channel, const json_document& json)
+	{
+		bool isFirst{ json.get<bool>("f") };
+		if (isFirst)
+		{
+			update_subscription_status(subscriptionId.data(), channel, subscription_status::SUBSCRIBED);
+		}
+	}
+
 	void bybit_websocket_stream::on_message(std::string_view message)
 	{
 		json_document json{ parse_json(message) };
@@ -128,8 +146,10 @@ namespace mb::internal
 	void bybit_websocket_stream::process_price_message(std::string subscriptionId, const json_document& json)
 	{
 		json_element dataElement{ json.element("data").begin().value() };
+		
 		double price{ std::stod(dataElement.get<std::string>("p")) };
-
+		
+		set_subscribed_if_first(subscriptionId, websocket_channel::PRICE, json);
 		update_price(std::move(subscriptionId), price);
 	}
 
@@ -146,6 +166,7 @@ namespace mb::internal
 			std::stod(dataElement.get<std::string>("v"))
 		};
 
+		set_subscribed_if_first(subscriptionId, websocket_channel::OHLCV, json);
 		update_ohlcv(std::move(subscriptionId), std::move(data));
 	}
 
@@ -153,6 +174,9 @@ namespace mb::internal
 	{
 		std::string topic{ get_topic(subscription) };
 		std::string message{ create_message(topic, "sub", subscription.pair_item()) };
+
+		set_sub_status(topic, subscription, subscription_status::INITIALISING);
+
 		_connection->send_message(message);
 	}
 
@@ -160,11 +184,9 @@ namespace mb::internal
 	{
 		std::string topic{ get_topic(subscription) };
 		std::string message{ create_message(topic, "cancel", subscription.pair_item()) };
-		_connection->send_message(message);
-	}
 
-	bool bybit_websocket_stream::is_subscribed(const websocket_subscription& subscription)
-	{
-		return true;
+		set_sub_status(topic, subscription, subscription_status::UNSUBSCRIBED);
+
+		_connection->send_message(message);
 	}
 }

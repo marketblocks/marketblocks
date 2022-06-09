@@ -20,4 +20,11 @@ namespace mb
 		D1,
 		W1
 	};
+
+	enum class subscription_status
+	{
+		UNSUBSCRIBED,
+		INITIALISING,
+		SUBSCRIBED
+	};
 }
