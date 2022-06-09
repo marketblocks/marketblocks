@@ -43,37 +43,11 @@ namespace mb
 	}
 
 	order_book_cache::order_book_cache(ask_cache asks, bid_cache bids)
-		: _asks{ std::move(asks) }, _bids{ std::move(bids) }, _mutex{}
+		: _asks{ std::move(asks) }, _bids{ std::move(bids) }
 	{}
-
-	order_book_cache::order_book_cache(const order_book_cache& other)
-		: _asks{ other._asks }, _bids{ other._bids }, _mutex{}
-	{}
-
-	order_book_cache::order_book_cache(order_book_cache&& other) noexcept
-		: _asks{ std::move(other._asks) }, _bids{ std::move(other._bids) }, _mutex{}
-	{}
-
-	order_book_cache& order_book_cache::operator=(const order_book_cache& other)
-	{
-		_asks = other._asks;
-		_bids = other._bids;
-
-		return *this;
-	}
-
-	order_book_cache& order_book_cache::operator=(order_book_cache&& other) noexcept
-	{
-		_asks = std::move(other._asks);
-		_bids = std::move(other._bids);
-
-		return *this;
-	}
 
 	void order_book_cache::update_cache(order_book_entry entry)
 	{
-		std::lock_guard<std::mutex> lock{ _mutex };
-
 		entry.side() == order_book_side::ASK
 			? ::update_cache(_asks, std::move(entry))
 			: ::update_cache(_bids, std::move(entry));
@@ -81,8 +55,6 @@ namespace mb
 
 	order_book_state order_book_cache::snapshot(int depth) const
 	{
-		std::lock_guard<std::mutex> lock{ _mutex };
-
 		if (depth == 0)
 		{
 			depth = std::max(_asks.size(), _bids.size());

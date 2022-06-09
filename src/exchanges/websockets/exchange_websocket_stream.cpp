@@ -64,51 +64,66 @@ namespace mb
 
 	void exchange_websocket_stream::update_subscription_status(std::string subscriptionId, websocket_channel channel, subscription_status status)
 	{
+		auto lockedSubscriptionStatus = _subscriptionStatus.unique_lock();
+
 		if (status == subscription_status::UNSUBSCRIBED)
 		{
-			_subscriptionStatus.erase(subscriptionId);
+			lockedSubscriptionStatus->erase(subscriptionId);
 
 			switch (channel)
 			{
 			case websocket_channel::PRICE:
-				_prices.erase(subscriptionId);
+			{
+				auto lockedPrices = _prices.unique_lock();
+				lockedPrices->erase(subscriptionId);
 				break;
+			}
 			case websocket_channel::OHLCV:
-				_ohlcv.erase(subscriptionId);
+			{
+				auto lockedOhlcv = _ohlcv.unique_lock();
+				lockedOhlcv->erase(subscriptionId);
 				break;
+			}
 			case websocket_channel::ORDER_BOOK:
-				_orderBooks.erase(subscriptionId);
+			{
+				auto lockedOrderBooks = _orderBooks.unique_lock();
+				lockedOrderBooks->erase(subscriptionId);
 				break;
+			}
 			default:
 				throw std::invalid_argument{ "Websocket channel not recognized" };
 			}
 		}
 		else
 		{
-			_subscriptionStatus.insert_or_assign(subscriptionId, status);
+			lockedSubscriptionStatus->insert_or_assign(subscriptionId, status);
 		}
 	}
 
 	void exchange_websocket_stream::update_price(std::string subscriptionId, double price)
 	{
-		_prices.insert_or_assign(std::move(subscriptionId), price);
+		auto lockedPrices = _prices.unique_lock();
+		lockedPrices->insert_or_assign(std::move(subscriptionId), price);
 	}
 
 	void exchange_websocket_stream::update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData)
 	{
-		_ohlcv.insert_or_assign(std::move(subscriptionId), std::move(ohlcvData));
+		auto lockedOhlcv = _ohlcv.unique_lock();
+		lockedOhlcv->insert_or_assign(std::move(subscriptionId), std::move(ohlcvData));
 	}
 
 	void exchange_websocket_stream::initialise_order_book(std::string subscriptionId, order_book_cache cache)
 	{
-		_orderBooks.insert_or_assign(std::move(subscriptionId), std::move(cache));
+		auto lockedOrderBooks = _orderBooks.unique_lock();
+		lockedOrderBooks->insert_or_assign(std::move(subscriptionId), std::move(cache));
 	}
 
 	void exchange_websocket_stream::update_order_book(std::string subscriptionId, order_book_entry entry)
 	{
-		auto it = _orderBooks.find(subscriptionId);
+		auto lockedOrderBooks = _orderBooks.unique_lock();
+		auto it = lockedOrderBooks->find(subscriptionId);
 
-		if (it != _orderBooks.end())
+		if (it != lockedOrderBooks->end())
 		{
 			it->second.update_cache(std::move(entry));
 		}
@@ -119,16 +134,19 @@ namespace mb
 	subscription_status exchange_websocket_stream::get_subscription_status(const unique_websocket_subscription& subscription) const
 	{
 		std::string subId{ generate_subscription_id(subscription) };
-		return find_or_default(_subscriptionStatus, subId, subscription_status::UNSUBSCRIBED);
+
+		auto lockedSubscriptionStatus = _subscriptionStatus.shared_lock();
+		return find_or_default(*lockedSubscriptionStatus, subId, subscription_status::UNSUBSCRIBED);
 	}
 
 	order_book_state exchange_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
 	{
 		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_order_book_sub(pair)) };
 
-		auto it = _orderBooks.find(subId);
+		auto lockedOrderBooks = _orderBooks.shared_lock();
+		auto it = lockedOrderBooks->find(subId);
 
-		if (it != _orderBooks.end())
+		if (it != lockedOrderBooks->end())
 		{
 			return it->second.snapshot(depth);
 		}
@@ -139,12 +157,16 @@ namespace mb
 	double exchange_websocket_stream::get_price(const tradable_pair& pair) const
 	{
 		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_price_sub(pair)) };
-		return find_or_default(_prices, subId, 0.0);
+		
+		auto lockedPrices = _prices.shared_lock();
+		return find_or_default(*lockedPrices, subId, 0.0);
 	}
 
 	ohlcv_data exchange_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
 	{
 		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_ohlcv_sub(pair, interval)) };
-		return find_or_default(_ohlcv, subId, ohlcv_data{ 0, 0, 0, 0, 0 });
+		
+		auto lockedOhlcv = _ohlcv.shared_lock();
+		return find_or_default(*lockedOhlcv, subId, ohlcv_data{ 0, 0, 0, 0, 0 });
 	}
 }

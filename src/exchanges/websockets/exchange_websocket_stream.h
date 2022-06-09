@@ -3,6 +3,7 @@
 #include "websocket_stream.h"
 #include "order_book_cache.h"
 #include "common/types/unordered_string_map.h"
+#include "common/types/thread_safe_wrapper.h"
 
 #include "common/exceptions/not_implemented_exception.h"
 
@@ -16,10 +17,10 @@ namespace mb
 		std::string_view _id;
 		std::string_view _url;
 
-		unordered_string_map<subscription_status> _subscriptionStatus;
-		unordered_string_map<double> _prices;
-		unordered_string_map<ohlcv_data> _ohlcv;
-		unordered_string_map<order_book_cache> _orderBooks;
+		thread_safe_wrapper<unordered_string_map<subscription_status>> _subscriptionStatus;
+		thread_safe_wrapper<unordered_string_map<double>> _prices;
+		thread_safe_wrapper<unordered_string_map<ohlcv_data>> _ohlcv;
+		thread_safe_wrapper<unordered_string_map<order_book_cache>> _orderBooks;
 		set_queue<tradable_pair> _messageQueue;
 
 		void initialise_connection_factory();

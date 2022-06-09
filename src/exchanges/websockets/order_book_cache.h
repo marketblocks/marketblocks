@@ -30,19 +30,11 @@ namespace mb
 	private:
 		ask_cache _asks;
 		bid_cache _bids;
-		mutable std::mutex _mutex;
 
 	public:
 		order_book_cache(ask_cache asks, bid_cache bids);
 
-		order_book_cache(const order_book_cache&);
-		order_book_cache(order_book_cache&&) noexcept;
-
-		order_book_cache& operator=(const order_book_cache&);
-		order_book_cache& operator=(order_book_cache&&) noexcept;
-
 		void update_cache(order_book_entry entry);
-
 		order_book_state snapshot(int depth = 0) const;
 	};
 }
