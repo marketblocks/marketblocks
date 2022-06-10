@@ -52,7 +52,7 @@ namespace mb
 		}
 		else
 		{
-			logger::instance().info("Websocket stream closed unexpectedly for exchange '{0}'. Reason: {1}", _id, error.message());
+			logger::instance().error("Websocket stream closed unexpectedly for exchange '{0}'. Reason: {1}", _id, error.message());
 		}
 	}
 
