@@ -79,31 +79,54 @@ namespace mb
 
     void websocket_client::close_connection(websocketpp::connection_hdl connectionHandle)
     {
+        if (connectionHandle.expired())
+        {
+            return;
+        }
+
         std::error_code errorCode;
         auto connectionPtr = _client.get_con_from_hdl(connectionHandle, errorCode);
-        
-        if (connectionPtr)
+        if (!connectionPtr)
         {
-            connectionPtr->close(websocketpp::close::status::going_away, "", errorCode);
+            return;
         }
+
+        connectionPtr->close(websocketpp::close::status::normal, "", errorCode);
 
         if (errorCode)
         {
             throw websocket_error{ std::format("Closing connection: {}", errorCode.message()) };
         }
+
+        volatile bool closing = true;
+        while (closing)
+        {
+            closing = connectionPtr->get_state() == websocketpp::session::state::closing;
+        }
     }
 
-    websocketpp::session::state::value websocket_client::get_state(websocketpp::connection_hdl connectionHandle)
+    ws_connection_status websocket_client::get_connection_status(websocketpp::connection_hdl connectionHandle)
     {
         std::error_code errorCode;
         auto connectionPtr = _client.get_con_from_hdl(connectionHandle, errorCode);
         
-        if (connectionPtr)
+        if (!connectionPtr || errorCode)
         {
-            return connectionPtr->get_state();
+            return ws_connection_status::CLOSED;
         }
 
-        throw websocket_error{ std::format("Getting state: {}", errorCode.message()) };
+        using namespace websocketpp::session;
+        state::value state = connectionPtr->get_state();
+
+        switch (state)
+        {
+        case state::closed:
+            return ws_connection_status::CLOSED;
+        case state::open:
+            return ws_connection_status::OPEN;
+        default:
+            throw std::logic_error{ "Websocket connection is in intermediary state" };
+        }
     }
 
     void websocket_client::send_message(websocketpp::connection_hdl connectionHandle, std::string_view message)

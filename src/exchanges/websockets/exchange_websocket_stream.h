@@ -24,10 +24,11 @@ namespace mb
 		set_queue<tradable_pair> _messageQueue;
 
 		void initialise_connection_factory();
+		void clear_subscriptions();
 
 		void on_open() const;
-		void on_close(std::error_code error) const;
-		void on_fail(std::error_code error) const;
+		void on_close(std::error_code error);
+		void on_fail(std::error_code error);
 
 		virtual void on_message(std::string_view message) = 0;
 		virtual std::string generate_subscription_id(const unique_websocket_subscription& subscription) const = 0;

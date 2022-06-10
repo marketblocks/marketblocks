@@ -27,24 +27,37 @@ namespace mb
 		_connectionFactory->set_on_message([this](std::string_view message) { on_message(message); });
 	}
 
+	void exchange_websocket_stream::clear_subscriptions()
+	{
+		auto lockedSubscriptionStatus = _subscriptionStatus.unique_lock();
+		auto lockedPrices = _prices.unique_lock();
+		auto lockedOhlcv = _ohlcv.unique_lock();
+		auto lockedOrderBooks = _orderBooks.unique_lock();
+
+		lockedSubscriptionStatus->clear();
+		lockedPrices->clear();
+		lockedOhlcv->clear();
+		lockedOrderBooks->clear();
+	}
+
 	void exchange_websocket_stream::on_open() const
 	{
 
 	}
 
-	void exchange_websocket_stream::on_close(std::error_code error) const
+	void exchange_websocket_stream::on_close(std::error_code error)
 	{
-
+		
 	}
 
-	void exchange_websocket_stream::on_fail(std::error_code error) const
+	void exchange_websocket_stream::on_fail(std::error_code error)
 	{
 
 	}
 
 	void exchange_websocket_stream::reset()
 	{
-		if (_connection->connection_status() != ws_connection_status::CLOSED)
+		if (_connection)
 		{
 			disconnect();
 		}
@@ -55,6 +68,7 @@ namespace mb
 	void exchange_websocket_stream::disconnect()
 	{
 		_connection->close();
+		clear_subscriptions();
 	}
 
 	ws_connection_status exchange_websocket_stream::connection_status() const

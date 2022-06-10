@@ -3,6 +3,7 @@
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 #include "websocket_error.h"
+#include "websocket_constants.h"
 
 namespace mb
 {
@@ -79,7 +80,7 @@ namespace mb
 		}
 				
 		void close_connection(websocketpp::connection_hdl connectionHandle);
-		websocketpp::session::state::value get_state(websocketpp::connection_hdl connectionHandle);
+		ws_connection_status get_connection_status(websocketpp::connection_hdl connectionHandle);
 		void send_message(websocketpp::connection_hdl connectionHandle, std::string_view message);
 	};
 }

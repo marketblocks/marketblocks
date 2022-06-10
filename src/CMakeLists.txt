@@ -75,6 +75,7 @@ add_library(marketblocks_lib
 "networking/websocket/websocket_connection.h" 
 "networking/websocket/websocket_client.cpp"
 "networking/websocket/websocket_client.h" 
+"networking/websocket/websocket_constants.h" 
 
 "networking/url.h"
 
