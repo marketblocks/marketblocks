@@ -25,7 +25,7 @@ namespace mb
 
     std::unique_ptr<websocket_connection> websocket_connection_factory::create_connection(std::string url) const
     {
-        auto handle =  websocket_client::instance().create_connection(url, _onOpen, _onClose, _onFail, _onMessage);
+        auto handle =  websocket_client::instance().create_connection(url, _onOpen, _onClose, _onMessage);
         return std::make_unique<websocket_connection>(handle);
     }
 }

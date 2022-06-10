@@ -32,12 +32,11 @@ namespace mb
 
 		void set_open_handshake_timeout(int timeout);
 
-		template<typename OnOpen, typename OnClose,	typename OnFail, typename OnMessage>
+		template<typename OnOpen, typename OnClose,	typename OnMessage>
 		websocketpp::connection_hdl create_connection(
 			std::string_view url,
 			OnOpen onOpen,
 			OnClose onClose,
-			OnFail onFail,
 			OnMessage onMessage)
 		{
 			std::error_code errorCode;
@@ -59,13 +58,6 @@ namespace mb
 				{
 					auto connection = _client.get_con_from_hdl(handle);
 					onClose(connection->get_ec());
-				});
-
-			connectionPtr->set_fail_handler(
-				[onFail, this](websocketpp::connection_hdl handle)
-				{
-					auto connection = _client.get_con_from_hdl(handle);
-					onFail(connection->get_ec());
 				});
 
 			connectionPtr->set_message_handler(

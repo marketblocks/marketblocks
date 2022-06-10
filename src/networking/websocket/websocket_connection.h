@@ -38,12 +38,10 @@ namespace mb
     private:
         using on_open = std::function<void()>;
         using on_close = std::function<void(std::error_code)>;
-        using on_fail = std::function<void(std::error_code)>;
         using on_message = std::function<void(std::string_view)>;
 
         on_open _onOpen;
         on_close _onClose;
-        on_fail _onFail;
         on_message _onMessage;
 
     public:
@@ -51,7 +49,6 @@ namespace mb
 
         void set_on_open(on_open onOpen) noexcept { _onOpen = std::move(onOpen); }
         void set_on_close(on_close onClose) noexcept { _onClose = std::move(onClose); }
-        void set_on_fail(on_fail onFail) noexcept { _onFail = std::move(onFail); }
         void set_on_message(on_message onMessage) noexcept { _onMessage = std::move(onMessage); }
 
         virtual std::unique_ptr<websocket_connection> create_connection(std::string url) const;

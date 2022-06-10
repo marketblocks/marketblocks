@@ -70,6 +70,11 @@ namespace mb
         {
             throw websocket_error{ e.what() };
         }
+
+        if (connectionPtr->get_state() != websocketpp::session::state::open)
+        {
+            throw websocket_error{ std::format("Connection Failed. Reason: {}", connectionPtr->get_ec().message()) };
+        }
     }
 
     void websocket_client::set_open_handshake_timeout(int timeout)

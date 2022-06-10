@@ -23,7 +23,6 @@ namespace mb
 	{
 		_connectionFactory->set_on_open([this]() { on_open(); });
 		_connectionFactory->set_on_close([this](std::error_code error) { on_close(error); });
-		_connectionFactory->set_on_fail([this](std::error_code error) { on_fail(error); });
 		_connectionFactory->set_on_message([this](std::string_view message) { on_message(message); });
 	}
 
@@ -42,17 +41,19 @@ namespace mb
 
 	void exchange_websocket_stream::on_open() const
 	{
-
+		logger::instance().info("Websocket stream successfully opened for exchange '{}'", _id);
 	}
 
 	void exchange_websocket_stream::on_close(std::error_code error)
 	{
-		
-	}
-
-	void exchange_websocket_stream::on_fail(std::error_code error)
-	{
-
+		if (_closeRequested)
+		{
+			logger::instance().info("Websocket stream successfully closed for exchange '{}'", _id);
+		}
+		else
+		{
+			logger::instance().info("Websocket stream closed unexpectedly for exchange '{0}'. Reason: {1}", _id, error.message());
+		}
 	}
 
 	void exchange_websocket_stream::reset()
@@ -62,12 +63,15 @@ namespace mb
 			disconnect();
 		}
 
+		_closeRequested = false; 
 		_connection = _connectionFactory->create_connection(_url.data());
 	}
 
 	void exchange_websocket_stream::disconnect()
 	{
+		_closeRequested = true;
 		_connection->close();
+
 		clear_subscriptions();
 	}
 

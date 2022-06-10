@@ -16,6 +16,7 @@ namespace mb
 
 		std::string_view _id;
 		std::string_view _url;
+		std::atomic_bool _closeRequested;
 
 		thread_safe_wrapper<unordered_string_map<subscription_status>> _subscriptionStatus;
 		thread_safe_wrapper<unordered_string_map<double>> _prices;
@@ -28,7 +29,6 @@ namespace mb
 
 		void on_open() const;
 		void on_close(std::error_code error);
-		void on_fail(std::error_code error);
 
 		virtual void on_message(std::string_view message) = 0;
 		virtual std::string generate_subscription_id(const unique_websocket_subscription& subscription) const = 0;
