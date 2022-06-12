@@ -8,7 +8,7 @@
 
 namespace mb
 {
-      class websocket_connection
+    class websocket_connection
     {
     private:
         websocket_client& _client;
@@ -28,9 +28,9 @@ namespace mb
         websocket_connection& operator=(const websocket_connection&) = delete;
         websocket_connection& operator=(websocket_connection&&) noexcept = default;
 
-        ws_connection_status connection_status() const;
-        void close();
-        void send_message(std::string_view message);
+        virtual ws_connection_status connection_status() const;
+        virtual void close();
+        virtual void send_message(std::string_view message);
     };
 
     class websocket_connection_factory
