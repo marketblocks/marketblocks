@@ -137,10 +137,6 @@ namespace mb::internal
 		{
 			process_ohlcv_message(std::move(subscriptionId), json);
 		}
-		else
-		{
-			logger::instance().warning("ByBit websocket unknown message: {}", message.data());
-		}
 	}
 
 	void bybit_websocket_stream::process_price_message(std::string subscriptionId, const json_document& json)
