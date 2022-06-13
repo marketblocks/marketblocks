@@ -67,13 +67,11 @@ namespace mb
 		bybit_api(
 			bybit_config config,
 			std::unique_ptr<http_service> httpService,
-			std::shared_ptr<websocket_stream> websocketStream,
 			bool enableTesting = false);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::BYBIT; }
 
-		std::weak_ptr<websocket_stream> get_websocket_stream() override { return _websocketStream; }
-
+		std::shared_ptr<websocket_stream> get_websocket_stream() override;
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const override;
@@ -87,5 +85,5 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_bybit(bybit_config config, std::shared_ptr<websocket_client> websocketClient, bool enableTesting = false);
+	std::unique_ptr<exchange> make_bybit(bybit_config config, bool enableTesting = false);
 }

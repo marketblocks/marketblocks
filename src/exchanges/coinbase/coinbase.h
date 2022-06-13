@@ -67,12 +67,11 @@ namespace mb
 		coinbase_api(
 			coinbase_config config,
 			std::unique_ptr<http_service> httpService, 
-			std::unique_ptr<websocket_stream> websocketStream,
 			bool enableTesting = false);
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::COINBASE; }
 
-		std::weak_ptr<websocket_stream> get_websocket_stream() override { return _websocketStream; }
+		std::shared_ptr<websocket_stream> get_websocket_stream() override { return _websocketStream; }
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
@@ -87,5 +86,5 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_coinbase(coinbase_config config, std::shared_ptr<websocket_client> websocketClient, bool enableTesting = false);
+	std::unique_ptr<exchange> make_coinbase(coinbase_config config, bool enableTesting = false);
 }

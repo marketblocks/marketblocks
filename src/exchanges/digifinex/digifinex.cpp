@@ -118,7 +118,7 @@ namespace mb
 		throw not_implemented_exception{ "digifinex::cancel_order" };
 	}
 
-	std::unique_ptr<exchange> make_digifinex(digifinex_config config, std::shared_ptr<websocket_client> websocketClient)
+	std::unique_ptr<exchange> make_digifinex(digifinex_config config)
 	{
 		return std::make_unique<digifinex_api>(
 			std::move(config),

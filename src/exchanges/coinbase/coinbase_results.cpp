@@ -116,11 +116,13 @@ namespace mb::coinbase
 
 				bidEntries.emplace_back(
 					std::stod(bidElement.get<std::string>(PRICE_INDEX)), 
-					std::stod(bidElement.get<std::string>(VOLUME_INDEX)));
+					std::stod(bidElement.get<std::string>(VOLUME_INDEX)),
+					order_book_side::ASK);
 
 				askEntries.emplace_back(
 					std::stod(askElement.get<std::string>(PRICE_INDEX)),
-					std::stod(askElement.get<std::string>(VOLUME_INDEX)));
+					std::stod(askElement.get<std::string>(VOLUME_INDEX)),
+					order_book_side::BID);
 			}
 
 			return order_book_state{ std::move(askEntries), std::move(bidEntries) };

@@ -16,6 +16,7 @@ namespace mb
 	{
 		void log_version();
 		void log_run_mode(run_mode runMode);
+		void exit_on_key();
 
 		template<typename Strategy>
 		std::unique_ptr<internal::runner_implementation<Strategy>> create_runner_implementation(run_mode runMode)
@@ -45,12 +46,6 @@ namespace mb
 
 		std::unique_ptr<Strategy> _strategy;
 
-		void exit_on_key()
-		{
-			std::cin.get();
-			std::exit(-1);
-		}
-
 	public:
 		explicit constexpr runner(
 			std::unique_ptr<internal::runner_implementation<Strategy>> implementation,
@@ -61,6 +56,20 @@ namespace mb
 			_initialised{ false },
 			_logger{ logger::instance() }
 		{}
+
+		template<typename Config>
+		Config load_custom_config()
+		{
+			try
+			{
+				return internal::load_or_create_config<Config>();
+			}
+			catch (const std::exception& e)
+			{
+				_logger.critical("Error occurred loading custom config file: {}", e.what());
+				internal::exit_on_key();
+			}
+		}
 
 		template<typename... Args>
 		void initialise(Args&&... args) noexcept
@@ -80,9 +89,8 @@ namespace mb
 			catch (const std::exception& e)
 			{
 				_logger.critical("An error has occurred during initialisation which cannot be recovered from. The program will now terminate. Details: \n{}", e.what());
-				exit_on_key();
+				internal::exit_on_key();
 			}
-			
 		}
 
 		void run() noexcept
@@ -98,26 +106,34 @@ namespace mb
 				_logger.critical("An error has occurred which cannot be recovered from. The program will now terminate. Details: \n{}", e.what());
 			}
 			
-			exit_on_key();
+			internal::exit_on_key();
 		}
 	};
 
 	template<typename Strategy>
 	runner<Strategy> create_runner()
 	{
-		internal::log_version();
-		internal::create_config_directory_if_not_exist();
-
-		runner_config config = load_or_create_config<runner_config>();
-
-		internal::log_run_mode(config.runmode());
-
-		auto implementation = internal::create_runner_implementation<Strategy>(config.runmode());
-
-		return runner<Strategy>
+		try
 		{
-			std::move(implementation),
-			std::move(config)
-		};
+			internal::log_version();
+			internal::create_config_directory_if_not_exist();
+
+			runner_config config = internal::load_or_create_config<runner_config>();
+
+			internal::log_run_mode(config.runmode());
+
+			auto implementation = internal::create_runner_implementation<Strategy>(config.runmode());
+
+			return runner<Strategy>
+			{
+				std::move(implementation),
+				std::move(config)
+			};
+		}
+		catch (const std::exception& e)
+		{
+			logger::instance().critical(e.what());
+			internal::exit_on_key();
+		}
 	}
 }

@@ -13,44 +13,38 @@ namespace
 	using namespace mb;
 
 	template<typename Config, typename MakeApi>
-	std::unique_ptr<exchange> create_api(std::shared_ptr<websocket_client> websocketClient, MakeApi makeApi)
+	std::unique_ptr<exchange> create_api(MakeApi makeApi)
 	{
-		Config config = load_or_create_config<Config>();
-		return makeApi(std::move(config), websocketClient);
+		Config config = internal::load_or_create_config<Config>();
+		return makeApi(std::move(config));
 	}
 
-	std::unique_ptr<exchange> create_api_from_id(
-		std::string_view identifier,
-		std::shared_ptr<websocket_client> websocketClient)
+	std::unique_ptr<exchange> create_api_from_id(std::string_view identifier)
 	{
 		if (identifier == exchange_ids::KRAKEN)
 		{
-			return create_api<kraken_config>(websocketClient, make_kraken);
+			return create_api<kraken_config>(make_kraken);
 		}
 		if (identifier == exchange_ids::COINBASE)
 		{
 			return create_api<coinbase_config>(
-				websocketClient, 
-				[](coinbase_config config, std::shared_ptr<websocket_client> client) { return make_coinbase(std::move(config), client); });
+				[](coinbase_config config) { return make_coinbase(std::move(config)); });
 		}
 		if (identifier == exchange_ids::BYBIT)
 		{
 			return create_api<bybit_config>(
-				websocketClient,
-				[](bybit_config config, std::shared_ptr<websocket_client> client) { return make_bybit(std::move(config), client); });
+				[](bybit_config config) { return make_bybit(std::move(config)); });
 		}
 		if (identifier == exchange_ids::DIGIFINEX)
 		{
-			return create_api<digifinex_config>(websocketClient, make_digifinex);
+			return create_api<digifinex_config>(make_digifinex);
 		}
 
 		return nullptr;
 	}
 
 	template<typename ExchangeIds>
-	std::vector<std::shared_ptr<exchange>> create_exchanges(
-		const ExchangeIds& exchangeIds,
-		std::shared_ptr<websocket_client> websocketClient)
+	std::vector<std::shared_ptr<exchange>> create_exchanges(const ExchangeIds& exchangeIds)
 	{
 		std::vector<std::shared_ptr<exchange>> exchanges;
 		exchanges.reserve(exchangeIds.size());
@@ -61,7 +55,7 @@ namespace
 		{
 			log.info("Creating exchange API: {}", exchangeId);
 
-			std::unique_ptr<exchange> api = create_api_from_id(exchangeId, websocketClient);
+			std::unique_ptr<exchange> api = create_api_from_id(exchangeId);
 
 			if (!api)
 			{
@@ -94,18 +88,18 @@ namespace mb::internal
 {
 	std::vector<std::shared_ptr<exchange>> create_exchange_apis(const runner_config& runnerConfig)
 	{
-		std::shared_ptr<websocket_client> websocketClient = std::make_shared<websocket_client>(runnerConfig.websocket_timeout());
 		http_service::set_timeout(runnerConfig.http_timeout());
+		websocket_client::instance().set_open_handshake_timeout(runnerConfig.websocket_timeout());
 
 		logger::instance().info("Creating exchange APIs...");
 
 		if (runnerConfig.exchange_ids().empty())
 		{
-			return ::create_exchanges(exchange_ids::all(), websocketClient);
+			return ::create_exchanges(exchange_ids::all());
 		}
 		else
 		{
-			return ::create_exchanges(runnerConfig.exchange_ids(), websocketClient);
+			return ::create_exchanges(runnerConfig.exchange_ids());
 		}
 	}
 }

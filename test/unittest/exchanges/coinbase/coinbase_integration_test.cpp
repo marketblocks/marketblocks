@@ -12,8 +12,7 @@ namespace
 	std::unique_ptr<exchange> create_api()
 	{
 		coinbase_config config{ load_test_config<coinbase_config>() };
-		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
-		return make_coinbase(std::move(config), websocketClient, true);
+		return make_coinbase(std::move(config), true);
 	}
 }
 

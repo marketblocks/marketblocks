@@ -3,6 +3,7 @@
 #include "common/utils/containerutils.h"
 #include "common/json/json.h"
 #include "logging/logger.h"
+#include "exchanges/exchange_ids.h"
 
 namespace
 {
@@ -10,7 +11,39 @@ namespace
 
 	constexpr const char PAIR_SEPARATOR = '-';
 
-	tradable_pair get_pair_from_id(std::string_view productId)
+	std::string create_message(std::string_view type, std::string channel, const std::vector<tradable_pair>& pairs)
+	{
+		std::vector<std::string> tradablePairList{ to_vector<std::string>(pairs, [](const tradable_pair& pair)
+		{
+			return pair.to_string(PAIR_SEPARATOR);
+		}) };
+
+		return json_writer{}
+			.add("type", type)
+			.add("product_ids", std::move(tradablePairList))
+			.add("channels", std::vector<std::string>{ channel })
+			.to_string();
+	}
+
+	std::string get_channel(websocket_channel channel)
+	{
+		switch (channel)
+		{
+		case websocket_channel::PRICE:
+			return "ticker";
+		case websocket_channel::OHLCV:
+		case websocket_channel::ORDER_BOOK:
+		default:
+			throw mb_exception{ std::format("Websocket channel not supported on Coinbase") };
+		}
+	}
+
+	std::string generate_subscription_id(std::string symbol, std::string channel)
+	{
+		return std::move(symbol) + std::move(channel);
+	}
+
+	/*tradable_pair get_pair_from_id(std::string_view productId)
 	{
 		std::vector<std::string> parts = split(productId, PAIR_SEPARATOR);
 		return tradable_pair{ parts[0], parts[1] };
@@ -26,20 +59,6 @@ namespace
 		};
 
 		return std::make_pair(std::move(price), std::move(entry));
-	}
-
-	std::string create_message(std::string_view type, std::string channel, const std::vector<tradable_pair>& pairs)
-	{
-		std::vector<std::string> tradablePairList{ to_vector<std::string>(pairs, [](const tradable_pair& pair)
-		{
-			return pair.to_string(PAIR_SEPARATOR);
-		}) };
-
-		return json_writer{}
-			.add("type", type)
-			.add("product_ids", std::move(tradablePairList))
-			.add("channels", std::vector<std::string>{ channel })
-			.to_string();
 	}
 
 	void process_order_book_snapshot_message(const json_document& json, local_order_book& localOrderBook)
@@ -106,24 +125,38 @@ namespace
 					std::move(entry)
 				});
 		}
-	}
+	}*/
 }
 
 namespace mb::internal
 {
-	void coinbase_websocket_stream::on_open()
+	coinbase_websocket_stream::coinbase_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
+		: exchange_websocket_stream{ exchange_ids::COINBASE, URL, std::move(connectionFactory) }
+	{}
+
+	void coinbase_websocket_stream::set_sub_status(std::string channel, const websocket_subscription& subscription, subscription_status status)
 	{
-		logger::instance().info("Successfully connected to Coinbase websocket feed");
+		for (auto& pair : subscription.pair_item())
+		{
+			std::string subId{ ::generate_subscription_id(pair.to_string(), channel) };
+			update_subscription_status(subId, subscription.channel(), status);
+		}
 	}
 
-	void coinbase_websocket_stream::on_close(std::error_code reason)
+	std::string coinbase_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
 	{
-
+		std::string symbol{ subscription.pair_item().to_string() };
+		std::string topic{ get_channel(subscription.channel()) };
+		return ::generate_subscription_id(std::move(symbol), std::move(topic));
 	}
 
-	void coinbase_websocket_stream::on_fail(std::error_code reason)
+	void coinbase_websocket_stream::process_price_message(const json_document& json)
 	{
+		std::string pairName{ json.get<std::string>("product_id") };
+		std::string subId{ ::generate_subscription_id(pairName, "ticker") };
+		double price{ std::stod(json.get<std::string>("price")) };
 
+		update_price(subId, price);
 	}
 
 	void coinbase_websocket_stream::on_message(std::string_view message)
@@ -132,23 +165,38 @@ namespace mb::internal
 
 		std::string messageType{ json.get<std::string>("type") };
 
-		if (messageType == "snapshot")
+		if (messageType == "ticker")
+		{
+			process_price_message(json);
+		}
+
+		/*if (messageType == "snapshot")
 		{
 			process_order_book_snapshot_message(json, _localOrderBook);
 		}
 		else if (messageType == "l2update")
 		{
 			process_order_book_update_message(json, _localOrderBook);
-		}
+		}*/
 	}
 
-	std::string coinbase_websocket_stream::get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const
+	void coinbase_websocket_stream::subscribe(const websocket_subscription& subscription)
 	{
-		return create_message("subscribe", "level2", tradablePairs);
+		std::string channelName{ get_channel(subscription.channel()) };
+		std::string message{ create_message("subscribe", channelName, subscription.pair_item()) };
+
+		set_sub_status(channelName, subscription, subscription_status::SUBSCRIBED);
+
+		_connection->send_message(message);
 	}
 
-	std::string coinbase_websocket_stream::get_order_book_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const
+	void coinbase_websocket_stream::unsubscribe(const websocket_subscription& subscription)
 	{
-		return create_message("unsubscribe", "level2", tradablePairs);
+		std::string channelName{ get_channel(subscription.channel()) };
+		std::string message{ create_message("unsubscribe", channelName, subscription.pair_item()) };
+
+		set_sub_status(channelName, subscription, subscription_status::UNSUBSCRIBED);
+
+		_connection->send_message(message);
 	}
 }

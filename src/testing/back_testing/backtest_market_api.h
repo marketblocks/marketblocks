@@ -26,7 +26,7 @@ namespace mb
 
 		static constexpr std::string_view id() noexcept { return "BACK TEST"; }
 		
-		std::weak_ptr<websocket_stream> get_websocket_stream() noexcept { return _websocketStream; }
+		std::shared_ptr<websocket_stream> get_websocket_stream() noexcept { return _websocketStream; }
 
 		exchange_status get_status() const;
 		std::vector<tradable_pair> get_tradable_pairs() const;

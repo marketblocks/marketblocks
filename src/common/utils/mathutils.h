@@ -1,6 +1,10 @@
 #pragma once
 
 #include <type_traits>
+#include <concepts>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
 namespace mb
 {
@@ -21,12 +25,16 @@ namespace mb
 		return (t - a) * 100.0 / (b - a);
 	}
 
+	bool double_equal(double a, double b);
+	bool double_less_than(double a, double b);
+	bool double_greater_than(double a, double b);
+
 	template<typename T>
 	requires std::floating_point<T>
 	constexpr std::string to_string(T number, int precision)
 	{
 		std::stringstream stream;
-		stream << std::fixed << std::setprecision(2) << number;
+		stream << std::fixed << std::setprecision(precision) << number;
 		return stream.str();
 	}
 

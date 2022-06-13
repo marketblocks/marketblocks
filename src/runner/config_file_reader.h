@@ -6,6 +6,7 @@
 #include "common/file/file.h"
 #include "common/json/json.h"
 #include "logging/logger.h"
+#include "common/exceptions/validation_exception.h"
 
 namespace mb
 {
@@ -16,19 +17,23 @@ namespace mb
 		void create_config_directory_if_not_exist();
 
 		template<typename Config>
-		Config load_config_file_or_default()
+		Config load_config_file()
 		{
 			std::filesystem::path path{ get_path(Config::name()) };
+			logger::instance().info("Reading config file: {}", Config::name());
 
 			try
 			{
-				logger::instance().info("Reading config file: {}", Config::name());
 				std::string jsonString{ read_file(path) };
 				return from_json<Config>(jsonString);
 			}
+			catch (const validation_exception& e)
+			{
+				throw e;
+			}
 			catch (const std::exception& e)
 			{
-				logger::instance().error("Error occurred reading {0}: {1}, using default values", Config::name(), e.what());
+				logger::instance().error("Error occurred reading config file: {1}. Using default values", e.what());
 				return Config{};
 			}
 		}
@@ -48,21 +53,21 @@ namespace mb
 				logger::instance().error("Error occurred saving config file: {}", e.what());
 			}
 		}
-	}
 
-	template<typename Config>
-	Config load_or_create_config()
-	{
-		if (!internal::file_exists(Config::name()))
+		template<typename Config>
+		Config load_or_create_config()
 		{
-			logger::instance().warning("Config file " + Config::name() + " does not exist, using default values");
+			if (!internal::file_exists(Config::name()))
+			{
+				logger::instance().warning("Config file " + Config::name() + " does not exist. Using default values");
 
-			Config config;
-			internal::save_config_file(config);
-			
-			return config;
+				Config config;
+				internal::save_config_file(config);
+
+				return config;
+			}
+
+			return internal::load_config_file<Config>();
 		}
-
-		return internal::load_config_file_or_default<Config>();
 	}
 }

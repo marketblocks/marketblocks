@@ -11,8 +11,7 @@ namespace
 	std::unique_ptr<exchange> create_api()
 	{
 		bybit_config config{ load_test_config<bybit_config>() };
-		std::shared_ptr<websocket_client> websocketClient{ std::make_shared<websocket_client>() };
-		return make_bybit(std::move(config), websocketClient);
+		return make_bybit(std::move(config));
 	}
 }
 

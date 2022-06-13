@@ -9,30 +9,19 @@ namespace mb
 		: _dataNavigator{ std::move(dataSource) }
 	{}
 
-	void backtest_websocket_stream::notify_data_incremented()
+	void backtest_websocket_stream::subscribe(const websocket_subscription& subscription)
 	{
-		for (auto& pair : _subscribedPairs)
-		{
-			_messageQueue.push(tradable_pair{ pair });
-		}
+
 	}
 
-	void backtest_websocket_stream::subscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	void backtest_websocket_stream::unsubscribe(const websocket_subscription& subscription)
 	{
-		_subscribedPairs.insert(tradablePairs.begin(), tradablePairs.end());
+
 	}
 
-	void backtest_websocket_stream::unsubscribe_order_book(const std::vector<tradable_pair>& tradablePairs)
+	subscription_status backtest_websocket_stream::get_subscription_status(const unique_websocket_subscription& subscription) const
 	{
-		for (auto& pair : tradablePairs)
-		{
-			_subscribedPairs.erase(pair);
-		}
-	}
-
-	bool backtest_websocket_stream::is_order_book_subscribed(const tradable_pair& pair) const
-	{
-		return _subscribedPairs.contains(pair);
+		return subscription_status::SUBSCRIBED;
 	}
 
 	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
@@ -45,36 +34,15 @@ namespace mb
 			return order_book_state
 			{
 				{
-					order_book_entry{ ohlcvData.low(), ohlcvData.volume() }
+					order_book_entry{ ohlcvData.low(), ohlcvData.volume(), order_book_side::ASK }
 				},
 				{
-					order_book_entry{ ohlcvData.high(), ohlcvData.volume() }
+					order_book_entry{ ohlcvData.high(), ohlcvData.volume(), order_book_side::BID }
 				}
 			};
 		}
 
 		return order_book_state{ {},{} };
-	}
-
-	set_queue<tradable_pair>& backtest_websocket_stream::get_order_book_message_queue()
-	{
-		return _messageQueue;
-	}
-
-	void backtest_websocket_stream::subscribe_price(const std::vector<tradable_pair>& tradablePairs)
-	{
-		//throw not_implemented_exception{ "backtest_websocket::price" };
-	}
-
-	void backtest_websocket_stream::unsubscribe_price(const std::vector<tradable_pair>& tradablePairs)
-	{
-		//throw not_implemented_exception{ "backtest_websocket::price" };
-	}
-
-	bool backtest_websocket_stream::is_price_subscribed(const tradable_pair& pair) const
-	{
-		return true;
-		//throw not_implemented_exception{ "backtest_websocket::price" };
 	}
 
 	double backtest_websocket_stream::get_price(const tradable_pair& pair) const
@@ -89,23 +57,7 @@ namespace mb
 		return 0.0;
 	}
 
-	void backtest_websocket_stream::subscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval) 
-	{
-		//throw not_implemented_exception{ "backtest_websocket::candles" };
-	}
-
-	void backtest_websocket_stream::unsubscribe_candles(const std::vector<tradable_pair>& tradablePairs, int interval)
-	{
-		//throw not_implemented_exception{ "backtest_websocket::candles" };
-	}
-
-	bool backtest_websocket_stream::is_candles_subscribed(const tradable_pair& pair, int interval) const
-	{
-		return true;
-		//throw not_implemented_exception{ "backtest_websocket::candles" };
-	}
-
-	ohlcv_data backtest_websocket_stream::get_candle(const tradable_pair& pair, int interval) const
+	ohlcv_data backtest_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
 	{
 		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
 

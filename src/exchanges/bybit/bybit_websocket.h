@@ -1,34 +1,27 @@
 #pragma once
 
-#include "exchanges/websockets/websocket_stream_implementation.h"
+#include "common/json/json.h"
+#include "exchanges/websockets/exchange_websocket_stream.h"
 
 namespace mb::internal
 {
-	class bybit_websocket_stream : public websocket_stream_implementation
+	class bybit_websocket_stream : public exchange_websocket_stream
 	{
 	private:
-		std::unordered_map<std::string, double> _prices;
-		std::unordered_map<std::string, ohlcv_data> _ohlcvData;
+		static constexpr std::string_view URL = "wss://stream.bybit.com/spot/quote/ws/v1";
+
+		void set_sub_status(std::string_view topic, const websocket_subscription& subscription, subscription_status status);
+		void set_subscribed_if_first(std::string_view subscriptionId, websocket_channel channel, const json_document& json);
+		void process_price_message(std::string subscriptionId, const json_document& json);
+		void process_ohlcv_message(std::string subscriptionId, const json_document& json);
+
+		void on_message(std::string_view message) override;
+		std::string generate_subscription_id(const unique_websocket_subscription& subscription) const override;
 
 	public:
-		std::string stream_url() const noexcept override { return "wss://stream.bybit.com/spot/quote/ws/v1"; }
+		bybit_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory);
 
-		void on_open() override;
-		void on_close(std::error_code reason) override;
-		void on_fail(std::error_code reason) override;
-		void on_message(std::string_view message) override;
-
-		std::string get_order_book_subscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
-		std::string get_order_book_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
-		
-		std::string get_price_subscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
-		std::string get_price_unsubscription_message(const std::vector<tradable_pair>& tradablePairs) const override;
-		bool is_price_subscribed(const tradable_pair& pair) const override;
-		double get_price(const tradable_pair& pair) const override;
-
-		std::string get_candles_subscription_message(const std::vector<tradable_pair>& tradablePairs, int interval) const override;
-		std::string get_candles_unsubscription_message(const std::vector<tradable_pair>& tradablePairs, int interval) const override;
-		bool is_candles_subscribed(const tradable_pair& pair, int interval) const override;
-		ohlcv_data get_candle(const tradable_pair& pair, int interval) const override;
+		void subscribe(const websocket_subscription& subscription) override;
+		void unsubscribe(const websocket_subscription& subscription) override;
 	};
 }

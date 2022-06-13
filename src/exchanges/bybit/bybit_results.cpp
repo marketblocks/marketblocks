@@ -42,12 +42,13 @@ namespace
 			? trade_action::BUY : trade_action::SELL;
 	}
 
-	order_book_entry read_order_book_entry(const json_element& entryElement)
+	order_book_entry read_order_book_entry(const json_element& entryElement, order_book_side side)
 	{
 		return order_book_entry
 		{
 			std::stod(entryElement.element(0).get<std::string>()),
-			std::stod(entryElement.element(1).get<std::string>())
+			std::stod(entryElement.element(1).get<std::string>()),
+			side
 		};
 	}
 
@@ -150,14 +151,14 @@ namespace mb::bybit
 				if (asksIt != asksElement.end())
 				{
 					json_element entryElement{ asksIt.value() };
-					askEntries.emplace_back(read_order_book_entry(entryElement));
+					askEntries.emplace_back(read_order_book_entry(entryElement, order_book_side::ASK));
 
 					++asksIt;
 				}
 				if (bidsIt != bidsElement.end())
 				{
 					json_element entryElement{ bidsIt.value() };
-					bidEntries.emplace_back(read_order_book_entry(entryElement));
+					bidEntries.emplace_back(read_order_book_entry(entryElement, order_book_side::BID));
 
 					++bidsIt;
 				}

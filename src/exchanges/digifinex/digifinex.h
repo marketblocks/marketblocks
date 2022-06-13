@@ -54,7 +54,7 @@ namespace mb
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::DIGIFINEX; }
 
-		std::weak_ptr<websocket_stream> get_websocket_stream() override 
+		std::shared_ptr<websocket_stream> get_websocket_stream() override 
 		{ 
 			throw not_implemented_exception{ "digifinex::get_websocket_stream" };
 		}
@@ -72,5 +72,5 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_digifinex(digifinex_config config, std::shared_ptr<websocket_client> websocketClient);
+	std::unique_ptr<exchange> make_digifinex(digifinex_config config);
 }
