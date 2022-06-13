@@ -69,6 +69,16 @@ namespace mb
 		return "/0/" + std::move(access) + "/" + std::move(method);
 	}
 
+	std::shared_ptr<websocket_stream> kraken_api::get_websocket_stream()
+	{
+		if (!_websocketStream)
+		{
+			_websocketStream = create_exchange_websocket_stream<internal::kraken_websocket_stream>();
+		}
+
+		return _websocketStream;
+	}
+
 	exchange_status kraken_api::get_status() const
 	{
 		return send_public_request<exchange_status>("SystemStatus", kraken::read_system_status);

@@ -71,8 +71,7 @@ namespace mb
 
 		constexpr std::string_view id() const noexcept override { return exchange_ids::COINBASE; }
 
-		std::shared_ptr<websocket_stream> get_websocket_stream() override { return _websocketStream; }
-
+		std::shared_ptr<websocket_stream> get_websocket_stream() override;
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const override;

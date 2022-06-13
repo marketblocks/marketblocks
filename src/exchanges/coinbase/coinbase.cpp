@@ -78,6 +78,16 @@ namespace mb
 		return encoded;
 	}
 
+	std::shared_ptr<websocket_stream> coinbase_api::get_websocket_stream()
+	{
+		if (!_websocketStream)
+		{
+			_websocketStream = create_exchange_websocket_stream<internal::coinbase_websocket_stream>();
+		}
+
+		return _websocketStream;
+	}
+
 	exchange_status coinbase_api::get_status() const
 	{
 		return exchange_status::ONLINE;
