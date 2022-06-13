@@ -9,14 +9,6 @@ namespace mb
 		: _dataNavigator{ std::move(dataSource) }
 	{}
 
-	void backtest_websocket_stream::notify_data_incremented()
-	{
-		for (auto& pair : _subscribedPairs)
-		{
-			_messageQueue.push(tradable_pair{ pair });
-		}
-	}
-
 	void backtest_websocket_stream::subscribe(const websocket_subscription& subscription)
 	{
 

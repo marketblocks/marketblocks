@@ -1,6 +1,6 @@
 #include "runner_config.h"
 #include "logging/logger.h"
-#include "common/exceptions/mb_exception.h"
+#include "common/exceptions/validation_exception.h"
 
 namespace
 {
@@ -86,20 +86,27 @@ namespace mb
 	{
 		logger& log{ logger::instance() };
 
-		if (_exchangeIds.empty())
-		{
-			log.warning("Exchange list is empty, all supported exchanges will be used");
-		}
-
 		if (_runMode == run_mode::UNKNOWN)
 		{
-			throw mb_exception{ std::format("Run mode not recognized. Options are: {0}, {1}, {2}", run_mode_strings::LIVE, run_mode_strings::LIVE_TEST, run_mode_strings::BACK_TEST) };
+			throw validation_exception{ std::format("Run mode not recognized. Options are: {0}, {1}, {2}", run_mode_strings::LIVE, run_mode_strings::LIVE_TEST, run_mode_strings::BACK_TEST) };
 		}
 
 		if (_runInterval < 0)
 		{
 			_runInterval = 0;
 			log.warning("Run interval cannot be less than zero");
+		}
+
+		if (_httpTimeout < 0)
+		{
+			_httpTimeout = 0;
+			log.warning("HTTP timeout cannot be less than zero");
+		}
+
+		if (_websocketTimeout < 0)
+		{
+			_websocketTimeout = 0;
+			log.warning("Websocket timeout cannot be less than zero");
 		}
 	}
 

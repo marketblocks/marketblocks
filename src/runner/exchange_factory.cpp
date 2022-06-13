@@ -15,7 +15,7 @@ namespace
 	template<typename Config, typename MakeApi>
 	std::unique_ptr<exchange> create_api(MakeApi makeApi)
 	{
-		Config config = load_or_create_config<Config>();
+		Config config = internal::load_or_create_config<Config>();
 		return makeApi(std::move(config));
 	}
 

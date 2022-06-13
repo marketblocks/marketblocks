@@ -15,8 +15,6 @@ namespace mb
 	public:
 		backtest_websocket_stream(std::shared_ptr<back_testing_data_navigator> dataSource);
 
-		void notify_data_incremented();
-
 		void reset() override {}
 		void disconnect()  override {}
 		ws_connection_status connection_status() const override { return ws_connection_status::OPEN; }

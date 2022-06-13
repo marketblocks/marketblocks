@@ -12,4 +12,11 @@ namespace mb::internal
 	{
 		logger::instance().info("Running {} mode", to_string(runMode));
 	}
+
+	void exit_on_key()
+	{
+		logger::instance().info("\nPress Enter to exit...");
+		std::cin.get();
+		std::exit(-1);
+	}
 }
