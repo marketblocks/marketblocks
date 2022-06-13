@@ -33,12 +33,12 @@ namespace mb
 	{
 		bool entry_less_than::operator()(const order_book_entry& l, const order_book_entry& r) const
 		{
-			return less_than(l.price(), r.price());
+			return double_less_than(l.price(), r.price());
 		}
 
 		bool entry_greater_than::operator()(const order_book_entry& l, const order_book_entry& r) const
 		{
-			return greater_than(l.price(), r.price());
+			return double_greater_than(l.price(), r.price());
 		}
 	}
 

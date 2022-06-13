@@ -25,9 +25,9 @@ namespace mb
 		return (t - a) * 100.0 / (b - a);
 	}
 
-	bool approximately_equal(double a, double b);
-	bool less_than(double a, double b);
-	bool greater_than(double a, double b);
+	bool double_equal(double a, double b);
+	bool double_less_than(double a, double b);
+	bool double_greater_than(double a, double b);
 
 	template<typename T>
 	requires std::floating_point<T>
