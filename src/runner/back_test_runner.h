@@ -12,7 +12,7 @@
 namespace mb::internal
 {
 	std::shared_ptr<backtest_market_api> create_backtest_market_api(const back_testing_config& config);
-	std::shared_ptr<paper_trade_api> create_paper_trade_api();
+	std::shared_ptr<paper_trade_api> create_paper_trade_api(std::shared_ptr<backtest_market_api> marketApi);
 	
 	template<typename Strategy>
 	class back_test_runner : public runner_implementation<Strategy>
@@ -28,9 +28,10 @@ namespace mb::internal
 
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
+			auto marketApi = create_backtest_market_api(_config);
 			_backTestExchange = std::make_shared<back_test_exchange>(
-				create_backtest_market_api(_config),
-				create_paper_trade_api());
+				marketApi,
+				create_paper_trade_api(marketApi));
 
 			return
 			{

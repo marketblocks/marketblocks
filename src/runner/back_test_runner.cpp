@@ -14,10 +14,13 @@ namespace mb::internal
 		return std::make_shared<backtest_market_api>(dataNavigator, std::move(websocketStream));
 	}
 
-	std::shared_ptr<paper_trade_api> create_paper_trade_api()
+	std::shared_ptr<paper_trade_api> create_paper_trade_api(std::shared_ptr<backtest_market_api> marketApi)
 	{
 		paper_trading_config config = load_or_create_config<paper_trading_config>();
 
-		return std::make_unique<paper_trade_api>(std::move(config), backtest_market_api::id());
+		return std::make_unique<paper_trade_api>(
+			std::move(config),
+			backtest_market_api::id(),
+			[marketApi](const tradable_pair& pair) { return marketApi->get_price(pair); });
 	}
 }
