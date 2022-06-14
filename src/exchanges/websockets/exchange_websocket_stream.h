@@ -27,7 +27,7 @@ namespace mb
 		void initialise_connection_factory();
 		void clear_subscriptions();
 
-		void on_open() const;
+		void on_open();
 		void on_close(std::error_code error);
 
 		virtual void on_message(std::string_view message) = 0;

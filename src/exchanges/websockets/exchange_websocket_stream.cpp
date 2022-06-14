@@ -39,9 +39,10 @@ namespace mb
 		lockedOrderBooks->clear();
 	}
 
-	void exchange_websocket_stream::on_open() const
+	void exchange_websocket_stream::on_open()
 	{
 		logger::instance().info("Websocket stream successfully opened for exchange '{}'", _id);
+		_closeRequested = false;
 	}
 
 	void exchange_websocket_stream::on_close(std::error_code error)
@@ -63,7 +64,6 @@ namespace mb
 			disconnect();
 		}
 
-		_closeRequested = false; 
 		_connection = _connectionFactory->create_connection(_url.data());
 	}
 

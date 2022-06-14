@@ -18,7 +18,9 @@ namespace mb
 		M15,
 		H1,
 		D1,
-		W1
+		W1,
+
+		UNKNOWN
 	};
 
 	enum class subscription_status
@@ -27,4 +29,8 @@ namespace mb
 		INITIALISING,
 		SUBSCRIBED
 	};
+
+	ohlcv_interval parse_ohlcv_interval(std::string_view string);
+
+	std::string to_string(ohlcv_interval interval);
 }

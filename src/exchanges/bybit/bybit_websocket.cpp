@@ -127,14 +127,16 @@ namespace mb::internal
 
 		std::string symbol{ json.get<std::string>("symbol") };
 		std::string topic{ json.get<std::string>("topic") };
-		std::string subscriptionId{ ::generate_subscription_id(symbol, topic) };
 
 		if (topic == "trade")
 		{
+			std::string subscriptionId{ ::generate_subscription_id(symbol, topic) };
 			process_price_message(std::move(subscriptionId), json);
 		}
 		else if (topic.contains("kline"))
 		{
+			topic += "_" + json.element("params").get<std::string>("klineType");
+			std::string subscriptionId{ ::generate_subscription_id(symbol, topic) };
 			process_ohlcv_message(std::move(subscriptionId), json);
 		}
 	}
