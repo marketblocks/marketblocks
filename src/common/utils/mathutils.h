@@ -55,5 +55,12 @@ namespace mb
 		}
 
 		constexpr T mean() const noexcept { return _mean; }
+		
+		constexpr void reset()
+		{
+			_mean = T{};
+			_valueSum = T{};
+			count = 0;
+		}
 	};
 }

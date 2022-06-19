@@ -55,7 +55,7 @@ namespace
 		std::time_t dataTimeRange,
 		std::vector<test_logger_exchange_data> exchangeData)
 	{
-		constexpr int PRECISION = 2;
+		constexpr int PRECISION = 8;
 
 		std::unordered_set<std::string> uniqueAssets;
 		unordered_string_map<double> initialBalances;
@@ -97,8 +97,8 @@ namespace
 				double pChange = calculate_percentage_diff(startBalance, finalBalance);
 				double years = dataTimeRange / 31536000.0;
 
-				percentageChange = to_string(pChange, PRECISION) + "%";
-				annualReturn = to_string(pChange / years, PRECISION) + "%";
+				percentageChange = to_string(pChange, 2) + "%";
+				annualReturn = to_string(pChange / years, 2) + "%";
 			}
 
 			assetReports.emplace_back(

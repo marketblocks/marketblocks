@@ -3,6 +3,30 @@
 
 #include "common/exceptions/not_implemented_exception.h"
 
+namespace
+{
+	using namespace mb;
+
+	int to_seconds(ohlcv_interval interval)
+	{
+		switch (interval)
+		{
+		case ohlcv_interval::M1:
+			return 60;
+		case ohlcv_interval::M5:
+			return 300;
+		case ohlcv_interval::M15:
+			return 900;
+		case ohlcv_interval::H1:
+			return 3600;
+		case ohlcv_interval::D1:
+			return 86400;
+		case ohlcv_interval::W1:
+			return 604800;
+		}
+	}
+}
+
 namespace mb
 {
 	backtest_websocket_stream::backtest_websocket_stream(std::shared_ptr<back_testing_data_navigator> dataSource)
@@ -59,13 +83,6 @@ namespace mb
 
 	ohlcv_data backtest_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
-
-		if (data.has_value())
-		{
-			return data.value().get().data();
-		}
-
-		return ohlcv_data{ 0,0,0,0,0 };
+		return _dataNavigator->get_merged_ohlcv(pair, to_seconds(interval));
 	}
 }

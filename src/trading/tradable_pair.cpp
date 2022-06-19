@@ -13,7 +13,7 @@ namespace mb
 
 		if (assets.size() != 2)
 		{
-			throw mb_exception{ std::format("Could parse tradable pair from {0} with seperator \"{1}\"", string, seperator) };
+			throw mb_exception{ std::format("Could not parse tradable pair from {0} with seperator \"{1}\"", string, seperator) };
 		}
 
 		to_upper(assets[0]);
