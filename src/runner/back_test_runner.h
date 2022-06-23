@@ -76,7 +76,7 @@ namespace mb::internal
 
 			logger::instance().info("Back test complete. Generating report...");
 
-			test_report report{ generate_back_test_report(data, testLogger) };
+			test_report report{ generate_back_test_report(data, testLogger, strategy.get_test_results()) };
 			testLogger.log_test_report(report);
 		}
 	};
