@@ -74,7 +74,7 @@ namespace mb::internal
 
 			logger::instance().info("Live test complete. Generating report...");
 
-			test_report report{ testLogger.generate_test_report() };
+			test_report report{ testLogger.generate_test_report(0, strategy.get_test_results()) };
 			testLogger.log_test_report(report);
 		}
 	};

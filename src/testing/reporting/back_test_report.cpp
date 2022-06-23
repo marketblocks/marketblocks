@@ -6,7 +6,8 @@ namespace mb
 {
 	test_report generate_back_test_report(
 		const back_testing_data& backTestingData,
-		const test_logger& testLogger)
+		const test_logger& testLogger,
+		report_result_list strategyResults)
 	{
 		report_result_list additionalResults
 		{
@@ -15,6 +16,8 @@ namespace mb
 			{ "Step Size", std::to_string(backTestingData.step_size()) },
 			{ "Time Steps", std::to_string(backTestingData.time_steps()) }
 		};
+
+		additionalResults.insert(additionalResults.end(), strategyResults.begin(), strategyResults.end());
 
 		std::time_t dataTimeRange = backTestingData.end_time() - backTestingData.start_time();
 

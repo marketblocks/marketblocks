@@ -8,5 +8,6 @@ namespace mb
 {
 	test_report generate_back_test_report(
 		const back_testing_data& backTestingData,
-		const test_logger& testLogger);
+		const test_logger& testLogger,
+		report_result_list strategyResults);
 }
