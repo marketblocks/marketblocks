@@ -53,7 +53,8 @@ namespace mb
 		back_testing_data& data() noexcept { return _data; }
 		std::time_t data_time() const noexcept { return _dataTime; }
 
-		ohlcv_data get_merged_ohlcv(const tradable_pair& pair, int interval);
+		timed_ohlcv_data get_merged_ohlcv(const tradable_pair& pair, int interval);
+		std::vector<timed_ohlcv_data> get_past_ohlcv_data(const tradable_pair& pair, int interval, int count);
 
 		std::vector<timed_ohlcv_data>::const_iterator find_data_position(const std::vector<timed_ohlcv_data>& pairData, const tradable_pair& tradablePair);
 		std::optional<std::reference_wrapper<const timed_ohlcv_data>> find_data_point(const tradable_pair& tradablePair);

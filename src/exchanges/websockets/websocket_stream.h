@@ -24,7 +24,7 @@ namespace mb
 
 		virtual order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const = 0;
 		virtual double get_price(const tradable_pair& pair) const = 0;
-		virtual ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const = 0;
+		virtual timed_ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const = 0;
 
 		virtual set_queue<tradable_pair>& get_order_book_message_queue() = 0;
 	};

@@ -120,6 +120,33 @@ namespace mb::bybit
 		});
 	}
 
+	result<std::vector<timed_ohlcv_data>> read_ohlcv(std::string_view jsonResult)
+	{
+		return read_result<std::vector<timed_ohlcv_data>>(jsonResult, [](const json_element& resultElement)
+		{
+			std::vector<timed_ohlcv_data> ohlcvData;
+			ohlcvData.reserve(resultElement.size());
+
+			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
+			{
+				json_element ohlcvElement = it.value();
+
+				ohlcvData.emplace_back(
+					ohlcvElement.get<std::time_t>(0),
+					ohlcv_data
+					{
+						std::stod(ohlcvElement.get<std::string>(1)),
+						std::stod(ohlcvElement.get<std::string>(2)),
+						std::stod(ohlcvElement.get<std::string>(3)),
+						std::stod(ohlcvElement.get<std::string>(4)),
+						std::stod(ohlcvElement.get<std::string>(5))
+					});
+			}
+
+			return ohlcvData;
+		});
+	}
+
 	result<double> read_price(std::string_view jsonResult)
 	{
 		return read_result<double>(jsonResult, [](const json_element& resultElement)
