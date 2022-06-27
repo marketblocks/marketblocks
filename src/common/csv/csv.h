@@ -28,7 +28,7 @@ namespace mb
 			return _rows.at(index);
 		}
 
-		constexpr size_t size() const noexcept
+		constexpr size_t row_count() const noexcept
 		{
 			return _rows.size();
 		}

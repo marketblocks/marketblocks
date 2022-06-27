@@ -9,39 +9,26 @@ add_library(marketblocks_lib
 "common/file/file.h"
 "runner/config_file_reader.cpp" 
 "runner/config_file_reader.h" 
-
-
 "common/security/hash.h" 
-
 "common/security/encoding.h" 
-
 "common/utils/containerutils.h"
-
 "common/utils/financeutils.h"
 "common/utils/mathutils.h"
 "common/utils/retry.h"
 "common/utils/stringutils.cpp"
 "common/utils/stringutils.h"
-
-
 "common/utils/timeutils.h" 
-
 "common/exceptions/mb_exception.h" 
 "common/exceptions/not_implemented_exception.h" 
-
 "common/types/result.h"
 "common/types/basic_iterator.h" 
-
 "exchanges/exchange.h"
 "runner/exchange_factory.cpp"  
 "runner/exchange_factory.h" 
-
 "exchanges/exchange_ids.h"
 "exchanges/exchange_helpers.cpp"
 "exchanges/exchange_helpers.h"
-
 "exchanges/exchange_status.h" 
-
 "exchanges/kraken/kraken.cpp"
 "exchanges/kraken/kraken.h"
 "exchanges/kraken/kraken_results.cpp"
@@ -52,22 +39,16 @@ add_library(marketblocks_lib
 "exchanges/kraken/kraken_websocket.cpp"
 "testing/paper_trading/paper_trade_api.cpp"
 "testing/paper_trading/paper_trade_api.h"
-
 "exchanges/websockets/exchange_websocket_stream.cpp"
 "exchanges/websockets/order_book_cache.h"  
 "exchanges/websockets/order_book_cache.cpp"
-
 "logging/logger.h"
 "logging/logger.cpp"
-
 "networking/http/http_constants.h"
 "networking/http/http_service.cpp"
 "networking/http/http_service.h"
-
 "networking/http/http_request.h"
-
 "networking/http/http_header.h"
-
 "networking/http/http_response.h" 
 "networking/http/http_error.h"
 "networking/websocket/websocket_error.h"
@@ -76,31 +57,97 @@ add_library(marketblocks_lib
 "networking/websocket/websocket_client.cpp"
 "networking/websocket/websocket_client.h" 
 "networking/websocket/websocket_constants.h" 
-
 "networking/url.h"
-
 "runner/runner.h" 
-
-
-
 "runner/runner_config.cpp" 
 "runner/runner_config.h"
- 
-
 "trading/order_book.h"
-
-
 "trading/fee_schedule.cpp" 
 "trading/fee_schedule.h" 
- 
 "trading/tradable_pair.h" 
 "trading/trade_description.h"
-
 "trading/trading_constants.h"
-
-
-
- "trading/ohlcv_data.h"  "trading/order_description.h"  "trading/order_type.h"  "common/types/unordered_string_map.h" "exchanges/coinbase/coinbase.h" "exchanges/coinbase/coinbase.cpp" "exchanges/coinbase/coinbase_websocket.h" "exchanges/coinbase/coinbase_websocket.cpp" "exchanges/coinbase/coinbase_results.h" "exchanges/coinbase/coinbase_results.cpp" "exchanges/coinbase/coinbase_config.h" "exchanges/coinbase/coinbase_config.cpp"  "common/types/set_queue.h" "testing/paper_trading/paper_trading_config.h" "testing/paper_trading/paper_trading_config.cpp" "common/json/json_constants.h" "common/json/json_writer.h"  "common/json/json_writer.cpp" "testing/back_testing/backtest_market_api.h" "testing/back_testing/backtest_market_api.cpp" "testing/back_testing/back_testing_config.h" "testing/back_testing/back_testing_config.cpp" "common/types/partial_data_result.h" "common/utils/timeutils.cpp" "common/csv/csv.h"   "common/csv/csv_row.h" "common/csv/csv.cpp" "testing/back_testing/back_testing_data.h" "testing/back_testing/back_testing_data.cpp" "testing/back_testing/data_loading.h" "testing/back_testing/data_loading.cpp" "common/csv/csv_row.cpp" "trading/tradable_pair.cpp" "trading/ohlcv_data.cpp" "testing/back_testing/backtest_websocket_stream.h" "testing/back_testing/backtest_websocket_stream.cpp" "runner/runner_implementation.h" "runner/live_runner.h"  "runner/back_test_runner.h"  "runner/back_test_runner.cpp" "runner/runner.cpp"   "trading/order_description.cpp"  "runner/live_test_runner.h" "runner/live_test_runner.cpp" "testing/reporting/asset_report.h" "testing/reporting/test_report.h" "testing/reporting/test_report.cpp" "testing/reporting/back_test_report.h" "testing/reporting/back_test_report.cpp" "testing/reporting/test_logger.h" "testing/reporting/test_logger.cpp"  "common/utils/generalutils.h" "common/utils/generalutils.cpp" "testing/back_testing/back_testing_data_source.h" "testing/back_testing/back_testing_data_source.cpp" "exchanges/template/template.h" "exchanges/template/template.cpp"   "exchanges/template/template_results.h" "exchanges/template/template_results.cpp" "exchanges/bybit/bybit.cpp" "exchanges/bybit/bybit.h" "exchanges/bybit/bybit_results.cpp" "exchanges/bybit/bybit_results.h" "exchanges/digifinex/digifinex.cpp" "exchanges/digifinex/digifinex.h" "exchanges/digifinex/digifinex_results.cpp" "exchanges/digifinex/digifinex_results.h"   "exchanges/digifinex/digifinex_config.h" "exchanges/bybit/bybit_config.cpp" "exchanges/digifinex/digifinex_config.cpp" "exchanges/digifinex/digifinex_config.h" "exchanges/exchange_common.h" "exchanges/bybit/bybit_websocket.h" "exchanges/bybit/bybit_websocket.cpp" "exchanges/websockets/websocket_stream_constants.h" "exchanges/websockets/websocket_stream_constants.cpp" "exchanges/websockets/websocket_subscription.h" "exchanges/websockets/exchange_websocket_stream.h" "common/utils/mathutils.cpp" "common/types/thread_safe_wrapper.h" "common/exceptions/validation_exception.h")
+ "trading/ohlcv_data.h"
+ "trading/order_description.h"
+ "trading/order_type.h"
+ "common/types/unordered_string_map.h"
+ "exchanges/coinbase/coinbase.h"
+ "exchanges/coinbase/coinbase.cpp"
+ "exchanges/coinbase/coinbase_websocket.h"
+ "exchanges/coinbase/coinbase_websocket.cpp"
+ "exchanges/coinbase/coinbase_results.h"
+ "exchanges/coinbase/coinbase_results.cpp"
+ "exchanges/coinbase/coinbase_config.h"
+ "exchanges/coinbase/coinbase_config.cpp" 
+ "common/types/set_queue.h"
+ "testing/paper_trading/paper_trading_config.h"
+ "testing/paper_trading/paper_trading_config.cpp"
+ "common/json/json_constants.h"
+ "common/json/json_writer.h"
+ "common/json/json_writer.cpp"
+ "testing/back_testing/backtest_market_api.h"
+ "testing/back_testing/backtest_market_api.cpp"
+ "testing/back_testing/back_testing_config.h"
+ "testing/back_testing/back_testing_config.cpp"
+ "common/types/partial_data_result.h"
+ "common/utils/timeutils.cpp" 
+ "common/csv/csv.h"
+ "common/csv/csv_row.h" 
+ "common/csv/csv.cpp"
+ "testing/back_testing/back_testing_data.h"
+ "testing/back_testing/back_testing_data.cpp" 
+ "testing/back_testing/data_loading.h"
+ "testing/back_testing/data_loading.cpp"
+ "common/csv/csv_row.cpp"
+ "trading/tradable_pair.cpp"
+ "trading/ohlcv_data.cpp"
+ "testing/back_testing/backtest_websocket_stream.h"
+ "testing/back_testing/backtest_websocket_stream.cpp"
+ "runner/runner_implementation.h" 
+ "runner/live_runner.h" 
+ "runner/back_test_runner.h"
+ "runner/back_test_runner.cpp"
+ "runner/runner.cpp"
+ "trading/order_description.cpp"
+ "runner/live_test_runner.h"
+ "runner/live_test_runner.cpp"
+ "testing/reporting/asset_report.h"
+ "testing/reporting/test_report.h"
+ "testing/reporting/test_report.cpp"
+ "testing/reporting/back_test_report.h" 
+ "testing/reporting/back_test_report.cpp"
+ "testing/reporting/test_logger.h"
+ "testing/reporting/test_logger.cpp" 
+ "common/utils/generalutils.h" 
+ "common/utils/generalutils.cpp"
+ "testing/back_testing/back_testing_data_source.h"
+ "testing/back_testing/back_testing_data_source.cpp"
+ "exchanges/template/template.h"
+ "exchanges/template/template.cpp"
+ "exchanges/template/template_results.h"
+ "exchanges/template/template_results.cpp"
+ "exchanges/bybit/bybit.cpp"
+ "exchanges/bybit/bybit.h"
+ "exchanges/bybit/bybit_results.cpp"
+ "exchanges/bybit/bybit_results.h"
+ "exchanges/digifinex/digifinex.cpp"
+ "exchanges/digifinex/digifinex.h"
+ "exchanges/digifinex/digifinex_results.cpp"
+ "exchanges/digifinex/digifinex_results.h" 
+ "exchanges/digifinex/digifinex_config.h"
+ "exchanges/bybit/bybit_config.cpp"
+ "exchanges/digifinex/digifinex_config.cpp"
+ "exchanges/digifinex/digifinex_config.h"
+ "exchanges/exchange_common.h"
+ "exchanges/bybit/bybit_websocket.h"
+ "exchanges/bybit/bybit_websocket.cpp"
+ "exchanges/websockets/websocket_stream_constants.h"
+ "exchanges/websockets/websocket_stream_constants.cpp"
+ "exchanges/websockets/websocket_subscription.h"
+ "exchanges/websockets/exchange_websocket_stream.h"
+ "common/utils/mathutils.cpp" 
+ "common/types/concurrent_wrapper.h"
+ "common/exceptions/validation_exception.h")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

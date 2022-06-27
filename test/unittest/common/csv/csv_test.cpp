@@ -20,7 +20,7 @@ namespace mb::test
 		std::string csvString{ read_file(csv_test_data_path("csv_test_file.csv")) };
 		csv_document csv{ parse_csv(csvString) };
 
-		ASSERT_EQ(expectedRows.size(), csv.size());
+		ASSERT_EQ(expectedRows.size(), csv.row_count());
 
 		for (int i = 0; i < expectedRows.size(); ++i)
 		{
@@ -34,5 +34,26 @@ namespace mb::test
 				EXPECT_EQ(expectedRow.get_cell(j), actualRow.get_cell(j));
 			}
 		}
+	}
+
+	TEST(CSV, CreatesOneRowOneColumnForStringWithNoSeparator)
+	{
+		std::string csvString{ "ThisIsAStringWithNoSeperator" };
+		csv_document csv{ parse_csv(csvString) };
+
+		EXPECT_EQ(1, csv.row_count());
+		
+		csv_row row{ csv.get_row(0) };
+
+		EXPECT_EQ(1, row.size());
+		EXPECT_EQ(csvString, row.get_cell(0));
+	}
+
+	TEST(CSV, CreatesEmptyDocumentForEmptyString)
+	{
+		std::string csvString{ "" };
+		csv_document csv{ parse_csv(csvString) };
+
+		EXPECT_EQ(0, csv.row_count());
 	}
 }
