@@ -1,6 +1,39 @@
 #include "back_testing_data.h"
 #include "common/utils/containerutils.h"
 
+namespace
+{
+	using namespace mb;
+
+	template<typename StartIt, typename EndIt>
+	timed_ohlcv_data merge_ohlcv(StartIt start, EndIt end, std::time_t targetTime)
+	{
+		double open = start->data().open();
+		double high = start->data().high();
+		double low = start->data().low();
+		double close = start->data().close();
+		double volume = start->data().volume();
+
+		auto it = std::make_reverse_iterator(start);
+		for (; it != end; ++it)
+		{
+			const timed_ohlcv_data& data = *it;
+
+			if (data.time_stamp() < targetTime)
+			{
+				break;
+			}
+
+			open = data.data().open();
+			high = std::max(high, data.data().high());
+			low = std::min(low, data.data().low());
+			volume += data.data().volume();
+		}
+
+		return timed_ohlcv_data{ targetTime, ohlcv_data{ open, high, low, close, volume } };
+	}
+}
+
 namespace mb
 {
 	back_testing_data::back_testing_data(
@@ -42,39 +75,55 @@ namespace mb
 		: _data{ std::move(data) }, _dataTime{ _data.start_time() }, _iteratorCache{}
 	{}
 
-	ohlcv_data back_testing_data_navigator::get_merged_ohlcv(const tradable_pair& pair, int interval)
+	timed_ohlcv_data back_testing_data_navigator::get_merged_ohlcv(const tradable_pair& pair, int interval)
 	{
 		const std::vector<timed_ohlcv_data>& pairData = _data.get_ohlcv_data(pair);
-		std::time_t targetTime = _dataTime - interval;
 		auto startIterator = find_data_position(pairData, pair);
 
 		if (startIterator == pairData.end())
 		{
-			return ohlcv_data{ 0, 0, 0, 0, 0 };
+			return timed_ohlcv_data{ 0, ohlcv_data{ 0, 0, 0, 0, 0 } };
 		}
 
-		double open = startIterator->data().open();
-		double high = startIterator->data().high();
-		double low = startIterator->data().low();
-		double close = startIterator->data().close();
-		double volume = startIterator->data().volume();
+		std::time_t targetTime = _dataTime - interval;
 
-		for (auto it = std::make_reverse_iterator(startIterator); it != pairData.rend(); ++it)
+		return merge_ohlcv(startIterator, pairData.rend(), targetTime);
+	}
+
+	std::vector<timed_ohlcv_data> back_testing_data_navigator::get_past_ohlcv_data(const tradable_pair& pair, int interval, int count)
+	{
+		const std::vector<timed_ohlcv_data>& pairData = _data.get_ohlcv_data(pair);
+		auto startIterator = find_data_position(pairData, pair);
+
+		if (startIterator == pairData.end())
 		{
-			const timed_ohlcv_data& data = *it;
+			return {};
+		}
 
-			if (data.time_stamp() < targetTime)
+		std::time_t targetTime = _dataTime - interval;
+
+		std::vector<timed_ohlcv_data> data;
+		data.reserve(count);
+
+		for (int i = 0; i < count; i++)
+		{
+			timed_ohlcv_data mergedOhlcv{ merge_ohlcv(startIterator, pairData.rend(), targetTime) };
+			data.emplace(data.begin(), std::move(mergedOhlcv));
+
+			if (startIterator == pairData.begin())
 			{
 				break;
 			}
 
-			open = data.data().open();
-			high = std::max(high, data.data().high());
-			low = std::min(low, data.data().low());
-			volume += data.data().volume();
+			while (startIterator->time_stamp() > targetTime && startIterator != pairData.begin())
+			{
+				startIterator--;
+			}
+
+			targetTime -= interval;
 		}
 
-		return ohlcv_data{ open, high, low, close, volume };
+		return data;
 	}
 
 	std::vector<timed_ohlcv_data>::const_iterator back_testing_data_navigator::find_data_position(const std::vector<timed_ohlcv_data>& pairData, const tradable_pair& tradablePair)

@@ -24,7 +24,12 @@ namespace mb
 
 	ohlcv_data backtest_market_api::get_24h_stats(const tradable_pair& tradablePair) const
 	{
-		return _dataNavigator->get_merged_ohlcv(tradablePair, 86400);
+		return _dataNavigator->get_merged_ohlcv(tradablePair, 86400).data();
+	}
+
+	std::vector<timed_ohlcv_data> backtest_market_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
+	{
+		return _dataNavigator->get_past_ohlcv_data(tradablePair, to_seconds(interval), count);
 	}
 
 	double backtest_market_api::get_price(const tradable_pair& tradablePair) const

@@ -31,6 +31,7 @@ namespace mb
 		exchange_status get_status() const;
 		std::vector<tradable_pair> get_tradable_pairs() const;
 		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const;
+		std::vector<timed_ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const;
 		double get_price(const tradable_pair& tradablePair) const;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const;
 	};

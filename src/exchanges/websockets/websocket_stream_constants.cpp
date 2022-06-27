@@ -33,4 +33,23 @@ namespace mb
 
 		return find_or_default(ohlcvIntervalLookup, interval, std::string{});
 	}
+
+	int to_seconds(ohlcv_interval interval)
+	{
+		switch (interval)
+		{
+		case ohlcv_interval::M1:
+			return 60;
+		case ohlcv_interval::M5:
+			return 300;
+		case ohlcv_interval::M15:
+			return 900;
+		case ohlcv_interval::H1:
+			return 3600;
+		case ohlcv_interval::D1:
+			return 86400;
+		case ohlcv_interval::W1:
+			return 604800;
+		}
+	}
 }

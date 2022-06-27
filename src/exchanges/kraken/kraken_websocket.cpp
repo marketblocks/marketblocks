@@ -190,13 +190,17 @@ namespace mb::internal
 	{
 		json_element ohlcArray{ json.element(1) };
 
-		update_ohlcv(std::move(subscriptionId), ohlcv_data
+		update_ohlcv(std::move(subscriptionId), timed_ohlcv_data
 			{
-				std::stod(ohlcArray.get<std::string>(2)),
-				std::stod(ohlcArray.get<std::string>(3)),
-				std::stod(ohlcArray.get<std::string>(4)),
-				std::stod(ohlcArray.get<std::string>(5)),
-				std::stod(ohlcArray.get<std::string>(7))
+				ohlcArray.get<std::time_t>(0),
+				ohlcv_data
+				{
+					std::stod(ohlcArray.get<std::string>(2)),
+					std::stod(ohlcArray.get<std::string>(3)),
+					std::stod(ohlcArray.get<std::string>(4)),
+					std::stod(ohlcArray.get<std::string>(5)),
+					std::stod(ohlcArray.get<std::string>(7))
+				}
 			});
 	}
 

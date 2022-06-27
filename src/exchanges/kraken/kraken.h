@@ -82,6 +82,12 @@ namespace mb
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const override;
+
+		std::vector<timed_ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override
+		{
+			throw not_implemented_exception{ "kraken::get_ohlcv" };
+		}
+
 		double get_price(const tradable_pair& tradablePair) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;
