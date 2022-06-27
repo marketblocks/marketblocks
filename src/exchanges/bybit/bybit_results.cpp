@@ -105,26 +105,11 @@ namespace mb::bybit
 		});
 	}
 
-	result<ohlcv_data> read_24h_stats(std::string_view jsonResult)
+	result<std::vector<ohlcv_data>> read_ohlcv(std::string_view jsonResult)
 	{
-		return read_result<ohlcv_data>(jsonResult, [](const json_element& resultElement)
+		return read_result<std::vector<ohlcv_data>>(jsonResult, [](const json_element& resultElement)
 		{
-			return ohlcv_data
-			{
-				std::stod(resultElement.get<std::string>("openPrice")),
-				std::stod(resultElement.get<std::string>("highPrice")),
-				std::stod(resultElement.get<std::string>("lowPrice")),
-				std::stod(resultElement.get<std::string>("lastPrice")),
-				std::stod(resultElement.get<std::string>("volume"))
-			};
-		});
-	}
-
-	result<std::vector<timed_ohlcv_data>> read_ohlcv(std::string_view jsonResult)
-	{
-		return read_result<std::vector<timed_ohlcv_data>>(jsonResult, [](const json_element& resultElement)
-		{
-			std::vector<timed_ohlcv_data> ohlcvData;
+			std::vector<ohlcv_data> ohlcvData;
 			ohlcvData.reserve(resultElement.size());
 
 			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
@@ -133,14 +118,11 @@ namespace mb::bybit
 
 				ohlcvData.emplace_back(
 					ohlcvElement.get<std::time_t>(0),
-					ohlcv_data
-					{
-						std::stod(ohlcvElement.get<std::string>(1)),
-						std::stod(ohlcvElement.get<std::string>(2)),
-						std::stod(ohlcvElement.get<std::string>(3)),
-						std::stod(ohlcvElement.get<std::string>(4)),
-						std::stod(ohlcvElement.get<std::string>(5))
-					});
+					std::stod(ohlcvElement.get<std::string>(1)),
+					std::stod(ohlcvElement.get<std::string>(2)),
+					std::stod(ohlcvElement.get<std::string>(3)),
+					std::stod(ohlcvElement.get<std::string>(4)),
+					std::stod(ohlcvElement.get<std::string>(5)));
 			}
 
 			return ohlcvData;

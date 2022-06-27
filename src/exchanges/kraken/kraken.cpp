@@ -89,15 +89,6 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>("AssetPairs", kraken::read_tradable_pairs);
 	}
 
-	ohlcv_data kraken_api::get_24h_stats(const tradable_pair& tradablePair) const
-	{
-		std::string query = url_query_builder{}
-			.add_parameter("pair", tradablePair.to_string())
-			.to_string();
-
-		return send_public_request<ohlcv_data>("Ticker", kraken::read_24h_stats, query);
-	}
-
 	double kraken_api::get_price(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}

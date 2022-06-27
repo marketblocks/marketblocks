@@ -55,27 +55,6 @@ namespace mb::test
 		api.get_tradable_pairs();
 	}
 
-	TEST(Digifinex, Get24hStats)
-	{
-		tradable_pair pair{ "ETH", "GBP" };
-
-		http_request expectedRequest
-		{
-			http_verb::GET,
-			""
-		};
-
-		http_response response
-		{
-			200,
-			read_file(digifinex_results_test_data_path("24h_stats.json"))
-		};
-
-		digifinex_api api{ create_api(std::move(expectedRequest), std::move(response)) };
-
-		api.get_24h_stats(pair);
-	}
-
 	TEST(Digifinex, GetPrice)
 	{
 		tradable_pair pair{ "BTC", "USDT" };

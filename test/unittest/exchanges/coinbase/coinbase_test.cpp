@@ -40,27 +40,6 @@ namespace mb::test
 		api.get_tradable_pairs();
 	}
 
-	TEST(Coinbase, Get24hStats)
-	{
-		tradable_pair pair{ "ETH", "USD" };
-
-		http_request expectedRequest
-		{
-			http_verb::GET,
-			"https://api.exchange.coinbase.com/products/ETH-USD/stats"
-		};
-
-		http_response response
-		{
-			200,
-			read_file(coinbase_results_test_data_path("24h_stats.json"))
-		};
-
-		coinbase_api api{ create_api(std::move(expectedRequest), std::move(response)) };
-
-		api.get_24h_stats(pair);
-	}
-
 	TEST(Coinbase, GetPrice)
 	{
 		tradable_pair pair{ "ETH", "USD" };

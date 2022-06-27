@@ -47,7 +47,7 @@ namespace mb
 	back_testing_data load_back_testing_data(const back_testing_config& config)
 	{
 		std::vector<tradable_pair> pairs{ get_available_pairs(config.data_directory()) };
-		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> ohlcvData;
+		std::unordered_map<tradable_pair, std::vector<ohlcv_data>> ohlcvData;
 		ohlcvData.reserve(pairs.size());
 
 		int count = pairs.size();
@@ -74,7 +74,7 @@ namespace mb
 
 		for (auto& pair : pairs)
 		{
-			std::vector<timed_ohlcv_data> data{ dataSource.load_data(pair) };
+			std::vector<ohlcv_data> data{ dataSource.load_data(pair) };
 
 			startTime = std::min(startTime, data.front().time_stamp());
 			endTime = std::max(endTime, data.back().time_stamp());

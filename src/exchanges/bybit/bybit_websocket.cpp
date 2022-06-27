@@ -155,17 +155,14 @@ namespace mb::internal
 	{
 		json_element dataElement{ json.element("data").begin().value() };
 
-		timed_ohlcv_data data
+		ohlcv_data data
 		{
 			dataElement.get<std::time_t>("t"),
-			ohlcv_data
-			{
-				std::stod(dataElement.get<std::string>("o")),
-				std::stod(dataElement.get<std::string>("h")),
-				std::stod(dataElement.get<std::string>("l")),
-				std::stod(dataElement.get<std::string>("c")),
-				std::stod(dataElement.get<std::string>("v"))
-			}
+			std::stod(dataElement.get<std::string>("o")),
+			std::stod(dataElement.get<std::string>("h")),
+			std::stod(dataElement.get<std::string>("l")),
+			std::stod(dataElement.get<std::string>("c")),
+			std::stod(dataElement.get<std::string>("v"))
 		};
 
 		set_subscribed_if_first(subscriptionId, websocket_channel::OHLCV, json);

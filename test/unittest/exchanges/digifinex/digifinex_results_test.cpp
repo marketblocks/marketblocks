@@ -30,19 +30,6 @@ namespace mb::test
 			});
 	}
 
-	TEST(DigifinexResults, Read24hStats)
-	{
-		execute_reader_test(
-			digifinex_results_test_data_path("24h_stats.json"),
-			digifinex_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
-			digifinex::read_24h_stats,
-			ohlcv_data
-			{
-				9307.96, 9349.99, 9305.86, 9342.7, 621.4565
-			},
-			assert_pair_stats_eq);
-	}
-
 	TEST(DigifinexResults, ReadPrice)
 	{
 		execute_reader_test(

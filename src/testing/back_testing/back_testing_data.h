@@ -13,7 +13,7 @@ namespace mb
 	{
 	private:
 		std::vector<tradable_pair> _tradablePairs;
-		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> _data;
+		std::unordered_map<tradable_pair, std::vector<ohlcv_data>> _data;
 		std::time_t _startTime;
 		std::time_t _endTime;
 		int _stepSize;
@@ -24,7 +24,7 @@ namespace mb
 	public:
 		back_testing_data(
 			std::vector<tradable_pair> tradablePairs,
-			std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> data,
+			std::unordered_map<tradable_pair, std::vector<ohlcv_data>> data,
 			std::time_t startTime,
 			std::time_t endTime,
 			int stepSize,
@@ -36,7 +36,7 @@ namespace mb
 		int step_size() const noexcept { return _stepSize; }
 		int time_steps() const noexcept { return _timeSteps; }
 		const std::vector<tradable_pair>& tradable_pairs() const noexcept { return _tradablePairs; }
-		const std::vector<timed_ohlcv_data>& get_ohlcv_data(const tradable_pair& pair);
+		const std::vector<ohlcv_data>& get_ohlcv_data(const tradable_pair& pair);
 	};
 
 	class back_testing_data_navigator
@@ -44,7 +44,7 @@ namespace mb
 	private:
 		back_testing_data _data;
 		std::time_t _dataTime;
-		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>::const_iterator> _iteratorCache;
+		std::unordered_map<tradable_pair, std::vector<ohlcv_data>::const_iterator> _iteratorCache;
 
 	public:
 		back_testing_data_navigator(back_testing_data data);
@@ -53,10 +53,8 @@ namespace mb
 		back_testing_data& data() noexcept { return _data; }
 		std::time_t data_time() const noexcept { return _dataTime; }
 
-		timed_ohlcv_data get_merged_ohlcv(const tradable_pair& pair, int interval);
-		std::vector<timed_ohlcv_data> get_past_ohlcv_data(const tradable_pair& pair, int interval, int count);
-
-		std::vector<timed_ohlcv_data>::const_iterator find_data_position(const std::vector<timed_ohlcv_data>& pairData, const tradable_pair& tradablePair);
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> find_data_point(const tradable_pair& tradablePair);
+		std::vector<ohlcv_data> get_past_ohlcv_data(const tradable_pair& pair, int interval, int count);
+		std::vector<ohlcv_data>::const_iterator find_data_position(const std::vector<ohlcv_data>& pairData, const tradable_pair& tradablePair);
+		std::optional<std::reference_wrapper<const ohlcv_data>> find_data_point(const tradable_pair& tradablePair);
 	};
 }

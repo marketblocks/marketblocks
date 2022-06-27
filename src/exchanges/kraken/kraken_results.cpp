@@ -118,29 +118,6 @@ namespace mb::kraken
 		});
 	}
 
-	result<ohlcv_data> read_24h_stats(std::string_view jsonResult)
-	{
-		return read_result<ohlcv_data>(jsonResult, [](const json_element& resultElement)
-		{
-			json_element dataElement{ resultElement.begin().value() };
-
-			std::string openingPrice{ dataElement.get<std::string>("o") };
-			std::vector<std::string> highs{ dataElement.get<std::vector<std::string>>("h") };
-			std::vector<std::string> lows{ dataElement.get<std::vector<std::string>>("l") };
-			std::vector<std::string> close{ dataElement.get<std::vector<std::string>>("c") };
-			std::vector<std::string> volumes{ dataElement.get<std::vector<std::string>>("v") };
-
-			return ohlcv_data
-			{
-				std::stod(openingPrice),
-				std::stod(highs[1]),
-				std::stod(lows[1]),
-				std::stod(close[0]),
-				std::stod(volumes[1]),
-			};
-		});
-	}
-
 	result<double> read_price(std::string_view jsonResult)
 	{
 		return read_result<double>(jsonResult, [](const json_element& resultElement)

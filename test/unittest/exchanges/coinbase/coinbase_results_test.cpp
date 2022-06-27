@@ -20,16 +20,6 @@ namespace mb::test
 		});
 	}
 
-	TEST(CoinbaseResults, Read24hStats)
-	{
-		execute_reader_test(
-			coinbase_results_test_data_path("24h_stats.json"),
-			coinbase_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
-			coinbase::read_24h_stats,
-			ohlcv_data{ 5414.18, 6441.37, 5261.69, 6250.02, 53687.76764233 },
-			assert_pair_stats_eq);
-	}
-
 	TEST(CoinbaseResults, ReadPrice)
 	{
 		execute_reader_test(

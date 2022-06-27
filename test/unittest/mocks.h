@@ -29,7 +29,7 @@ namespace mb::test
 
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& pair), (const, override));
-		MOCK_METHOD(timed_ohlcv_data, get_last_candle, (const tradable_pair& pair, ohlcv_interval interval), (const, override));
+		MOCK_METHOD(ohlcv_data, get_last_candle, (const tradable_pair& pair, ohlcv_interval interval), (const, override));
 
 		MOCK_METHOD(set_queue<tradable_pair>&, get_order_book_message_queue, (), (noexcept, override));
 	};
@@ -56,7 +56,6 @@ namespace mb::test
 		MOCK_METHOD(std::string_view, id, (), (const, override, noexcept));
 		MOCK_METHOD(exchange_status, get_status, (), (const, override));
 		MOCK_METHOD(std::vector<tradable_pair>, get_tradable_pairs, (), (const, override));
-		MOCK_METHOD(ohlcv_data, get_24h_stats, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& tradablePair, int depth), (const, override));
 		MOCK_METHOD(unordered_string_map<double>, get_balances, (), (const, override));

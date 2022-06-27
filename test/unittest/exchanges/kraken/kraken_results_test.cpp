@@ -41,16 +41,6 @@ namespace mb::test
 		});
 	}
 
-	TEST(KrakenResults, Read24hStats)
-	{
-		execute_reader_test(
-			kraken_results_test_data_path("24h_stats_success.json"),
-			kraken_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
-			kraken::read_24h_stats,
-			ohlcv_data{ 2034.26, 2056.45, 1917.23, 1940.0, 369.71101684 },
-			assert_pair_stats_eq);
-	}
-
 	TEST(KrakenResults, ReadPrice)
 	{
 		execute_reader_test(

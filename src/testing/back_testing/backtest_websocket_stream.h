@@ -25,7 +25,7 @@ namespace mb
 
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		double get_price(const tradable_pair& pair) const override;
-		timed_ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const override;
+		ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const override;
 
 		set_queue<tradable_pair>& get_order_book_message_queue() override
 		{

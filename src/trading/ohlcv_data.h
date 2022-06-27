@@ -9,6 +9,7 @@ namespace mb
 	class ohlcv_data
 	{
 	private:
+		std::time_t _timeStamp;
 		double _open;
 		double _high;
 		double _low;
@@ -16,13 +17,25 @@ namespace mb
 		double _volume;
 
 	public:
+		constexpr ohlcv_data()
+			:
+			_timeStamp{ -1 },
+			_open{},
+			_high{},
+			_low{},
+			_close{},
+			_volume{}
+		{}
+
 		constexpr ohlcv_data(
+			std::time_t timeStamp,
 			double open,
 			double high,
 			double low,
 			double close,
 			double volume)
 			:
+			_timeStamp{ timeStamp },
 			_open{ open },
 			_high{ high },
 			_low{ low },
@@ -30,33 +43,19 @@ namespace mb
 			_volume{ volume }
 		{}
 
+		constexpr std::time_t time_stamp() const noexcept { return _timeStamp; }
 		constexpr double open() const noexcept { return _open; }
 		constexpr double high() const noexcept { return _high; }
 		constexpr double low() const noexcept { return _low; }
 		constexpr double close() const noexcept { return _close; }
 		constexpr double volume() const noexcept { return _volume; }
-	};
 
-	class timed_ohlcv_data
-	{
-	private:
-		std::time_t _timeStamp;
-		ohlcv_data _data;
-
-	public:
-		constexpr timed_ohlcv_data(std::time_t timeStamp, ohlcv_data data)
-			: _timeStamp{ timeStamp }, _data{ std::move(data) }
-		{}
-
-		constexpr std::time_t time_stamp() const noexcept { return _timeStamp; }
-		constexpr const ohlcv_data& data() const noexcept { return _data; }
-
-		constexpr bool operator<(const timed_ohlcv_data& other) const
+		constexpr bool operator<(const ohlcv_data& other) const
 		{
 			return _timeStamp < other._timeStamp;
 		}
 	};
 
 	template<>
-	timed_ohlcv_data from_csv_row(const csv_row& row);
+	ohlcv_data from_csv_row(const csv_row& row);
 }

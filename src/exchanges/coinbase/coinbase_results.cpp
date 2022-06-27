@@ -70,21 +70,6 @@ namespace mb::coinbase
 		});
 	}
 
-	result<ohlcv_data> read_24h_stats(std::string_view jsonResult)
-	{
-		return read_result<ohlcv_data>(jsonResult, [](const json_document& json)
-		{
-			return ohlcv_data
-			{
-				std::stod(json.get<std::string>("open")),
-				std::stod(json.get<std::string>("high")),
-				std::stod(json.get<std::string>("low")),
-				std::stod(json.get<std::string>("last")),
-				std::stod(json.get<std::string>("volume"))
-			};
-		});
-	}
-
 	result<double> read_price(std::string_view jsonResult)
 	{
 		return read_result<double>(jsonResult, [](const json_document& json)

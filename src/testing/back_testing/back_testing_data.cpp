@@ -6,31 +6,31 @@ namespace
 	using namespace mb;
 
 	template<typename StartIt, typename EndIt>
-	timed_ohlcv_data merge_ohlcv(StartIt start, EndIt end, std::time_t targetTime)
+	ohlcv_data merge_ohlcv(StartIt start, EndIt end, std::time_t targetTime)
 	{
-		double open = start->data().open();
-		double high = start->data().high();
-		double low = start->data().low();
-		double close = start->data().close();
-		double volume = start->data().volume();
+		double open = start->open();
+		double high = start->high();
+		double low = start->low();
+		double close = start->close();
+		double volume = start->volume();
 
 		auto it = std::make_reverse_iterator(start);
 		for (; it != end; ++it)
 		{
-			const timed_ohlcv_data& data = *it;
+			const ohlcv_data& data = *it;
 
 			if (data.time_stamp() < targetTime)
 			{
 				break;
 			}
 
-			open = data.data().open();
-			high = std::max(high, data.data().high());
-			low = std::min(low, data.data().low());
-			volume += data.data().volume();
+			open = data.open();
+			high = std::max(high, data.high());
+			low = std::min(low, data.low());
+			volume += data.volume();
 		}
 
-		return timed_ohlcv_data{ targetTime, ohlcv_data{ open, high, low, close, volume } };
+		return ohlcv_data{ targetTime, open, high, low, close, volume };
 	}
 }
 
@@ -38,7 +38,7 @@ namespace mb
 {
 	back_testing_data::back_testing_data(
 		std::vector<tradable_pair> tradablePairs,
-		std::unordered_map<tradable_pair, std::vector<timed_ohlcv_data>> data,
+		std::unordered_map<tradable_pair, std::vector<ohlcv_data>> data,
 		std::time_t startTime,
 		std::time_t endTime,
 		int step_size,
@@ -54,7 +54,7 @@ namespace mb
 		_dataSource{ std::move(dataSource) }
 	{}
 
-	const std::vector<timed_ohlcv_data>& back_testing_data::get_ohlcv_data(const tradable_pair& pair)
+	const std::vector<ohlcv_data>& back_testing_data::get_ohlcv_data(const tradable_pair& pair)
 	{
 		auto it = _data.find(pair);
 		if (it != _data.end())
@@ -64,7 +64,7 @@ namespace mb
 
 		if (_dataSource)
 		{
-			std::vector<timed_ohlcv_data> data = _dataSource->load_data(pair);
+			std::vector<ohlcv_data> data = _dataSource->load_data(pair);
 			return _data[pair] = std::move(data);
 		}
 
@@ -75,24 +75,9 @@ namespace mb
 		: _data{ std::move(data) }, _dataTime{ _data.start_time() }, _iteratorCache{}
 	{}
 
-	timed_ohlcv_data back_testing_data_navigator::get_merged_ohlcv(const tradable_pair& pair, int interval)
+	std::vector<ohlcv_data> back_testing_data_navigator::get_past_ohlcv_data(const tradable_pair& pair, int interval, int count)
 	{
-		const std::vector<timed_ohlcv_data>& pairData = _data.get_ohlcv_data(pair);
-		auto startIterator = find_data_position(pairData, pair);
-
-		if (startIterator == pairData.end())
-		{
-			return timed_ohlcv_data{ 0, ohlcv_data{ 0, 0, 0, 0, 0 } };
-		}
-
-		std::time_t targetTime = _dataTime - interval;
-
-		return merge_ohlcv(startIterator, pairData.rend(), targetTime);
-	}
-
-	std::vector<timed_ohlcv_data> back_testing_data_navigator::get_past_ohlcv_data(const tradable_pair& pair, int interval, int count)
-	{
-		const std::vector<timed_ohlcv_data>& pairData = _data.get_ohlcv_data(pair);
+		const std::vector<ohlcv_data>& pairData = _data.get_ohlcv_data(pair);
 		auto startIterator = find_data_position(pairData, pair);
 
 		if (startIterator == pairData.end())
@@ -102,12 +87,12 @@ namespace mb
 
 		std::time_t targetTime = _dataTime - interval;
 
-		std::vector<timed_ohlcv_data> data;
+		std::vector<ohlcv_data> data;
 		data.reserve(count);
 
 		for (int i = 0; i < count; i++)
 		{
-			timed_ohlcv_data mergedOhlcv{ merge_ohlcv(startIterator, pairData.rend(), targetTime) };
+			ohlcv_data mergedOhlcv{ merge_ohlcv(startIterator, pairData.rend(), targetTime) };
 			data.emplace(data.begin(), std::move(mergedOhlcv));
 
 			if (startIterator == pairData.begin())
@@ -126,7 +111,7 @@ namespace mb
 		return data;
 	}
 
-	std::vector<timed_ohlcv_data>::const_iterator back_testing_data_navigator::find_data_position(const std::vector<timed_ohlcv_data>& pairData, const tradable_pair& tradablePair)
+	std::vector<ohlcv_data>::const_iterator back_testing_data_navigator::find_data_position(const std::vector<ohlcv_data>& pairData, const tradable_pair& tradablePair)
 	{
 		if (pairData.empty() || _dataTime < pairData.front().time_stamp())
 		{
@@ -160,9 +145,9 @@ namespace mb
 		return it;
 	}
 
-	std::optional<std::reference_wrapper<const timed_ohlcv_data>> back_testing_data_navigator::find_data_point(const tradable_pair& tradablePair)
+	std::optional<std::reference_wrapper<const ohlcv_data>> back_testing_data_navigator::find_data_point(const tradable_pair& tradablePair)
 	{
-		const std::vector<timed_ohlcv_data>& pairData{ _data.get_ohlcv_data(tradablePair) };
+		const std::vector<ohlcv_data>& pairData{ _data.get_ohlcv_data(tradablePair) };
 		auto iterator = find_data_position(pairData, tradablePair);
 
 		if (iterator != pairData.end())

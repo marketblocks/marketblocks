@@ -81,9 +81,8 @@ namespace mb
 		std::shared_ptr<websocket_stream> get_websocket_stream() override;
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
-		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const override;
 
-		std::vector<timed_ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override
+		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override
 		{
 			throw not_implemented_exception{ "kraken::get_ohlcv" };
 		}

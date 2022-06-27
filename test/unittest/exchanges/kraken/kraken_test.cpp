@@ -77,27 +77,6 @@ namespace mb::test
 		api.get_tradable_pairs();
 	}
 
-	TEST(Kraken, Get24hStats)
-	{
-		tradable_pair pair{ "ETH", "GBP" };
-
-		http_request expectedRequest
-		{
-			http_verb::GET,
-			"https://api.kraken.com/0/public/Ticker?pair=ETHGBP"
-		};
-
-		http_response response
-		{
-			200,
-			read_file(kraken_results_test_data_path("24h_stats_success.json"))
-		};
-
-		kraken_api api{ create_api(std::move(expectedRequest), std::move(response), IsHttpRequest<http_request>) };
-
-		api.get_24h_stats(pair);
-	}
-
 	TEST(Kraken, GetOrderBook)
 	{
 		tradable_pair pair{ "XBT", "USD" };

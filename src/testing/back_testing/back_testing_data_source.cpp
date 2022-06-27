@@ -5,18 +5,18 @@ namespace
 {
 	using namespace mb;
 
-	class timed_ohlcv_data_csv_selector
+	class ohlcv_data_csv_selector
 	{
 	private:
 		int _stepSize;
 		std::time_t _lastTime;
 
 	public:
-		timed_ohlcv_data_csv_selector(int stepSize)
+		ohlcv_data_csv_selector(int stepSize)
 			: _stepSize{ stepSize }, _lastTime{ -1 }
 		{}
 
-		bool operator()(const timed_ohlcv_data& data)
+		bool operator()(const ohlcv_data& data)
 		{
 			if (data.time_stamp() - _lastTime < _stepSize)
 			{
@@ -35,15 +35,15 @@ namespace mb
 		: _dataDirectory{ std::move(dataDirectory) }, _stepSize{ stepSize }
 	{}
 
-	std::vector<timed_ohlcv_data> back_testing_data_source::load_data(const tradable_pair& pair) const
+	std::vector<ohlcv_data> back_testing_data_source::load_data(const tradable_pair& pair) const
 	{
 		std::string pairName{ pair.to_string('_') };
 
 		logger::instance().info("Loading data from {0}.csv", pairName);
 
 		std::filesystem::path path = _dataDirectory / (pairName + ".csv");
-		std::vector<timed_ohlcv_data> data{
-			read_csv_file<timed_ohlcv_data>(path, timed_ohlcv_data_csv_selector{ _stepSize }) };
+		std::vector<ohlcv_data> data{
+			read_csv_file<ohlcv_data>(path, ohlcv_data_csv_selector{ _stepSize }) };
 
 		if (data.empty())
 		{

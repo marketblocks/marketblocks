@@ -28,8 +28,7 @@ namespace mb
 		virtual std::shared_ptr<websocket_stream> get_websocket_stream() = 0;
 		virtual exchange_status get_status() const = 0;
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
-		virtual ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const = 0;
-		virtual std::vector<timed_ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const = 0;
+		virtual std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const = 0;
 		virtual double get_price(const tradable_pair& tradablePair) const = 0;
 		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 		virtual unordered_string_map<double> get_balances() const = 0;
@@ -84,12 +83,7 @@ namespace mb
 			return _marketApi->get_tradable_pairs();
 		}
 
-		ohlcv_data get_24h_stats(const tradable_pair& tradablePair) const override
-		{
-			return _marketApi->get_24h_stats(tradablePair);
-		}
-
-		std::vector<timed_ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override
+		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override
 		{
 			return _marketApi->get_ohlcv(tradablePair, interval, count);
 		}

@@ -124,7 +124,7 @@ namespace mb
 		lockedPrices->insert_or_assign(std::move(subscriptionId), price);
 	}
 
-	void exchange_websocket_stream::update_ohlcv(std::string subscriptionId, timed_ohlcv_data ohlcvData)
+	void exchange_websocket_stream::update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData)
 	{
 		auto lockedOhlcv = _ohlcv.unique_lock();
 		lockedOhlcv->insert_or_assign(std::move(subscriptionId), std::move(ohlcvData));
@@ -180,11 +180,11 @@ namespace mb
 		return find_or_default(*lockedPrices, subId, 0.0);
 	}
 
-	timed_ohlcv_data exchange_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
+	ohlcv_data exchange_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
 	{
 		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_ohlcv_sub(pair, interval)) };
 		
 		auto lockedOhlcv = _ohlcv.shared_lock();
-		return find_or_default(*lockedOhlcv, subId, timed_ohlcv_data{ 0, ohlcv_data{ 0, 0, 0, 0, 0 } });
+		return find_or_default(*lockedOhlcv, subId, ohlcv_data{});
 	}
 }

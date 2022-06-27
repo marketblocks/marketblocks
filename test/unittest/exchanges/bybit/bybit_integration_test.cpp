@@ -29,14 +29,6 @@ namespace mb::test
 		ASSERT_NO_THROW(bybit->get_tradable_pairs());
 	}
 
-	TEST(ByBitIntegration, Get24hStats)
-	{
-		tradable_pair pair{ "BTC", "USDT" };
-
-		auto bybit{ create_api() };
-		ASSERT_NO_THROW(bybit->get_24h_stats(pair));
-	}
-
 	TEST(ByBitIntegration, GetPrice)
 	{
 		tradable_pair pair{ "BTC", "USDT" };

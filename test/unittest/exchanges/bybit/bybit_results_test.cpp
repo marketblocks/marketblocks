@@ -29,19 +29,6 @@ namespace mb::test
 			});
 	}
 
-	TEST(ByBitResults, Read24hStats)
-	{
-		execute_reader_test(
-			bybit_results_test_data_path("24hr_stats.json"),
-			bybit_results_test_data_path(ERROR_RESPONSE_FILE_NAME),
-			bybit::read_24h_stats,
-			ohlcv_data
-			{
-				50005.12, 70000, 50005.12, 50008, 26.7308
-			},
-			assert_pair_stats_eq);
-	}
-
 	TEST(ByBitResults, ReadPrice)
 	{
 		execute_reader_test(

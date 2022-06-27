@@ -15,6 +15,6 @@ namespace mb
 	public:
 		back_testing_data_source(std::filesystem::path dataDirectory, int stepSize);
 
-		std::vector<timed_ohlcv_data> load_data(const tradable_pair& pair) const;
+		std::vector<ohlcv_data> load_data(const tradable_pair& pair) const;
 	};
 }

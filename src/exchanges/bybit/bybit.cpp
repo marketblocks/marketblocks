@@ -86,16 +86,7 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>("spot/v1/symbols", bybit::read_tradable_pairs);
 	}
 
-	ohlcv_data bybit_api::get_24h_stats(const tradable_pair& tradablePair) const
-	{
-		std::string query = url_query_builder{}
-			.add_parameter("symbol", tradablePair.to_string())
-			.to_string();
-
-		return send_public_request<ohlcv_data>("/spot/quote/v1/ticker/24hr", bybit::read_24h_stats, query);
-	}
-
-	std::vector<timed_ohlcv_data> bybit_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
+	std::vector<ohlcv_data> bybit_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
 	{
 		std::string query = url_query_builder{}
 			.add_parameter("symbol", tradablePair.to_string())
@@ -103,7 +94,7 @@ namespace mb
 			.add_parameter("limit", std::to_string(count))
 			.to_string();
 
-		return send_public_request<std::vector<timed_ohlcv_data>>("/spot/quote/v1/kline", bybit::read_ohlcv, query);
+		return send_public_request<std::vector<ohlcv_data>>("/spot/quote/v1/kline", bybit::read_ohlcv, query);
 	}
 
 	double bybit_api::get_price(const tradable_pair& tradablePair) const

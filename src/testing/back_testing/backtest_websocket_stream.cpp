@@ -26,11 +26,11 @@ namespace mb
 
 	order_book_state backtest_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
+		std::optional<std::reference_wrapper<const ohlcv_data>> data = _dataNavigator->find_data_point(pair);
 
 		if (data.has_value())
 		{
-			const ohlcv_data& ohlcvData = data.value().get().data();
+			const ohlcv_data& ohlcvData = data.value().get();
 			return order_book_state
 			{
 				{
@@ -47,18 +47,25 @@ namespace mb
 
 	double backtest_websocket_stream::get_price(const tradable_pair& pair) const
 	{
-		std::optional<std::reference_wrapper<const timed_ohlcv_data>> data = _dataNavigator->find_data_point(pair);
+		std::optional<std::reference_wrapper<const ohlcv_data>> data = _dataNavigator->find_data_point(pair);
 
 		if (data.has_value())
 		{
-			return data.value().get().data().close();
+			return data.value().get().close();
 		}
 
 		return 0.0;
 	}
 
-	timed_ohlcv_data backtest_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
+	ohlcv_data backtest_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
 	{
-		return _dataNavigator->get_merged_ohlcv(pair, to_seconds(interval));
+		std::vector<ohlcv_data> candles = _dataNavigator->get_past_ohlcv_data(pair, to_seconds(interval), 1);
+
+		if (candles.empty())
+		{
+			return ohlcv_data{ 0, 0, 0, 0, 0, 0 };
+		}
+
+		return candles.front();
 	}
 }

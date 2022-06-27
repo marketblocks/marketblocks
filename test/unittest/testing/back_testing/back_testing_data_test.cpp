@@ -6,11 +6,11 @@ namespace mb::test
 {
 	TEST(BackTestingData, FindDataPositionReturnsEndIfTimeIsBeforeFirstDataPoint)
 	{
-		std::vector<timed_ohlcv_data> data
+		std::vector<ohlcv_data> data
 		{
-			timed_ohlcv_data{ 2, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 3, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 4, ohlcv_data{ 0, 0, 0, 0, 0 } },
+			ohlcv_data{ 2, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 3, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 4, 0, 0, 0, 0, 0 }
 		};
 
 		tradable_pair pair{ "BTC", "GBP" };
@@ -20,7 +20,7 @@ namespace mb::test
 			back_testing_data
 			{
 				std::vector<tradable_pair>{ pair },
-				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				std::unordered_map<tradable_pair,std::vector<ohlcv_data>>{ { pair, data }},
 				1,
 				4,
 				1,
@@ -35,11 +35,11 @@ namespace mb::test
 
 	TEST(BackTestingData, FindDataPositionReturnsCorrectlyIfTimeIsEqualToDataPoint)
 	{
-		std::vector<timed_ohlcv_data> data
+		std::vector<ohlcv_data> data
 		{
-			timed_ohlcv_data{ 2, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 3, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 4, ohlcv_data{ 0, 0, 0, 0, 0 } },
+			ohlcv_data{ 2, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 3, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 4, 0, 0, 0, 0, 0 }
 		};
 
 		tradable_pair pair{ "BTC", "GBP" };
@@ -49,7 +49,7 @@ namespace mb::test
 			back_testing_data
 			{
 				std::vector<tradable_pair>{ pair },
-				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				std::unordered_map<tradable_pair,std::vector<ohlcv_data>>{ { pair, data }},
 				1,
 				4,
 				1,
@@ -71,11 +71,11 @@ namespace mb::test
 
 	TEST(BackTestingData, FindDataPositionReturnsLastIfTimeIsPastEndDataPoint)
 	{
-		std::vector<timed_ohlcv_data> data
+		std::vector<ohlcv_data> data
 		{
-			timed_ohlcv_data{ 2, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 3, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 4, ohlcv_data{ 0, 0, 0, 0, 0 } },
+			ohlcv_data{ 2, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 3, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 4, 0, 0, 0, 0, 0 }
 		};
 
 		tradable_pair pair{ "BTC", "GBP" };
@@ -85,7 +85,7 @@ namespace mb::test
 			back_testing_data
 			{
 				std::vector<tradable_pair>{ pair },
-				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				std::unordered_map<tradable_pair,std::vector<ohlcv_data>>{ { pair, data }},
 				5,
 				6,
 				1,
@@ -103,11 +103,11 @@ namespace mb::test
 
 	TEST(BackTestingData, FindDataPositionReturnsMostRecentIfTimeIsBetweenDataPoints)
 	{
-		std::vector<timed_ohlcv_data> data
+		std::vector<ohlcv_data> data
 		{
-			timed_ohlcv_data{ 2, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 5, ohlcv_data{ 0, 0, 0, 0, 0 } },
-			timed_ohlcv_data{ 7, ohlcv_data{ 0, 0, 0, 0, 0 } },
+			ohlcv_data{ 2, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 5, 0, 0, 0, 0, 0 },
+			ohlcv_data{ 7, 0, 0, 0, 0, 0 }
 		};
 
 		tradable_pair pair{ "BTC", "GBP" };
@@ -117,7 +117,7 @@ namespace mb::test
 			back_testing_data
 			{
 				std::vector<tradable_pair>{ pair },
-				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{ { pair, data }},
+				std::unordered_map<tradable_pair,std::vector<ohlcv_data>>{ { pair, data }},
 				2,
 				7,
 				1,
@@ -143,7 +143,7 @@ namespace mb::test
 			back_testing_data
 			{
 				std::vector<tradable_pair>{},
-				std::unordered_map<tradable_pair,std::vector<timed_ohlcv_data>>{},
+				std::unordered_map<tradable_pair,std::vector<ohlcv_data>>{},
 				0,
 				0,
 				0,

@@ -61,11 +61,6 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>("/spot/symbols", digifinex::read_tradable_pairs);
 	}
 
-	ohlcv_data digifinex_api::get_24h_stats(const tradable_pair& tradablePair) const
-	{
-		throw not_implemented_exception{ "digifinex::get_24h_stats" };
-	}
-
 	double digifinex_api::get_price(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}

@@ -12,11 +12,6 @@ namespace mb::read_template
 		return result<std::vector<tradable_pair>>::success({});
 	}
 
-	result<ohlcv_data> read_24h_stats(std::string_view jsonResult)
-	{
-		return result<ohlcv_data>::success(ohlcv_data{ 0.0,0.0,0.0,0.0,0.0 });
-	}
-
 	result<double> read_price(std::string_view jsonResult)
 	{
 		return result<double>::success(0.0);

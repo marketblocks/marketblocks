@@ -29,14 +29,6 @@ namespace mb::test
 		ASSERT_NO_THROW(digifinex->get_tradable_pairs());
 	}
 
-	TEST(DigifinexIntegration, Get24hStats)
-	{
-		tradable_pair pair{ "BTC", "USDT" };
-
-		auto digifinex{ create_api() };
-		ASSERT_NO_THROW(digifinex->get_24h_stats(pair));
-	}
-
 	TEST(DigifinexIntegration, GetPrice)
 	{
 		tradable_pair pair{ "BTC", "USDT" };
