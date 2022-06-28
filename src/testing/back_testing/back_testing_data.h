@@ -3,12 +3,16 @@
 #include <vector>
 #include <unordered_map>
 
-#include "back_testing_data_source.h"
+#include "data_loading/back_testing_data_source.h"
 #include "trading/tradable_pair.h"
 #include "trading/ohlcv_data.h"
+#include "trading/order_book.h"
 
 namespace mb
 {
+	using data_iterator = std::vector<ohlcv_data>::const_iterator;
+	using iterator_cache = std::unordered_map<tradable_pair, data_iterator>;
+
 	class back_testing_data
 	{
 	private:
@@ -20,6 +24,11 @@ namespace mb
 		int _timeSteps;
 
 		std::unique_ptr<back_testing_data_source> _dataSource;
+
+		std::time_t _dataTime;
+		iterator_cache _iteratorCache;
+
+		const std::vector<ohlcv_data>& get_or_load_data(const tradable_pair& pair);
 
 	public:
 		back_testing_data(
@@ -36,25 +45,10 @@ namespace mb
 		int step_size() const noexcept { return _stepSize; }
 		int time_steps() const noexcept { return _timeSteps; }
 		const std::vector<tradable_pair>& tradable_pairs() const noexcept { return _tradablePairs; }
-		const std::vector<ohlcv_data>& get_ohlcv_data(const tradable_pair& pair);
-	};
 
-	class back_testing_data_navigator
-	{
-	private:
-		back_testing_data _data;
-		std::time_t _dataTime;
-		std::unordered_map<tradable_pair, std::vector<ohlcv_data>::const_iterator> _iteratorCache;
-
-	public:
-		back_testing_data_navigator(back_testing_data data);
-
-		void increment_data() { _dataTime += _data.step_size(); };
-		back_testing_data& data() noexcept { return _data; }
-		std::time_t data_time() const noexcept { return _dataTime; }
-
-		std::vector<ohlcv_data> get_past_ohlcv_data(const tradable_pair& pair, int interval, int count);
-		std::vector<ohlcv_data>::const_iterator find_data_position(const std::vector<ohlcv_data>& pairData, const tradable_pair& tradablePair);
-		std::optional<std::reference_wrapper<const ohlcv_data>> find_data_point(const tradable_pair& tradablePair);
+		void increment();
+		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& pair, int interval, int count);
+		double get_price(const tradable_pair& pair);
+		order_book_state get_order_book(const tradable_pair& pair, int depth = 0);
 	};
 }

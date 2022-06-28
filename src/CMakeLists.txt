@@ -85,8 +85,8 @@ add_library(marketblocks_lib
  "common/json/json_constants.h"
  "common/json/json_writer.h"
  "common/json/json_writer.cpp"
- "testing/back_testing/backtest_market_api.h"
- "testing/back_testing/backtest_market_api.cpp"
+ "testing/back_testing/back_test_market_api.h"
+ "testing/back_testing/back_test_market_api.cpp"
  "testing/back_testing/back_testing_config.h"
  "testing/back_testing/back_testing_config.cpp"
  "common/types/partial_data_result.h"
@@ -96,8 +96,8 @@ add_library(marketblocks_lib
  "common/csv/csv.cpp"
  "testing/back_testing/back_testing_data.h"
  "testing/back_testing/back_testing_data.cpp" 
- "testing/back_testing/data_loading.h"
- "testing/back_testing/data_loading.cpp"
+ "testing/back_testing/data_loading/data_factory.h"
+ "testing/back_testing/data_loading/data_factory.cpp"
  "common/csv/csv_row.cpp"
  "trading/tradable_pair.cpp"
  "trading/ohlcv_data.cpp"
@@ -106,7 +106,7 @@ add_library(marketblocks_lib
  "runner/runner_implementation.h" 
  "runner/live_runner.h" 
  "runner/back_test_runner.h"
- "runner/back_test_runner.cpp"
+ 
  "runner/runner.cpp"
  "trading/order_description.cpp"
  "runner/live_test_runner.h"
@@ -120,8 +120,8 @@ add_library(marketblocks_lib
  "testing/reporting/test_logger.cpp" 
  "common/utils/generalutils.h" 
  "common/utils/generalutils.cpp"
- "testing/back_testing/back_testing_data_source.h"
- "testing/back_testing/back_testing_data_source.cpp"
+ "testing/back_testing/data_loading/back_testing_data_source.h"
+ 
  "exchanges/template/template.h"
  "exchanges/template/template.cpp"
  "exchanges/template/template_results.h"
@@ -147,7 +147,8 @@ add_library(marketblocks_lib
  "exchanges/websockets/exchange_websocket_stream.h"
  "common/utils/mathutils.cpp" 
  "common/types/concurrent_wrapper.h"
- "common/exceptions/validation_exception.h")
+ "common/exceptions/validation_exception.h"
+ "exchanges/exchange.cpp" "exchanges/multi_component_exchange.h"  "testing/back_testing/data_loading/csv_data_source.h" "testing/back_testing/data_loading/csv_data_source.cpp")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

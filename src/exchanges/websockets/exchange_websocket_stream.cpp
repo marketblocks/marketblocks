@@ -16,7 +16,6 @@ namespace mb
 		_connectionFactory{ std::move(connectionFactory) }
 	{
 		initialise_connection_factory();
-		reset();
 	}
 
 	void exchange_websocket_stream::initialise_connection_factory()

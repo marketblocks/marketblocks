@@ -49,8 +49,10 @@ namespace mb
 	coinbase_api::coinbase_api(
 		coinbase_config config,
 		std::unique_ptr<http_service> httpService,
+		std::shared_ptr<websocket_stream> websocketStream,
 		bool enableTesting)
 		:
+		exchange{ exchange_ids::COINBASE, std::move(websocketStream) },
 		_baseUrl{ select_base_url(enableTesting) },
 		_userAgentId{ get_timestamp() },
 		_apiKey{ config.api_key() },
@@ -76,16 +78,6 @@ namespace mb
 		auto hmac = hmac_sha256(message, _decodedApiSecret);
 		auto encoded = b64_encode(hmac);
 		return encoded;
-	}
-
-	std::shared_ptr<websocket_stream> coinbase_api::get_websocket_stream()
-	{
-		if (!_websocketStream)
-		{
-			_websocketStream = create_exchange_websocket_stream<internal::coinbase_websocket_stream>();
-		}
-
-		return _websocketStream;
 	}
 
 	exchange_status coinbase_api::get_status() const
@@ -188,6 +180,7 @@ namespace mb
 		return std::make_unique<coinbase_api>(
 			std::move(config),
 			std::make_unique<http_service>(),
+			create_exchange_websocket_stream<internal::coinbase_websocket_stream>(),
 			enableTesting);
 	}
 }

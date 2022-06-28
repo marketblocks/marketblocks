@@ -1,25 +1,26 @@
 #pragma once
 
 #include "runner_implementation.h"
-#include "testing/back_testing/backtest_market_api.h"
+#include "testing/back_testing/back_test_market_api.h"
 #include "testing/back_testing/back_testing_config.h"
+#include "testing/back_testing/data_loading/data_factory.h"
 #include "testing/paper_trading/paper_trade_api.h"
 #include "testing/reporting/back_test_report.h"
 #include "testing/reporting/test_logger.h"
 #include "logging/logger.h"
 #include "common/utils/mathutils.h"
+#include "exchanges/multi_component_exchange.h"
+#include "exchanges/exchange_ids.h"
 
 namespace mb::internal
 {
-	std::shared_ptr<backtest_market_api> create_backtest_market_api(const back_testing_config& config);
-	std::shared_ptr<paper_trade_api> create_paper_trade_api(std::shared_ptr<backtest_market_api> marketApi);
-	
 	template<typename Strategy>
 	class back_test_runner : public runner_implementation<Strategy>
 	{
 	private:
 		back_testing_config _config;
-		std::shared_ptr<back_test_exchange> _backTestExchange;
+		std::shared_ptr<back_testing_data> _backTestingData;
+		std::shared_ptr<paper_trade_api> _paperTradeApi;
 
 	public:
 		back_test_runner(back_testing_config config)
@@ -28,27 +29,29 @@ namespace mb::internal
 
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
-			auto marketApi = create_backtest_market_api(_config);
-			_backTestExchange = std::make_shared<back_test_exchange>(
-				marketApi,
-				create_paper_trade_api(marketApi));
+			_backTestingData = load_back_testing_data(_config);
+
+			std::shared_ptr<backtest_websocket_stream> websocketStream{ std::make_shared<backtest_websocket_stream>(_backTestingData) };
+			std::shared_ptr<back_test_market_api> marketApi{ std::make_shared<back_test_market_api>(_backTestingData) };
+			
+			_paperTradeApi = create_paper_trade_api(
+				exchange_ids::BACK_TEST, 
+				[_backTestingData](const tradable_pair& pair) { return _backTestingData->get_price(pair); });
 
 			return
 			{
-				_backTestExchange
+				std::make_shared<back_test_exchange>(
+					exchange_ids::BACK_TEST,
+					websocketStream,
+					marketApi,
+					_paperTradeApi)
 			};
 		}
 
 		void run(Strategy& strategy) override
 		{
-			std::shared_ptr<backtest_market_api> backTestMarketApi = _backTestExchange->market_api();
-			std::shared_ptr<paper_trade_api> paperTradeApi = _backTestExchange->trade_api();
-
-			test_logger testLogger{ mb::create_test_logger({paperTradeApi}) };
-
-			const back_testing_data& data = backTestMarketApi->get_back_testing_data();
-			int timeSteps = data.time_steps();
-
+			test_logger testLogger{ mb::create_test_logger({ _paperTradeApi }) };
+			int timeSteps{ _backTestingData->time_steps() };
 			int lastLoggedPercentage = -1;
 
 			for (int i = 0; i < timeSteps; ++i)
@@ -71,12 +74,12 @@ namespace mb::internal
 					logger::instance().error(e.what());
 				}
 
-				backTestMarketApi->increment_data();
+				_backTestingData->increment();
 			}
 
 			logger::instance().info("Back test complete. Generating report...");
 
-			test_report report{ generate_back_test_report(data, testLogger, strategy.get_test_results()) };
+			test_report report{ generate_back_test_report(_backTestingData, testLogger, strategy.get_test_results()) };
 			testLogger.log_test_report(report);
 		}
 	};
@@ -84,7 +87,7 @@ namespace mb::internal
 	template<typename Strategy>
 	std::unique_ptr<back_test_runner<Strategy>> create_back_test_runner()
 	{
-		back_testing_config config = load_or_create_config<back_testing_config>();
+		back_testing_config config{ load_or_create_config<back_testing_config>() };
 		return std::make_unique<back_test_runner<Strategy>>(std::move(config));
 	}
 }

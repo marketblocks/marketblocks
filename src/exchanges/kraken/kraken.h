@@ -29,7 +29,6 @@ namespace mb
 		std::string _publicKey;
 		std::vector<unsigned char> _decodedPrivateKey;
 		std::unique_ptr<http_service> _httpService;
-		std::shared_ptr<websocket_stream> _websocketStream;
 
 		std::string get_nonce() const;
 		std::string compute_api_sign(std::string_view uriPath, std::string_view postData, std::string_view nonce) const;
@@ -74,11 +73,9 @@ namespace mb
 	public:
 		kraken_api(
 			kraken_config config, 
-			std::unique_ptr<http_service> httpService);
+			std::unique_ptr<http_service> httpService,
+			std::shared_ptr<websocket_stream> websocketStream);
 
-		constexpr std::string_view id() const noexcept override { return exchange_ids::KRAKEN; }
-		
-		std::shared_ptr<websocket_stream> get_websocket_stream() override;
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 

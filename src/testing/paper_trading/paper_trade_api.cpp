@@ -117,6 +117,11 @@ namespace mb
 		return _fee;
 	}
 
+	unordered_string_map<double> paper_trade_api::get_balances() const
+	{
+		return _balances;
+	}
+
 	std::vector<order_description> paper_trade_api::get_open_orders() const
 	{
 		std::vector<order_description> orders;
@@ -128,6 +133,11 @@ namespace mb
 		}
 
 		return orders;
+	}
+
+	std::vector<order_description> paper_trade_api::get_closed_orders() const
+	{
+		return _closedOrders;
 	}
 
 	std::string paper_trade_api::add_order(const trade_description& description)

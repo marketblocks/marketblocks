@@ -20,7 +20,7 @@
 //		};
 //
 //		auto dataNavigator = std::make_shared<back_testing_data_navigator>(backTestingData);
-//		auto marketApi = std::make_shared<backtest_market_api>(dataNavigator, nullptr);
+//		auto marketApi = std::make_shared<backtest_exchange>(dataNavigator, nullptr);
 //		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{});
 //		internal::back_test_runner<mock_strategy> runner{ marketApi, paperTradeApi, "" };
 //
@@ -46,7 +46,7 @@
 //		};
 //
 //		auto dataNavigator = std::make_shared<back_testing_data_navigator>(backTestingData);
-//		auto marketApi = std::make_shared<backtest_market_api>(dataNavigator, nullptr);
+//		auto marketApi = std::make_shared<backtest_exchange>(dataNavigator, nullptr);
 //		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{});
 //		internal::back_test_runner<mock_strategy> runner{ marketApi, paperTradeApi, "" };
 //

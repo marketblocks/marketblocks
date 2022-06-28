@@ -42,8 +42,10 @@ namespace mb
 {
 	kraken_api::kraken_api(
 		kraken_config config, 
-		std::unique_ptr<http_service> httpService)
+		std::unique_ptr<http_service> httpService,
+		std::shared_ptr<websocket_stream> websocketStream)
 		:
+		exchange{ exchange_ids::KRAKEN, std::move(websocketStream) },
 		_publicKey{ config.public_key() },
 		_decodedPrivateKey{ b64_decode(config.private_key()) },
 		_httpService{ std::move(httpService) }
@@ -67,16 +69,6 @@ namespace mb
 	std::string kraken_api::build_kraken_path(std::string access, std::string method) const
 	{
 		return "/0/" + std::move(access) + "/" + std::move(method);
-	}
-
-	std::shared_ptr<websocket_stream> kraken_api::get_websocket_stream()
-	{
-		if (!_websocketStream)
-		{
-			_websocketStream = create_exchange_websocket_stream<internal::kraken_websocket_stream>();
-		}
-
-		return _websocketStream;
 	}
 
 	exchange_status kraken_api::get_status() const
@@ -158,6 +150,7 @@ namespace mb
 	{
 		return std::make_unique<kraken_api>(
 			std::move(config),
-			std::make_unique<http_service>());
+			std::make_unique<http_service>(),
+			create_exchange_websocket_stream<internal::kraken_websocket_stream>());
 	}
 }

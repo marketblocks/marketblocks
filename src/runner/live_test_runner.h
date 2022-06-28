@@ -7,6 +7,7 @@
 #include "testing/reporting/test_report.h"
 #include "testing/reporting/test_logger.h"
 #include "logging/logger.h"
+#include "exchanges/multi_component_exchange.h"
 
 namespace mb::internal
 {

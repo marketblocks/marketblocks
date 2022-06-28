@@ -33,7 +33,7 @@ namespace
 	kraken_api create_api(http_request expectedRequest, http_response response, HttpRequestMatcher matcher)
 	{
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response), matcher) };
-		return kraken_api{ kraken_config{}, std::move(mockHttpService) };
+		return kraken_api{ kraken_config{}, std::move(mockHttpService), nullptr };
 	}
 }
 

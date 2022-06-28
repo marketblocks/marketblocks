@@ -8,12 +8,11 @@ namespace mb
 	class backtest_websocket_stream : public websocket_stream
 	{
 	private:
-		std::shared_ptr<back_testing_data_navigator> _dataNavigator;
-		std::unordered_set<tradable_pair> _subscribedPairs;
+		std::shared_ptr<back_testing_data> _backTestingData;
 		set_queue<tradable_pair> _messageQueue;
 
 	public:
-		backtest_websocket_stream(std::shared_ptr<back_testing_data_navigator> dataSource);
+		backtest_websocket_stream(std::shared_ptr<back_testing_data> backTestingData);
 
 		void reset() override {}
 		void disconnect()  override {}

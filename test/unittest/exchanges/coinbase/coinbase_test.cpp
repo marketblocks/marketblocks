@@ -15,7 +15,7 @@ namespace
 	coinbase_api create_api(http_request expectedRequest, http_response response)
 	{
 		std::unique_ptr<mock_http_service> mockHttpService{ create_mock_http_service(std::move(expectedRequest), std::move(response), IsHttpRequest<http_request>) };
-		return coinbase_api{ coinbase_config{}, std::move(mockHttpService) };
+		return coinbase_api{ coinbase_config{}, std::move(mockHttpService), nullptr };
 	}
 }
 

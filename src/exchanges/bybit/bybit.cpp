@@ -47,23 +47,15 @@ namespace mb
 	bybit_api::bybit_api(
 		bybit_config config,
 		std::unique_ptr<http_service> httpService,
+		std::shared_ptr<websocket_stream> websocketStream,
 		bool enableTesting)
 		: 
+		exchange{ exchange_ids::BYBIT, std::move(websocketStream) },
 		_baseUrl{ select_base_url(enableTesting) },
 		_apiKey{ config.api_key() },
 		_apiSecret{ config.api_secret() },
 		_httpService{ std::move(httpService) }
 	{}
-
-	std::shared_ptr<websocket_stream> bybit_api::get_websocket_stream()
-	{
-		if (!_websocketStream)
-		{
-			_websocketStream = create_exchange_websocket_stream<internal::bybit_websocket_stream>();
-		}
-
-		return _websocketStream;
-	}
 
 	std::string bybit_api::get_time_stamp() const
 	{
@@ -165,6 +157,7 @@ namespace mb
 		return std::make_unique<bybit_api>(
 			std::move(config),
 			std::make_unique<http_service>(),
+			create_exchange_websocket_stream<internal::bybit_websocket_stream>(),
 			enableTesting);
 	}
 }

@@ -32,6 +32,40 @@ namespace
 
 		return ohlcv_data{ targetTime, open, high, low, close, volume };
 	}
+
+	std::optional<data_iterator> get_iterator(const std::vector<ohlcv_data>& data, const tradable_pair& pair, std::time_t time, iterator_cache& cache)
+	{
+		if (data.empty() || time < data.front().time_stamp())
+		{
+			return std::nullopt;
+		}
+
+		if (time > data.back().time_stamp())
+		{
+			return std::prev(data.end());
+		}
+
+		auto it = find_or_default(cache, pair, data.begin());
+
+		for (it; it != data.end(); ++it)
+		{
+			std::time_t timeStamp = it->time_stamp();
+
+			if (timeStamp > time)
+			{
+				--it;
+				break;
+			}
+
+			if (timeStamp == time)
+			{
+				break;
+			}
+		}
+
+		cache[pair] = it;
+		return it;
+	}
 }
 
 namespace mb
@@ -51,10 +85,12 @@ namespace mb
 		_endTime{ endTime },
 		_stepSize{ step_size },
 		_timeSteps{ size },
-		_dataSource{ std::move(dataSource) }
+		_dataSource{ std::move(dataSource) },
+		_dataTime{ _startTime }, 
+		_iteratorCache{}
 	{}
 
-	const std::vector<ohlcv_data>& back_testing_data::get_ohlcv_data(const tradable_pair& pair)
+	const std::vector<ohlcv_data>& back_testing_data::get_or_load_data(const tradable_pair& pair)
 	{
 		auto it = _data.find(pair);
 		if (it != _data.end())
@@ -64,29 +100,30 @@ namespace mb
 
 		if (_dataSource)
 		{
-			std::vector<ohlcv_data> data = _dataSource->load_data(pair);
+			std::vector<ohlcv_data> data = _dataSource->load_data(pair, _stepSize);
 			return _data[pair] = std::move(data);
 		}
 
 		return _data[pair] = {};
 	}
 
-	back_testing_data_navigator::back_testing_data_navigator(back_testing_data data)
-		: _data{ std::move(data) }, _dataTime{ _data.start_time() }, _iteratorCache{}
-	{}
-
-	std::vector<ohlcv_data> back_testing_data_navigator::get_past_ohlcv_data(const tradable_pair& pair, int interval, int count)
+	void back_testing_data::increment()
 	{
-		const std::vector<ohlcv_data>& pairData = _data.get_ohlcv_data(pair);
-		auto startIterator = find_data_position(pairData, pair);
+		_dataTime += _stepSize;
+	}
 
-		if (startIterator == pairData.end())
+	std::vector<ohlcv_data> back_testing_data::get_ohlcv(const tradable_pair& pair, int interval, int count)
+	{
+		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
+		std::optional<data_iterator> optStartIterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
+		
+		if (!optStartIterator.has_value())
 		{
 			return {};
 		}
 
+		data_iterator startIterator = *optStartIterator;
 		std::time_t targetTime = _dataTime - interval;
-
 		std::vector<ohlcv_data> data;
 		data.reserve(count);
 
@@ -111,50 +148,38 @@ namespace mb
 		return data;
 	}
 
-	std::vector<ohlcv_data>::const_iterator back_testing_data_navigator::find_data_position(const std::vector<ohlcv_data>& pairData, const tradable_pair& tradablePair)
+	double back_testing_data::get_price(const tradable_pair& pair)
 	{
-		if (pairData.empty() || _dataTime < pairData.front().time_stamp())
+		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
+		std::optional<data_iterator> iterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
+
+		if (!iterator.has_value())
 		{
-			return pairData.end();
+			return 0.0;
 		}
 
-		if (_dataTime > pairData.back().time_stamp())
-		{
-			return std::prev(pairData.end());
-		}
-
-		auto it = find_or_default(_iteratorCache, tradablePair, pairData.begin());
-
-		for (it; it != pairData.end(); ++it)
-		{
-			std::time_t timeStamp = it->time_stamp();
-
-			if (timeStamp > _dataTime)
-			{
-				--it;
-				break;
-			}
-
-			if (timeStamp == _dataTime)
-			{
-				break;
-			}
-		}
-
-		_iteratorCache[tradablePair] = it;
-		return it;
+		return iterator.value()->close();
 	}
 
-	std::optional<std::reference_wrapper<const ohlcv_data>> back_testing_data_navigator::find_data_point(const tradable_pair& tradablePair)
+	order_book_state back_testing_data::get_order_book(const tradable_pair& pair, int depth)
 	{
-		const std::vector<ohlcv_data>& pairData{ _data.get_ohlcv_data(tradablePair) };
-		auto iterator = find_data_position(pairData, tradablePair);
+		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
+		std::optional<data_iterator> iterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
 
-		if (iterator != pairData.end())
+		if (!iterator.has_value())
 		{
-			return std::reference_wrapper{ *iterator };
+			return order_book_state{ {},{} };
 		}
 
-		return std::nullopt;
+		const ohlcv_data& ohlcvData = *iterator.value();
+		return order_book_state
+		{
+			{
+				order_book_entry{ ohlcvData.low(), ohlcvData.volume(), order_book_side::ASK }
+			},
+			{
+				order_book_entry{ ohlcvData.high(), ohlcvData.volume(), order_book_side::BID }
+			}
+		};
 	}
 }

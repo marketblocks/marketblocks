@@ -39,10 +39,10 @@ namespace mb
 		std::unique_ptr<http_service> httpService,
 		std::shared_ptr<websocket_stream> websocketStream)
 		: 
+		exchange{ exchange_ids::DIGIFINEX, std::move(websocketStream) },
 		_apiKey{ config.api_key() },
 		_apiSecret{ config.api_secret() },
-		_httpService{ std::move(httpService) },
-		_websocketStream{ websocketStream }
+		_httpService{ std::move(httpService) }
 	{}
 
 	std::string digifinex_api::compute_api_sign(std::string_view query) const

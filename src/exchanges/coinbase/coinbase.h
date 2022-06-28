@@ -21,7 +21,6 @@ namespace mb
 		std::vector<unsigned char> _decodedApiSecret;
 		std::string _apiPassphrase;
 		std::unique_ptr<http_service> _httpService;
-		std::shared_ptr<websocket_stream> _websocketStream;
 
 		std::string get_timestamp() const;
 		std::string compute_access_sign(std::string_view timestamp, http_verb httpVerb, std::string_view path, std::string_view query, std::string_view body) const;
@@ -67,11 +66,9 @@ namespace mb
 		coinbase_api(
 			coinbase_config config,
 			std::unique_ptr<http_service> httpService, 
+			std::shared_ptr<websocket_stream> websocketStream,
 			bool enableTesting = false);
 
-		constexpr std::string_view id() const noexcept override { return exchange_ids::COINBASE; }
-
-		std::shared_ptr<websocket_stream> get_websocket_stream() override;
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 

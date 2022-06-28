@@ -21,7 +21,6 @@ namespace mb
 		std::string _apiKey;
 		std::string _apiSecret;
 		std::unique_ptr<http_service> _httpService;
-		std::shared_ptr<websocket_stream> _websocketStream;
 
 		std::string compute_api_sign(std::string_view query) const;
 
@@ -51,13 +50,6 @@ namespace mb
 			digifinex_config config,
 			std::unique_ptr<http_service> httpService,
 			std::shared_ptr<websocket_stream> websocketStream);
-
-		constexpr std::string_view id() const noexcept override { return exchange_ids::DIGIFINEX; }
-
-		std::shared_ptr<websocket_stream> get_websocket_stream() override 
-		{ 
-			throw not_implemented_exception{ "digifinex::get_websocket_stream" };
-		}
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;

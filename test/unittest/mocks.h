@@ -53,7 +53,6 @@ namespace mb::test
 	class mock_exchange : public exchange
 	{
 	public:
-		MOCK_METHOD(std::string_view, id, (), (const, override, noexcept));
 		MOCK_METHOD(exchange_status, get_status, (), (const, override));
 		MOCK_METHOD(std::vector<tradable_pair>, get_tradable_pairs, (), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& tradablePair), (const, override));
