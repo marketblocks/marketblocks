@@ -89,6 +89,7 @@ namespace mb
 			request.add_header(_constants.http.ACCESS_KEY_HEADER, _apiKey);
 			request.add_header(_constants.http.ACCESS_TIMESTAMP_HEADER, timestamp);
 			request.add_header(_constants.http.ACCESS_SIGN_HEADER, compute_api_sign(query));
+			request.add_header("ACCESS-RECV-WINDOW", "60000");
 
 			return internal::send_http_request<Value>(*_httpService, request, reader);
 		}
