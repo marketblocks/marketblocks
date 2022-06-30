@@ -43,7 +43,7 @@ add_executable(marketblocks_test
 "unittest/exchanges/digifinex/digifinex_results_test.cpp"
 "unittest/exchanges/digifinex/digifinex_test.cpp" 
 "unittest/exchanges/exchange_test_common.h"
-"unittest/exchanges/websockets/exchange_websocket_stream_test.cpp"  "unittest/common/types/concurrent_wrapper_test.cpp" "unittest/testing/back_testing/data_loading/csv_data_source_test.cpp")
+"unittest/exchanges/websockets/exchange_websocket_stream_test.cpp"  "unittest/common/types/concurrent_wrapper_test.cpp" "unittest/testing/back_testing/data_loading/csv_data_source_test.cpp" "unittest/testing/back_testing/data_loading/data_factory_test.cpp")
 
 target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
 target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)

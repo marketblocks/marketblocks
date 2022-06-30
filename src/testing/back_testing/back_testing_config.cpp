@@ -42,6 +42,8 @@ namespace mb
 			assert_throw(_startTime != 0, "Start time cannot be 0 when dynamic data load enabled");
 			assert_throw(_endTime != 0, "End time cannot be 0 when dynamic data load enabled");
 		}
+
+		assert_throw(_stepSize > 0, "Step size must be greater than zero");
 	}
 
 	template<>

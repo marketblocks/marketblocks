@@ -29,7 +29,9 @@ namespace mb::internal
 
 		std::vector<std::shared_ptr<exchange>> create_exchanges(const runner_config& runnerConfig) override
 		{
-			_backTestingData = load_back_testing_data(_config);
+			_backTestingData = load_back_testing_data(
+				create_data_source(_config.data_directory()),
+				_config);
 
 			auto websocketStream{ std::make_shared<backtest_websocket_stream>(_backTestingData) };
 			auto marketApi{ std::make_shared<back_test_market_api>(_backTestingData) };

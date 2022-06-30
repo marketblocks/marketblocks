@@ -62,6 +62,6 @@ namespace mb::test
 
 	void assert_order_book_entry_eq(const order_book_entry& lhs, const order_book_entry& rhs);
 	void assert_order_book_state_eq(const order_book_state& lhs, const order_book_state& rhs);
-	void assert_pair_stats_eq(const ohlcv_data& lhs, const ohlcv_data& rhs);
+	void assert_ohlcv_data_eq(const ohlcv_data& lhs, const ohlcv_data& rhs);
 	void assert_order_description_eq(const order_description& lhs, const order_description& rhs);
 }

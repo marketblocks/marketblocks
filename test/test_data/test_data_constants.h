@@ -13,4 +13,6 @@ namespace mb::test
 	std::filesystem::path bybit_results_test_data_path(std::string_view fileName);
 	std::filesystem::path digifinex_results_test_data_path(std::string_view fileName);
 	std::filesystem::path csv_test_data_path(std::string_view fileName);
+
+	std::filesystem::path csv_back_test_data_directory();
 }

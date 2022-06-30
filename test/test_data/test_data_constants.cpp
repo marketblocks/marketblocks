@@ -44,4 +44,12 @@ namespace mb::test
 	{
 		return get_file_path("csv_test", fileName);
 	}
+
+	std::filesystem::path csv_back_test_data_directory()
+	{
+		std::filesystem::path path{ TEST_DATA_FOLDER };
+		path /= "csv_data_source_test";
+
+		return path;
+	}
 }

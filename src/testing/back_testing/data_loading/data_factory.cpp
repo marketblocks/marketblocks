@@ -1,3 +1,5 @@
+#include <string_view>
+
 #include "data_factory.h"
 #include "back_testing_data_source.h"
 #include "csv_data_source.h"
@@ -9,11 +11,6 @@
 namespace
 {
 	using namespace mb;
-
-	std::unique_ptr<back_testing_data_source> create_data_source(const back_testing_config& config)
-	{
-		return std::make_unique<csv_data_source>(config.data_directory());
-	}
 
 	int calculate_time_steps(std::time_t startTime, std::time_t endTime, int stepSize)
 	{
@@ -35,27 +32,38 @@ namespace
 		{
 			std::vector<ohlcv_data> data{ dataSource->load_data(pair, config.step_size()) };
 
+			if (data.empty())
+			{
+				continue;
+			}
+
 			startTime = std::min(startTime, data.front().time_stamp());
 			endTime = std::max(endTime, data.back().time_stamp());
 
 			ohlcvData.emplace(pair, std::move(data));
 		}
 
-		startTime = std::max(startTime, config.start_time());
+		if (config.start_time() != 0)
+		{
+			startTime = config.start_time();
+		}
 
 		if (config.end_time() != 0)
 		{
-			endTime = std::min(endTime, config.end_time());
+			endTime = config.end_time();
 		}
 	}
 }
 
 namespace mb
 {
-	std::shared_ptr<back_testing_data> load_back_testing_data(const back_testing_config& config)
+	std::unique_ptr<back_testing_data_source> create_data_source(std::string_view dataDirectory)
 	{
-		std::unique_ptr<back_testing_data_source> dataSource{ create_data_source(config) };
+		return std::make_unique<csv_data_source>(dataDirectory);
+	}
 
+	std::shared_ptr<back_testing_data> load_back_testing_data(std::unique_ptr<back_testing_data_source> dataSource, const back_testing_config& config)
+	{
 		std::vector<tradable_pair> pairs{ dataSource->get_available_pairs() };
 		std::unordered_map<tradable_pair, std::vector<ohlcv_data>> ohlcvData;
 		ohlcvData.reserve(pairs.size());

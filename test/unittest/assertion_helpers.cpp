@@ -24,8 +24,9 @@ namespace mb::test
 		}
 	}
 
-	void assert_pair_stats_eq(const ohlcv_data& lhs, const ohlcv_data& rhs)
+	void assert_ohlcv_data_eq(const ohlcv_data& lhs, const ohlcv_data& rhs)
 	{
+		EXPECT_EQ(lhs.time_stamp(), rhs.time_stamp());
 		EXPECT_DOUBLE_EQ(lhs.open(), rhs.open());
 		EXPECT_DOUBLE_EQ(lhs.high(), rhs.high());
 		EXPECT_DOUBLE_EQ(lhs.low(), rhs.low());

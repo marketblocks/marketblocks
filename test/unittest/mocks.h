@@ -7,6 +7,7 @@
 #include "exchanges/websockets/exchange_websocket_stream.h"
 #include "networking/http/http_service.h"
 #include "networking/websocket/websocket_connection.h"
+#include "testing/back_testing/data_loading/back_testing_data_source.h"
 
 namespace mb::test
 {
@@ -89,5 +90,12 @@ namespace mb::test
 		MOCK_METHOD(ws_connection_status, connection_status, (), (const, override));
 		MOCK_METHOD(void, close, (), (override));
 		MOCK_METHOD(void, send_message, (std::string_view message), (override));
+	};
+
+	class mock_back_testing_data_source : public back_testing_data_source
+	{
+	public:
+		MOCK_METHOD(std::vector<tradable_pair>, get_available_pairs, (), (override));
+		MOCK_METHOD(std::vector<ohlcv_data>, load_data, (const tradable_pair& pair, int stepSize), (override));
 	};
 }

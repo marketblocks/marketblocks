@@ -19,7 +19,7 @@ namespace
 
 		bool operator()(const ohlcv_data& data)
 		{
-			if (data.time_stamp() - _lastTime < _stepSize)
+			if (_lastTime != -1 && data.time_stamp() - _lastTime < _stepSize)
 			{
 				return false;
 			}
