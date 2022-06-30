@@ -8,6 +8,7 @@
 #include "back_test_runner.h"
 #include "runner_config.h"
 #include "config_file_reader.h"
+#include "system/time_synchronization.h"
 #include "logging/logger.h"
 
 namespace mb
@@ -17,6 +18,7 @@ namespace mb
 		void log_version();
 		void log_run_mode(run_mode runMode);
 		void exit_on_key();
+		std::unique_ptr<internal::time_synchronizer> create_synchronizer_if_enabled(run_mode runMode, bool enabled);
 
 		template<typename Strategy>
 		std::unique_ptr<internal::runner_implementation<Strategy>> create_runner_implementation(run_mode runMode)
@@ -43,18 +45,20 @@ namespace mb
 		runner_config _config;
 		bool _initialised;
 		logger& _logger;
+		std::unique_ptr<internal::time_synchronizer> _timeSynchronizer;
 
 		std::unique_ptr<Strategy> _strategy;
 
 	public:
-		explicit constexpr runner(
+		explicit runner(
 			std::unique_ptr<internal::runner_implementation<Strategy>> implementation,
 			runner_config config)
-			: 
-			_implementation{ std::move(implementation) }, 
+			:
+			_implementation{ std::move(implementation) },
 			_config{ std::move(config) },
 			_initialised{ false },
-			_logger{ logger::instance() }
+			_logger{ logger::instance() },
+			_timeSynchronizer{ internal::create_synchronizer_if_enabled(_config.runmode(), _config.sync_time()) }
 		{}
 
 		template<typename Config>

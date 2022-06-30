@@ -22,6 +22,7 @@ namespace mb
 		int _websocketTimeout;
 		int _httpTimeout;
 		int _runInterval;
+		bool _syncTime;
 
 		void validate();
 
@@ -33,7 +34,8 @@ namespace mb
 			run_mode runMode,
 			int websocketTimeout,
 			int httpTimeout,
-			int runInterval);
+			int runInterval,
+			bool syncTime);
 			
 		static constexpr std::string name() noexcept { return "runner"; }
 		
@@ -42,6 +44,7 @@ namespace mb
 		constexpr int websocket_timeout() const noexcept { return _websocketTimeout; }
 		constexpr int http_timeout() const noexcept { return _httpTimeout; }
 		constexpr int run_interval() const noexcept { return _runInterval; }
+		constexpr bool sync_time() const noexcept { return _syncTime; }
 	};
 
 	template<>

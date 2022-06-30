@@ -19,4 +19,14 @@ namespace mb::internal
 		std::cin.get();
 		std::exit(-1);
 	}
+
+	std::unique_ptr<internal::time_synchronizer> create_synchronizer_if_enabled(run_mode runMode, bool enabled)
+	{
+		if (enabled && (runMode == run_mode::LIVE || runMode == run_mode::LIVETEST))
+		{
+			return std::make_unique<internal::time_synchronizer>();
+		}
+
+		return nullptr;
+	}
 }

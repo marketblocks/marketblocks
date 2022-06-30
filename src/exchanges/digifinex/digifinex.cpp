@@ -72,7 +72,12 @@ namespace mb
 
 	order_book_state digifinex_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
-		throw not_implemented_exception{ "digifinex::get_order_book" };
+		std::string query = url_query_builder{}
+			.add_parameter(_constants.queries.SYMBOL, tradablePair.to_string('_'))
+			.add_parameter("limit", std::to_string(depth))
+			.to_string();
+
+		return send_public_request<order_book_state>("order_book", digifinex::read_order_book, query);
 	}
 
 	double digifinex_api::get_fee(const tradable_pair& tradablePair) const

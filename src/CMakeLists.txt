@@ -148,7 +148,12 @@ add_library(marketblocks_lib
  "common/utils/mathutils.cpp" 
  "common/types/concurrent_wrapper.h"
  "common/exceptions/validation_exception.h"
- "exchanges/exchange.cpp" "exchanges/multi_component_exchange.h"  "testing/back_testing/data_loading/csv_data_source.h" "testing/back_testing/data_loading/csv_data_source.cpp")
+ "exchanges/exchange.cpp" 
+ "exchanges/multi_component_exchange.h"  
+ "testing/back_testing/data_loading/csv_data_source.h"
+ "testing/back_testing/data_loading/csv_data_source.cpp"
+ "runner/system/time_synchronization.h" 
+ "runner/system/time_synchronization.cpp")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

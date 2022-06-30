@@ -16,6 +16,7 @@ namespace
 		static constexpr std::string_view WEBSOCKET_TIMEOUT = "websocketTimeout";
 		static constexpr std::string_view HTTP_TIMEOUT = "httpTimeout";
 		static constexpr std::string_view RUN_INTERVAL = "runInterval";
+		static constexpr std::string_view SYNC_TIME = "syncTime";
 	}
 
 	namespace run_mode_strings
@@ -63,7 +64,7 @@ namespace mb
 	}
 
 	runner_config::runner_config()
-		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT, 0 }
+		: runner_config{ {}, run_mode::LIVETEST, DEFAULT_WEBSOCKET_TIMEOUT, DEFAULT_HTTP_TIMEOUT, 0, false }
 	{}
 
 	runner_config::runner_config(
@@ -71,13 +72,15 @@ namespace mb
 		run_mode runMode,
 		int websocketTimeout,
 		int httpTimeout,
-		int runInterval)
+		int runInterval,
+		bool syncTime)
 		:
 		_exchangeIds{ std::move(exchangeIds) },
 		_runMode{ runMode },
 		_websocketTimeout{ websocketTimeout },
 		_httpTimeout{ httpTimeout },
-		_runInterval{ runInterval }
+		_runInterval{ runInterval },
+		_syncTime{ syncTime }
 	{
 		validate();
 	}
@@ -112,7 +115,8 @@ namespace mb
 			run_mode_from_string(json.get<std::string>(json_property_names::RUN_MODE)),
 			json.get<int>(json_property_names::WEBSOCKET_TIMEOUT),
 			json.get<int>(json_property_names::HTTP_TIMEOUT),
-			json.get<int>(json_property_names::RUN_INTERVAL)
+			json.get<int>(json_property_names::RUN_INTERVAL),
+			json.get<bool>(json_property_names::SYNC_TIME)
 		};
 	}
 
@@ -124,5 +128,6 @@ namespace mb
 		writer.add(json_property_names::WEBSOCKET_TIMEOUT, config.websocket_timeout());
 		writer.add(json_property_names::HTTP_TIMEOUT, config.http_timeout());
 		writer.add(json_property_names::RUN_INTERVAL, config.run_interval());
+		writer.add(json_property_names::SYNC_TIME, config.sync_time());
 	}
 }

@@ -70,7 +70,7 @@ namespace
 	}
 
 	template<typename T, typename Reader>
-	result<T> read_result(std::string_view jsonResult, std::string_view resultName, const Reader& reader)
+	result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
 		try
 		{
@@ -82,7 +82,7 @@ namespace
 				return result<T>::fail(get_error_message(errorCode));
 			}
 
-			return result<T>::success(reader(jsonDocument.element(resultName)));
+			return result<T>::success(reader(jsonDocument));
 		}
 		catch (const std::exception& e)
 		{
@@ -95,7 +95,7 @@ namespace mb::digifinex
 {
 	result<exchange_status> read_system_status(std::string_view jsonResult)
 	{
-		return read_result<exchange_status>(jsonResult, "msg", [](const json_element& resultElement)
+		return read_result<exchange_status>(jsonResult, [](const json_document& json)
 		{
 			return exchange_status::ONLINE;
 		});
@@ -103,8 +103,10 @@ namespace mb::digifinex
 
 	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
 	{
-		return read_result<std::vector<tradable_pair>>(jsonResult, "symbol_list", [](const json_element& resultElement)
+		return read_result<std::vector<tradable_pair>>(jsonResult, [](const json_document& json)
 		{
+			json_element resultElement{ json.element("symbol_list") };
+
 			std::unordered_set<tradable_pair> pairs;
 			pairs.reserve(resultElement.size());
 
@@ -129,22 +131,60 @@ namespace mb::digifinex
 
 	result<double> read_price(std::string_view jsonResult)
 	{
-		return read_result<double>(jsonResult, "ticker", [](const json_element& resultElement)
+		return read_result<double>(jsonResult, [](const json_document& json)
 		{
-			json_element tickerElement{ resultElement.begin().value() };
+			json_element tickerElement{ json.element("ticker").begin().value() };
 			return tickerElement.get<double>("last");
 		});
 	}
 
 	result<order_book_state> read_order_book(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_order_book" };
+		return read_result<order_book_state>(jsonResult, [](const json_document& json)
+		{
+			json_element bidsElement{ json.element("bids") };
+			json_element asksElement{ json.element("asks") };
+
+			std::vector<order_book_entry> bids;
+			bids.reserve(bidsElement.size());
+
+			std::vector<order_book_entry> asks;
+			asks.reserve(asksElement.size());
+
+			int depth = std::max(bidsElement.size(), asksElement.size());
+
+			auto bidsIt = bidsElement.begin();
+			auto asksIt = asksElement.begin();
+
+			for (int i = 0; i < depth; ++i)
+			{
+				if (asksIt != asksElement.end())
+				{
+					json_element entryElement{ asksIt.value() };
+					asks.emplace_back(
+						entryElement.get<double>(0),
+						entryElement.get<double>(1));
+				}
+
+				if (bidsIt != bidsElement.end())
+				{
+					json_element entryElement{ bidsIt.value() };
+					bids.emplace_back(
+						entryElement.get<double>(0),
+						entryElement.get<double>(1));
+				}
+			}
+
+			return order_book_state{ std::move(asks), std::move(bids) };
+		});
 	}
 
 	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
 	{
-		return read_result<unordered_string_map<double>>(jsonResult, "list", [](const json_element& resultElement)
+		return read_result<unordered_string_map<double>>(jsonResult, [](const json_document& json)
 		{
+			json_element resultElement{ json.element("list") };
+
 			unordered_string_map<double> balances;
 			balances.reserve(resultElement.size());
 
@@ -174,9 +214,9 @@ namespace mb::digifinex
 
 	result<std::string> read_add_order(std::string_view jsonResult)
 	{
-		return read_result<std::string>(jsonResult, "order_id", [](const json_element& resultElement)
+		return read_result<std::string>(jsonResult, [](const json_document& json)
 		{
-			return resultElement.get<std::string>();
+			return json.get<std::string>("order_id");
 		});
 	}
 
