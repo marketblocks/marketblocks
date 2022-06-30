@@ -163,7 +163,8 @@ namespace mb::digifinex
 					json_element entryElement{ asksIt.value() };
 					asks.emplace_back(
 						entryElement.get<double>(0),
-						entryElement.get<double>(1));
+						entryElement.get<double>(1),
+						order_book_side::ASK);
 				}
 
 				if (bidsIt != bidsElement.end())
@@ -171,7 +172,8 @@ namespace mb::digifinex
 					json_element entryElement{ bidsIt.value() };
 					bids.emplace_back(
 						entryElement.get<double>(0),
-						entryElement.get<double>(1));
+						entryElement.get<double>(1),
+						order_book_side::BID);
 				}
 			}
 

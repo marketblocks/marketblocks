@@ -73,7 +73,7 @@ namespace mb
 	order_book_state digifinex_api::get_order_book(const tradable_pair& tradablePair, int depth) const
 	{
 		std::string query = url_query_builder{}
-			.add_parameter(_constants.queries.SYMBOL, tradablePair.to_string('_'))
+			.add_parameter("symbol", tradablePair.to_string('_'))
 			.add_parameter("limit", std::to_string(depth))
 			.to_string();
 

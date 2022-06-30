@@ -31,8 +31,8 @@ namespace mb::internal
 		{
 			_backTestingData = load_back_testing_data(_config);
 
-			std::shared_ptr<backtest_websocket_stream> websocketStream{ std::make_shared<backtest_websocket_stream>(_backTestingData) };
-			std::shared_ptr<back_test_market_api> marketApi{ std::make_shared<back_test_market_api>(_backTestingData) };
+			auto websocketStream{ std::make_shared<backtest_websocket_stream>(_backTestingData) };
+			auto marketApi{ std::make_shared<back_test_market_api>(_backTestingData) };
 			
 			_paperTradeApi = create_paper_trade_api(
 				exchange_ids::BACK_TEST, 

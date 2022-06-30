@@ -6,14 +6,14 @@ namespace
 {
 	using namespace mb;
 
-	class ohlcv_data_csv_selector
+	class ohlcv_data_selector
 	{
 	private:
 		int _stepSize;
 		std::time_t _lastTime;
 
 	public:
-		ohlcv_data_csv_selector(int stepSize)
+		ohlcv_data_selector(int stepSize)
 			: _stepSize{ stepSize }, _lastTime{ -1 }
 		{}
 
@@ -49,7 +49,7 @@ namespace mb
 
 			try
 			{
-				std::filesystem::path fileName = directoryEntry.path().filename();
+				std::filesystem::path fileName{ directoryEntry.path().filename() };
 				fileName.replace_extension();
 				pairs.emplace_back(parse_tradable_pair(fileName.string(), '_'));
 			}
@@ -70,7 +70,7 @@ namespace mb
 
 		std::filesystem::path path = _dataDirectory / (pairName + ".csv");
 		std::vector<ohlcv_data> data{
-			read_csv_file<ohlcv_data>(path, ohlcv_data_csv_selector{ stepSize }) };
+			read_csv_file<ohlcv_data>(path, ohlcv_data_selector{ stepSize }) };
 
 		if (data.empty())
 		{
