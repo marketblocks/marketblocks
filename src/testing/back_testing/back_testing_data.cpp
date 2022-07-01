@@ -1,5 +1,6 @@
 #include "back_testing_data.h"
 #include "common/utils/containerutils.h"
+#include "common/utils/mathutils.h"
 
 namespace
 {
@@ -14,19 +15,13 @@ namespace
 		double close = start->close();
 		double volume = start->volume();
 
-		auto it = std::make_reverse_iterator(start);
-		for (; it != end; ++it)
+		for (auto it = std::next(start); it < end; ++it)
 		{
 			const ohlcv_data& data = *it;
 
-			if (data.time_stamp() < targetTime)
-			{
-				break;
-			}
-
-			open = data.open();
 			high = std::max(high, data.high());
 			low = std::min(low, data.low());
+			close = data.close();
 			volume += data.volume();
 		}
 
@@ -100,7 +95,7 @@ namespace mb
 
 		if (_dataSource)
 		{
-			std::vector<ohlcv_data> data = _dataSource->load_data(pair, _stepSize);
+			std::vector<ohlcv_data> data{ _dataSource->load_data(pair, _stepSize) };
 			return _data[pair] = std::move(data);
 		}
 
@@ -115,34 +110,45 @@ namespace mb
 	std::vector<ohlcv_data> back_testing_data::get_ohlcv(const tradable_pair& pair, int interval, int count)
 	{
 		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
-		std::optional<data_iterator> optStartIterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
+		std::optional<data_iterator> optionalIterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
 		
-		if (!optStartIterator.has_value())
+		std::time_t startTime = pairData.begin()->time_stamp();
+
+		if (!optionalIterator.has_value() ||
+			*optionalIterator == pairData.begin() && _dataTime == startTime)
 		{
 			return {};
 		}
 
-		data_iterator startIterator = *optStartIterator;
-		std::time_t targetTime = _dataTime - interval;
+		std::time_t targetTime = _dataTime;
+		data_iterator end = *optionalIterator;
 		std::vector<ohlcv_data> data;
 		data.reserve(count);
 
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; ++i)
 		{
-			ohlcv_data mergedOhlcv{ merge_ohlcv(startIterator, pairData.rend(), targetTime) };
-			data.emplace(data.begin(), std::move(mergedOhlcv));
+			targetTime = std::max(targetTime - interval, startTime);
+			data_iterator start = end;
 
-			if (startIterator == pairData.begin())
+			if (targetTime + interval > end->time_stamp())
+			{
+				++end;
+			}
+
+			while (start->time_stamp() > targetTime && start != pairData.begin())
+			{
+				start--;
+			}
+
+			ohlcv_data mergedOhlcv{ merge_ohlcv(start, end, targetTime) };
+			data.emplace_back(std::move(mergedOhlcv));
+
+			if (targetTime == startTime && start == pairData.begin())
 			{
 				break;
 			}
 
-			while (startIterator->time_stamp() > targetTime && startIterator != pairData.begin())
-			{
-				startIterator--;
-			}
-
-			targetTime -= interval;
+			end = start;
 		}
 
 		return data;
@@ -158,7 +164,13 @@ namespace mb
 			return 0.0;
 		}
 
-		return iterator.value()->close();
+		const ohlcv_data& ohlcvData = *iterator.value();
+		if (std::next(iterator.value()) == pairData.end() && _dataTime > ohlcvData.time_stamp())
+		{
+			return ohlcvData.close();
+		}
+
+		return ohlcvData.open();
 	}
 
 	order_book_state back_testing_data::get_order_book(const tradable_pair& pair, int depth)
@@ -175,10 +187,10 @@ namespace mb
 		return order_book_state
 		{
 			{
-				order_book_entry{ ohlcvData.low(), ohlcvData.volume(), order_book_side::ASK }
+				order_book_entry{ ohlcvData.high(), ohlcvData.volume(), order_book_side::ASK }
 			},
 			{
-				order_book_entry{ ohlcvData.high(), ohlcvData.volume(), order_book_side::BID }
+				order_book_entry{ ohlcvData.low(), ohlcvData.volume(), order_book_side::BID }
 			}
 		};
 	}
