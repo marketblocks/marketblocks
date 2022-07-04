@@ -153,8 +153,8 @@ namespace mb::digifinex
 
 			int depth = std::max(bidsElement.size(), asksElement.size());
 
-			auto bidsIt = bidsElement.begin();
-			auto asksIt = asksElement.begin();
+			json_iterator bidsIt{ bidsElement.begin() };
+			json_iterator asksIt{ asksElement.begin() };
 
 			for (int i = 0; i < depth; ++i)
 			{
@@ -164,6 +164,8 @@ namespace mb::digifinex
 					asks.emplace_back(
 						entryElement.get<double>(0),
 						entryElement.get<double>(1));
+
+					++asksIt;
 				}
 
 				if (bidsIt != bidsElement.end())
@@ -172,6 +174,8 @@ namespace mb::digifinex
 					bids.emplace_back(
 						entryElement.get<double>(0),
 						entryElement.get<double>(1));
+
+					++bidsIt;
 				}
 			}
 

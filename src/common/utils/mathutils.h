@@ -26,7 +26,7 @@ namespace mb
 	constexpr std::string to_string(T number, int precision)
 	{
 		std::stringstream stream;
-		stream << std::fixed << std::setprecision(2) << number;
+		stream << std::fixed << std::setprecision(precision) << number;
 		return stream.str();
 	}
 
