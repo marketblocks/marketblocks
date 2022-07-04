@@ -12,6 +12,7 @@ namespace mb
 		static constexpr std::string_view COINBASE = "coinbase";
 		static constexpr std::string_view BYBIT = "bybit";
 		static constexpr std::string_view DIGIFINEX = "digifinex";
+		static constexpr std::string_view DEXTRADE = "dextrade";
 
 		constexpr std::vector<std::string_view> all()
 		{
@@ -20,7 +21,8 @@ namespace mb
 				exchange_ids::KRAKEN,
 				exchange_ids::COINBASE,
 				exchange_ids::BYBIT,
-				exchange_ids::DIGIFINEX
+				exchange_ids::DIGIFINEX,
+				exchange_ids::DEXTRADE
 			};
 		}
 	}

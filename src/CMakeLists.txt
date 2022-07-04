@@ -153,7 +153,13 @@ add_library(marketblocks_lib
  "testing/back_testing/data_loading/csv_data_source.h"
  "testing/back_testing/data_loading/csv_data_source.cpp"
  "runner/system/time_synchronization.h" 
- "runner/system/time_synchronization.cpp")
+ "runner/system/time_synchronization.cpp"
+ "exchanges/dextrade/dextrade.cpp"
+ "exchanges/dextrade/dextrade.h" 
+ "exchanges/dextrade/dextrade_config.cpp"
+ "exchanges/dextrade/dextrade_config.h" 
+ "exchanges/dextrade/dextrade_results.cpp"
+ "exchanges/dextrade/dextrade_results.h")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

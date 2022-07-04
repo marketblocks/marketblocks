@@ -7,6 +7,7 @@
 #include "exchanges/coinbase/coinbase.h"
 #include "exchanges/bybit/bybit.h"
 #include "exchanges/digifinex/digifinex.h"
+#include "exchanges/dextrade/dextrade.h"
 
 namespace
 {
@@ -38,6 +39,10 @@ namespace
 		if (identifier == exchange_ids::DIGIFINEX)
 		{
 			return create_api<digifinex_config>(make_digifinex);
+		}
+		if (identifier == exchange_ids::DEXTRADE)
+		{
+			return create_api<dextrade_config>(make_dextrade);
 		}
 
 		return nullptr;
