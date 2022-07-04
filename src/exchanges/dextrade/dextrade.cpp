@@ -78,6 +78,11 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>("symbols", dextrade::read_tradable_pairs);
 	}
 
+	std::vector<ohlcv_data> dextrade_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
+	{
+		throw not_implemented_exception{ "dextrade::get_ohlcv" };
+	}
+
 	double dextrade_api::get_price(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
@@ -133,7 +138,7 @@ namespace mb
 		throw not_implemented_exception{ "dextrade::cancel_order" };
 	}
 
-	std::unique_ptr<exchange> make_dextrade(dextrade_config config, std::shared_ptr<websocket_client> websocketClient)
+	std::unique_ptr<exchange> make_dextrade(dextrade_config config)
 	{
 		return std::make_unique<dextrade_api>(
 			std::move(config),

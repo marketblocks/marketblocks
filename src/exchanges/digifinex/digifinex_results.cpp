@@ -165,7 +165,6 @@ namespace mb::digifinex
 						entryElement.get<double>(0),
 						entryElement.get<double>(1),
 						order_book_side::ASK);
-						entryElement.get<double>(1));
 
 					++asksIt;
 				}
@@ -177,7 +176,6 @@ namespace mb::digifinex
 						entryElement.get<double>(0),
 						entryElement.get<double>(1),
 						order_book_side::BID);
-						entryElement.get<double>(1));
 
 					++bidsIt;
 				}

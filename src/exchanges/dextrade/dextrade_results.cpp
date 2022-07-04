@@ -92,7 +92,8 @@ namespace mb::dextrade
 					json_element entryElement{ asksIt.value() };
 					asks.emplace_back(
 						entryElement.get<double>("rate"),
-						entryElement.get<double>("volume"));
+						entryElement.get<double>("volume"),
+						order_book_side::ASK);
 
 					++asksIt;
 				}
@@ -102,7 +103,8 @@ namespace mb::dextrade
 					json_element entryElement{ bidsIt.value() };
 					bids.emplace_back(
 						entryElement.get<double>("rate"),
-						entryElement.get<double>("volume"));
+						entryElement.get<double>("volume"),
+						order_book_side::BID);
 
 					++bidsIt;
 				}
