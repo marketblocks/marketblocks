@@ -7,22 +7,22 @@ namespace mb
 	class dextrade_config
 	{
 	private:
-		std::string _apiKey;
-		std::string _apiSecret;
+		std::string _publicKey;
+		std::string _privateKey;
 
 	public:
 		constexpr dextrade_config()
-			: _apiKey{}, _apiSecret{}
+			: _publicKey{}, _privateKey{}
 		{};
 
-		constexpr dextrade_config(std::string apiKey, std::string apiSecret)
-			: _apiKey{ std::move(apiKey) }, _apiSecret{ std::move(apiSecret) }
+		constexpr dextrade_config(std::string publicKey, std::string privateKey)
+			: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
 		{}
 
 		static constexpr std::string name() noexcept { return "dextrade"; }
 
-		constexpr const std::string& api_key() const noexcept { return _apiKey; }
-		constexpr const std::string& api_secret() const noexcept { return _apiSecret; }
+		constexpr const std::string& public_key() const noexcept { return _publicKey; }
+		constexpr const std::string& private_key() const noexcept { return _privateKey; }
 	};
 
 	template<>
