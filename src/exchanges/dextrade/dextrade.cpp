@@ -78,11 +78,6 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>("symbols", dextrade::read_tradable_pairs);
 	}
 
-	ohlcv_data dextrade_api::get_24h_stats(const tradable_pair& tradablePair) const
-	{
-		throw not_implemented_exception{ "dextrade::get_24h_stats" };
-	}
-
 	double dextrade_api::get_price(const tradable_pair& tradablePair) const
 	{
 		std::string query = url_query_builder{}
