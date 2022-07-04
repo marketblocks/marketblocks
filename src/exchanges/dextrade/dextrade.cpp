@@ -33,8 +33,8 @@ namespace mb
 		std::unique_ptr<http_service> httpService,
 		std::shared_ptr<websocket_stream> websocketStream)
 		: 
-		_publicKey{ config.api_key() },
-		_privateKey{ config.api_secret() },
+		_publicKey{ config.public_key() },
+		_privateKey{ config.private_key() },
 		_httpService{ std::move(httpService) },
 		_websocketStream{ websocketStream }
 	{}
