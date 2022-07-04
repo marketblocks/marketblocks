@@ -26,7 +26,6 @@ namespace mb
 	enum class subscription_status
 	{
 		UNSUBSCRIBED,
-		INITIALISING,
 		SUBSCRIBED
 	};
 

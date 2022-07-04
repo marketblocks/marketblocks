@@ -37,7 +37,7 @@ namespace mb
     {
     private:
         using on_open = std::function<void()>;
-        using on_close = std::function<void(std::error_code)>;
+        using on_close = std::function<void()>;
         using on_message = std::function<void(std::string_view)>;
 
         on_open _onOpen;

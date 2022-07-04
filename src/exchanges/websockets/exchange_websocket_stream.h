@@ -16,9 +16,8 @@ namespace mb
 
 		std::string_view _id;
 		std::string_view _url;
-		std::atomic_bool _closeRequested;
 
-		concurrent_wrapper<unordered_string_map<subscription_status>> _subscriptionStatus;
+		concurrent_wrapper<std::unordered_set<std::string>> _subscriptions;
 		concurrent_wrapper<unordered_string_map<double>> _prices;
 		concurrent_wrapper<unordered_string_map<ohlcv_data>> _ohlcv;
 		concurrent_wrapper<unordered_string_map<order_book_cache>> _orderBooks;
@@ -26,9 +25,10 @@ namespace mb
 
 		void initialise_connection_factory();
 		void clear_subscriptions();
+		void set_subscribed(std::string subscriptionId);
 
 		void on_open();
-		void on_close(std::error_code error);
+		void on_close();
 
 		virtual void on_message(std::string_view message) = 0;
 		virtual std::string generate_subscription_id(const unique_websocket_subscription& subscription) const = 0;
@@ -36,7 +36,7 @@ namespace mb
 	protected:
 		std::unique_ptr<websocket_connection> _connection;
 
-		void update_subscription_status(std::string subscriptionId, websocket_channel channel, subscription_status status);
+		void set_unsubscribed(std::string subscriptionId, websocket_channel channel);
 		void update_price(std::string subscriptionId, double price);
 		void update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData);
 		void initialise_order_book(std::string subscriptionId, order_book_cache cache);
@@ -51,7 +51,7 @@ namespace mb
 		void reset() override;
 		void disconnect() override;
 		ws_connection_status connection_status() const override;
-		
+
 		subscription_status get_subscription_status(const unique_websocket_subscription& subscription) const override;
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		double get_price(const tradable_pair& pair) const override;

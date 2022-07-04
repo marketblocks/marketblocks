@@ -21,39 +21,41 @@ namespace mb
 	void exchange_websocket_stream::initialise_connection_factory()
 	{
 		_connectionFactory->set_on_open([this]() { on_open(); });
-		_connectionFactory->set_on_close([this](std::error_code error) { on_close(error); });
+		_connectionFactory->set_on_close([this]() { on_close(); });
 		_connectionFactory->set_on_message([this](std::string_view message) { on_message(message); });
 	}
 
 	void exchange_websocket_stream::clear_subscriptions()
 	{
-		auto lockedSubscriptionStatus = _subscriptionStatus.unique_lock();
+		auto lockedSubscriptions = _subscriptions.unique_lock();
 		auto lockedPrices = _prices.unique_lock();
 		auto lockedOhlcv = _ohlcv.unique_lock();
 		auto lockedOrderBooks = _orderBooks.unique_lock();
 
-		lockedSubscriptionStatus->clear();
+		lockedSubscriptions->clear();
 		lockedPrices->clear();
 		lockedOhlcv->clear();
 		lockedOrderBooks->clear();
 	}
 
-	void exchange_websocket_stream::on_open()
+	void exchange_websocket_stream::set_subscribed(std::string subscriptionId)
 	{
-		logger::instance().info("Websocket stream successfully opened for exchange '{}'", _id);
-		_closeRequested = false;
+		auto lockedSubscriptions = _subscriptions.unique_lock();
+
+		if (!lockedSubscriptions->contains(subscriptionId))
+		{
+			lockedSubscriptions->emplace(std::move(subscriptionId));
+		}
 	}
 
-	void exchange_websocket_stream::on_close(std::error_code error)
+	void exchange_websocket_stream::on_open()
 	{
-		if (_closeRequested)
-		{
-			logger::instance().info("Websocket stream successfully closed for exchange '{}'", _id);
-		}
-		else
-		{
-			logger::instance().error("Websocket stream closed unexpectedly for exchange '{0}'. Reason: {1}", _id, error.message());
-		}
+		logger::instance().info("Websocket stream opened for exchange '{}'", _id);
+	}
+
+	void exchange_websocket_stream::on_close()
+	{
+		logger::instance().info("Websocket stream closed for exchange '{}'", _id);
 	}
 
 	void exchange_websocket_stream::reset()
@@ -68,9 +70,7 @@ namespace mb
 
 	void exchange_websocket_stream::disconnect()
 	{
-		_closeRequested = true;
 		_connection->close();
-
 		clear_subscriptions();
 	}
 
@@ -79,81 +79,83 @@ namespace mb
 		return _connection->connection_status();
 	}
 
-	void exchange_websocket_stream::update_subscription_status(std::string subscriptionId, websocket_channel channel, subscription_status status)
+	void exchange_websocket_stream::set_unsubscribed(std::string subscriptionId, websocket_channel channel)
 	{
-		auto lockedSubscriptionStatus = _subscriptionStatus.unique_lock();
+		auto lockedSubscriptions = _subscriptions.unique_lock();
 
-		if (status == subscription_status::UNSUBSCRIBED)
+		lockedSubscriptions->erase(subscriptionId);
+
+		switch (channel)
 		{
-			lockedSubscriptionStatus->erase(subscriptionId);
-
-			switch (channel)
-			{
-			case websocket_channel::PRICE:
-			{
-				auto lockedPrices = _prices.unique_lock();
-				lockedPrices->erase(subscriptionId);
-				break;
-			}
-			case websocket_channel::OHLCV:
-			{
-				auto lockedOhlcv = _ohlcv.unique_lock();
-				lockedOhlcv->erase(subscriptionId);
-				break;
-			}
-			case websocket_channel::ORDER_BOOK:
-			{
-				auto lockedOrderBooks = _orderBooks.unique_lock();
-				lockedOrderBooks->erase(subscriptionId);
-				break;
-			}
-			default:
-				throw std::invalid_argument{ "Websocket channel not recognized" };
-			}
+		case websocket_channel::PRICE:
+		{
+			auto lockedPrices = _prices.unique_lock();
+			lockedPrices->erase(subscriptionId);
+			break;
 		}
-		else
+		case websocket_channel::OHLCV:
 		{
-			lockedSubscriptionStatus->insert_or_assign(subscriptionId, status);
+			auto lockedOhlcv = _ohlcv.unique_lock();
+			lockedOhlcv->erase(subscriptionId);
+			break;
+		}
+		case websocket_channel::ORDER_BOOK:
+		{
+			auto lockedOrderBooks = _orderBooks.unique_lock();
+			lockedOrderBooks->erase(subscriptionId);
+			break;
+		}
+		default:
+			throw std::invalid_argument{ "Websocket channel not recognized" };
 		}
 	}
 
 	void exchange_websocket_stream::update_price(std::string subscriptionId, double price)
 	{
 		auto lockedPrices = _prices.unique_lock();
-		lockedPrices->insert_or_assign(std::move(subscriptionId), price);
+		lockedPrices->insert_or_assign(subscriptionId, price);
+
+		set_subscribed(std::move(subscriptionId));
 	}
 
 	void exchange_websocket_stream::update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData)
 	{
 		auto lockedOhlcv = _ohlcv.unique_lock();
-		lockedOhlcv->insert_or_assign(std::move(subscriptionId), std::move(ohlcvData));
+		lockedOhlcv->insert_or_assign(subscriptionId, std::move(ohlcvData));
+
+		set_subscribed(std::move(subscriptionId));
 	}
 
 	void exchange_websocket_stream::initialise_order_book(std::string subscriptionId, order_book_cache cache)
 	{
 		auto lockedOrderBooks = _orderBooks.unique_lock();
-		lockedOrderBooks->insert_or_assign(std::move(subscriptionId), std::move(cache));
+		lockedOrderBooks->insert_or_assign(subscriptionId, std::move(cache));
+
+		set_subscribed(std::move(subscriptionId));
 	}
 
 	void exchange_websocket_stream::update_order_book(std::string subscriptionId, order_book_entry entry)
 	{
 		auto lockedOrderBooks = _orderBooks.unique_lock();
-		auto it = lockedOrderBooks->find(subscriptionId);
 
-		if (it != lockedOrderBooks->end())
+		if (!lockedOrderBooks->contains(subscriptionId))
 		{
-			it->second.update_cache(std::move(entry));
+			initialise_order_book(subscriptionId, order_book_cache{ {}, {} });
 		}
 
-		throw mb_exception{ "Order book must be initialised before update" };
+		auto it = lockedOrderBooks->find(subscriptionId);
+		it->second.update_cache(std::move(entry));
 	}
 
 	subscription_status exchange_websocket_stream::get_subscription_status(const unique_websocket_subscription& subscription) const
 	{
 		std::string subId{ generate_subscription_id(subscription) };
 
-		auto lockedSubscriptionStatus = _subscriptionStatus.shared_lock();
-		return find_or_default(*lockedSubscriptionStatus, subId, subscription_status::UNSUBSCRIBED);
+		auto lockedSubscriptionStatus = _subscriptions.shared_lock();
+
+		return lockedSubscriptionStatus->contains(subId)
+			? subscription_status::SUBSCRIBED
+			: subscription_status::UNSUBSCRIBED;
 	}
 
 	order_book_state exchange_websocket_stream::get_order_book(const tradable_pair& pair, int depth) const

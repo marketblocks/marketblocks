@@ -134,15 +134,6 @@ namespace mb::internal
 		: exchange_websocket_stream{ exchange_ids::COINBASE, URL, std::move(connectionFactory) }
 	{}
 
-	void coinbase_websocket_stream::set_sub_status(std::string channel, const websocket_subscription& subscription, subscription_status status)
-	{
-		for (auto& pair : subscription.pair_item())
-		{
-			std::string subId{ ::generate_subscription_id(pair.to_string(), channel) };
-			update_subscription_status(subId, subscription.channel(), status);
-		}
-	}
-
 	std::string coinbase_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
 	{
 		std::string symbol{ subscription.pair_item().to_string() };
@@ -185,8 +176,6 @@ namespace mb::internal
 		std::string channelName{ get_channel(subscription.channel()) };
 		std::string message{ create_message("subscribe", channelName, subscription.pair_item()) };
 
-		set_sub_status(channelName, subscription, subscription_status::SUBSCRIBED);
-
 		_connection->send_message(message);
 	}
 
@@ -194,8 +183,6 @@ namespace mb::internal
 	{
 		std::string channelName{ get_channel(subscription.channel()) };
 		std::string message{ create_message("unsubscribe", channelName, subscription.pair_item()) };
-
-		set_sub_status(channelName, subscription, subscription_status::UNSUBSCRIBED);
 
 		_connection->send_message(message);
 	}

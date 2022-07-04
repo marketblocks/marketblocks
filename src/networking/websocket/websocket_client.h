@@ -54,10 +54,9 @@ namespace mb
 				});
 
 			connectionPtr->set_close_handler(
-				[onClose, this](websocketpp::connection_hdl handle)
+				[onClose, this](websocketpp::connection_hdl)
 				{
-					auto connection = _client.get_con_from_hdl(handle);
-					onClose(connection->get_ec());
+					onClose();
 				});
 
 			connectionPtr->set_message_handler(

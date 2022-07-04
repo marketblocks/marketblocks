@@ -10,7 +10,6 @@ namespace mb::internal
 	private:
 		static constexpr std::string_view URL = "wss://ws.kraken.com";
 
-		void set_sub_status(const websocket_subscription& subscription, subscription_status status);
 		void process_event_message(const json_document& json);
 		void process_price_message(std::string subscriptionId, const json_document& json);
 		void process_ohlcv_message(std::string subscriptionId, const json_document& json);

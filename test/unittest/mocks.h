@@ -49,6 +49,31 @@ namespace mb::test
 		MOCK_METHOD(std::string, generate_subscription_id, (const unique_websocket_subscription& subscription), (const, override));
 		MOCK_METHOD(void, subscribe, (const websocket_subscription& subscription), (override));
 		MOCK_METHOD(void, unsubscribe, (const websocket_subscription& subscription), (override));
+
+		void expose_update_price(std::string subId, double price)
+		{
+			update_price(std::move(subId), price);
+		}
+
+		void expose_update_ohlcv(std::string subId, ohlcv_data data)
+		{
+			update_ohlcv(std::move(subId), std::move(data));
+		}
+
+		void expose_initialise_order_book(std::string subId, order_book_cache cache)
+		{
+			initialise_order_book(std::move(subId), std::move(cache));
+		}
+
+		void expose_update_order_book(std::string subId, order_book_entry entry)
+		{
+			update_order_book(std::move(subId), std::move(entry));
+		}
+
+		void expose_set_unsubscribed(std::string subscriptionId, websocket_channel channel)
+		{
+			set_unsubscribed(std::move(subscriptionId), channel);
+		}
 	};
 
 	class mock_exchange : public exchange

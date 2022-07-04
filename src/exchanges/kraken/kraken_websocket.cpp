@@ -161,17 +161,6 @@ namespace mb::internal
 		return ::generate_subscription_id(std::move(pairName), std::move(channelName));
 	}
 
-	void kraken_websocket_stream::set_sub_status(const websocket_subscription& subscription, subscription_status status)
-	{
-		std::string channelName{ get_full_channel_name(subscription) };
-
-		for (auto& pair : subscription.pair_item())
-		{
-			std::string subId{ ::generate_subscription_id(pair.to_string(PAIR_SEPARATOR), channelName) };
-			update_subscription_status(subId, subscription.channel(), status);
-		}
-	}
-
 	void kraken_websocket_stream::process_event_message(const json_document& json)
 	{
 		// TODO
@@ -259,16 +248,12 @@ namespace mb::internal
 	{
 		std::string message{ create_message("subscribe", subscription) };
 
-		set_sub_status(subscription, subscription_status::SUBSCRIBED);
-
 		_connection->send_message(message);
 	}
 
 	void kraken_websocket_stream::unsubscribe(const websocket_subscription& subscription)
 	{
 		std::string message{ create_message("unsubscribe", subscription) };
-
-		set_sub_status(subscription, subscription_status::UNSUBSCRIBED);
 
 		_connection->send_message(message);
 	}

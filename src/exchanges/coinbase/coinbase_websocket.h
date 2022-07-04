@@ -10,7 +10,6 @@ namespace mb::internal
 	private:
 		static constexpr std::string_view URL = "wss://ws-feed.exchange.coinbase.com";
 
-		void set_sub_status(std::string channel, const websocket_subscription& subscription, subscription_status status);
 		void process_price_message(const json_document& json);
 
 		void on_message(std::string_view message) override;

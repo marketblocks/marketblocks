@@ -46,6 +46,7 @@ namespace mb
 	private:
 		std::string_view _id;
 		std::shared_ptr<websocket_stream> _websocketStream;
+		bool _websocketConnected;
 
 	public:
 		exchange(std::string_view id, std::shared_ptr<websocket_stream> websocketStream);
