@@ -56,4 +56,10 @@ namespace mb
 		constexpr std::string_view id() const noexcept { return _id; }
 		std::shared_ptr<websocket_stream> get_websocket_stream();
 	};	
+
+	template<typename T>
+	std::unique_ptr<exchange> create_exchange_api(bool testing = false)
+	{
+		static_assert(sizeof(T) == 0, "No specialization of create_exchange_api found");
+	}
 }

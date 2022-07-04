@@ -69,5 +69,6 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_digifinex(digifinex_config config);
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<digifinex_api>(bool testing);
 }

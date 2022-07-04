@@ -80,5 +80,6 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_dextrade(dextrade_config config);
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<dextrade_api>(bool testing);
 }

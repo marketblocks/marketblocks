@@ -87,5 +87,6 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_coinbase(coinbase_config config, bool enableTesting = false);
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<coinbase_api>(bool testing);
 }

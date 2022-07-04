@@ -2,6 +2,7 @@
 #include "bybit_websocket.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
+#include "common/file/config_file_reader.h"
 
 namespace
 {
@@ -152,12 +153,13 @@ namespace mb
 		send_private_request<void>(http_verb::HTTP_DELETE, "spot/v1/order", bybit::read_cancel_order, queryParams);
 	}
 
-	std::unique_ptr<exchange> make_bybit(bybit_config config, bool enableTesting)
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<bybit_api>(bool testing)
 	{
 		return std::make_unique<bybit_api>(
-			std::move(config),
+			internal::load_or_create_config<bybit_config>(),
 			std::make_unique<http_service>(),
 			create_exchange_websocket_stream<internal::bybit_websocket_stream>(),
-			enableTesting);
+			testing);
 	}
 }

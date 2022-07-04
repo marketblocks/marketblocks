@@ -7,7 +7,7 @@
 #include "live_test_runner.h"
 #include "back_test_runner.h"
 #include "runner_config.h"
-#include "config_file_reader.h"
+#include "common/file/config_file_reader.h"
 #include "system/time_synchronization.h"
 #include "logging/logger.h"
 

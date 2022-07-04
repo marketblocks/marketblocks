@@ -1,5 +1,4 @@
 #include "exchange_factory.h"
-#include "config_file_reader.h"
 #include "networking/http/http_service.h"
 #include "logging/logger.h"
 #include "exchanges/exchange_ids.h"
@@ -13,36 +12,27 @@ namespace
 {
 	using namespace mb;
 
-	template<typename Config, typename MakeApi>
-	std::unique_ptr<exchange> create_api(MakeApi makeApi)
-	{
-		Config config = internal::load_or_create_config<Config>();
-		return makeApi(std::move(config));
-	}
-
 	std::unique_ptr<exchange> create_api_from_id(std::string_view identifier)
 	{
 		if (identifier == exchange_ids::KRAKEN)
 		{
-			return create_api<kraken_config>(make_kraken);
+			return create_exchange_api<kraken_api>();
 		}
 		if (identifier == exchange_ids::COINBASE)
 		{
-			return create_api<coinbase_config>(
-				[](coinbase_config config) { return make_coinbase(std::move(config)); });
+			return create_exchange_api<coinbase_api>();
 		}
 		if (identifier == exchange_ids::BYBIT)
 		{
-			return create_api<bybit_config>(
-				[](bybit_config config) { return make_bybit(std::move(config)); });
+			return create_exchange_api<bybit_api>();
 		}
 		if (identifier == exchange_ids::DIGIFINEX)
 		{
-			return create_api<digifinex_config>(make_digifinex);
+			return create_exchange_api<digifinex_api>();
 		}
 		if (identifier == exchange_ids::DEXTRADE)
 		{
-			return create_api<dextrade_config>(make_dextrade);
+			return create_exchange_api<dextrade_api>();
 		}
 
 		return nullptr;

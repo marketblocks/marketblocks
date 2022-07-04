@@ -2,6 +2,7 @@
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 #include "common/exceptions/not_implemented_exception.h"
+#include "common/file/config_file_reader.h"
 
 namespace
 {
@@ -118,10 +119,11 @@ namespace mb
 		throw not_implemented_exception{ "digifinex::cancel_order" };
 	}
 
-	std::unique_ptr<exchange> make_digifinex(digifinex_config config)
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<digifinex_api>(bool testing)
 	{
 		return std::make_unique<digifinex_api>(
-			std::move(config),
+			internal::load_or_create_config<digifinex_config>(),
 			std::make_unique<http_service>(),
 			nullptr);
 	}

@@ -94,5 +94,6 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_kraken(kraken_config config);
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<kraken_api>(bool testing);
 } 

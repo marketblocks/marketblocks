@@ -4,6 +4,7 @@
 #include "kraken_results.h"
 #include "kraken_websocket.h"
 #include "networking/http/http_constants.h"
+#include "common/file/config_file_reader.h"
 #include "common/types/result.h"
 #include "common/utils/stringutils.h"
 #include "common/utils/containerutils.h"
@@ -146,10 +147,11 @@ namespace mb
 		send_private_request<void>("CancelOrder", kraken::read_cancel_order, query);
 	}
 
-	std::unique_ptr<exchange> make_kraken(kraken_config config)
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<kraken_api>(bool testing)
 	{
 		return std::make_unique<kraken_api>(
-			std::move(config),
+			internal::load_or_create_config<kraken_config>(),
 			std::make_unique<http_service>(),
 			create_exchange_websocket_stream<internal::kraken_websocket_stream>());
 	}

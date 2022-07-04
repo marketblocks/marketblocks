@@ -82,5 +82,6 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	std::unique_ptr<exchange> make_bybit(bybit_config config, bool enableTesting = false);
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<bybit_api>(bool testing);
 }

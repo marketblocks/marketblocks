@@ -3,6 +3,7 @@
 #include "common/utils/timeutils.h"
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
+#include "common/file/config_file_reader.h"
 
 namespace
 {
@@ -175,12 +176,13 @@ namespace mb
 		send_private_request<void>(http_verb::HTTP_DELETE, path, coinbase::read_cancel_order);
 	}
 
-	std::unique_ptr<exchange> make_coinbase(coinbase_config config, bool enableTesting)
+	template<>
+	std::unique_ptr<exchange> create_exchange_api<coinbase_api>(bool testing)
 	{
 		return std::make_unique<coinbase_api>(
-			std::move(config),
+			internal::load_or_create_config<coinbase_config>(),
 			std::make_unique<http_service>(),
 			create_exchange_websocket_stream<internal::coinbase_websocket_stream>(),
-			enableTesting);
+			testing);
 	}
 }
