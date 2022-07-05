@@ -124,9 +124,30 @@ namespace mb::digifinex
 		});
 	}
 
-	result<ohlcv_data> read_24h_stats(std::string_view jsonResult)
+	result<std::vector<ohlcv_data>> read_ohlcv_data(std::string_view jsonResult, int count)
 	{
-		throw not_implemented_exception{ "digifinex::read_24h_stats" };
+		return read_result<std::vector<ohlcv_data>>(jsonResult, [count](const json_document& json)
+		{
+			json_element dataElement{ json.element("data") };
+			int limit{ std::min<int>(dataElement.size(), count) };
+			std::vector<ohlcv_data> data;
+			data.reserve(limit);
+
+			for (int i = 0; i < limit; ++i)
+			{
+				json_element ohlcvElement{ dataElement.element(i) };
+
+				data.emplace(data.begin(),
+					ohlcvElement.get<std::time_t>(0),
+					ohlcvElement.get<double>(5),
+					ohlcvElement.get<double>(3),
+					ohlcvElement.get<double>(4),
+					ohlcvElement.get<double>(2),
+					ohlcvElement.get<double>(1));
+			}
+
+			return data;
+		});
 	}
 
 	result<double> read_price(std::string_view jsonResult)

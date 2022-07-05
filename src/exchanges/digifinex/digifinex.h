@@ -53,12 +53,7 @@ namespace mb
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;
-
-		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override
-		{
-			throw not_implemented_exception{ "digifinex::get_ohlcv" };
-		}
-
+		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override;
 		double get_price(const tradable_pair& tradablePair) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;

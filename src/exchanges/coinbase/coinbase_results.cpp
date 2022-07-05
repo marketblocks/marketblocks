@@ -70,6 +70,30 @@ namespace mb::coinbase
 		});
 	}
 
+	result<std::vector<ohlcv_data>> read_ohlcv_data(std::string_view jsonResult, int count)
+	{
+		return read_result<std::vector<ohlcv_data>>(jsonResult, [count](const json_document& json)
+		{
+			int limit{ std::min<int>(json.size(), count) };
+			std::vector<ohlcv_data> data;
+			data.reserve(limit);
+
+			for (int i = 0; i < limit; ++i)
+			{
+				json_element dataElement{ json.element(i) };
+				data.emplace_back(
+					dataElement.get<std::time_t>(0),
+					dataElement.get<double>(3),
+					dataElement.get<double>(2),
+					dataElement.get<double>(1),
+					dataElement.get<double>(4),
+					dataElement.get<double>(5));
+			}
+
+			return data;
+		});
+	}
+
 	result<double> read_price(std::string_view jsonResult)
 	{
 		return read_result<double>(jsonResult, [](const json_document& json)

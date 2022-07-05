@@ -25,25 +25,19 @@ add_executable(marketblocks_test
 "unittest/exchanges/coinbase/coinbase_results_test.cpp"
 "unittest/assertion_helpers.cpp" 
 "test_data/test_exchange_configs/test_config_loader.h"
-"unittest/exchanges/kraken/kraken_websocket_test.cpp" 
-"unittest/exchanges/kraken/kraken_integration_test.cpp" 
+ 
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
-"unittest/exchanges/coinbase/coinbase_integration_test.cpp"
-"unittest/exchanges/coinbase/coinbase_websocket_test.cpp" 
 "unittest/common/types/set_queue_test.cpp"
 "unittest/common/csv/csv_test.cpp"
 "unittest/common/csv/csv_row_test.cpp"  
 "unittest/runner/backtest_runner_test.cpp" 
 "unittest/testing/back_testing/back_testing_data_test.cpp"
 "unittest/testing/back_testing/back_testing_report_test.cpp"
-"unittest/exchanges/bybit/bybit_integration_test.cpp" 
-"unittest/exchanges/bybit/bybit_integration_test.cpp" 
 "unittest/exchanges/bybit/bybit_results_test.cpp" 
-"unittest/exchanges/digifinex/digifinex_integration_test.cpp" 
 "unittest/exchanges/digifinex/digifinex_results_test.cpp"
 "unittest/exchanges/digifinex/digifinex_test.cpp" 
 "unittest/exchanges/exchange_test_common.h"
-"unittest/exchanges/websockets/exchange_websocket_stream_test.cpp"  "unittest/common/types/concurrent_wrapper_test.cpp" "unittest/testing/back_testing/data_loading/csv_data_source_test.cpp" "unittest/testing/back_testing/data_loading/data_factory_test.cpp")
+"unittest/exchanges/websockets/exchange_websocket_stream_test.cpp"  "unittest/common/types/concurrent_wrapper_test.cpp" "unittest/testing/back_testing/data_loading/csv_data_source_test.cpp" "unittest/testing/back_testing/data_loading/data_factory_test.cpp"  "unittest/exchanges/integration_tests.cpp" )
 
 target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
 target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)
@@ -51,6 +45,10 @@ target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)
 add_custom_command(TARGET marketblocks_test POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
 						   ${CMAKE_CURRENT_SOURCE_DIR}/test_data/ $<TARGET_FILE_DIR:marketblocks_test>/test_data)
+
+add_custom_command(TARGET marketblocks_test POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+						   ${CMAKE_CURRENT_SOURCE_DIR}/configs/ $<TARGET_FILE_DIR:marketblocks_test>/configs)
 
 include(GoogleTest)
 gtest_discover_tests(marketblocks_test)

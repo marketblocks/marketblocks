@@ -8,6 +8,22 @@ namespace
 {
 	using namespace mb;
 
+	std::string get_ohlcv_period(ohlcv_interval interval)
+	{
+		if (interval == ohlcv_interval::D1)
+		{
+			return "1D";
+		}
+		else if (interval == ohlcv_interval::W1)
+		{
+			return "1W";
+		}
+		else
+		{
+			return std::to_string(to_seconds(interval) / 60);
+		}
+	}
+
 	constexpr std::string_view get_order_type(order_type orderType, trade_action action)
 	{
 		if (orderType == order_type::LIMIT)
@@ -60,6 +76,19 @@ namespace mb
 	std::vector<tradable_pair> digifinex_api::get_tradable_pairs() const
 	{
 		return send_public_request<std::vector<tradable_pair>>("/spot/symbols", digifinex::read_tradable_pairs);
+	}
+
+	std::vector<ohlcv_data> digifinex_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
+	{
+		std::string query = url_query_builder{}
+			.add_parameter("symbol", tradablePair.to_string(_pairSeparator))
+			.add_parameter("period", get_ohlcv_period(interval))
+			.to_string();
+
+		return send_public_request<std::vector<ohlcv_data>>(
+			"/kline", 
+			[count](std::string_view result) { return digifinex::read_ohlcv_data(result, count); },
+			query);
 	}
 
 	double digifinex_api::get_price(const tradable_pair& tradablePair) const

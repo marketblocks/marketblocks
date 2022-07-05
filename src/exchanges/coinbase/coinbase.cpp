@@ -91,6 +91,20 @@ namespace mb
 		return send_public_request<std::vector<tradable_pair>>("/products", coinbase::read_tradable_pairs);
 	}
 
+	std::vector<ohlcv_data> coinbase_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
+	{
+		std::string path = "/products/" + tradablePair.to_string(_pairSeparator) + "/candles";
+
+		std::string query{ url_query_builder{}
+			.add_parameter("granularity", std::to_string(to_seconds(interval)))
+			.to_string() };
+
+		return send_public_request<std::vector<ohlcv_data>>(
+			path,
+			[count](std::string_view jsonResult) { return coinbase::read_ohlcv_data(jsonResult, count); },
+			query);
+	}
+
 	double coinbase_api::get_price(const tradable_pair& tradablePair) const
 	{
 		std::string path = "/products/" + tradablePair.to_string(_pairSeparator) + "/ticker";

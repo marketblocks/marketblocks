@@ -118,6 +118,32 @@ namespace mb::kraken
 		});
 	}
 
+	result<std::vector<ohlcv_data>> read_ohlcv_data(std::string_view jsonResult, int count)
+	{
+		return read_result<std::vector<ohlcv_data>>(jsonResult, [count](const json_element& resultElement)
+		{
+			json_element pairElement{ resultElement.begin().value() };
+			int limit{ std::min<int>(pairElement.size(), count) };
+			std::vector<ohlcv_data> data;
+			data.reserve(limit);
+
+			for (int i = 0; i < limit; ++i)
+			{
+				json_element dataElement{ pairElement.element(i) };
+
+				data.emplace(data.begin(),
+					dataElement.get<std::time_t>(0),
+					std::stod(dataElement.get<std::string>(1)),
+					std::stod(dataElement.get<std::string>(2)),
+					std::stod(dataElement.get<std::string>(3)),
+					std::stod(dataElement.get<std::string>(4)),
+					std::stod(dataElement.get<std::string>(6)));
+			}
+
+			return data;
+		});
+	}
+
 	result<double> read_price(std::string_view jsonResult)
 	{
 		return read_result<double>(jsonResult, [](const json_element& resultElement)

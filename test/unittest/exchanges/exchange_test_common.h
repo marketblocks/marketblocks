@@ -1,10 +1,17 @@
 #pragma once
 
+#include <gtest/gtest.h>
+
 #include "common/file/file.h"
 #include "test_data/test_data_constants.h"
 #include "unittest/assertion_helpers.h"
 #include "unittest/mocks.h"
 #include "unittest/common_matchers.h"
+#include "exchanges/kraken/kraken.h"
+#include "exchanges/coinbase/coinbase.h"
+#include "exchanges/bybit/bybit.h"
+#include "exchanges/digifinex/digifinex.h"
+#include "exchanges/dextrade/dextrade.h"
 
 namespace
 {
@@ -20,6 +27,14 @@ namespace
 
 namespace mb::test
 {
+	using testing::Types;
+	using ExchangeImplementations = Types<
+		kraken_api,
+		coinbase_api,
+		bybit_api,
+		digifinex_api,
+		dextrade_api>;
+
 	static const std::string ERROR_MESSAGE = "This is an error";
 	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";
 
