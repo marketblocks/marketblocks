@@ -113,7 +113,7 @@ namespace mb
 
 	std::vector<order_description> dextrade_api::get_open_orders() const
 	{
-		throw not_implemented_exception{ "dextrade::get_open_orders" };
+		return send_private_request<std::vector<order_description>>("orders", dextrade::read_open_orders);
 	}
 
 	std::vector<order_description> dextrade_api::get_closed_orders() const
@@ -135,7 +135,10 @@ namespace mb
 
 	void dextrade_api::cancel_order(std::string_view orderId)
 	{
-		throw not_implemented_exception{ "dextrade::cancel_order" };
+		json_writer jsonWriter;
+		jsonWriter.add("order_id", orderId);
+
+		return send_private_request<void>("delete-order", dextrade::read_cancel_order, jsonWriter);
 	}
 
 	std::unique_ptr<exchange> make_dextrade(dextrade_config config, std::shared_ptr<websocket_client> websocketClient)
