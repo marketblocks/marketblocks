@@ -10,6 +10,8 @@ namespace mb::test
 	using ::testing::_;
 	using ::testing::Return;
 
+	static std::string TestDataDirectory = std::string{ TEST_DATA_FOLDER } + "/" + "csv_data_source_test";
+
 	TEST(DataFactory, UsesConfigTimeLimitsIfDynamicLoadingEnabled)
 	{
 		constexpr std::time_t startTime = 10;
@@ -22,7 +24,7 @@ namespace mb::test
 			startTime,
 			endTime,
 			stepSize,
-			csv_back_test_data_directory().string(),
+			TestDataDirectory,
 			true
 		};
 
@@ -41,7 +43,7 @@ namespace mb::test
 			10,
 			50,
 			10,
-			csv_back_test_data_directory().string(),
+			TestDataDirectory,
 			true
 		};
 
@@ -68,7 +70,7 @@ namespace mb::test
 			100,
 			340,
 			60,
-			csv_back_test_data_directory().string(),
+			TestDataDirectory,
 			false
 		};
 
@@ -92,7 +94,7 @@ namespace mb::test
 			0,
 			0,
 			60,
-			csv_back_test_data_directory().string(),
+			TestDataDirectory,
 			false
 		};
 
@@ -134,7 +136,7 @@ namespace mb::test
 			startTime,
 			endTime,
 			60,
-			csv_back_test_data_directory().string(),
+			TestDataDirectory,
 			false
 		};
 

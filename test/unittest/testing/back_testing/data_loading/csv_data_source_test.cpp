@@ -13,7 +13,7 @@ namespace
 	{
 		if (directory.empty())
 		{
-			return csv_data_source{ csv_back_test_data_directory() };
+			directory = "csv_data_source_test";
 		}
 
 		std::filesystem::path path{ TEST_DATA_FOLDER };

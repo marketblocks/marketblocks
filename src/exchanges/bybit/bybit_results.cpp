@@ -116,8 +116,9 @@ namespace mb::bybit
 			{
 				json_element ohlcvElement = it.value();
 
-				ohlcvData.emplace_back(
-					ohlcvElement.get<std::time_t>(0),
+				ohlcvData.emplace(
+					ohlcvData.begin(),
+					ohlcvElement.get<std::time_t>(0) / 1000,
 					std::stod(ohlcvElement.get<std::string>(1)),
 					std::stod(ohlcvElement.get<std::string>(2)),
 					std::stod(ohlcvElement.get<std::string>(3)),

@@ -17,7 +17,9 @@ namespace mb::test
 			csv_row{ { "/\"r5c1\"\\", "r5c2", "1234.5678" } }
 		};
 
-		std::string csvString{ read_file(csv_test_data_path("csv_test_file.csv")) };
+		std::filesystem::path path{ TEST_DATA_FOLDER };
+		path /= "csv_test/csv_test_file.csv";
+		std::string csvString{ read_file(path) };
 		csv_document csv{ parse_csv(csvString) };
 
 		ASSERT_EQ(expectedRows.size(), csv.row_count());

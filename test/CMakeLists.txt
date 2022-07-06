@@ -15,14 +15,14 @@ add_executable(marketblocks_test
 "unittest/common/utils/retry_test.cpp" 
 "unittest/testing/paper_trading/paper_trader_test.cpp" 
 "unittest/common/security/hash_test.cpp"
-"unittest/exchanges/kraken/kraken_results_test.cpp"
+
 "unittest/exchanges/kraken/kraken_test.cpp"
 "unittest/assertion_helpers.h" 
 "unittest/common_matchers.h"
 "test_data/test_data_constants.h"
-"test_data/test_data_constants.cpp" 
+ 
 "unittest/exchanges/coinbase/coinbase_test.cpp" 
-"unittest/exchanges/coinbase/coinbase_results_test.cpp"
+
 "unittest/assertion_helpers.cpp" 
 "test_data/test_exchange_configs/test_config_loader.h"
  
@@ -33,11 +33,19 @@ add_executable(marketblocks_test
 "unittest/runner/backtest_runner_test.cpp" 
 "unittest/testing/back_testing/back_testing_data_test.cpp"
 "unittest/testing/back_testing/back_testing_report_test.cpp"
-"unittest/exchanges/bybit/bybit_results_test.cpp" 
-"unittest/exchanges/digifinex/digifinex_results_test.cpp"
+ 
+
 "unittest/exchanges/digifinex/digifinex_test.cpp" 
 "unittest/exchanges/exchange_test_common.h"
-"unittest/exchanges/websockets/exchange_websocket_stream_test.cpp"  "unittest/common/types/concurrent_wrapper_test.cpp" "unittest/testing/back_testing/data_loading/csv_data_source_test.cpp" "unittest/testing/back_testing/data_loading/data_factory_test.cpp"  "unittest/exchanges/integration_tests.cpp" )
+"unittest/exchanges/websockets/exchange_websocket_stream_test.cpp"  
+"unittest/common/types/concurrent_wrapper_test.cpp"
+"unittest/testing/back_testing/data_loading/csv_data_source_test.cpp"
+"unittest/testing/back_testing/data_loading/data_factory_test.cpp" 
+"unittest/exchanges/integration_tests.h" 
+"unittest/exchanges/reader_tests.h"
+"unittest/exchanges/test_implementations/kraken_tests.cpp"
+"unittest/exchanges/test_implementations/coinbase_tests.cpp"
+"unittest/exchanges/test_implementations/bybit_tests.cpp")
 
 target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
 target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)

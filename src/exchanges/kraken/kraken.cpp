@@ -44,7 +44,8 @@ namespace mb
 	kraken_api::kraken_api(
 		kraken_config config, 
 		std::unique_ptr<http_service> httpService,
-		std::shared_ptr<websocket_stream> websocketStream)
+		std::shared_ptr<websocket_stream> websocketStream,
+		bool enableTesting)
 		:
 		exchange{ exchange_ids::KRAKEN, std::move(websocketStream) },
 		_publicKey{ config.public_key() },
@@ -166,6 +167,7 @@ namespace mb
 		return std::make_unique<kraken_api>(
 			internal::load_or_create_config<kraken_config>(),
 			std::make_unique<http_service>(),
-			create_exchange_websocket_stream<internal::kraken_websocket_stream>());
+			create_exchange_websocket_stream<internal::kraken_websocket_stream>(),
+			testing);
 	}
 }

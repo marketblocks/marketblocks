@@ -1,0 +1,127 @@
+#pragma once 
+
+#include <gtest/gtest.h>
+
+#include "exchange_test_common.h"
+#include "exchanges/exchange.h"
+
+namespace
+{
+	using namespace mb;
+
+	void execute_add_cancel_order_test(exchange& api, const tradable_pair& pair, order_type orderType, trade_action action, bool cancel = true)
+	{
+		double price{ api.get_price(pair) };
+		trade_description trade{ orderType, pair, action, price, 1.0 };
+
+		std::string orderId;
+		ASSERT_NO_THROW(orderId = api.add_order(trade));
+
+		if (cancel)
+		{
+			ASSERT_NO_THROW(api.cancel_order(orderId));
+		}
+	}
+}
+
+namespace mb::test
+{
+	template<typename Api>
+	class ExchangeIntegrationTests : public testing::Test
+	{
+	protected:
+		std::unique_ptr<exchange> _api;
+		tradable_pair _testingPair;
+
+		ExchangeIntegrationTests()
+			: _api{ mb::create_exchange_api<Api>(true) }, _testingPair{ get_testing_pair<Api>() }
+		{}
+	};
+
+	TYPED_TEST_SUITE_P(ExchangeIntegrationTests);
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetStatus)
+	{
+		exchange_status status{ this->_api->get_status() };
+		ASSERT_EQ(exchange_status::ONLINE, status);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetTradablePairs)
+	{
+		std::vector<tradable_pair> pairs{ this->_api->get_tradable_pairs() };
+		ASSERT_FALSE(pairs.empty());
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetOhlcv)
+	{
+		std::vector<ohlcv_data> ohlcv{ this->_api->get_ohlcv(this->_testingPair, ohlcv_interval::M15, 5) };
+		ASSERT_FALSE(ohlcv.empty());
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetPrice)
+	{
+		double price{ this->_api->get_price(this->_testingPair) };
+		ASSERT_GT(price, 0.0);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetOrderBook)
+	{
+		order_book_state orderBook{ this->_api->get_order_book(this->_testingPair, 5) };
+		ASSERT_GT(orderBook.depth(), 0);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetBalances)
+	{
+		ASSERT_NO_THROW(this->_api->get_balances());
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetFee)
+	{
+		ASSERT_NO_THROW(this->_api->get_fee(this->_testingPair));
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetOpenOrders)
+	{
+		ASSERT_NO_THROW(this->_api->get_open_orders());
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetClosedOrders)
+	{
+		ASSERT_NO_THROW(this->_api->get_closed_orders());
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, AddCancelBuyLimitOrder)
+	{
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::LIMIT, trade_action::BUY);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, AddCancelSellLimitOrder)
+	{
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::LIMIT, trade_action::SELL);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, AddBuyMarketOrder)
+	{
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::MARKET, trade_action::BUY, false);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, AddSellMarketOrder)
+	{
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::MARKET, trade_action::SELL, false);
+	}
+
+	REGISTER_TYPED_TEST_SUITE_P(ExchangeIntegrationTests,
+		GetStatus,
+		GetTradablePairs,
+		GetOhlcv,
+		GetPrice,
+		GetOrderBook,
+		GetBalances,
+		GetFee,
+		GetOpenOrders,
+		GetClosedOrders,
+		AddCancelBuyLimitOrder,
+		AddCancelSellLimitOrder,
+		AddBuyMarketOrder,
+		AddSellMarketOrder);
+}

@@ -3,15 +3,11 @@
 #include <gtest/gtest.h>
 
 #include "common/file/file.h"
+#include "common/file/config_file_reader.h"
 #include "test_data/test_data_constants.h"
 #include "unittest/assertion_helpers.h"
 #include "unittest/mocks.h"
 #include "unittest/common_matchers.h"
-#include "exchanges/kraken/kraken.h"
-#include "exchanges/coinbase/coinbase.h"
-#include "exchanges/bybit/bybit.h"
-#include "exchanges/digifinex/digifinex.h"
-#include "exchanges/dextrade/dextrade.h"
 
 namespace
 {
@@ -27,13 +23,35 @@ namespace
 
 namespace mb::test
 {
-	using testing::Types;
-	using ExchangeImplementations = Types<
-		kraken_api,
-		coinbase_api,
-		bybit_api,
-		digifinex_api,
-		dextrade_api>;
+	using ::testing::Types;
+
+	template<typename Api>
+	tradable_pair get_testing_pair()
+	{
+		static_assert(sizeof(Api) == 0, "No specialization for get_testing_pair exists");
+	}
+
+	template<typename Api>
+	std::unique_ptr<exchange> create_exchange_api(
+		std::unique_ptr<http_service> httpService,
+		std::shared_ptr<websocket_stream> websocketStream)
+	{
+		static_assert(sizeof(Api) == 0, "No specialization for create_exchange_api exists");
+	}
+
+	template<typename Api, typename Config>
+	std::unique_ptr<exchange> create_exchange_api(
+		std::unique_ptr<http_service> httpService,
+		std::shared_ptr<websocket_stream> websocketStream)
+	{
+		Config config{ internal::load_or_create_config<Config>() };
+		return std::make_unique<Api>(
+			std::move(config),
+			std::move(httpService),
+			websocketStream,
+			true);
+	}
+
 
 	static const std::string ERROR_MESSAGE = "This is an error";
 	static const std::string ERROR_RESPONSE_FILE_NAME = "error_response.json";

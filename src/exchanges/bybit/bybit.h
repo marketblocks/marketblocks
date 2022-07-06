@@ -18,6 +18,7 @@ namespace mb
 
 		std::string _apiKey;
 		std::string _apiSecret;
+		double _fee;
 		std::unique_ptr<http_service> _httpService;
 
 		std::string get_time_stamp() const;

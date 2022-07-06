@@ -55,6 +55,7 @@ namespace mb
 		_baseUrl{ select_base_url(enableTesting) },
 		_apiKey{ config.api_key() },
 		_apiSecret{ config.api_secret() },
+		_fee{ config.fee() },
 		_httpService{ std::move(httpService) }
 	{}
 
@@ -111,7 +112,7 @@ namespace mb
 
 	double bybit_api::get_fee(const tradable_pair& tradablePair) const
 	{
-		return 0.1;
+		return _fee;
 	}
 
 	unordered_string_map<double> bybit_api::get_balances() const

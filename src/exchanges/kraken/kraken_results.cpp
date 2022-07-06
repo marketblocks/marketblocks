@@ -45,11 +45,11 @@ namespace
 		}
 	}
 
-	result<std::vector<order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderType)
+	result<std::vector<order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderStatus)
 	{
-		return read_result<std::vector<order_description>>(jsonResult, [&orderType](const json_element& resultElement)
+		return read_result<std::vector<order_description>>(jsonResult, [&orderStatus](const json_element& resultElement)
 			{
-				json_element ordersElement{ resultElement.element(orderType) };
+				json_element ordersElement{ resultElement.element(orderStatus) };
 				std::vector<order_description> orderDescriptions;
 				orderDescriptions.reserve(ordersElement.size());
 
@@ -57,6 +57,13 @@ namespace
 				{
 					std::string orderId{ it.key() };
 					json_element order{ it.value() };
+					
+					std::string status{ order.get<std::string>("status") };
+					if (status != orderStatus)
+					{
+						continue;
+					}
+
 					json_element descriptionElement{ order.element("descr") };
 
 					std::string pairName{ descriptionElement.get<std::string>("pair") };
@@ -129,9 +136,9 @@ namespace mb::kraken
 
 			for (int i = 0; i < limit; ++i)
 			{
-				json_element dataElement{ pairElement.element(i) };
+				json_element dataElement{ pairElement.element(pairElement.size() - i - 1) };
 
-				data.emplace(data.begin(),
+				data.emplace_back(
 					dataElement.get<std::time_t>(0),
 					std::stod(dataElement.get<std::string>(1)),
 					std::stod(dataElement.get<std::string>(2)),
