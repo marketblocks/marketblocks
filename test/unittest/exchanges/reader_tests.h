@@ -36,6 +36,7 @@ namespace mb::test
 		void set_http_response(std::string_view fileName)
 		{
 			std::filesystem::path path{ TEST_DATA_FOLDER };
+			path /= "responses";
 			path /= _api->id();
 			path /= fileName;
 			path.replace_extension(".json");
