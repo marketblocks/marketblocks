@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://api.kraken.com/0/private/Balance",
+  "content": "nonce=<13>"
+}

@@ -1,6 +1,7 @@
 #include "unittest/exchanges/exchange_test_common.h"
 #include "unittest/exchanges/integration_tests.h"
 #include "unittest/exchanges/reader_tests.h"
+#include "unittest/exchanges/request_tests.h"
 #include "exchanges/coinbase/coinbase.h"
 
 namespace mb::test
@@ -21,4 +22,5 @@ namespace mb::test
 
 	INSTANTIATE_TYPED_TEST_SUITE_P(Coinbase, ExchangeIntegrationTests, coinbase_api);
 	INSTANTIATE_TYPED_TEST_SUITE_P(Coinbase, ExchangeReaderTests, coinbase_api);
+	INSTANTIATE_TYPED_TEST_SUITE_P(Coinbase, ExchangeRequestTests, coinbase_api);
 }

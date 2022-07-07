@@ -39,4 +39,16 @@ namespace mb
 
 		throw std::invalid_argument("HTTP verb not recognized");
 	}
+
+	constexpr http_verb to_http_verb(std::string_view verb)
+	{
+		if (verb == "GET")
+			return http_verb::GET;
+		if (verb == "POST")
+			return http_verb::POST;
+		if (verb == "DELETE")
+			return http_verb::HTTP_DELETE;
+
+		throw std::invalid_argument("HTTP verb not recognized");
+	}
 }

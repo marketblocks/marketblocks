@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://api.bybit.com/spot/quote/v1/depth?symbol=BTCUSD&limit=5",
+  "content": ""
+}

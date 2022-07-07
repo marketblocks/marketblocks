@@ -1,0 +1,5 @@
+{
+  "verb": "DELETE",
+  "url": "https://api.exchange.coinbase.com/orders/123456789",
+  "content": ""
+}

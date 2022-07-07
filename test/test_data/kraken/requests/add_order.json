@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://api.kraken.com/0/private/AddOrder",
+  "content": "nonce=<13>&pair=BTCUSD&type=buy&ordertype=limit&price=1234.560000&volume=0.789000"
+}

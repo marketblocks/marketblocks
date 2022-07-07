@@ -2,6 +2,8 @@
 
 #include <utility>
 #include <vector>
+#include <iostream>
+
 #include "http_constants.h"
 #include "http_header.h"
 
@@ -20,6 +22,8 @@ namespace mb
 			: _verb{ verb }, _url{ std::move(uri) }, _content{}, _headers{}
 		{}
 
+		friend std::ostream& operator<<(std::ostream& stream, const http_request& request);
+
 		constexpr http_verb verb() const noexcept { return _verb; }
 		constexpr const std::string& url() const noexcept { return _url; }
 		constexpr const std::string& content() const noexcept { return _content; }
@@ -35,4 +39,6 @@ namespace mb
 			_headers.emplace_back(std::string{ key }, std::string{ value });
 		}
 	};
+
+	std::ostream& operator<<(std::ostream& stream, const http_request& request);
 }

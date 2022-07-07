@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://api.bybit.com/spot/v1/order",
+  "content": "api_key=<18>&price=1234.560000&qty=0.789000&side=Buy&symbol=BTCUSD&timestamp=<13>&type=LIMIT&sign=<64>"
+}

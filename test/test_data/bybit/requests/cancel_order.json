@@ -1,0 +1,5 @@
+{
+  "verb": "DELETE",
+  "url": "https://api.bybit.com/spot/v1/order?api_key=<18>&orderId=123456789&timestamp=<13>&sign=<64>",
+  "content": ""
+}

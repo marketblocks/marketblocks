@@ -120,18 +120,25 @@ namespace mb::coinbase
 
 			for (int i = 0; i < depth; ++i)
 			{
-				json_element bidElement{ bids.element(i) };
-				json_element askElement{ asks.element(i) };
+				if (i < bids.size())
+				{
+					json_element bidElement{ bids.element(i) };
 
-				bidEntries.emplace_back(
-					std::stod(bidElement.get<std::string>(PRICE_INDEX)), 
-					std::stod(bidElement.get<std::string>(VOLUME_INDEX)),
-					order_book_side::ASK);
+					bidEntries.emplace_back(
+						std::stod(bidElement.get<std::string>(PRICE_INDEX)),
+						std::stod(bidElement.get<std::string>(VOLUME_INDEX)),
+						order_book_side::ASK);
+				}
 
-				askEntries.emplace_back(
-					std::stod(askElement.get<std::string>(PRICE_INDEX)),
-					std::stod(askElement.get<std::string>(VOLUME_INDEX)),
-					order_book_side::BID);
+				if (i < asks.size())
+				{
+					json_element askElement{ asks.element(i) };
+
+					askEntries.emplace_back(
+						std::stod(askElement.get<std::string>(PRICE_INDEX)),
+						std::stod(askElement.get<std::string>(VOLUME_INDEX)),
+						order_book_side::BID);
+				}
 			}
 
 			return order_book_state{ std::move(askEntries), std::move(bidEntries) };

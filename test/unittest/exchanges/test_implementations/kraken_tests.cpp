@@ -1,6 +1,7 @@
 #include "unittest/exchanges/exchange_test_common.h"
 #include "unittest/exchanges/integration_tests.h"
 #include "unittest/exchanges/reader_tests.h"
+#include "unittest/exchanges/request_tests.h"
 #include "exchanges/kraken/kraken.h"
 
 namespace mb::test
@@ -21,4 +22,5 @@ namespace mb::test
 
 	INSTANTIATE_TYPED_TEST_SUITE_P(Kraken, ExchangeIntegrationTests, kraken_api);
 	INSTANTIATE_TYPED_TEST_SUITE_P(Kraken, ExchangeReaderTests, kraken_api);
+	INSTANTIATE_TYPED_TEST_SUITE_P(Kraken, ExchangeRequestTests, kraken_api);
 }

@@ -12,6 +12,7 @@
 namespace mb::test
 {
 	using ::testing::_;
+	using ::testing::Return;
 
 	template<typename Api>
 	class ExchangeReaderTests : public testing::Test
@@ -35,13 +36,7 @@ namespace mb::test
 
 		void set_http_response(std::string_view fileName)
 		{
-			std::filesystem::path path{ TEST_DATA_FOLDER };
-			path /= "responses";
-			path /= _api->id();
-			path /= fileName;
-			path.replace_extension(".json");
-
-			std::string responseMessage{ read_file(path) };
+			std::string responseMessage{ read_response_file(_api->id(), fileName) };
 			http_response response{ 200, std::move(responseMessage) };
 
 			EXPECT_CALL(*_mockHttpService, send(_))

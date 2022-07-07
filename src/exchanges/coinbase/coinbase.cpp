@@ -142,7 +142,11 @@ namespace mb
 
 	std::vector<order_description> coinbase_api::get_open_orders() const
 	{
-		return send_private_request<std::vector<order_description>>(http_verb::GET, "/orders", coinbase::read_orders);
+		std::string query{ url_query_builder{}
+			.add_parameter("status", "open")
+			.to_string() };
+
+		return send_private_request<std::vector<order_description>>(http_verb::GET, "/orders", coinbase::read_orders, query);
 	}
 
 	std::vector<order_description> coinbase_api::get_closed_orders() const

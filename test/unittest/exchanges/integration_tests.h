@@ -12,7 +12,7 @@ namespace
 	void execute_add_cancel_order_test(exchange& api, const tradable_pair& pair, order_type orderType, trade_action action, bool cancel = true)
 	{
 		double price{ api.get_price(pair) };
-		trade_description trade{ orderType, pair, action, price, 1.0 };
+		trade_description trade{ orderType, pair, action, price, 0.01 };
 
 		std::string orderId;
 		ASSERT_NO_THROW(orderId = api.add_order(trade));

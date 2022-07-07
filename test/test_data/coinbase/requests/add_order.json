@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://api.exchange.coinbase.com/orders",
+  "content": "{\"price\":\"1234.560000\",\"product_id\":\"BTC-USD\",\"side\":\"buy\",\"size\":\"0.789000\",\"type\":\"limit\"}"
+}
