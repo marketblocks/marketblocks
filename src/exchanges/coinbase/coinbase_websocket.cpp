@@ -136,7 +136,7 @@ namespace mb::internal
 
 	std::string coinbase_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
 	{
-		std::string symbol{ subscription.pair_item().to_string() };
+		std::string symbol{ subscription.pair_item().to_string(PAIR_SEPARATOR) };
 		std::string topic{ get_channel(subscription.channel()) };
 		return ::generate_subscription_id(std::move(symbol), std::move(topic));
 	}
@@ -147,7 +147,7 @@ namespace mb::internal
 		std::string subId{ ::generate_subscription_id(pairName, "ticker") };
 		double price{ std::stod(json.get<std::string>("price")) };
 
-		update_price(subId, price);
+		update_price(std::move(subId), price);
 	}
 
 	void coinbase_websocket_stream::on_message(std::string_view message)

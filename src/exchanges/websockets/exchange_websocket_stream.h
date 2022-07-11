@@ -48,6 +48,8 @@ namespace mb
 			std::string_view url, 
 			std::unique_ptr<websocket_connection_factory> connectionFactory);
 
+		std::string_view id() const noexcept { return _id; }
+
 		void reset() override;
 		void disconnect() override;
 		ws_connection_status connection_status() const override;

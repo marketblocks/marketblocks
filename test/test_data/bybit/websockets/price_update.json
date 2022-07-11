@@ -1,0 +1,21 @@
+{
+  "symbol": "BTCUSD",
+  "symbolName": "BTCUSD",
+  "topic": "trade",
+  "params": {
+    "realtimeInterval": "24h",
+    "binary": "false"
+  },
+  "data": [
+    {
+      "v": "929681067596857345",
+      "t": 1625562619577,
+      "p": "6060.4",
+      "q": "0.00027",
+      "m": true
+    }
+  ],
+  "f": true,
+  "sendTime": 1626249138535,
+  "shared": false
+}

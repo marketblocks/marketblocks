@@ -13,7 +13,7 @@ namespace mb
         _client.close_connection(_connectionHandle);
     }
 
-    void websocket_connection::send_message(std::string_view message)
+    void websocket_connection::send_message(std::string message)
     {
         _client.send_message(_connectionHandle, message);
     }

@@ -106,15 +106,21 @@ namespace mb::test
 	class mock_websocket_connection_factory : public websocket_connection_factory
 	{
 	public:
+		void fire_on_message(std::string_view message) { _onMessage(message); }
+
 		MOCK_METHOD(std::unique_ptr<websocket_connection>, create_connection, (std::string url), (const, override));
 	};
 
 	class mock_websocket_connection : public websocket_connection
 	{
 	public:
+		mock_websocket_connection()
+			: websocket_connection{ std::weak_ptr<void>() }
+		{}
+
 		MOCK_METHOD(ws_connection_status, connection_status, (), (const, override));
 		MOCK_METHOD(void, close, (), (override));
-		MOCK_METHOD(void, send_message, (std::string_view message), (override));
+		MOCK_METHOD(void, send_message, (std::string message), (override));
 	};
 
 	class mock_back_testing_data_source : public back_testing_data_source

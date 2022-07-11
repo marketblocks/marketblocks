@@ -2,6 +2,7 @@
 
 #include "bybit_config.h"
 #include "bybit_results.h"
+#include "bybit_websocket.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_ids.h"
 #include "exchanges/exchange_common.h"

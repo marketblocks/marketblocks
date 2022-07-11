@@ -30,12 +30,12 @@ namespace mb
 
         virtual ws_connection_status connection_status() const;
         virtual void close();
-        virtual void send_message(std::string_view message);
+        virtual void send_message(std::string message);
     };
 
     class websocket_connection_factory
     {
-    private:
+    protected:
         using on_open = std::function<void()>;
         using on_close = std::function<void()>;
         using on_message = std::function<void(std::string_view)>;

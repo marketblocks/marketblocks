@@ -40,6 +40,6 @@ namespace mb::test
 	}
 
 	std::string read_response_file(std::string_view apiId, std::string_view fileName);
-
 	std::string read_request_file(std::string_view apiId, std::string_view fileName);
+	std::string read_websockets_file(std::string_view apiId, std::string_view fileName);
 }

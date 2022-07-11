@@ -138,7 +138,7 @@ namespace mb::internal
 
 		ohlcv_data data
 		{
-			dataElement.get<std::time_t>("t"),
+			dataElement.get<std::time_t>("t") / 1000,
 			std::stod(dataElement.get<std::string>("o")),
 			std::stod(dataElement.get<std::string>("h")),
 			std::stod(dataElement.get<std::string>("l")),

@@ -1,0 +1,25 @@
+{
+  "symbol": "BTCUSD",
+  "symbolName": "BTCUSD",
+  "topic": "kline",
+  "params": {
+    "realtimeInterval": "24h",
+    "klineType": "5m",
+    "binary": "false"
+  },
+  "data": [
+    {
+      "t": 1657043700000,
+      "s": "BTCUSD",
+      "sn": "BTCUSD",
+      "c": "19683.6",
+      "h": "19720.0",
+      "l": "19682.1",
+      "o": "19703.50",
+      "v": "3.38715290"
+    }
+  ],
+  "f": true,
+  "sendTime": 1626252389284,
+  "shared": false
+}

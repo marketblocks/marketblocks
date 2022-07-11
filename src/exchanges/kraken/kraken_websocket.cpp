@@ -40,7 +40,7 @@ namespace
 	}
 
 	template<typename Subscription>
-	std::string_view get_full_channel_name(const Subscription& subscription)
+	std::string get_full_channel_name(const Subscription& subscription)
 	{
 		std::string channel{ CHANNEL_NAMES[subscription.channel()] };
 
@@ -181,7 +181,7 @@ namespace mb::internal
 
 		update_ohlcv(std::move(subscriptionId), ohlcv_data
 			{
-				ohlcArray.get<std::time_t>(0),
+				std::stoll(ohlcArray.get<std::string>(0)),
 				std::stod(ohlcArray.get<std::string>(2)),
 				std::stod(ohlcArray.get<std::string>(3)),
 				std::stod(ohlcArray.get<std::string>(4)),

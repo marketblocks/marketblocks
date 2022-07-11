@@ -76,6 +76,11 @@ namespace mb
 
 	ws_connection_status exchange_websocket_stream::connection_status() const
 	{
+		if (!_connection)
+		{
+			return ws_connection_status::CLOSED;
+		}
+
 		return _connection->connection_status();
 	}
 

@@ -1,0 +1,17 @@
+{
+  "type": "ticker",
+  "sequence": 29912240,
+  "product_id": "BTC-USD",
+  "price": "6060.4",
+  "open_24h": "6060.4",
+  "volume_24h": "0.43526841",
+  "low_24h": "6052.26",
+  "high_24h": "6062.06",
+  "volume_30d": "160.65999711",
+  "best_bid": "6052.26",
+  "best_ask": "60553.84",
+  "side": "sell",
+  "time": "2022-03-16T18:42:08.145773Z",
+  "trade_id": 131414,
+  "last_size": "0.00002465"
+}
