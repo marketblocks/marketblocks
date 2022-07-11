@@ -14,9 +14,10 @@ namespace
 			(trade.action() == trade_action::SELL && currentPrice >= trade.asset_price());
 	}
 
-	order_description to_order_description(std::string orderId, double fillPrice, const trade_description& trade)
+	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const trade_description& trade)
 	{
 		return order_description{
+			time,
 			std::move(orderId),
 			trade.pair().to_string('/'),
 			trade.action(),
@@ -30,9 +31,11 @@ namespace mb
 	paper_trade_api::paper_trade_api(
 		paper_trading_config config,
 		std::string_view exchangeId,
-		get_price_function getPrice)
+		get_price_function getPrice,
+		get_time_function getTime)
 		: 
 		_getPrice{ std::move(getPrice) },
+		_getTime{ std::move(getTime) },
 		_exchangeId{ exchangeId }, 
 		_fee{ config.fee() },
 		_balances{std::move(config.balances())}, 
@@ -82,7 +85,7 @@ namespace mb
 		_balances[gainedAsset] += gainValue;
 		_balances[soldAsset] -= soldValue;
 
-		_closedOrders.emplace_back(to_order_description(std::move(orderId), fillPrice, description));
+		_closedOrders.emplace_back(to_order_description(std::move(orderId), fillPrice, _getTime(), description));
 	}
 
 	void paper_trade_api::fill_open_orders()
@@ -129,7 +132,7 @@ namespace mb
 
 		for (auto& [orderId, trade] : _openTrades)
 		{
-			orders.emplace_back(to_order_description(orderId, trade.asset_price(), trade));
+			orders.emplace_back(to_order_description(orderId, trade.asset_price(), _getTime(), trade));
 		}
 
 		return orders;

@@ -70,10 +70,17 @@ namespace
 					trade_action action = descriptionElement.get<std::string>("type") == "buy" 
 						? trade_action::BUY 
 						: trade_action::SELL;
-					double price = std::stod(descriptionElement.get<std::string>("price"));
-					double volume = std::stod(order.get<std::string>("vol"));
+					double price{ std::stod(descriptionElement.get<std::string>("price")) };
+					double volume{ std::stod(order.get<std::string>("vol")) };
+					std::time_t time{ order.get<std::time_t>("opentm") };
 
-					orderDescriptions.emplace_back(std::move(orderId), std::move(pairName), action, price, volume);
+					orderDescriptions.emplace_back(
+						time,
+						std::move(orderId), 
+						std::move(pairName), 
+						action, 
+						price, 
+						volume);
 				}
 
 				return orderDescriptions;

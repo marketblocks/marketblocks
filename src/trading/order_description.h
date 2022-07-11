@@ -8,6 +8,7 @@ namespace mb
 	class order_description
 	{
 	private:
+		std::time_t _timeStamp;
 		std::string _orderId;
 		std::string _pairName;
 		trade_action _action;
@@ -15,10 +16,23 @@ namespace mb
 		double _volume;
 
 	public:
-		constexpr order_description(std::string orderId, std::string pairName, trade_action action, double price, double volume)
-			: _orderId{ std::move(orderId) }, _pairName{ std::move(pairName) }, _action{ action }, _price{ price }, _volume{ volume }
+		constexpr order_description(
+			std::time_t timeStamp,
+			std::string orderId,
+			std::string pairName,
+			trade_action action, 
+			double price, 
+			double volume)
+			: 
+			_timeStamp{ timeStamp },
+			_orderId{ std::move(orderId) },
+			_pairName{ std::move(pairName) },
+			_action{ action }, 
+			_price{ price },
+			_volume{ volume }
 		{}
 
+		constexpr std::time_t time_stamp() const noexcept { return _timeStamp; }
 		constexpr const std::string& order_id() const noexcept { return _orderId; }
 		constexpr const std::string& pair_name() const noexcept { return _pairName; }
 		constexpr trade_action action() const noexcept { return _action; }

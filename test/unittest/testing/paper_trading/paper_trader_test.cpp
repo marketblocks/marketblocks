@@ -44,7 +44,8 @@ namespace
 		return paper_trade_api{
 			paper_trading_config{ fee, std::move(initialBalances) },
 			"",
-			[&getPrices](const tradable_pair& pair) {return getPrices.get_price(pair); } };
+			[&getPrices](const tradable_pair& pair) {return getPrices.get_price(pair); },
+			now_t};
 	}
 }
 

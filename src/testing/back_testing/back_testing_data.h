@@ -40,6 +40,7 @@ namespace mb
 			int timeSteps,
 			std::unique_ptr<back_testing_data_source> dataSource = nullptr);
 
+		std::time_t data_time() const noexcept { return _dataTime; }
 		std::time_t start_time() const noexcept { return _startTime; }
 		std::time_t end_time() const noexcept { return _endTime; }
 		int step_size() const noexcept { return _stepSize; }

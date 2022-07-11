@@ -199,7 +199,11 @@ namespace mb::coinbase
 					price = calculate_asset_price(cost, size);
 				}
 
+				std::string createdAt{ orderElement.get<std::string>("created_at") };
+				std::time_t time{ to_time_t(createdAt, "%Y-%m-%dT%T") };
+
 				orders.emplace_back(
+					time,
 					orderElement.get<std::string>("id"),
 					orderElement.get<std::string>("product_id"),
 					to_trade_action(orderElement.get<std::string>("side")),

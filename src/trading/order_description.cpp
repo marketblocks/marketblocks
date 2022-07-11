@@ -7,6 +7,7 @@ namespace mb
 	{
 		return csv_row
 		{ std::vector<std::string>{
+			std::to_string(data.time_stamp()),
 			data.order_id(),
 			data.pair_name(),
 			std::string{ to_string(data.action()) },

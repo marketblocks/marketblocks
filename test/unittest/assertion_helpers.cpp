@@ -36,6 +36,7 @@ namespace mb::test
 
 	void assert_order_description_eq(const order_description& lhs, const order_description& rhs)
 	{
+		EXPECT_EQ(lhs.time_stamp(), rhs.time_stamp());
 		EXPECT_EQ(lhs.order_id(), rhs.order_id());
 		EXPECT_EQ(lhs.pair_name(), rhs.pair_name());
 		EXPECT_EQ(lhs.action(), rhs.action());

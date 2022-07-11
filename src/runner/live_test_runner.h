@@ -37,7 +37,8 @@ namespace mb::internal
 				auto paperTradeApi{ std::make_shared<paper_trade_api>(
 					paperTradingConfig, 
 					exchange->id(),
-					[exchange](const tradable_pair& pair) { return exchange->get_price(pair); } )};
+					[exchange](const tradable_pair& pair) { return exchange->get_price(pair); },
+					now_t)};
 
 				_liveTestExchanges.emplace_back(
 					std::make_shared<live_test_exchange>(exchange, paperTradeApi));

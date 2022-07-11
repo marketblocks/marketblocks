@@ -152,8 +152,8 @@ namespace mb::test
 	{
 		std::vector<order_description> expectedOrders
 		{
-			order_description{ "OB5VMBB4U2UDK2WRW", "ETHUSD", trade_action::SELL, 1450.0, 0.275 },
-			order_description{ "OQCLMLBW3P3BUCMWZ", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
+			order_description{ 1616665899, "OB5VMBB4U2UDK2WRW", "ETHUSD", trade_action::SELL, 1450.0, 0.275 },
+			order_description{ 1616666559, "OQCLMLBW3P3BUCMWZ", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
 		};
 
 		this->set_http_response("get_open_orders");
@@ -166,7 +166,7 @@ namespace mb::test
 	{
 		std::vector<order_description> expectedOrders
 		{
-			order_description{ "OQCLMLBW3P3BUCMWZ", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
+			order_description{ 1616666559, "OQCLMLBW3P3BUCMWZ", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
 		};
 
 		this->set_http_response("get_closed_orders");

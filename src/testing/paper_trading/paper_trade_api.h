@@ -9,6 +9,7 @@
 #include "trading/tradable_pair.h"
 #include "trading/trade_description.h"
 #include "trading/order_description.h"
+#include "common/utils/timeutils.h"
 
 namespace mb
 {
@@ -16,8 +17,10 @@ namespace mb
 	{
 	private:
 		using get_price_function = std::function<double(const tradable_pair&)>;
+		using get_time_function = std::function<std::time_t()>;
 
 		get_price_function _getPrice;
+		get_time_function _getTime;
 		std::string_view _exchangeId;
 		double _fee;
 		unordered_string_map<double> _balances;
@@ -32,7 +35,8 @@ namespace mb
 		explicit paper_trade_api(
 			paper_trading_config config,
 			std::string_view exchangeId,
-			get_price_function getPrice);
+			get_price_function getPrice,
+			get_time_function getTime);
 
 		void fill_open_orders();
 
@@ -46,14 +50,15 @@ namespace mb
 		void cancel_order(std::string_view orderId) override;
 	};
 
-	template<typename GetPrice>
-	std::shared_ptr<paper_trade_api> create_paper_trade_api(std::string_view id, GetPrice getPrice)
+	template<typename GetPrice, typename GetTime>
+	std::shared_ptr<paper_trade_api> create_paper_trade_api(std::string_view id, GetPrice getPrice, GetTime getTime)
 	{
 		paper_trading_config config{ load_or_create_config<paper_trading_config>() };
 
 		return std::make_unique<paper_trade_api>(
 			std::move(config),
 			id,
-			getPrice);
+			std::move(getPrice),
+			std::move(getTime));
 	}
 }

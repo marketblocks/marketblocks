@@ -65,6 +65,7 @@ namespace
 		
 		return order_description
 		{
+			std::stoll(orderElement.get<std::string>("time")) / 1000,
 			orderElement.get<std::string>("orderId"),
 			orderElement.get<std::string>("symbol"),
 			action,
