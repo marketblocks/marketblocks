@@ -27,7 +27,7 @@ namespace
 
 		std::vector<std::string> tradesCsvHeaders
 		{
-			"Order ID", "Market", "Action", "Price", "Volume"
+			"Time Stamp", "Order ID", "Market", "Action", "Price", "Volume"
 		};
 
 		file_handler tradeFileHandler{ file_handler::write(path / TRADES_FILENAME) };

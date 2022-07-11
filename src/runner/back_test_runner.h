@@ -38,8 +38,8 @@ namespace mb::internal
 			
 			_paperTradeApi = create_paper_trade_api(
 				exchange_ids::BACK_TEST, 
-				[_backTestingData](const tradable_pair& pair) { return _backTestingData->get_price(pair); },
-				[_backTestingData]() { return _backTestingData->data_time(); });
+				[this](const tradable_pair& pair) { return _backTestingData->get_price(pair); },
+				[this]() { return _backTestingData->data_time(); });
 
 			return
 			{
@@ -82,7 +82,7 @@ namespace mb::internal
 
 			logger::instance().info("Back test complete. Generating report...");
 
-			test_report report{ generate_back_test_report(_backTestingData, testLogger, strategy.get_test_results()) };
+			test_report report{ generate_back_test_report(*_backTestingData, testLogger, strategy.get_test_results()) };
 			testLogger.log_test_report(report);
 		}
 	};

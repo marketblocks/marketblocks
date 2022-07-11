@@ -41,7 +41,11 @@ namespace mb::internal
 					now_t)};
 
 				_liveTestExchanges.emplace_back(
-					std::make_shared<live_test_exchange>(exchange, paperTradeApi));
+					std::make_shared<live_test_exchange>(
+						exchange->id(),
+						exchange->get_websocket_stream(),
+						exchange, 
+						paperTradeApi));
 			}
 
 			return std::vector<std::shared_ptr<exchange>>{ _liveTestExchanges.begin(), _liveTestExchanges.end() };

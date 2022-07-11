@@ -5,6 +5,7 @@
 
 #include "paper_trading_config.h"
 #include "exchanges/exchange.h"
+#include "common/file/config_file_reader.h"
 #include "trading/trading_constants.h"
 #include "trading/tradable_pair.h"
 #include "trading/trade_description.h"
@@ -53,7 +54,7 @@ namespace mb
 	template<typename GetPrice, typename GetTime>
 	std::shared_ptr<paper_trade_api> create_paper_trade_api(std::string_view id, GetPrice getPrice, GetTime getTime)
 	{
-		paper_trading_config config{ load_or_create_config<paper_trading_config>() };
+		paper_trading_config config{ internal::load_or_create_config<paper_trading_config>() };
 
 		return std::make_unique<paper_trade_api>(
 			std::move(config),
