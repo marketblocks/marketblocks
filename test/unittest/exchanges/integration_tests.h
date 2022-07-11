@@ -9,9 +9,8 @@ namespace
 {
 	using namespace mb;
 
-	void execute_add_cancel_order_test(exchange& api, const tradable_pair& pair, order_type orderType, trade_action action, bool cancel = true)
+	void execute_add_cancel_order_test(exchange& api, const tradable_pair& pair, double price, order_type orderType, trade_action action, bool cancel = true)
 	{
-		double price{ api.get_price(pair) };
 		trade_description trade{ orderType, pair, action, price, 0.01 };
 
 		std::string orderId;
@@ -92,22 +91,26 @@ namespace mb::test
 
 	TYPED_TEST_P(ExchangeIntegrationTests, AddCancelBuyLimitOrder)
 	{
-		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::LIMIT, trade_action::BUY);
+		double price{ std::round(this->_api->get_price(this->_testingPair) * 0.01) };
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::LIMIT, trade_action::BUY);
 	}
 
 	TYPED_TEST_P(ExchangeIntegrationTests, AddCancelSellLimitOrder)
 	{
-		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::LIMIT, trade_action::SELL);
+		double price{ std::round(this->_api->get_price(this->_testingPair) * 100) };
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::LIMIT, trade_action::SELL);
 	}
 
 	TYPED_TEST_P(ExchangeIntegrationTests, AddBuyMarketOrder)
 	{
-		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::MARKET, trade_action::BUY, false);
+		double price{ this->_api->get_price(this->_testingPair) };
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::MARKET, trade_action::BUY, false);
 	}
 
 	TYPED_TEST_P(ExchangeIntegrationTests, AddSellMarketOrder)
 	{
-		execute_add_cancel_order_test(*this->_api, this->_testingPair, order_type::MARKET, trade_action::SELL, false);
+		double price{ this->_api->get_price(this->_testingPair) };
+		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::MARKET, trade_action::SELL, false);
 	}
 
 	REGISTER_TYPED_TEST_SUITE_P(ExchangeIntegrationTests,

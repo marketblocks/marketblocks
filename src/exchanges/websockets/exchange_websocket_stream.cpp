@@ -145,7 +145,8 @@ namespace mb
 
 		if (!lockedOrderBooks->contains(subscriptionId))
 		{
-			initialise_order_book(subscriptionId, order_book_cache{ {}, {} });
+			lockedOrderBooks->insert_or_assign(subscriptionId, order_book_cache{ {}, {} });
+			set_subscribed(subscriptionId);
 		}
 
 		auto it = lockedOrderBooks->find(subscriptionId);
