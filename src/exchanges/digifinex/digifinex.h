@@ -2,6 +2,7 @@
 
 #include "digifinex_config.h"
 #include "digifinex_results.h"
+#include "digifinex_websocket.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_ids.h"
 #include "exchanges/exchange_common.h"
@@ -49,7 +50,8 @@ namespace mb
 		digifinex_api(
 			digifinex_config config,
 			std::unique_ptr<http_service> httpService,
-			std::shared_ptr<websocket_stream> websocketStream);
+			std::shared_ptr<websocket_stream> websocketStream,
+			bool enableTesting = false);
 
 		exchange_status get_status() const override;
 		std::vector<tradable_pair> get_tradable_pairs() const override;

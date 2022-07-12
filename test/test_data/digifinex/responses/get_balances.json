@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "list": [
+    {
+      "currency": "USD",
+      "free": 171288.6158,
+      "total": 0
+    },
+    {
+      "currency": "BTC",
+      "free": 1011.1908877900,
+      "total": 0
+    },
+    {
+      "currency": "ETH",
+      "free": 818.550,
+      "total": 0
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://openapi.digifinex.com/v3/order_book?symbol=BTC_USD&limit=5",
+  "content": ""
+}

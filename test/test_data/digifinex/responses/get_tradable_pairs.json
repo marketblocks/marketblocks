@@ -1,0 +1,35 @@
+{
+  "code": 0,
+  "symbol_list": [
+    {
+      "order_types": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "quote_asset": "BTC",
+      "minimum_value": 2,
+      "amount_precision": 4,
+      "status": "TRADING",
+      "minimum_amount": 0.0006,
+      "symbol": "ETH_BTC",
+      "zone": "MAIN",
+      "base_asset": "ETH",
+      "price_precision": 2
+    },
+    {
+      "order_types": [
+        "LIMIT",
+        "MARKET"
+      ],
+      "quote_asset": "USD",
+      "minimum_value": 2,
+      "amount_precision": 8,
+      "status": "TRADING",
+      "minimum_amount": 5e-05,
+      "symbol": "BTC_USD",
+      "zone": "MAIN",
+      "base_asset": "BTC",
+      "price_precision": 2
+    }
+  ]
+}

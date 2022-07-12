@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://openapi.digifinex.com/v3/spot/order/cancel?market=spot&order_id=123456789",
+  "content": ""
+}

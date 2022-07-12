@@ -1,0 +1,17 @@
+{
+  "method": "trades.update",
+  "params": [
+    true,
+    [
+      {
+        "id": 7172173,
+        "time": 1657043705,
+        "price": "19683.6",
+        "amount": "1.0",
+        "type": "buy"
+      }
+    ],
+    "BTC_USD"
+  ],
+  "id": null
+}

@@ -69,6 +69,19 @@ namespace
 		return it->second;
 	}
 
+	order_description read_order_description(const json_element& orderElement)
+	{
+		return order_description
+		{
+			orderElement.get<std::time_t>("created_date"),
+			orderElement.get<std::string>("order_id"),
+			orderElement.get<std::string>("symbol"),
+			orderElement.get<std::string>("type") == "buy" ? trade_action::BUY : trade_action::SELL,
+			orderElement.get<double>("price"),
+			orderElement.get<double>("amount")
+		};
+	}
+
 	template<typename T, typename Reader>
 	result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
@@ -82,7 +95,14 @@ namespace
 				return result<T>::fail(get_error_message(errorCode));
 			}
 
-			return result<T>::success(reader(jsonDocument));
+			if constexpr (std::is_same_v<T, void>)
+			{
+				return result<T>::success();
+			}
+			else
+			{
+				return result<T>::success(reader(jsonDocument));
+			}
 		}
 		catch (const std::exception& e)
 		{
@@ -231,12 +251,46 @@ namespace mb::digifinex
 
 	result<std::vector<order_description>> read_open_orders(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_open_orders" };
+		return read_result<std::vector<order_description>>(jsonResult, [](const json_document& json)
+		{
+			json_element dataElement{ json.element("data") };
+			std::vector<order_description> orders;
+			orders.reserve(dataElement.size());
+
+			for (auto it = dataElement.begin(); it != dataElement.end(); ++it)
+			{
+				json_element orderElement{ it.value() };
+				orders.emplace_back(read_order_description(orderElement));
+			}
+
+			return orders;
+		});
 	}
 
 	result<std::vector<order_description>> read_closed_orders(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_closed_orders" };
+		return read_result<std::vector<order_description>>(jsonResult, [](const json_document& json)
+		{
+			json_element dataElement{ json.element("data") };
+			std::vector<order_description> orders;
+			orders.reserve(dataElement.size());
+
+			for (auto it = dataElement.begin(); it != dataElement.end(); ++it)
+			{
+				json_element orderElement{ it.value() };
+
+				int status{ orderElement.get<int>("status") };
+
+				if (status != 2)
+				{
+					continue;
+				}
+
+				orders.emplace_back(read_order_description(orderElement));
+			}
+
+			return orders;
+		});
 	}
 
 	result<std::string> read_add_order(std::string_view jsonResult)
@@ -249,6 +303,8 @@ namespace mb::digifinex
 
 	result<void> read_cancel_order(std::string_view jsonResult)
 	{
-		throw not_implemented_exception{ "digifinex::read_cancel_order" };
+		return read_result<void>(jsonResult, [](const json_document& json)
+		{
+		});
 	}
 }

@@ -54,7 +54,8 @@ namespace mb
 	digifinex_api::digifinex_api(
 		digifinex_config config,
 		std::unique_ptr<http_service> httpService,
-		std::shared_ptr<websocket_stream> websocketStream)
+		std::shared_ptr<websocket_stream> websocketStream,
+		bool enableTesting)
 		: 
 		exchange{ exchange_ids::DIGIFINEX, std::move(websocketStream) },
 		_apiKey{ config.api_key() },
@@ -122,12 +123,12 @@ namespace mb
 
 	std::vector<order_description> digifinex_api::get_open_orders() const
 	{
-		throw not_implemented_exception{ "digifinex::get_open_orders" };
+		return send_private_request<std::vector<order_description>>(http_verb::GET, "spot/order/current", digifinex::read_open_orders);
 	}
 
 	std::vector<order_description> digifinex_api::get_closed_orders() const
 	{
-		throw not_implemented_exception{ "digifinex::get_closed_orders" };
+		return send_private_request<std::vector<order_description>>(http_verb::GET, "spot/order/history", digifinex::read_closed_orders);
 	}
 
 	std::string digifinex_api::add_order(const trade_description& description)
@@ -145,7 +146,26 @@ namespace mb
 
 	void digifinex_api::cancel_order(std::string_view orderId)
 	{
-		throw not_implemented_exception{ "digifinex::cancel_order" };
+		std::string query = url_query_builder{}
+			.add_parameter("market", "spot")
+			.add_parameter("order_id", orderId)
+			.to_string();
+
+		return send_private_request<void>(http_verb::POST, "spot/order/cancel", digifinex::read_cancel_order, query);
+	}
+
+	template<>
+	std::unique_ptr<websocket_stream> create_exchange_websocket_stream<internal::digifinex_websocket_stream>()
+	{
+		std::unique_ptr<digifinex_api> marketApi{ std::make_unique<digifinex_api>(
+			digifinex_config{},
+			std::make_unique<http_service>(),
+			nullptr,
+			false) };
+
+		return std::make_unique<internal::digifinex_websocket_stream>(
+			std::make_unique<websocket_connection_factory>(),
+			std::move(marketApi));
 	}
 
 	template<>
@@ -154,6 +174,7 @@ namespace mb
 		return std::make_unique<digifinex_api>(
 			internal::load_or_create_config<digifinex_config>(),
 			std::make_unique<http_service>(),
-			nullptr);
+			create_exchange_websocket_stream<internal::digifinex_websocket_stream>(),
+			testing);
 	}
 }

@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://openapi.digifinex.com/v3/spot/order/history",
+  "content": ""
+}

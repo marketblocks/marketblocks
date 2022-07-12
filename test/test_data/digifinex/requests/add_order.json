@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://openapi.digifinex.com/v3/spot/order/new?market=spot&symbol=BTC_USD&type=buy&amount=0.789000&price=1234.560000",
+  "content": ""
+}

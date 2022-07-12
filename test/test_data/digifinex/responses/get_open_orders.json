@@ -1,0 +1,33 @@
+{
+  "code": 0,
+  "data": [
+    {
+      "symbol": "ETHUSD",
+      "order_id": "OB5VMBB4U2UDK2WRW",
+      "created_date": 1616665899,
+      "finished_date": 0,
+      "price": 1450.0,
+      "amount": 0.275,
+      "cash_amount": 0.275,
+      "executed_amount": 0,
+      "avg_price": 0,
+      "status": 1,
+      "type": "sell",
+      "kind": "spot"
+    },
+    {
+      "symbol": "BTCUSD",
+      "order_id": "OQCLMLBW3P3BUCMWZ",
+      "created_date": 1616666559,
+      "finished_date": 0,
+      "price": 30010.0,
+      "amount": 1.25,
+      "cash_amount": 1.25,
+      "executed_amount": 0,
+      "avg_price": 0,
+      "status": 1,
+      "type": "buy",
+      "kind": "spot"
+    }
+  ]
+}
