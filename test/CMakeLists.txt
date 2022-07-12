@@ -24,7 +24,6 @@ add_executable(marketblocks_test
  
 
 "unittest/assertion_helpers.cpp" 
-"test_data/test_exchange_configs/test_config_loader.h"
  
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
 "unittest/common/types/set_queue_test.cpp"
@@ -46,7 +45,7 @@ add_executable(marketblocks_test
 "unittest/exchanges/request_tests.h"
 "unittest/exchanges/test_implementations/kraken_tests.cpp"
 "unittest/exchanges/test_implementations/coinbase_tests.cpp"
-"unittest/exchanges/test_implementations/bybit_tests.cpp" "unittest/exchanges/exchange_test_common.cpp" "unittest/exchanges/websocket_stream_tests.h")
+"unittest/exchanges/test_implementations/bybit_tests.cpp" "unittest/exchanges/exchange_test_common.cpp" "unittest/exchanges/websocket_stream_tests.h" "unittest/trading/ohlcv_from_trades_test.cpp")
 
 target_link_libraries(marketblocks_test LINK_PUBLIC marketblocks_lib)
 target_link_libraries(marketblocks_test PRIVATE gtest_main gmock_main)

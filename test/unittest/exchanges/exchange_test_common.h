@@ -26,6 +26,12 @@ namespace mb::test
 		static_assert(sizeof(Api) == 0, "No specialization for create_exchange_api exists");
 	}
 
+	template<typename WebsocketStream>
+	std::unique_ptr<WebsocketStream> create_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
+	{
+		return std::make_unique<WebsocketStream>(std::move(connectionFactory));
+	}
+
 	template<typename Api, typename Config>
 	std::unique_ptr<exchange> create_exchange_api(
 		std::unique_ptr<http_service> httpService,

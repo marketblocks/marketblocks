@@ -2,6 +2,7 @@
 
 #include "common/utils/containerutils.h"
 #include "common/json/json.h"
+#include "common/utils/timeutils.h"
 #include "logging/logger.h"
 #include "exchanges/exchange_ids.h"
 
@@ -32,6 +33,7 @@ namespace
 		case websocket_channel::PRICE:
 			return "ticker";
 		case websocket_channel::OHLCV:
+			return "ohlcv";
 		case websocket_channel::ORDER_BOOK:
 		default:
 			throw mb_exception{ std::format("Websocket channel not supported on Coinbase") };
@@ -130,14 +132,24 @@ namespace
 
 namespace mb::internal
 {
-	coinbase_websocket_stream::coinbase_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::COINBASE, URL, std::move(connectionFactory) }
+	coinbase_websocket_stream::coinbase_websocket_stream(
+		std::unique_ptr<websocket_connection_factory> connectionFactory,
+		std::unique_ptr<market_api> marketApi)
+		: 
+		exchange_websocket_stream{ exchange_ids::COINBASE, URL, std::move(connectionFactory) },
+		_marketApi{ std::move(marketApi) }
 	{}
 
 	std::string coinbase_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
 	{
 		std::string symbol{ subscription.pair_item().to_string(PAIR_SEPARATOR) };
 		std::string topic{ get_channel(subscription.channel()) };
+
+		if (subscription.channel() == websocket_channel::OHLCV)
+		{
+			topic += std::to_string(to_seconds(subscription.get_ohlcv_interval()));
+		}
+
 		return ::generate_subscription_id(std::move(symbol), std::move(topic));
 	}
 
@@ -148,6 +160,21 @@ namespace mb::internal
 		double price{ std::stod(json.get<std::string>("price")) };
 
 		update_price(std::move(subId), price);
+
+		auto lockedOhlcvSubscriptions = _ohlcvSubscriptions.unique_lock();
+
+		if (lockedOhlcvSubscriptions->contains(pairName))
+		{
+			std::unordered_map<int, ohlcv_from_trades>& ohlcvFromTrades{ (*lockedOhlcvSubscriptions)[pairName] };
+			double volume{ std::stod(json.get<std::string>("last_size")) };
+			std::time_t time{ to_time_t(json.get<std::string>("time"), "%Y-%m-%dT%T") };
+
+			for (auto& [interval, oft] : ohlcvFromTrades)
+			{
+				oft.add_trade(time, price, volume);
+				update_ohlcv(::generate_subscription_id(pairName, "ohlcv" + std::to_string(interval)), oft.get_ohlcv(time));
+			}
+		}
 	}
 
 	void coinbase_websocket_stream::on_message(std::string_view message)
@@ -171,8 +198,51 @@ namespace mb::internal
 		}*/
 	}
 
+	void coinbase_websocket_stream::ohlcv_virtual_subscribe(const websocket_subscription& subscription)
+	{
+		subscribe(websocket_subscription::create_price_sub(subscription.pair_item()));
+
+		ohlcv_interval ohlcvInterval{ subscription.get_ohlcv_interval() };
+		int interval{ to_seconds(ohlcvInterval) };
+
+		auto lockedOhlcvSubscriptions = _ohlcvSubscriptions.unique_lock();
+
+		for (auto& pair : subscription.pair_item())
+		{
+			std::vector<ohlcv_data> ohlcvData{ _marketApi->get_ohlcv(pair, ohlcvInterval, 1)};
+			ohlcv_data latestOhlcv = ohlcvData.empty() ? ohlcv_data{} : ohlcvData.front();
+
+			(*lockedOhlcvSubscriptions)[pair.to_string(PAIR_SEPARATOR)].emplace(interval, ohlcv_from_trades{std::move(latestOhlcv), interval});
+		}
+	}
+
+	void coinbase_websocket_stream::ohlcv_virtual_unsubscribe(const websocket_subscription& subscription)
+	{
+		int interval{ to_seconds(subscription.get_ohlcv_interval()) };
+
+		auto lockedOhlcvSubscriptions = _ohlcvSubscriptions.unique_lock();
+
+		for (auto& pair : subscription.pair_item())
+		{
+			std::string pairName{ pair.to_string(PAIR_SEPARATOR) };
+
+			(*lockedOhlcvSubscriptions)[pairName].erase(interval);
+
+			if ((*lockedOhlcvSubscriptions)[pairName].empty())
+			{
+				lockedOhlcvSubscriptions->erase(pairName);
+			}
+		}
+	}
+
 	void coinbase_websocket_stream::subscribe(const websocket_subscription& subscription)
 	{
+		if (subscription.channel() == websocket_channel::OHLCV)
+		{
+			ohlcv_virtual_subscribe(subscription);
+			return;
+		}
+
 		std::string channelName{ get_channel(subscription.channel()) };
 		std::string message{ create_message("subscribe", channelName, subscription.pair_item()) };
 
@@ -181,6 +251,12 @@ namespace mb::internal
 
 	void coinbase_websocket_stream::unsubscribe(const websocket_subscription& subscription)
 	{
+		if (subscription.channel() == websocket_channel::OHLCV)
+		{
+			ohlcv_virtual_unsubscribe(subscription);
+			return;
+		}
+
 		std::string channelName{ get_channel(subscription.channel()) };
 		std::string message{ create_message("unsubscribe", channelName, subscription.pair_item()) };
 

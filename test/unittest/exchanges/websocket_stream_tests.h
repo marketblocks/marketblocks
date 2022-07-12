@@ -35,7 +35,7 @@ namespace mb::test
 						return std::move(mockConnection);
 					});
 
-			_stream = std::make_unique<StreamImpl>(std::move(mockConnectionFactory));
+			_stream = create_websocket_stream<StreamImpl>(std::move(mockConnectionFactory));
 			_stream->reset();
 		}
 
@@ -98,6 +98,9 @@ namespace mb::test
 
 	TYPED_TEST_P(WebsocketStreamTests, OhlcvUpdateOnMessage)
 	{
+		this->_stream->subscribe(websocket_subscription::create_ohlcv_sub(
+			{ tradable_pair{ "BTC", "USD" }}, ohlcv_interval::M5));
+
 		ohlcv_data expectedOhlcv{ 1657043700, 19703.50, 19720.0, 19682.1, 19683.6, 3.38715290 };
 
 		this->receive_message("ohlcv_update");

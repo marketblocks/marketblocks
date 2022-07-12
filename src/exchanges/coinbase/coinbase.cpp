@@ -195,6 +195,20 @@ namespace mb
 	}
 
 	template<>
+	std::unique_ptr<websocket_stream> create_exchange_websocket_stream<internal::coinbase_websocket_stream>()
+	{
+		std::unique_ptr<coinbase_api> marketApi{ std::make_unique<coinbase_api>(
+			coinbase_config{},
+			std::make_unique<http_service>(),
+			nullptr,
+			false) };
+
+		return std::make_unique<internal::coinbase_websocket_stream>(
+			std::make_unique<websocket_connection_factory>(),
+			std::move(marketApi));
+	}
+
+	template<>
 	std::unique_ptr<exchange> create_exchange_api<coinbase_api>(bool testing)
 	{
 		return std::make_unique<coinbase_api>(

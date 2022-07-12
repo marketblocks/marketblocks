@@ -159,7 +159,7 @@ add_library(marketblocks_lib
  "exchanges/dextrade/dextrade_config.cpp"
  "exchanges/dextrade/dextrade_config.h" 
  "exchanges/dextrade/dextrade_results.cpp"
- "exchanges/dextrade/dextrade_results.h" "networking/http/http_request.cpp")
+ "exchanges/dextrade/dextrade_results.h" "networking/http/http_request.cpp" "trading/ohlcv_from_trades.h" "trading/ohlcv_from_trades.cpp")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

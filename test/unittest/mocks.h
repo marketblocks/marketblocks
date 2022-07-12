@@ -79,8 +79,13 @@ namespace mb::test
 	class mock_exchange : public exchange
 	{
 	public:
+		mock_exchange()
+			: exchange{ "TEST", nullptr }
+		{}
+
 		MOCK_METHOD(exchange_status, get_status, (), (const, override));
 		MOCK_METHOD(std::vector<tradable_pair>, get_tradable_pairs, (), (const, override));
+		MOCK_METHOD(std::vector<ohlcv_data>, get_ohlcv, (const tradable_pair& tradablePair, ohlcv_interval interval, int count), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& tradablePair, int depth), (const, override));
 		MOCK_METHOD(unordered_string_map<double>, get_balances, (), (const, override));
