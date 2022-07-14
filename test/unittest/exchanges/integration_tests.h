@@ -35,6 +35,11 @@ namespace mb::test
 		ExchangeIntegrationTests()
 			: _api{ mb::create_exchange_api<Api>(true) }, _testingPair{ get_testing_pair<Api>() }
 		{}
+
+		void TearDown() override
+		{
+			//_api->get_websocket_stream()->disconnect();
+		}
 	};
 
 	TYPED_TEST_SUITE_P(ExchangeIntegrationTests);
@@ -113,6 +118,33 @@ namespace mb::test
 		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::MARKET, trade_action::SELL, false);
 	}
 
+	TYPED_TEST_P(ExchangeIntegrationTests, WebsocketFeedUpdatesPrice)
+	{
+		auto websocketStream{ this->_api->get_websocket_stream() };
+		websocketStream->subscribe(websocket_subscription::create_price_sub({ this->_testingPair }));
+
+		bool isPriceUpdated = wait_for_condition(
+			[websocketStream, this]() { return websocketStream->get_price(this->_testingPair) != 0.0; },
+			10000);
+
+		EXPECT_TRUE(isPriceUpdated);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, WebsocketFeedUpdatesOhlcv)
+	{
+		auto websocketStream{ this->_api->get_websocket_stream() };
+		websocketStream->subscribe(websocket_subscription::create_ohlcv_sub({ this->_testingPair }, ohlcv_interval::M5));
+
+		bool isOhlcvUpdated = wait_for_condition(
+			[websocketStream, this]()
+			{ 
+				return websocketStream->get_last_candle(this->_testingPair, ohlcv_interval::M5).time_stamp() > 0.0;
+			},
+			10000);
+
+		EXPECT_TRUE(isOhlcvUpdated);
+	}
+
 	REGISTER_TYPED_TEST_SUITE_P(ExchangeIntegrationTests,
 		GetStatus,
 		GetTradablePairs,
@@ -126,5 +158,7 @@ namespace mb::test
 		AddCancelBuyLimitOrder,
 		AddCancelSellLimitOrder,
 		AddBuyMarketOrder,
-		AddSellMarketOrder);
+		AddSellMarketOrder,
+		WebsocketFeedUpdatesPrice,
+		WebsocketFeedUpdatesOhlcv);
 }

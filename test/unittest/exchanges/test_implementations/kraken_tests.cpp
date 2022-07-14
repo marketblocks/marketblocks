@@ -10,7 +10,7 @@ namespace mb::test
 	template<>
 	tradable_pair get_testing_pair<kraken_api>()
 	{
-		return tradable_pair{ "BTC", "USD" };
+		return tradable_pair{ "XBT", "USD" };
 	}
 
 	template<>

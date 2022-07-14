@@ -4,6 +4,7 @@
 
 #include "common/file/file.h"
 #include "common/file/config_file_reader.h"
+#include "common/utils/timeutils.h"
 #include "test_data/test_data_constants.h"
 #include "unittest/assertion_helpers.h"
 #include "unittest/mocks.h"
@@ -43,6 +44,23 @@ namespace mb::test
 			std::move(httpService),
 			websocketStream,
 			false);
+	}
+
+	template<typename Predicate>
+	bool wait_for_condition(Predicate pred, int msWait)
+	{
+		using namespace std::chrono;
+		std::time_t start{ time_since_epoch<milliseconds>() };
+
+		while (time_since_epoch<milliseconds>() < start + msWait)
+		{
+			if (pred())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	std::string read_response_file(std::string_view apiId, std::string_view fileName);
