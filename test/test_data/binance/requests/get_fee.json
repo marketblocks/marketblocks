@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://api.binance.com/sapi/v1/asset/tradeFee?symbol=BTCUSD&timestamp=<13>&signature=<64>",
+  "content": ""
+}

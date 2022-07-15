@@ -126,6 +126,8 @@ add_library(marketblocks_lib
  "exchanges/template/template.cpp"
  "exchanges/template/template_results.h"
  "exchanges/template/template_results.cpp"
+ "exchanges/template/template_config.h" 
+ "exchanges/template/template_config.cpp"
  "exchanges/bybit/bybit.cpp"
  "exchanges/bybit/bybit.h"
  "exchanges/bybit/bybit_results.cpp"
@@ -159,7 +161,19 @@ add_library(marketblocks_lib
  "exchanges/dextrade/dextrade_config.cpp"
  "exchanges/dextrade/dextrade_config.h" 
  "exchanges/dextrade/dextrade_results.cpp"
- "exchanges/dextrade/dextrade_results.h" "networking/http/http_request.cpp" "trading/ohlcv_from_trades.h" "trading/ohlcv_from_trades.cpp" "exchanges/digifinex/digifinex_websocket.cpp" "exchanges/websockets/ohlcv_subscription_service.h" "exchanges/websockets/ohlcv_subscription_service.cpp")
+ "exchanges/dextrade/dextrade_results.h" 
+ "networking/http/http_request.cpp" 
+ "trading/ohlcv_from_trades.h" 
+ "trading/ohlcv_from_trades.cpp" 
+ "exchanges/digifinex/digifinex_websocket.cpp"
+ "exchanges/websockets/ohlcv_subscription_service.h"
+ "exchanges/websockets/ohlcv_subscription_service.cpp"
+ "exchanges/binance/binance.cpp"
+ "exchanges/binance/binance.h" 
+ "exchanges/binance/binance_results.cpp"
+ "exchanges/binance/binance_results.h" 
+ "exchanges/binance/binance_config.h" 
+ "exchanges/binance/binance_config.cpp")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

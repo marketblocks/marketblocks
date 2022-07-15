@@ -7,6 +7,7 @@
 #include "exchanges/bybit/bybit.h"
 #include "exchanges/digifinex/digifinex.h"
 #include "exchanges/dextrade/dextrade.h"
+#include "exchanges/binance/binance.h"
 
 namespace
 {
@@ -33,6 +34,10 @@ namespace
 		if (identifier == exchange_ids::DEXTRADE)
 		{
 			return create_exchange_api<dextrade_api>();
+		}
+		if (identifier == exchange_ids::BINANCE)
+		{
+			return create_exchange_api<binance_api>();
 		}
 
 		return nullptr;

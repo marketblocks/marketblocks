@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://api.binance.com/api/v3/time",
+  "content": ""
+}

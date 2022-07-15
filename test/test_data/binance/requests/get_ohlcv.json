@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://api.binance.com/api/v3/klines?symbol=BTCUSD&interval=5m&limit=10",
+  "content": ""
+}
