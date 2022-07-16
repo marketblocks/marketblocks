@@ -96,13 +96,13 @@ namespace mb::test
 
 	TYPED_TEST_P(ExchangeIntegrationTests, AddCancelBuyLimitOrder)
 	{
-		double price{ std::round(this->_api->get_price(this->_testingPair) * 0.01) };
+		double price{ std::round(this->_api->get_price(this->_testingPair)) };
 		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::LIMIT, trade_action::BUY);
 	}
 
 	TYPED_TEST_P(ExchangeIntegrationTests, AddCancelSellLimitOrder)
 	{
-		double price{ std::round(this->_api->get_price(this->_testingPair) * 100) };
+		double price{ std::round(this->_api->get_price(this->_testingPair)) };
 		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::LIMIT, trade_action::SELL);
 	}
 

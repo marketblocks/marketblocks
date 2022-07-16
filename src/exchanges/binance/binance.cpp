@@ -5,6 +5,8 @@
 #include "common/security/encoding.h"
 #include "common/file/config_file_reader.h"
 
+#include "common/exceptions/not_implemented_exception.h"
+
 namespace
 {
 	using namespace mb;
@@ -20,6 +22,26 @@ namespace
 		}
 
 		return LIVE_BASE_URL;
+	}
+
+	std::string to_order_side(trade_action action)
+	{
+		return action == trade_action::BUY
+			? "BUY"
+			: "SELL";
+	}
+
+	std::string to_order_type_str(order_type orderType)
+	{
+		switch (orderType)
+		{
+		case order_type::LIMIT:
+			return "LIMIT";
+		case order_type::MARKET:
+			return "MARKET";
+		default:
+			throw mb_exception{ "Order type not supported" };
+		}
 	}
 }
 
@@ -85,35 +107,64 @@ namespace mb
 
 	double binance_api::get_fee(const tradable_pair& tradablePair) const
 	{
-		url_query_builder query = url_query_builder{}
-			.add_parameter("symbol", tradablePair.to_string());
-
-		return send_private_request<double>(http_verb::GET, "/sapi/v1/asset/tradeFee", binance::read_fee, query);
+		return send_private_request<double>(http_verb::GET, "/api/v3/account", binance::read_fee);
 	}
 
 	unordered_string_map<double> binance_api::get_balances() const
 	{
-		return mb::binance::read_balances("").value();
+		return send_private_request<unordered_string_map<double>>(http_verb::GET, "/api/v3/account", binance::read_balances);
 	}
 
 	std::vector<order_description> binance_api::get_open_orders() const
 	{
-		return mb::binance::read_open_orders("").value();
+		return send_private_request<std::vector<order_description>>(http_verb::GET, "/api/v3/openOrders", binance::read_open_orders);
 	}
 
 	std::vector<order_description> binance_api::get_closed_orders() const
 	{
-		return mb::binance::read_closed_orders("").value();
+		throw not_implemented_exception{ "binance::get_closed_orders" };
 	}
 
 	std::string binance_api::add_order(const trade_description& description)
 	{
-		return mb::binance::read_add_order("").value();
+		url_query_builder query = url_query_builder{}
+			.add_parameter("symbol", description.pair().to_string())
+			.add_parameter("side", to_order_side(description.action()))
+			.add_parameter("type", to_order_type_str(description.order_type()))
+			.add_parameter("quantity", std::to_string(description.volume()));
+
+		if (description.order_type() != order_type::MARKET)
+		{
+			query.add_parameter("price", std::to_string(description.asset_price()));
+			query.add_parameter("timeInForce", "GTC");
+		}
+
+		return send_private_request<std::string>(http_verb::POST, "/api/v3/order", binance::read_add_order, query);
 	}
 
 	void binance_api::cancel_order(std::string_view orderId)
 	{
-		mb::binance::read_cancel_order("").value();
+		std::vector<order_description> openOrders{ get_open_orders() };
+
+		std::string pair;
+		for (auto& order : openOrders)
+		{
+			if (order.order_id() == orderId)
+			{
+				pair = order.pair_name();
+			}
+		}
+
+		if (pair.empty())
+		{
+			return;
+		}
+
+		url_query_builder query = url_query_builder{}
+			.add_parameter("symbol", std::move(pair))
+			.add_parameter("orderId", std::string{ orderId });
+
+		send_private_request<void>(http_verb::HTTP_DELETE, "/api/v3/order", binance::read_cancel_order, query);
 	}
 
 	template<>

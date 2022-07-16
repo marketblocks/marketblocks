@@ -1,0 +1,5 @@
+{
+  "verb": "GET",
+  "url": "https://api.binance.com/api/v3/openOrders?timestamp=<13>&signature=<64>",
+  "content": ""
+}

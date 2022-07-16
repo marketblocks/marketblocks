@@ -1,7 +1,15 @@
-[
-  {
-    "symbol": "BTCUSD",
-    "makerCommission": "0.002",
-    "takerCommission": "0.002"
-  }
-]
+{
+  "makerCommission": 20,
+  "takerCommission": 20,
+  "buyerCommission": 0,
+  "sellerCommission": 0,
+  "canTrade": true,
+  "canWithdraw": true,
+  "canDeposit": true,
+  "updateTime": 123456789,
+  "accountType": "SPOT",
+  "balances": [],
+  "permissions": [
+    "SPOT"
+  ]
+}

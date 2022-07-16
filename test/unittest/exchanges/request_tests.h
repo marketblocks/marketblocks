@@ -33,19 +33,26 @@ namespace
 		constexpr const char escape = '<';
 		constexpr const char close = '>';
 
-		size_t start = 0;
-		while (expected.contains(escape))
+		try
 		{
-			start = expected.find_first_of(escape, start);
-			size_t end = expected.find_first_of(close, start);
-			
-			int count = std::stoi(expected.substr(start + 1, end - start - 1));
+			size_t start = 0;
+			while (expected.contains(escape))
+			{
+				start = expected.find_first_of(escape, start);
+				size_t end = expected.find_first_of(close, start);
 
-			expected.erase(start, end - start + 1);
-			actual.erase(start, count);
+				int count = std::stoi(expected.substr(start + 1, end - start - 1));
+
+				expected.erase(start, end - start + 1);
+				actual.erase(start, count);
+			}
+
+			return expected == actual;
 		}
-
-		return expected == actual;
+		catch (const std::exception&)
+		{
+			return false;
+		}
 	}
 
 	MATCHER_P(IsHttpRequest, expected, "")

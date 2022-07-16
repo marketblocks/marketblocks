@@ -1,0 +1,5 @@
+{
+  "verb": "DELETE",
+  "url": "https://api.binance.com/api/v3/order?symbol=BTCUSD&orderId=123456789&timestamp=<13>&signature=<64>",
+  "content": ""
+}

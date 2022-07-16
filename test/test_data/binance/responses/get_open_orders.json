@@ -1,0 +1,42 @@
+[
+  {
+    "symbol": "ETHUSD",
+    "orderId": 1536728786697,
+    "orderListId": -1,
+    "clientOrderId": "myOrder1",
+    "price": "1450.0",
+    "origQty": "0.275",
+    "executedQty": "0.0",
+    "cummulativeQuoteQty": "0.0",
+    "status": "NEW",
+    "timeInForce": "GTC",
+    "type": "LIMIT",
+    "side": "SELL",
+    "stopPrice": "0.0",
+    "icebergQty": "0.0",
+    "time": 1616665899559,
+    "updateTime": 1616665899559,
+    "isWorking": true,
+    "origQuoteOrderQty": "0.000000"
+  },
+  {
+    "symbol": "BTCUSD",
+    "orderId": 7886252369684,
+    "orderListId": -1,
+    "clientOrderId": "myOrder1",
+    "price": "30010.0",
+    "origQty": "1.25",
+    "executedQty": "0.0",
+    "cummulativeQuoteQty": "0.0",
+    "status": "NEW",
+    "timeInForce": "GTC",
+    "type": "LIMIT",
+    "side": "BUY",
+    "stopPrice": "0.0",
+    "icebergQty": "0.0",
+    "time": 1616666559559,
+    "updateTime": 1616666559559,
+    "isWorking": true,
+    "origQuoteOrderQty": "0.000000"
+  }
+]

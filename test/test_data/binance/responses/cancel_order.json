@@ -1,0 +1,15 @@
+{
+  "symbol": "BTCUSDT",
+  "orderId": 7886252369684,
+  "orderListId": -1,
+  "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+  "transactTime": 1507725176595,
+  "price": "1.00000000",
+  "origQty": "1.00000000",
+  "executedQty": "0.00000000",
+  "cummulativeQuoteQty": "0.00000000",
+  "status": "CANCELLED",
+  "timeInForce": "GTC",
+  "type": "LIMIT",
+  "side": "BUY"
+}

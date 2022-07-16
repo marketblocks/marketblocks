@@ -1,0 +1,5 @@
+{
+  "verb": "POST",
+  "url": "https://api.binance.com/api/v3/order?symbol=BTCUSD&side=BUY&type=LIMIT&quantity=0.789000&price=1234.560000&timeInForce=GTC&timestamp=<13>&signature=<64>",
+  "content": ""
+}

@@ -11,13 +11,14 @@ namespace mb
 {
 	class binance_api : public exchange
 	{
+	public:
+		std::string compute_api_sign(std::string query) const;
 	private:
 		std::string_view _baseUrl;
 		std::string _apiKey;
 		std::string _secretKey;
 		std::unique_ptr<http_service> _httpService;
 
-		std::string compute_api_sign(std::string query) const;
 
 		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
@@ -27,7 +28,7 @@ namespace mb
 		}
 
 		template<typename Value, typename ResponseReader>
-		Value send_private_request(http_verb verb, std::string_view path, const ResponseReader& reader, url_query_builder query = {}) const
+		Value send_private_request(http_verb verb, std::string_view path, const ResponseReader& reader, url_query_builder query = url_query_builder{}) const
 		{
 			std::string timeStamp{ std::to_string(time_since_epoch<std::chrono::milliseconds>()) };
 			query.add_parameter("timestamp", std::move(timeStamp));

@@ -1,6 +1,8 @@
 #include "binance_results.h"
 #include "common/json/json.h"
 
+#include "common/exceptions/not_implemented_exception.h"
+
 namespace
 {
 	using namespace mb;
@@ -14,6 +16,28 @@ namespace
 			std::stod(element.get<std::string>(0)),
 			std::stod(element.get<std::string>(1)),
 			side
+		};
+	}
+
+	trade_action to_trade_action(std::string_view action)
+	{
+		if (action == "BUY")
+			return trade_action::BUY;
+
+		return trade_action::SELL;
+	}
+
+	template<typename Json>
+	order_description read_order_description(const Json& orderElement)
+	{
+		return order_description
+		{
+			orderElement.get<std::time_t>("time") / 1000,
+			std::to_string(orderElement.get<long long>("orderId")),
+			orderElement.get<std::string>("symbol"),
+			to_trade_action(orderElement.get<std::string>("side")),
+			std::stod(orderElement.get<std::string>("price")),
+			std::stod(orderElement.get<std::string>("origQty"))
 		};
 	}
 
@@ -150,33 +174,64 @@ namespace mb::binance
 	{
 		return read_result<double>(jsonResult, [](const json_document& json)
 		{
-			json_element feeElement{ json.begin().value() };
-			return std::stod(feeElement.get<std::string>("takerCommission")) * 100;
+			return json.get<double>("takerCommission") / 100;
 		});
 	}
 
 	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
 	{
-		return result<unordered_string_map<double>>::success({});
+		return read_result<unordered_string_map<double>>(jsonResult, [](const json_document& json)
+		{
+			json_element balancesElement{ json.element("balances") };
+			unordered_string_map<double> balances;
+			balances.reserve(balancesElement.size());
+
+			for (auto it = balancesElement.begin(); it != balancesElement.end(); ++it)
+			{
+				json_element balanceElement{ it.value() };
+				std::string asset{ balanceElement.get<std::string>("asset") };
+				double balance{ std::stod(balanceElement.get<std::string>("free")) };
+
+				balances.emplace(std::move(asset), balance);
+			}
+
+			return balances;
+		});
 	}
 
 	result<std::vector<order_description>> read_open_orders(std::string_view jsonResult)
 	{
-		return result<std::vector<order_description>>::success({});
+		return read_result<std::vector<order_description>>(jsonResult, [](const json_document& json)
+		{
+			std::vector<order_description> orders;
+			orders.reserve(json.size());
+			
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				orders.emplace_back(read_order_description(it.value()));
+			}
+
+			return orders;
+		});
 	}
 
 	result<std::vector<order_description>> read_closed_orders(std::string_view jsonResult)
 	{
-		return result<std::vector<order_description>>::success({});
+		throw not_implemented_exception{ "binance::read_closed_orders" };
 	}
 
 	result<std::string> read_add_order(std::string_view jsonResult)
 	{
-		return result<std::string>::success("");
+		return read_result<std::string>(jsonResult, [](const json_document& json)
+			{
+				return std::to_string(json.get<long long>("orderId"));
+			});
 	}
 
 	result<void> read_cancel_order(std::string_view jsonResult)
 	{
-		return result<void>::success();
+		return read_result<void>(jsonResult, [](const json_document& json)
+			{
+			});
 	}
 }

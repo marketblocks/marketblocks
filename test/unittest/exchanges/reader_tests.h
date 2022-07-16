@@ -152,8 +152,8 @@ namespace mb::test
 	{
 		std::vector<order_description> expectedOrders
 		{
-			order_description{ 1616665899, "OB5VMBB4U2UDK2WRW", "ETHUSD", trade_action::SELL, 1450.0, 0.275 },
-			order_description{ 1616666559, "OQCLMLBW3P3BUCMWZ", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
+			order_description{ 1616665899, "1536728786697", "ETHUSD", trade_action::SELL, 1450.0, 0.275 },
+			order_description{ 1616666559, "7886252369684", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
 		};
 
 		this->set_http_response("get_open_orders");
@@ -166,7 +166,7 @@ namespace mb::test
 	{
 		std::vector<order_description> expectedOrders
 		{
-			order_description{ 1616666559, "OQCLMLBW3P3BUCMWZ", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
+			order_description{ 1616666559, "7886252369684", "BTCUSD", trade_action::BUY, 30010.0, 1.25 }
 		};
 
 		this->set_http_response("get_closed_orders");
@@ -185,13 +185,13 @@ namespace mb::test
 			1.0,
 			1.0})};
 
-		ASSERT_EQ("OUF4EMFRGI2MQMWZD", orderId);
+		ASSERT_EQ("7886252369684", orderId);
 	}
 
 	TYPED_TEST_P(ExchangeReaderTests, ReadCancelOrder)
 	{
 		this->set_http_response("cancel_order");
-		ASSERT_NO_THROW(this->_api->cancel_order("OUF4EMFRGI2MQMWZD"));
+		ASSERT_NO_THROW(this->_api->cancel_order("7886252369684"));
 	}
 
 	REGISTER_TYPED_TEST_SUITE_P(ExchangeReaderTests,
