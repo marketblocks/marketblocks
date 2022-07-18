@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 cmake_minimum_required (VERSION 3.8)
 
-project (marketblocks VERSION "2.1.0")
+project (marketblocks VERSION "3.1.0")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/project_settings.h.in ${CMAKE_BINARY_DIR}/generated/project_settings.h)
 
 enable_testing()
