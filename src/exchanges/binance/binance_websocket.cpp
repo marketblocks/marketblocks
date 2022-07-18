@@ -82,7 +82,7 @@ namespace mb::internal
 
 		ohlcv_data ohlcv
 		{
-			klineElement.get<std::time_t>("t"),
+			klineElement.get<std::time_t>("t") / 1000,
 			std::stod(klineElement.get<std::string>("o")),
 			std::stod(klineElement.get<std::string>("h")),
 			std::stod(klineElement.get<std::string>("l")),
@@ -118,6 +118,8 @@ namespace mb::internal
 				return;
 			}
 		}
+
+		logger::instance().info("Binance message: {}", message);
 	}
 
 	void binance_websocket_stream::subscribe(const websocket_subscription& subscription)
