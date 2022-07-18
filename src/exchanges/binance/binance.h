@@ -1,6 +1,7 @@
 #pragma once
 
 #include "binance_config.h"
+#include "binance_websocket.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_common.h"
 #include "networking/http/http_service.h"

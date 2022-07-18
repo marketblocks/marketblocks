@@ -81,7 +81,7 @@ namespace
 namespace mb::internal
 {
 	bybit_websocket_stream::bybit_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::BYBIT, URL, std::move(connectionFactory) }
+		: exchange_websocket_stream{ exchange_ids::BYBIT, "wss://stream.bybit.com/spot/quote/ws/v1", std::move(connectionFactory)}
 	{}
 
 	std::string bybit_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const

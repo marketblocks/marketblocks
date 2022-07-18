@@ -24,5 +24,5 @@ namespace mb::test
 	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, ExchangeIntegrationTests, binance_api);
 	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, ExchangeReaderTests, binance_api);
 	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, ExchangeRequestTests, binance_api);
-	//INSTANTIATE_TYPED_TEST_SUITE_P(Binance, WebsocketStreamTests, internal::coinbase_websocket_stream);
+	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, WebsocketStreamTests, internal::binance_websocket_stream);
 }

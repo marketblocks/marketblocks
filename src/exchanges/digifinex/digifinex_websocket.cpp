@@ -44,7 +44,7 @@ namespace mb::internal
 	digifinex_websocket_stream::digifinex_websocket_stream(
 		std::unique_ptr<websocket_connection_factory> connectionFactory,
 		std::unique_ptr<market_api> marketApi)
-		: exchange_websocket_stream{ exchange_ids::DIGIFINEX, URL, std::move(connectionFactory) },
+		: exchange_websocket_stream{ exchange_ids::DIGIFINEX, "wss://openapi.digifinex.com/ws/v1/", std::move(connectionFactory) },
 		_ohlcvSubscriptionService{ ohlcv_subscription_service
 			{
 				std::move(marketApi),

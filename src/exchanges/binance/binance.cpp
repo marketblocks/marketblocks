@@ -173,7 +173,7 @@ namespace mb
 		return std::make_unique<binance_api>(
 			internal::load_or_create_config<binance_config>(),
 			std::make_unique<http_service>(),
-			nullptr, //create_exchange_websocket_stream<internal::coinbase_websocket_stream>(),
+			create_exchange_websocket_stream<internal::binance_websocket_stream>(),
 			testing);
 	}
 }

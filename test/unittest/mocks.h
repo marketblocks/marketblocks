@@ -40,9 +40,9 @@ namespace mb::test
 	public:
 		mock_exchange_websocket_stream(
 			std::string_view id,
-			std::string_view url,
+			std::string url,
 			std::unique_ptr<websocket_connection_factory> connectionFactory)
-			: exchange_websocket_stream{ id, url, std::move(connectionFactory) }
+			: exchange_websocket_stream{ id, std::move(url), std::move(connectionFactory) }
 		{}
 
 		MOCK_METHOD(void, on_message, (std::string_view message), (override));

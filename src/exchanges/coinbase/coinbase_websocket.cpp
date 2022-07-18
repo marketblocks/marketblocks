@@ -134,7 +134,7 @@ namespace mb::internal
 		std::unique_ptr<websocket_connection_factory> connectionFactory,
 		std::unique_ptr<market_api> marketApi)
 		: 
-		exchange_websocket_stream{ exchange_ids::COINBASE, URL, std::move(connectionFactory) },
+		exchange_websocket_stream{ exchange_ids::COINBASE, "wss://ws-feed.exchange.coinbase.com", std::move(connectionFactory) },
 		_ohlcvSubscriptionService{ ohlcv_subscription_service
 			{
 				std::move(marketApi),

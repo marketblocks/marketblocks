@@ -24,6 +24,11 @@ namespace mb
 		std::transform(source.begin(), source.end(), source.begin(), ::toupper);
 	}
 
+	void to_lower(std::string& source)
+	{
+		std::transform(source.begin(), source.end(), source.begin(), ::tolower);
+	}
+
 	bool numeric_string_less::operator()(const std::string& l, const std::string& r) const
 	{
 		double numL = std::stod(l);

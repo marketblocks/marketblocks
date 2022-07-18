@@ -150,7 +150,7 @@ namespace
 namespace mb::internal
 {
 	kraken_websocket_stream::kraken_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::KRAKEN, URL, std::move(connectionFactory) }
+		: exchange_websocket_stream{ exchange_ids::KRAKEN, "wss://ws.kraken.com", std::move(connectionFactory) }
 	{}
 
 	std::string kraken_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const

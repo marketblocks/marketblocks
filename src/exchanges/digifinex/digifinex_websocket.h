@@ -9,8 +9,6 @@ namespace mb::internal
 	class digifinex_websocket_stream : public exchange_websocket_stream
 	{
 	private:
-		static constexpr std::string_view URL = "wss://openapi.digifinex.com/ws/v1/";
-
 		concurrent_wrapper<ohlcv_subscription_service> _ohlcvSubscriptionService;
 
 		void process_price_message(const json_document& json);

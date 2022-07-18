@@ -128,6 +128,8 @@ add_library(marketblocks_lib
  "exchanges/template/template_results.cpp"
  "exchanges/template/template_config.h" 
  "exchanges/template/template_config.cpp"
+ "exchanges/template/template_websocket.h"
+ "exchanges/template/template_websocket.cpp"
  "exchanges/bybit/bybit.cpp"
  "exchanges/bybit/bybit.h"
  "exchanges/bybit/bybit_results.cpp"
@@ -173,7 +175,9 @@ add_library(marketblocks_lib
  "exchanges/binance/binance_results.cpp"
  "exchanges/binance/binance_results.h" 
  "exchanges/binance/binance_config.h" 
- "exchanges/binance/binance_config.cpp")
+ "exchanges/binance/binance_config.cpp" 
+ "exchanges/binance/binance_websocket.cpp"
+ "exchanges/binance/binance_websocket.h"  )
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

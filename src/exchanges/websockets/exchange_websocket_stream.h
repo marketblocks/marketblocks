@@ -15,7 +15,7 @@ namespace mb
 		std::unique_ptr<websocket_connection_factory> _connectionFactory;
 
 		std::string_view _id;
-		std::string_view _url;
+		std::string _url;
 
 		concurrent_wrapper<std::unordered_set<std::string>> _subscriptions;
 		concurrent_wrapper<unordered_string_map<double>> _prices;
@@ -45,8 +45,10 @@ namespace mb
 	public:
 		exchange_websocket_stream(
 			std::string_view id, 
-			std::string_view url, 
+			std::string url, 
 			std::unique_ptr<websocket_connection_factory> connectionFactory);
+
+		virtual ~exchange_websocket_stream() = default;
 
 		std::string_view id() const noexcept { return _id; }
 

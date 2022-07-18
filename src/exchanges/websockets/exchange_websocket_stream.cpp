@@ -8,11 +8,11 @@ namespace mb
 {
 	exchange_websocket_stream::exchange_websocket_stream(
 		std::string_view id, 
-		std::string_view url,
+		std::string url,
 		std::unique_ptr<websocket_connection_factory> connectionFactory)
 		: 
 		_id{ id },
-		_url{ url },
+		_url{ std::move(url) },
 		_connectionFactory{ std::move(connectionFactory) }
 	{
 		initialise_connection_factory();
