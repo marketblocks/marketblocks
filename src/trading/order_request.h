@@ -7,7 +7,7 @@
 
 namespace mb
 {
-	class trade_description
+	class order_request
 	{
 	private:
 		order_type _orderType;
@@ -17,7 +17,7 @@ namespace mb
 		double _volume;
 
 	public:
-		constexpr trade_description(
+		constexpr order_request(
 			order_type orderType,
 			tradable_pair pair,
 			trade_action action,
@@ -38,9 +38,9 @@ namespace mb
 		constexpr double volume() const noexcept { return _volume; }
 	};
 
-	constexpr trade_description create_trade_by_cost(tradable_pair pair, trade_action action, double assetPrice, double tradeCost)
+	constexpr order_request create_order_by_cost(tradable_pair pair, trade_action action, double assetPrice, double tradeCost)
 	{
-		return trade_description{ order_type::LIMIT, std::move(pair), action, assetPrice, calculate_volume(assetPrice, tradeCost) };
+		return order_request{ order_type::LIMIT, std::move(pair), action, assetPrice, calculate_volume(assetPrice, tradeCost) };
 	}
 }
 

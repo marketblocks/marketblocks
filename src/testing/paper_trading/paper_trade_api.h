@@ -8,7 +8,7 @@
 #include "common/file/config_file_reader.h"
 #include "trading/trading_constants.h"
 #include "trading/tradable_pair.h"
-#include "trading/trade_description.h"
+#include "trading/order_request.h"
 #include "trading/order_description.h"
 #include "common/utils/timeutils.h"
 
@@ -25,12 +25,12 @@ namespace mb
 		std::string_view _exchangeId;
 		double _fee;
 		unordered_string_map<double> _balances;
-		unordered_string_map<trade_description> _openTrades;
+		unordered_string_map<order_request> _openTrades;
 		std::vector<order_description> _closedOrders;
 		int _nextOrderNumber;
 
 		bool has_sufficient_funds(const std::string& asset, double amount) const;
-		void execute_order(std::string orderId, const trade_description& description, double fillPrice);
+		void execute_order(std::string orderId, const order_request& description, double fillPrice);
 
 	public:
 		explicit paper_trade_api(
@@ -47,7 +47,7 @@ namespace mb
 		unordered_string_map<double> get_balances() const override;
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
-		std::string add_order(const trade_description& description) override;
+		std::string add_order(const order_request& description) override;
 		void cancel_order(std::string_view orderId) override;
 	};
 

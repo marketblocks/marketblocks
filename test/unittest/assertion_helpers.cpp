@@ -43,4 +43,11 @@ namespace mb::test
 		EXPECT_DOUBLE_EQ(lhs.price(), rhs.price());
 		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
 	}
+
+	void assert_trade_update_eq(const trade_update& lhs, const trade_update& rhs)
+	{
+		EXPECT_EQ(lhs.time_stamp(), rhs.time_stamp());
+		EXPECT_DOUBLE_EQ(lhs.price(), rhs.price());
+		EXPECT_DOUBLE_EQ(lhs.volume(), rhs.volume());
+	}
 }

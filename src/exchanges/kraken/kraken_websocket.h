@@ -9,7 +9,7 @@ namespace mb::internal
 	{
 	private:
 		void process_event_message(const json_document& json);
-		void process_price_message(std::string subscriptionId, const json_document& json);
+		void process_trade_message(std::string subscriptionId, const json_document& json);
 		void process_ohlcv_message(std::string subscriptionId, const json_document& json);
 		//void process_order_book_message(std::string subscriptionId, const json_document& json);
 

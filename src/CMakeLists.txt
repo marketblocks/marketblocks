@@ -65,7 +65,7 @@ add_library(marketblocks_lib
 "trading/fee_schedule.cpp" 
 "trading/fee_schedule.h" 
 "trading/tradable_pair.h" 
-"trading/trade_description.h"
+"trading/order_request.h"
 "trading/trading_constants.h"
  "trading/ohlcv_data.h"
  "trading/order_description.h"
@@ -177,7 +177,7 @@ add_library(marketblocks_lib
  "exchanges/binance/binance_config.h" 
  "exchanges/binance/binance_config.cpp" 
  "exchanges/binance/binance_websocket.cpp"
- "exchanges/binance/binance_websocket.h"  )
+ "exchanges/binance/binance_websocket.h"   "trading/trade_update.h")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

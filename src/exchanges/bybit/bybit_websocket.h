@@ -8,7 +8,7 @@ namespace mb::internal
 	class bybit_websocket_stream : public exchange_websocket_stream
 	{
 	private:
-		void process_price_message(std::string subscriptionId, const json_document& json);
+		void process_trade_message(std::string subscriptionId, const json_document& json);
 		void process_ohlcv_message(std::string subscriptionId, const json_document& json);
 
 		void on_message(std::string_view message) override;

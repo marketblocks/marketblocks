@@ -29,9 +29,9 @@ namespace mb
 		{}
 
 	public:
-		static constexpr basic_websocket_subscription<TradablePairItem> create_price_sub(TradablePairItem pairItem)
+		static constexpr basic_websocket_subscription<TradablePairItem> create_trade_sub(TradablePairItem pairItem)
 		{
-			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::PRICE, std::move(pairItem) };
+			return basic_websocket_subscription<TradablePairItem>{ websocket_channel::TRADE, std::move(pairItem) };
 		}
 
 		static constexpr basic_websocket_subscription<TradablePairItem> create_order_book_sub(TradablePairItem pairItem)

@@ -167,7 +167,7 @@ namespace mb::test
 	{
 		this->set_http_service_behaviour("add_order");
 		this->_api->add_order(
-			trade_description
+			order_request
 			{
 				order_type::LIMIT,
 				tradable_pair{ "BTC", "USD" },

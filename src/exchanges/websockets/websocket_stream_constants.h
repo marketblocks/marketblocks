@@ -7,7 +7,7 @@ namespace mb
 	enum class websocket_channel
 	{
 		ORDER_BOOK,
-		PRICE,
+		TRADE,
 		OHLCV
 	};
 

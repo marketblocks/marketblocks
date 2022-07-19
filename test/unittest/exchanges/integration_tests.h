@@ -11,7 +11,7 @@ namespace
 
 	void execute_add_cancel_order_test(exchange& api, const tradable_pair& pair, double price, order_type orderType, trade_action action, bool cancel = true)
 	{
-		trade_description trade{ orderType, pair, action, price, 0.01 };
+		order_request trade{ orderType, pair, action, price, 0.01 };
 
 		std::string orderId;
 		ASSERT_NO_THROW(orderId = api.add_order(trade));
@@ -118,16 +118,16 @@ namespace mb::test
 		execute_add_cancel_order_test(*this->_api, this->_testingPair, price, order_type::MARKET, trade_action::SELL, false);
 	}
 
-	TYPED_TEST_P(ExchangeIntegrationTests, WebsocketFeedUpdatesPrice)
+	TYPED_TEST_P(ExchangeIntegrationTests, WebsocketFeedUpdatesTrade)
 	{
 		auto websocketStream{ this->_api->get_websocket_stream() };
-		websocketStream->subscribe(websocket_subscription::create_price_sub({ this->_testingPair }));
+		websocketStream->subscribe(websocket_subscription::create_trade_sub({ this->_testingPair }));
 
-		bool isPriceUpdated = wait_for_condition(
-			[websocketStream, this]() { return websocketStream->get_price(this->_testingPair) != 0.0; },
+		bool isTradeUpdated = wait_for_condition(
+			[websocketStream, this]() { return websocketStream->get_last_trade(this->_testingPair).time_stamp() != 0.0; },
 			10000);
 
-		EXPECT_TRUE(isPriceUpdated);
+		EXPECT_TRUE(isTradeUpdated);
 	}
 
 	TYPED_TEST_P(ExchangeIntegrationTests, WebsocketFeedUpdatesOhlcv)
@@ -159,6 +159,6 @@ namespace mb::test
 		AddCancelSellLimitOrder,
 		AddBuyMarketOrder,
 		AddSellMarketOrder,
-		WebsocketFeedUpdatesPrice,
+		WebsocketFeedUpdatesTrade,
 		WebsocketFeedUpdatesOhlcv);
 }

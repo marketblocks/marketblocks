@@ -28,12 +28,12 @@ namespace mb
 	void exchange_websocket_stream::clear_subscriptions()
 	{
 		auto lockedSubscriptions = _subscriptions.unique_lock();
-		auto lockedPrices = _prices.unique_lock();
+		auto lockedTrades = _trades.unique_lock();
 		auto lockedOhlcv = _ohlcv.unique_lock();
 		auto lockedOrderBooks = _orderBooks.unique_lock();
 
 		lockedSubscriptions->clear();
-		lockedPrices->clear();
+		lockedTrades->clear();
 		lockedOhlcv->clear();
 		lockedOrderBooks->clear();
 	}
@@ -92,10 +92,10 @@ namespace mb
 
 		switch (channel)
 		{
-		case websocket_channel::PRICE:
+		case websocket_channel::TRADE:
 		{
-			auto lockedPrices = _prices.unique_lock();
-			lockedPrices->erase(subscriptionId);
+			auto lockedTrades = _trades.unique_lock();
+			lockedTrades->erase(subscriptionId);
 			break;
 		}
 		case websocket_channel::OHLCV:
@@ -115,10 +115,10 @@ namespace mb
 		}
 	}
 
-	void exchange_websocket_stream::update_price(std::string subscriptionId, double price)
+	void exchange_websocket_stream::update_trade(std::string subscriptionId, trade_update trade)
 	{
-		auto lockedPrices = _prices.unique_lock();
-		lockedPrices->insert_or_assign(subscriptionId, price);
+		auto lockedTrades = _trades.unique_lock();
+		lockedTrades->insert_or_assign(subscriptionId, std::move(trade));
 
 		set_subscribed(std::move(subscriptionId));
 	}
@@ -179,12 +179,12 @@ namespace mb
 		return order_book_state{ {}, {} };
 	}
 
-	double exchange_websocket_stream::get_price(const tradable_pair& pair) const
+	trade_update exchange_websocket_stream::get_last_trade(const tradable_pair& pair) const
 	{
-		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_price_sub(pair)) };
+		std::string subId{ generate_subscription_id(unique_websocket_subscription::create_trade_sub(pair)) };
 		
-		auto lockedPrices = _prices.shared_lock();
-		return find_or_default(*lockedPrices, subId, 0.0);
+		auto lockedTrades = _trades.shared_lock();
+		return find_or_default(*lockedTrades, subId, trade_update{0, 0, 0});
 	}
 
 	ohlcv_data exchange_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const

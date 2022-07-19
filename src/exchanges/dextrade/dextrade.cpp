@@ -122,7 +122,7 @@ namespace mb
 		throw not_implemented_exception{ "dextrade::get_closed_orders" };
 	}
 
-	std::string dextrade_api::add_order(const trade_description& description)
+	std::string dextrade_api::add_order(const order_request& description)
 	{
 		json_writer jsonWriter;
 		jsonWriter.add("type_trade", get_trade_type(description.order_type()));

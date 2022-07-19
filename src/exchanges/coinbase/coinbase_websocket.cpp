@@ -30,7 +30,7 @@ namespace
 	{
 		switch (channel)
 		{
-		case websocket_channel::PRICE:
+		case websocket_channel::TRADE:
 			return "ticker";
 		case websocket_channel::ORDER_BOOK:
 		default:
@@ -156,21 +156,21 @@ namespace mb::internal
 		return ::generate_subscription_id(std::move(symbol), std::move(topic));
 	}
 
-	void coinbase_websocket_stream::process_price_message(const json_document& json)
+	void coinbase_websocket_stream::process_trade_message(const json_document& json)
 	{
 		std::string pairName{ json.get<std::string>("product_id") };
 		std::string subId{ ::generate_subscription_id(pairName, "ticker") };
-		double price{ std::stod(json.get<std::string>("price")) };
 
-		update_price(std::move(subId), price);
+		double price{ std::stod(json.get<std::string>("price")) };
+		double volume{ std::stod(json.get<std::string>("last_size")) };
+		std::time_t time{ to_time_t(json.get<std::string>("time"), "%Y-%m-%dT%T") };
+
+		update_trade(std::move(subId), trade_update{time, price, volume});
 
 		auto lockedOhlcvSubscriptions = _ohlcvSubscriptionService.unique_lock();
 
 		if (lockedOhlcvSubscriptions->is_subscribed(pairName))
 		{
-			double volume{ std::stod(json.get<std::string>("last_size")) };
-			std::time_t time{ to_time_t(json.get<std::string>("time"), "%Y-%m-%dT%T") };
-
 			lockedOhlcvSubscriptions->update_ohlcv(std::move(pairName), time, price, volume);
 		}
 	}
@@ -183,7 +183,7 @@ namespace mb::internal
 
 		if (messageType == "ticker")
 		{
-			process_price_message(json);
+			process_trade_message(json);
 		}
 
 		/*if (messageType == "snapshot")
@@ -200,7 +200,7 @@ namespace mb::internal
 	{
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{
-			subscribe(websocket_subscription::create_price_sub(subscription.pair_item()));
+			subscribe(websocket_subscription::create_trade_sub(subscription.pair_item()));
 			_ohlcvSubscriptionService.unique_lock()->add_subscription(subscription);
 			return;
 		}

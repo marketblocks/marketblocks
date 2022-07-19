@@ -11,7 +11,7 @@ namespace
 
 	static std::unordered_map<websocket_channel, std::string_view> CHANNEL_NAMES
 	{
-		{ websocket_channel::PRICE, "trade" },
+		{ websocket_channel::TRADE, "trade" },
 		{ websocket_channel::OHLCV, "ohlc" },
 		{ websocket_channel::ORDER_BOOK, "book" }
 	};
@@ -166,13 +166,16 @@ namespace mb::internal
 		// TODO
 	}
 
-	void kraken_websocket_stream::process_price_message(std::string subscriptionId, const json_document& json)
+	void kraken_websocket_stream::process_trade_message(std::string subscriptionId, const json_document& json)
 	{
 		json_element tradesArray{ json.element(1) };
 		json_element lastTrade{ tradesArray.element(tradesArray.size() - 1) };
-		double price{ std::stod(lastTrade.get<std::string>(0)) };
 
-		update_price(std::move(subscriptionId), price);
+		double price{ std::stod(lastTrade.get<std::string>(0)) };
+		double volume{ std::stod(lastTrade.get<std::string>(1)) };
+		std::time_t time{ std::stoll(lastTrade.get<std::string>(2)) };
+
+		update_trade(std::move(subscriptionId), trade_update{time, price, volume});
 	}
 
 	void kraken_websocket_stream::process_ohlcv_message(std::string subscriptionId, const json_document& json)
@@ -227,7 +230,7 @@ namespace mb::internal
 
 			if (channelName == "trade")
 			{
-				process_price_message(std::move(subscriptionId), json);
+				process_trade_message(std::move(subscriptionId), json);
 			}
 			else if (channelName.contains("ohlc"))
 			{

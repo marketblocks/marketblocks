@@ -38,14 +38,14 @@ namespace
 		throw mb_exception{ "Order type not supported" };
 	}
 
-	constexpr double get_amount(const trade_description& tradeDescription)
+	constexpr double get_amount(const order_request& orderRequest)
 	{
-		if (tradeDescription.order_type() == order_type::LIMIT)
+		if (orderRequest.order_type() == order_type::LIMIT)
 		{
-			return tradeDescription.volume();
+			return orderRequest.volume();
 		}
 
-		return calculate_cost(tradeDescription.asset_price(), tradeDescription.volume());
+		return calculate_cost(orderRequest.asset_price(), orderRequest.volume());
 	}
 }
 
@@ -131,7 +131,7 @@ namespace mb
 		return send_private_request<std::vector<order_description>>(http_verb::GET, "spot/order/history", digifinex::read_closed_orders);
 	}
 
-	std::string digifinex_api::add_order(const trade_description& description)
+	std::string digifinex_api::add_order(const order_request& description)
 	{
 		std::string query = url_query_builder{}
 			.add_parameter("market", "spot")

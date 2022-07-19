@@ -24,7 +24,7 @@ namespace mb
 
 	double back_test_market_api::get_price(const tradable_pair& tradablePair) const
 	{
-		return _backTestingData->get_price(tradablePair);
+		return _backTestingData->get_trade(tradablePair).price();
 	}
 
 	order_book_state back_test_market_api::get_order_book(const tradable_pair& tradablePair, int depth) const

@@ -64,7 +64,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		trade_description tradeDescription
+		order_request orderRequest
 		{
 			order_type::LIMIT,
 			pair,
@@ -76,13 +76,13 @@ namespace mb::test
 		constexpr double expectedGbpBalance = 59.96;
 		constexpr double expectedBtcBalance = 3.5;
 
-		std::string orderId = trader.add_order(tradeDescription);
+		std::string orderId = trader.add_order(orderRequest);
 
 		unordered_string_map<double> balances = trader.get_balances();
 
 		EXPECT_EQ(orderId, "1");
-		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().asset()), expectedBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().price_unit()), expectedGbpBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), expectedBtcBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), expectedGbpBalance);
 	}
 
 	TEST(PaperTrader, AddSellOrderCorrectlyAdjustsBalances)
@@ -98,7 +98,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		trade_description tradeDescription
+		order_request orderRequest
 		{
 			order_type::LIMIT,
 			pair,
@@ -110,13 +110,13 @@ namespace mb::test
 		constexpr double expectedGbpBalance = 119.98;
 		constexpr double expectedBtcBalance = 0.5;
 
-		std::string orderId = trader.add_order(tradeDescription);
+		std::string orderId = trader.add_order(orderRequest);
 
 		unordered_string_map<double> balances = trader.get_balances();
 
 		EXPECT_EQ(orderId, "1");
-		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().asset()), expectedBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().price_unit()), expectedGbpBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), expectedBtcBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), expectedGbpBalance);
 	}
 
 	TEST(PaperTrader, AddBuyOrderThrowsIfInsufficientFunds)
@@ -132,7 +132,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		trade_description tradeDescription
+		order_request orderRequest
 		{
 			order_type::LIMIT,
 			pair,
@@ -141,7 +141,7 @@ namespace mb::test
 			volume
 		};
 
-		EXPECT_THROW(trader.add_order(tradeDescription), mb_exception);
+		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
 	}
 
 	TEST(PaperTrader, AddSellOrderThrowsIfInsufficientFunds)
@@ -157,7 +157,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		trade_description tradeDescription
+		order_request orderRequest
 		{
 			order_type::LIMIT,
 			pair,
@@ -166,7 +166,7 @@ namespace mb::test
 			volume
 		};
 
-		EXPECT_THROW(trader.add_order(tradeDescription), mb_exception);
+		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
 	}
 
 	TEST(PaperTrader, AddLimitOrderDoesNotExecuteIfPriceNotReached)
@@ -183,7 +183,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		trade_description tradeDescription
+		order_request orderRequest
 		{
 			order_type::LIMIT,
 			pair,
@@ -192,12 +192,12 @@ namespace mb::test
 			volume
 		};
 
-		trader.add_order(tradeDescription);
+		trader.add_order(orderRequest);
 
 		unordered_string_map<double> balances = trader.get_balances();
 
-		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().asset()), initialBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(tradeDescription.pair().price_unit()), initialGbpBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), initialBtcBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), initialGbpBalance);
 	}
 
 	TEST(PaperTrader, CloseOpenOrdersClosesOrders)
@@ -214,7 +214,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		trade_description tradeDescription1
+		order_request orderRequest1
 		{
 			order_type::LIMIT,
 			pair,
@@ -223,7 +223,7 @@ namespace mb::test
 			volume
 		};
 
-		trade_description tradeDescription2
+		order_request orderRequest2
 		{
 			order_type::LIMIT,
 			pair,
@@ -232,8 +232,8 @@ namespace mb::test
 			volume
 		};
 
-		trader.add_order(tradeDescription1);
-		trader.add_order(tradeDescription2);
+		trader.add_order(orderRequest1);
+		trader.add_order(orderRequest2);
 
 		prices.set_price(pair, orderPrice);
 		trader.fill_open_orders();

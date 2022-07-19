@@ -55,10 +55,10 @@ namespace mb::test
 
 	TYPED_TEST_SUITE_P(WebsocketStreamTests);
 
-	TYPED_TEST_P(WebsocketStreamTests, PriceSubscriptionMessageSent)
+	TYPED_TEST_P(WebsocketStreamTests, TradeSubscriptionMessageSent)
 	{
-		this->set_expected_message_sent("price_subscribe");
-		this->_stream->subscribe(websocket_subscription::create_price_sub(
+		this->set_expected_message_sent("trade_subscribe");
+		this->_stream->subscribe(websocket_subscription::create_trade_sub(
 			std::vector<tradable_pair>
 			{
 				tradable_pair{ "BTC", "USD" },
@@ -81,7 +81,7 @@ namespace mb::test
 	TYPED_TEST_P(WebsocketStreamTests, UnsubscriptionMessageSent)
 	{
 		this->set_expected_message_sent("unsubscription");
-		this->_stream->unsubscribe(websocket_subscription::create_price_sub(
+		this->_stream->unsubscribe(websocket_subscription::create_trade_sub(
 			std::vector<tradable_pair>
 			{
 				tradable_pair{ "BTC", "USD" },
@@ -89,11 +89,11 @@ namespace mb::test
 			}));
 	}
 
-	TYPED_TEST_P(WebsocketStreamTests, PriceUpdateOnMessage)
+	TYPED_TEST_P(WebsocketStreamTests, TradeUpdateOnMessage)
 	{
-		this->receive_message("price_update");
+		this->receive_message("trade_update");
 
-		EXPECT_DOUBLE_EQ(6060.4, this->_stream->get_price(tradable_pair{ "BTC","USD" }));
+		assert_trade_update_eq(trade_update{ 1657043700, 6060.4, 0.0025 }, this->_stream->get_last_trade(tradable_pair{ "BTC","USD" }));
 	}
 
 	TYPED_TEST_P(WebsocketStreamTests, OhlcvUpdateOnMessage)
@@ -111,9 +111,9 @@ namespace mb::test
 	}
 
 	REGISTER_TYPED_TEST_SUITE_P(WebsocketStreamTests,
-		PriceSubscriptionMessageSent,
+		TradeSubscriptionMessageSent,
 		OhlcvSubscriptionMessageSent,
 		UnsubscriptionMessageSent,
-		PriceUpdateOnMessage,
+		TradeUpdateOnMessage,
 		OhlcvUpdateOnMessage);
 }

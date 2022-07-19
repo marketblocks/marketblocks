@@ -11,7 +11,7 @@ namespace mb::internal
 	private:
 		concurrent_wrapper<ohlcv_subscription_service> _ohlcvSubscriptionService;
 
-		void process_price_message(const json_document& json);
+		void process_trade_message(const json_document& json);
 
 		void on_message(std::string_view message) override;
 		std::string generate_subscription_id(const unique_websocket_subscription& subscription) const override;

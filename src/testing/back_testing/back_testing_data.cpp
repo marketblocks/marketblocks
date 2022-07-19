@@ -154,23 +154,28 @@ namespace mb
 		return data;
 	}
 
-	double back_testing_data::get_price(const tradable_pair& pair)
+	trade_update back_testing_data::get_trade(const tradable_pair& pair)
 	{
 		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
 		std::optional<data_iterator> iterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
 
 		if (!iterator.has_value())
 		{
-			return 0.0;
+			return trade_update{0,0,0};
 		}
 
 		const ohlcv_data& ohlcvData = *iterator.value();
+		double price;
 		if (std::next(iterator.value()) == pairData.end() && _dataTime > ohlcvData.time_stamp())
 		{
-			return ohlcvData.close();
+			price = ohlcvData.close();
+		}
+		else
+		{
+			price = ohlcvData.open();
 		}
 
-		return ohlcvData.open();
+		return trade_update{ ohlcvData.time_stamp(), price, ohlcvData.volume() };
 	}
 
 	order_book_state back_testing_data::get_order_book(const tradable_pair& pair, int depth)

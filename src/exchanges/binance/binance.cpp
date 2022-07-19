@@ -125,7 +125,7 @@ namespace mb
 		throw not_implemented_exception{ "binance::get_closed_orders" };
 	}
 
-	std::string binance_api::add_order(const trade_description& description)
+	std::string binance_api::add_order(const order_request& description)
 	{
 		url_query_builder query = url_query_builder{}
 			.add_parameter("symbol", description.pair().to_string())

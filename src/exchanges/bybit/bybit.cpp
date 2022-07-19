@@ -20,14 +20,14 @@ namespace
 		return LIVE_BASE_URL;
 	}
 
-	constexpr double get_order_quantity(const trade_description& tradeDescription)
+	constexpr double get_order_quantity(const order_request& orderRequest)
 	{
-		if (tradeDescription.order_type() == order_type::MARKET && tradeDescription.action() == trade_action::BUY)
+		if (orderRequest.order_type() == order_type::MARKET && orderRequest.action() == trade_action::BUY)
 		{
-			return calculate_cost(tradeDescription.asset_price(), tradeDescription.volume());
+			return calculate_cost(orderRequest.asset_price(), orderRequest.volume());
 		}
 
-		return tradeDescription.volume();
+		return orderRequest.volume();
 	}
 
 	constexpr std::string to_side_string(trade_action action)
@@ -130,7 +130,7 @@ namespace mb
 		return send_private_request<std::vector<order_description>>(http_verb::GET, "/spot/v1/history-orders", bybit::read_closed_orders);
 	}
 
-	std::string bybit_api::add_order(const trade_description& description)
+	std::string bybit_api::add_order(const order_request& description)
 	{
 		std::map<std::string, std::string> queryParams
 		{

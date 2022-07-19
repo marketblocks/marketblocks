@@ -36,7 +36,7 @@ namespace
 	{
 		switch (subscription.channel())
 		{
-		case websocket_channel::PRICE:
+		case websocket_channel::TRADE:
 			return "trade";
 		case websocket_channel::OHLCV:
 			return get_kline_topic(subscription.get_ohlcv_interval());
@@ -113,7 +113,7 @@ namespace mb::internal
 		if (topic == "trade")
 		{
 			std::string subscriptionId{ ::generate_subscription_id(symbol, topic) };
-			process_price_message(std::move(subscriptionId), json);
+			process_trade_message(std::move(subscriptionId), json);
 		}
 		else if (topic.contains("kline"))
 		{
@@ -123,13 +123,15 @@ namespace mb::internal
 		}
 	}
 
-	void bybit_websocket_stream::process_price_message(std::string subscriptionId, const json_document& json)
+	void bybit_websocket_stream::process_trade_message(std::string subscriptionId, const json_document& json)
 	{
 		json_element dataElement{ json.element("data").begin().value() };
 		
 		double price{ std::stod(dataElement.get<std::string>("p")) };
+		double volume{ std::stod(dataElement.get<std::string>("q")) };
+		std::time_t time{ dataElement.get<std::time_t>("t") / 1000 };
 		
-		update_price(std::move(subscriptionId), price);
+		update_trade(std::move(subscriptionId), trade_update{time, price, volume});
 	}
 
 	void bybit_websocket_stream::process_ohlcv_message(std::string subscriptionId, const json_document& json)

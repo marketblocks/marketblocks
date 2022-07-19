@@ -178,7 +178,7 @@ namespace mb::test
 	TYPED_TEST_P(ExchangeReaderTests, ReadAddOrder)
 	{
 		this->set_http_response("add_order");
-		std::string orderId{ this->_api->add_order(trade_description{
+		std::string orderId{ this->_api->add_order(order_request{
 			order_type::LIMIT,
 			this->_testingPair,
 			trade_action::BUY,

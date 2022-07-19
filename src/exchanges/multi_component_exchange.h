@@ -82,7 +82,7 @@ namespace mb
 			return _tradeApi->get_closed_orders();
 		}
 
-		std::string add_order(const trade_description& description) override
+		std::string add_order(const order_request& description) override
 		{
 			return _tradeApi->add_order(description);
 		}

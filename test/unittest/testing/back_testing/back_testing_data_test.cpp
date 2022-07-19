@@ -15,7 +15,7 @@ namespace mb::test
 	};
 
 	static tradable_pair TEST_PAIR{ "BTC", "GBP" };
-	TEST(BackTestingData, GetPriceReturnsOpenIfTimeEqualToDataPoint)
+	TEST(BackTestingData, GetTradeReturnsOpenPriceIfTimeEqualToDataPoint)
 	{
 		back_testing_data backTestingData
 		{
@@ -27,9 +27,9 @@ namespace mb::test
 			5
 		};
 
-		double price = backTestingData.get_price(TEST_PAIR);
+		trade_update trade{ backTestingData.get_trade(TEST_PAIR) };
 
-		EXPECT_DOUBLE_EQ(2, price);
+		assert_trade_update_eq(trade_update{ 100, 2, 3 }, trade);
 	}
 
 	TEST(BackTestingData, GetPriceReturnsZeroIfStartLessThanFirstPoint)
@@ -44,9 +44,9 @@ namespace mb::test
 			5
 		};
 
-		double price = backTestingData.get_price(TEST_PAIR);
+		trade_update trade{ backTestingData.get_trade(TEST_PAIR) };
 
-		EXPECT_DOUBLE_EQ(0, price);
+		assert_trade_update_eq(trade_update{ 0, 0, 0 }, trade);
 	}
 
 	TEST(BackTestingData, GetPriceReturnsLastClosePriceIfEndGreaterThanLastPoint)
@@ -64,9 +64,9 @@ namespace mb::test
 		for (int i = 0; i < 5; ++i)
 			backTestingData.increment();
 
-		double price = backTestingData.get_price(TEST_PAIR);
+		trade_update trade{ backTestingData.get_trade(TEST_PAIR) };
 
-		EXPECT_DOUBLE_EQ(23, price);
+		assert_trade_update_eq(trade_update{ 340, 23, 24 }, trade);
 	}
 
 	TEST(BackTestingData, GetPriceReturnsMostRecentOpenIfTimeBetweenPoints)
@@ -84,9 +84,9 @@ namespace mb::test
 		for (int i = 0; i < 3; ++i)
 			backTestingData.increment();
 
-		double price = backTestingData.get_price(TEST_PAIR);
+		trade_update trade{ backTestingData.get_trade(TEST_PAIR) };
 
-		EXPECT_DOUBLE_EQ(7, price);
+		assert_trade_update_eq(trade_update{ 160, 7, 9 }, trade);
 	}
 
 	TEST(BackTestingData, IncrementMovesDataPosition)
@@ -103,9 +103,9 @@ namespace mb::test
 
 		backTestingData.increment();
 
-		double price = backTestingData.get_price(TEST_PAIR);
+		trade_update trade{ backTestingData.get_trade(TEST_PAIR) };
 
-		EXPECT_DOUBLE_EQ(7, price);
+		EXPECT_EQ(160, trade.time_stamp());
 	}
 
 	TEST(BackTestingData, GetOrderBookReturnsEmptyStateIfStartLessThanFirstPoint)

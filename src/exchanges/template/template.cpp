@@ -60,7 +60,7 @@ namespace mb
 		return mb::read_template::read_closed_orders("").value();
 	}
 
-	std::string template_api::add_order(const trade_description& description)
+	std::string template_api::add_order(const order_request& description)
 	{
 		return mb::read_template::read_add_order("").value();
 	}

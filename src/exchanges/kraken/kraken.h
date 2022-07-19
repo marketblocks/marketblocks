@@ -15,7 +15,7 @@
 #include "networking/url.h"
 #include "networking/http/http_service.h"
 #include "networking/websocket/websocket_connection.h"
-#include "trading/trade_description.h"
+#include "trading/order_request.h"
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
 
@@ -86,7 +86,7 @@ namespace mb
 		unordered_string_map<double> get_balances() const override;
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
-		std::string add_order(const trade_description& description) override;
+		std::string add_order(const order_request& description) override;
 		void cancel_order(std::string_view orderId) override;
 	};
 

@@ -7,14 +7,14 @@ namespace
 {
 	using namespace mb;
 
-	bool should_close_limit_order(const trade_description& trade, double currentPrice)
+	bool should_close_limit_order(const order_request& trade, double currentPrice)
 	{
 		return 
 			(trade.action() == trade_action::BUY && currentPrice <= trade.asset_price()) ||
 			(trade.action() == trade_action::SELL && currentPrice >= trade.asset_price());
 	}
 
-	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const trade_description& trade)
+	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const order_request& trade)
 	{
 		return order_description{
 			time,
@@ -53,7 +53,7 @@ namespace mb
 		return balanceIt->second >= amount;
 	}
 
-	void paper_trade_api::execute_order(std::string orderId, const trade_description& description, double fillPrice)
+	void paper_trade_api::execute_order(std::string orderId, const order_request& description, double fillPrice)
 	{
 		double cost = calculate_cost(fillPrice, description.volume());
 		double fee = cost * _fee * 0.01;
@@ -143,7 +143,7 @@ namespace mb
 		return _closedOrders;
 	}
 
-	std::string paper_trade_api::add_order(const trade_description& description)
+	std::string paper_trade_api::add_order(const order_request& description)
 	{
 		std::string orderId = std::to_string(_nextOrderNumber++);
 		double price = _getPrice(description.pair());

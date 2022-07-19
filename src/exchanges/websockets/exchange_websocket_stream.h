@@ -18,7 +18,7 @@ namespace mb
 		std::string _url;
 
 		concurrent_wrapper<std::unordered_set<std::string>> _subscriptions;
-		concurrent_wrapper<unordered_string_map<double>> _prices;
+		concurrent_wrapper<unordered_string_map<trade_update>> _trades;
 		concurrent_wrapper<unordered_string_map<ohlcv_data>> _ohlcv;
 		concurrent_wrapper<unordered_string_map<order_book_cache>> _orderBooks;
 		set_queue<tradable_pair> _messageQueue;
@@ -37,7 +37,7 @@ namespace mb
 		std::unique_ptr<websocket_connection> _connection;
 
 		void set_unsubscribed(std::string subscriptionId, websocket_channel channel);
-		void update_price(std::string subscriptionId, double price);
+		void update_trade(std::string subscriptionId, trade_update trade);
 		void update_ohlcv(std::string subscriptionId, ohlcv_data ohlcvData);
 		void initialise_order_book(std::string subscriptionId, order_book_cache cache);
 		void update_order_book(std::string subscriptionId, order_book_entry entry);
@@ -58,7 +58,7 @@ namespace mb
 
 		subscription_status get_subscription_status(const unique_websocket_subscription& subscription) const override;
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
-		double get_price(const tradable_pair& pair) const override;
+		trade_update get_last_trade(const tradable_pair& pair) const override;
 		ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const override;
 
 		set_queue<tradable_pair>& get_order_book_message_queue() override

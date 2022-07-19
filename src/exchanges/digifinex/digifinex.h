@@ -62,7 +62,7 @@ namespace mb
 		unordered_string_map<double> get_balances() const override;
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
-		std::string add_order(const trade_description& description) override;
+		std::string add_order(const order_request& description) override;
 		void cancel_order(std::string_view orderId) override;
 	};
 

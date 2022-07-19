@@ -25,9 +25,9 @@ namespace mb
 		return _backTestingData->get_order_book(pair, depth);
 	}
 
-	double backtest_websocket_stream::get_price(const tradable_pair& pair) const
+	trade_update backtest_websocket_stream::get_last_trade(const tradable_pair& pair) const
 	{
-		return _backTestingData->get_price(pair);
+		return _backTestingData->get_trade(pair);
 	}
 
 	ohlcv_data backtest_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const

@@ -12,7 +12,7 @@ namespace
 	{
 		switch (channel)
 		{
-		case websocket_channel::PRICE:
+		case websocket_channel::TRADE:
 			return "trades";
 		case websocket_channel::ORDER_BOOK:
 		default:
@@ -53,7 +53,7 @@ namespace mb::internal
 			} }
 	{}
 
-	void digifinex_websocket_stream::process_price_message(const json_document& json)
+	void digifinex_websocket_stream::process_trade_message(const json_document& json)
 	{
 		json_element paramsElement{ json.element("params") };
 		json_element tradesElement{ paramsElement.element(1) };
@@ -61,17 +61,17 @@ namespace mb::internal
 
 		json_element lastTrade{ tradesElement.element(tradesElement.size() - 1) };
 		std::string subId{ ::generate_subscription_id(pairName, "trades") };
+
 		double price{ std::stod(lastTrade.get<std::string>("price")) };
-		
-		update_price(std::move(subId), price);
+		double volume{ std::stod(lastTrade.get<std::string>("amount")) };
+		std::time_t time{ lastTrade.get<std::time_t>("time") };
+
+		update_trade(std::move(subId), trade_update{time, price, volume});
 
 		auto lockedOhlcvSubscriptions = _ohlcvSubscriptionService.unique_lock();
 
 		if (lockedOhlcvSubscriptions->is_subscribed(pairName))
 		{
-			double volume{ std::stod(lastTrade.get<std::string>("amount")) };
-			std::time_t time{ lastTrade.get<std::time_t>("time") };
-
 			lockedOhlcvSubscriptions->update_ohlcv(std::move(pairName), time, price, volume);
 		}
 	}
@@ -84,7 +84,7 @@ namespace mb::internal
 
 		if (method == "trades.update")
 		{
-			process_price_message(json);
+			process_trade_message(json);
 		}
 	}
 
@@ -105,7 +105,7 @@ namespace mb::internal
 	{
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{
-			subscribe(websocket_subscription::create_price_sub(subscription.pair_item()));
+			subscribe(websocket_subscription::create_trade_sub(subscription.pair_item()));
 			_ohlcvSubscriptionService.unique_lock()->add_subscription(subscription);
 			return;
 		}

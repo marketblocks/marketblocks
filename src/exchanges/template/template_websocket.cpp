@@ -12,7 +12,7 @@ namespace mb::internal
 		return "";
 	}
 
-	void template_websocket_stream::process_price_message(const json_document& json)
+	void template_websocket_stream::process_trade_message(const json_document& json)
 	{
 	}
 

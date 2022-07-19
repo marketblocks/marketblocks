@@ -31,10 +31,10 @@
 //		back_testing_data data { {}, {}, 0,	0, 0, 0	};
 //
 //		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{0, { {"GBP", 1000} } });
-//		trade_description tradeDescription{ order_type::LIMIT, tradable_pair{"BTC", "GBP"}, trade_action::BUY, 0, 0 };
-//		paperTradeApi->add_order(tradeDescription);
-//		paperTradeApi->add_order(tradeDescription);
-//		paperTradeApi->add_order(tradeDescription);
+//		trade_description orderRequest{ order_type::LIMIT, tradable_pair{"BTC", "GBP"}, trade_action::BUY, 0, 0 };
+//		paperTradeApi->add_order(orderRequest);
+//		paperTradeApi->add_order(orderRequest);
+//		paperTradeApi->add_order(orderRequest);
 //
 //		back_testing_report report = generate_back_testing_report(data, {}, paperTradeApi, std::chrono::seconds{});
 //

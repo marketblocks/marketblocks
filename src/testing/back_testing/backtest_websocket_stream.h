@@ -23,7 +23,7 @@ namespace mb
 		subscription_status get_subscription_status(const unique_websocket_subscription& subscription) const override;
 
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
-		double get_price(const tradable_pair& pair) const override;
+		trade_update get_last_trade(const tradable_pair& pair) const override;
 		ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const override;
 
 		set_queue<tradable_pair>& get_order_book_message_queue() override

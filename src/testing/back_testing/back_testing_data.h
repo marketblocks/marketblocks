@@ -7,6 +7,7 @@
 #include "trading/tradable_pair.h"
 #include "trading/ohlcv_data.h"
 #include "trading/order_book.h"
+#include "trading/trade_update.h"
 
 namespace mb
 {
@@ -49,7 +50,7 @@ namespace mb
 
 		void increment();
 		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& pair, int interval, int count);
-		double get_price(const tradable_pair& pair);
+		trade_update get_trade(const tradable_pair& pair);
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0);
 	};
 }

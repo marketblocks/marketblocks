@@ -5,6 +5,7 @@
 #include "trading/tradable_pair.h"
 #include "trading/order_book.h"
 #include "trading/ohlcv_data.h"
+#include "trading/trade_update.h"
 #include "common/types/set_queue.h"
 
 namespace mb
@@ -23,7 +24,7 @@ namespace mb
 		virtual subscription_status get_subscription_status(const unique_websocket_subscription& subscription) const = 0;
 
 		virtual order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const = 0;
-		virtual double get_price(const tradable_pair& pair) const = 0;
+		virtual trade_update get_last_trade(const tradable_pair& pair) const = 0;
 		virtual ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const = 0;
 
 		virtual set_queue<tradable_pair>& get_order_book_message_queue() = 0;

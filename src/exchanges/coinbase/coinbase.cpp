@@ -158,7 +158,7 @@ namespace mb
 		return send_private_request<std::vector<order_description>>(http_verb::GET, "/orders", coinbase::read_orders, query);
 	}
 
-	std::string coinbase_api::add_order(const trade_description& description)
+	std::string coinbase_api::add_order(const order_request& description)
 	{
 		json_writer json = json_writer{}
 			.add("side", to_string(description.action()))

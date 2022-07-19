@@ -10,7 +10,7 @@
 #include "trading/tradable_pair.h"
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
-#include "trading/trade_description.h"
+#include "trading/order_request.h"
 #include "trading/ohlcv_data.h"
 #include "trading/order_description.h"
 
@@ -37,7 +37,7 @@ namespace mb
 		virtual double get_fee(const tradable_pair& tradablePair) const = 0;
 		virtual std::vector<order_description> get_open_orders() const = 0;
 		virtual std::vector<order_description> get_closed_orders() const = 0;
-		virtual std::string add_order(const trade_description& description) = 0;
+		virtual std::string add_order(const order_request& description) = 0;
 		virtual void cancel_order(std::string_view orderId) = 0;
 	};
 

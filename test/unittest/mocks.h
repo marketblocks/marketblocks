@@ -29,7 +29,7 @@ namespace mb::test
 		MOCK_METHOD(subscription_status, get_subscription_status, (const unique_websocket_subscription& subscription), (const, override));
 
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
-		MOCK_METHOD(double, get_price, (const tradable_pair& pair), (const, override));
+		MOCK_METHOD(trade_update, get_last_trade, (const tradable_pair& pair), (const, override));
 		MOCK_METHOD(ohlcv_data, get_last_candle, (const tradable_pair& pair, ohlcv_interval interval), (const, override));
 
 		MOCK_METHOD(set_queue<tradable_pair>&, get_order_book_message_queue, (), (noexcept, override));
@@ -50,9 +50,9 @@ namespace mb::test
 		MOCK_METHOD(void, subscribe, (const websocket_subscription& subscription), (override));
 		MOCK_METHOD(void, unsubscribe, (const websocket_subscription& subscription), (override));
 
-		void expose_update_price(std::string subId, double price)
+		void expose_update_trade(std::string subId, trade_update trade)
 		{
-			update_price(std::move(subId), price);
+			update_trade(std::move(subId), std::move(trade));
 		}
 
 		void expose_update_ohlcv(std::string subId, ohlcv_data data)
@@ -92,7 +92,7 @@ namespace mb::test
 		MOCK_METHOD(double, get_fee, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(std::vector<order_description>, get_open_orders, (), (const, override));
 		MOCK_METHOD(std::vector<order_description>, get_closed_orders, (), (const, override));
-		MOCK_METHOD(std::string, add_order, (const trade_description& description), (override));
+		MOCK_METHOD(std::string, add_order, (const order_request& description), (override));
 		MOCK_METHOD(void, cancel_order, (std::string_view orderId), (override));
 	};
 

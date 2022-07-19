@@ -7,6 +7,7 @@
 #include "trading/order_book.h"
 #include "trading/ohlcv_data.h"
 #include "trading/order_description.h"
+#include "trading/trade_update.h"
 
 namespace mb::test
 {
@@ -64,4 +65,5 @@ namespace mb::test
 	void assert_order_book_state_eq(const order_book_state& lhs, const order_book_state& rhs);
 	void assert_ohlcv_data_eq(const ohlcv_data& lhs, const ohlcv_data& rhs);
 	void assert_order_description_eq(const order_description& lhs, const order_description& rhs);
+	void assert_trade_update_eq(const trade_update& lhs, const trade_update& rhs);
 }

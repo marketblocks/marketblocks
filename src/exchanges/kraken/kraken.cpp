@@ -139,7 +139,7 @@ namespace mb
 		return send_private_request<std::vector<order_description>>("ClosedOrders", kraken::read_closed_orders);
 	}
 
-	std::string kraken_api::add_order(const trade_description& description)
+	std::string kraken_api::add_order(const order_request& description)
 	{
 		std::string query = url_query_builder{}
 			.add_parameter("pair", description.pair().to_string())
