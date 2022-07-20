@@ -225,4 +225,30 @@ namespace mb::test
 			subscription_status::UNSUBSCRIBED,
 			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(pair)));
 	}
+
+	TEST(ExchangeWebsocketStream, UpdateTradeFiresHandler)
+	{
+		tradable_pair pair{ "test", "test" };
+		trade_update trade{ 1, 2.0, 3.0 };
+		mock_exchange_websocket_stream test{ create_mock_stream() };
+
+		bool eventFired = false;
+		test.set_trade_update_handler([&eventFired](trade_update_message) { eventFired = true; });
+
+		test.subscribe(websocket_subscription::create_trade_sub({ pair }));
+		test.expose_update_trade(pair.to_string(), trade);
+
+		ASSERT_TRUE(eventFired);
+	}
+
+	TEST(ExchangeWebsocketStream, DoesNotCrashIfEventHandlerNotSet)
+	{
+		tradable_pair pair{ "test", "test" };
+		trade_update trade{ 1, 2.0, 3.0 };
+		mock_exchange_websocket_stream test{ create_mock_stream() };
+
+		test.subscribe(websocket_subscription::create_trade_sub({ pair }));
+
+		ASSERT_NO_THROW(test.expose_update_trade(pair.to_string(), trade));
+	}
 }

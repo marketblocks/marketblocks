@@ -31,8 +31,6 @@ namespace mb::test
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
 		MOCK_METHOD(trade_update, get_last_trade, (const tradable_pair& pair), (const, override));
 		MOCK_METHOD(ohlcv_data, get_last_candle, (const tradable_pair& pair, ohlcv_interval interval), (const, override));
-
-		MOCK_METHOD(set_queue<tradable_pair>&, get_order_book_message_queue, (), (noexcept, override));
 	};
 
 	class mock_exchange_websocket_stream : public exchange_websocket_stream
