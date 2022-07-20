@@ -32,11 +32,6 @@ namespace
 			.add("params", std::move(tradablePairList))
 			.to_string();
 	}
-
-	std::string generate_subscription_id(std::string symbol, std::string channel)
-	{
-		return std::move(symbol) + std::move(channel);
-	}
 }
 
 namespace mb::internal
@@ -44,11 +39,18 @@ namespace mb::internal
 	digifinex_websocket_stream::digifinex_websocket_stream(
 		std::unique_ptr<websocket_connection_factory> connectionFactory,
 		std::unique_ptr<market_api> marketApi)
-		: exchange_websocket_stream{ exchange_ids::DIGIFINEX, "wss://openapi.digifinex.com/ws/v1/", std::move(connectionFactory) },
+		: 
+		exchange_websocket_stream
+		{
+			exchange_ids::DIGIFINEX, 
+			"wss://openapi.digifinex.com/ws/v1/",
+			PAIR_SEPARATOR,
+			std::move(connectionFactory)
+		},
 		_ohlcvSubscriptionService{ ohlcv_subscription_service
 			{
 				std::move(marketApi),
-				[this](std::string id, ohlcv_data ohlcv) { update_ohlcv(std::move(id), std::move(ohlcv)); },
+				[this](std::string pairName, ohlcv_interval interval, ohlcv_data ohlcv) { update_ohlcv(std::move(pairName), interval, std::move(ohlcv)); },
 				PAIR_SEPARATOR
 			} }
 	{}
@@ -60,19 +62,18 @@ namespace mb::internal
 		std::string pairName{ paramsElement.get<std::string>(2) };
 
 		json_element lastTrade{ tradesElement.element(tradesElement.size() - 1) };
-		std::string subId{ ::generate_subscription_id(pairName, "trades") };
 
 		double price{ std::stod(lastTrade.get<std::string>("price")) };
 		double volume{ std::stod(lastTrade.get<std::string>("amount")) };
 		std::time_t time{ lastTrade.get<std::time_t>("time") };
 
-		update_trade(std::move(subId), trade_update{time, price, volume});
+		update_trade(pairName, trade_update{time, price, volume});
 
 		auto lockedOhlcvSubscriptions = _ohlcvSubscriptionService.unique_lock();
 
 		if (lockedOhlcvSubscriptions->is_subscribed(pairName))
 		{
-			lockedOhlcvSubscriptions->update_ohlcv(std::move(pairName), time, price, volume);
+			lockedOhlcvSubscriptions->update_ohlcv(pairName, time, price, volume);
 		}
 	}
 
@@ -88,24 +89,11 @@ namespace mb::internal
 		}
 	}
 
-	std::string digifinex_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
-	{
-		std::string pair{ subscription.pair_item().to_string(PAIR_SEPARATOR) };
-
-		if (subscription.channel() == websocket_channel::OHLCV)
-		{
-			return _ohlcvSubscriptionService.shared_lock()->generate_subscription_id(std::move(pair), subscription.get_ohlcv_interval());
-		}
-
-		std::string channel{ get_channel(subscription.channel()) };
-		return ::generate_subscription_id(std::move(pair), std::move(channel));
-	}
-
-	void digifinex_websocket_stream::subscribe(const websocket_subscription& subscription)
+	void digifinex_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{
-			subscribe(websocket_subscription::create_trade_sub(subscription.pair_item()));
+			send_subscribe(websocket_subscription::create_trade_sub(subscription.pair_item()));
 			_ohlcvSubscriptionService.unique_lock()->add_subscription(subscription);
 			return;
 		}
@@ -116,7 +104,7 @@ namespace mb::internal
 		_connection->send_message(std::move(message));
 	}
 
-	void digifinex_websocket_stream::unsubscribe(const websocket_subscription& subscription)
+	void digifinex_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{

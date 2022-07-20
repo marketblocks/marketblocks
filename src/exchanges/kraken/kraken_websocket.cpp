@@ -18,45 +18,6 @@ namespace
 
 	static constexpr const char PAIR_SEPARATOR = '/';
 
-	int get_ohlc_interval(ohlcv_interval interval)
-	{
-		switch (interval)
-		{
-		case ohlcv_interval::M1:
-			return 1;
-		case ohlcv_interval::M5:
-			return 5;
-		case ohlcv_interval::M15:
-			return 15;
-		case ohlcv_interval::H1:
-			return 60;
-		case ohlcv_interval::D1:
-			return 1440;
-		case ohlcv_interval::W1:
-			return 10080;
-		default:
-			throw mb_exception{ std::format("OHLCV interval not supported on Kraken") };
-		}
-	}
-
-	template<typename Subscription>
-	std::string get_full_channel_name(const Subscription& subscription)
-	{
-		std::string channel{ CHANNEL_NAMES[subscription.channel()] };
-
-		if (subscription.channel() == websocket_channel::OHLCV)
-		{
-			channel += "-" + std::to_string(get_ohlc_interval(subscription.get_ohlcv_interval()));
-		}
-
-		return channel;
-	}
-
-	std::string generate_subscription_id(std::string symbol, std::string channelName)
-	{
-		return symbol + channelName;
-	}
-
 	std::string create_message(std::string eventName, const websocket_subscription& subscription)
 	{
 		std::vector<std::string> tradablePairList{ to_vector<std::string>(subscription.pair_item(), 
@@ -67,7 +28,7 @@ namespace
 
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{
-			subscriptionJson.add("interval", get_ohlc_interval(subscription.get_ohlcv_interval()));
+			subscriptionJson.add("interval", to_minutes(subscription.get_ohlcv_interval()));
 		}
 		
 		return json_writer{}
@@ -150,39 +111,44 @@ namespace
 namespace mb::internal
 {
 	kraken_websocket_stream::kraken_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::KRAKEN, "wss://ws.kraken.com", std::move(connectionFactory) }
+		: 
+		exchange_websocket_stream
+		{ 
+			exchange_ids::KRAKEN,
+			"wss://ws.kraken.com",
+			'/',
+			std::move(connectionFactory) 
+		}
 	{}
-
-	std::string kraken_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
-	{
-		std::string pairName{ subscription.pair_item().to_string(PAIR_SEPARATOR) };
-		std::string channelName{ get_full_channel_name(subscription) };
-
-		return ::generate_subscription_id(std::move(pairName), std::move(channelName));
-	}
 
 	void kraken_websocket_stream::process_event_message(const json_document& json)
 	{
 		// TODO
 	}
 
-	void kraken_websocket_stream::process_trade_message(std::string subscriptionId, const json_document& json)
+	void kraken_websocket_stream::process_trade_message(std::string pairName, const json_document& json)
 	{
 		json_element tradesArray{ json.element(1) };
-		json_element lastTrade{ tradesArray.element(tradesArray.size() - 1) };
 
-		double price{ std::stod(lastTrade.get<std::string>(0)) };
-		double volume{ std::stod(lastTrade.get<std::string>(1)) };
-		std::time_t time{ std::stoll(lastTrade.get<std::string>(2)) };
+		for (auto it = tradesArray.begin(); it != tradesArray.end(); ++it)
+		{
+			json_element tradeElement{ it.value() };
 
-		update_trade(std::move(subscriptionId), trade_update{time, price, volume});
+			double price{ std::stod(tradeElement.get<std::string>(0)) };
+			double volume{ std::stod(tradeElement.get<std::string>(1)) };
+			std::time_t time{ std::stoll(tradeElement.get<std::string>(2)) };
+
+			update_trade(pairName, trade_update{ time, price, volume });
+		}
 	}
 
-	void kraken_websocket_stream::process_ohlcv_message(std::string subscriptionId, const json_document& json)
+	void kraken_websocket_stream::process_ohlcv_message(std::string pairName, std::string channelName, const json_document& json)
 	{
 		json_element ohlcArray{ json.element(1) };
+		std::string minuteInterval{ split(channelName, '-')[1] };
+		ohlcv_interval interval{ from_minutes(std::stoi(minuteInterval)) };
 
-		update_ohlcv(std::move(subscriptionId), ohlcv_data
+		update_ohlcv(std::move(pairName), interval, ohlcv_data
 			{
 				std::stoll(ohlcArray.get<std::string>(0)),
 				std::stod(ohlcArray.get<std::string>(2)),
@@ -226,15 +192,14 @@ namespace mb::internal
 		{
 			std::string channelName{ json.element(json.size() - 2).get<std::string>() };
 			std::string pairName{ json.element(json.size() - 1).get<std::string>() };
-			std::string subscriptionId{ ::generate_subscription_id(pairName, channelName) };
 
 			if (channelName == "trade")
 			{
-				process_trade_message(std::move(subscriptionId), json);
+				process_trade_message(std::move(pairName), json);
 			}
 			else if (channelName.contains("ohlc"))
 			{
-				process_ohlcv_message(std::move(subscriptionId), json);
+				process_ohlcv_message(std::move(pairName), std::move(channelName), json);
 			}
 			/*if (channelName.contains("book"))
 			{
@@ -247,14 +212,14 @@ namespace mb::internal
 		}
 	}
 
-	void kraken_websocket_stream::subscribe(const websocket_subscription& subscription)
+	void kraken_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
 		std::string message{ create_message("subscribe", subscription) };
 
 		_connection->send_message(message);
 	}
 
-	void kraken_websocket_stream::unsubscribe(const websocket_subscription& subscription)
+	void kraken_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
 		std::string message{ create_message("unsubscribe", subscription) };
 

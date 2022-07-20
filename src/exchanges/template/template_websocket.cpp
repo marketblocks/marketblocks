@@ -4,13 +4,15 @@
 namespace mb::internal
 {
 	template_websocket_stream::template_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::BYBIT, "wss://", std::move(connectionFactory) }
+		: 
+		exchange_websocket_stream
+		{ 
+			exchange_ids::BYBIT,
+			"wss://", 
+			'\0',
+			std::move(connectionFactory)
+		}
 	{}
-
-	std::string template_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
-	{
-		return "";
-	}
 
 	void template_websocket_stream::process_trade_message(const json_document& json)
 	{
@@ -20,12 +22,12 @@ namespace mb::internal
 	{
 	}
 
-	void template_websocket_stream::subscribe(const websocket_subscription& subscription)
+	void template_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
 
 	}
 
-	void template_websocket_stream::unsubscribe(const websocket_subscription& subscription)
+	void template_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
 
 	}

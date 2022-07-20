@@ -9,17 +9,15 @@ namespace mb::internal
 	{
 	private:
 		void process_event_message(const json_document& json);
-		void process_trade_message(std::string subscriptionId, const json_document& json);
-		void process_ohlcv_message(std::string subscriptionId, const json_document& json);
+		void process_trade_message(std::string pairName, const json_document& json);
+		void process_ohlcv_message(std::string pairName, std::string channelName, const json_document& json);
 		//void process_order_book_message(std::string subscriptionId, const json_document& json);
 
 		void on_message(std::string_view message) override;
-		std::string generate_subscription_id(const unique_websocket_subscription& subscription) const override;
+		void send_subscribe(const websocket_subscription& subscription) override;
+		void send_unsubscribe(const websocket_subscription& subscription) override;
 
 	public:
 		kraken_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory);
-
-		void subscribe(const websocket_subscription& subscription) override;
-		void unsubscribe(const websocket_subscription& subscription) override;
 	};
 }

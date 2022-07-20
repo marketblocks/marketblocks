@@ -30,8 +30,11 @@ namespace mb
 	};
 
 	ohlcv_interval parse_ohlcv_interval(std::string_view string);
-
 	std::string to_string(ohlcv_interval interval);
 
 	int to_seconds(ohlcv_interval interval);
+	int to_minutes(ohlcv_interval interval);
+
+	ohlcv_interval from_seconds(int seconds);
+	ohlcv_interval from_minutes(int minutes);
 }

@@ -52,4 +52,36 @@ namespace mb
 			return 604800;
 		}
 	}
+
+	int to_minutes(ohlcv_interval interval)
+	{
+		return to_seconds(interval) / 60;
+	}
+
+	ohlcv_interval from_seconds(int seconds)
+	{
+		switch (seconds)
+		{
+		case 60:
+			return ohlcv_interval::M1;
+		case 300:
+			return ohlcv_interval::M5;
+		case 900:
+			return ohlcv_interval::M15;
+		case 3600:
+			return ohlcv_interval::H1;
+		case 86400:
+			return ohlcv_interval::D1;
+		case 604800:
+			return ohlcv_interval::W1;
+		default:
+			return ohlcv_interval::UNKNOWN;
+		}
+
+	}
+
+	ohlcv_interval from_minutes(int minutes)
+	{
+		return from_seconds(minutes * 60);
+	}
 }

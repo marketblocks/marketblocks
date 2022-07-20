@@ -32,6 +32,11 @@ namespace mb
 
 		constexpr std::string to_string(char separator) const
 		{
+			if (separator == '\0')
+			{
+				return to_string();
+			}
+
 			return _asset + separator + _priceUnit;
 		}
 

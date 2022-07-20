@@ -23,33 +23,30 @@ namespace mb::test
 
 	TEST(ExchangeWebsocketStream, UpdateTradeSetsTrade)
 	{
-		std::string subId{ "testSubId" };
+		tradable_pair pair{ "test", "test" };
 		trade_update trade{ 1, 2.0, 3.0 };
-
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_trade(subId, trade);
+		test.expose_update_trade(pair.to_string(), trade);
 
-		assert_trade_update_eq(trade, test.get_last_trade(tradable_pair{ "test", "test" }));
+		assert_trade_update_eq(trade, test.get_last_trade(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, UpdateOhlcvSetsOhlcv)
 	{
-		std::string subId{ "testSubId" };
+		tradable_pair pair{ "test", "test" };
+		ohlcv_interval interval{ ohlcv_interval::D1 };
 		ohlcv_data ohlcvData{ 1, 2, 3, 4, 5, 6 };
-
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_ohlcv(subId, ohlcvData);
+		test.expose_update_ohlcv(pair.to_string(), interval, ohlcvData);
 
-		assert_ohlcv_data_eq(ohlcvData, test.get_last_candle(tradable_pair{ "test", "test" }, ohlcv_interval::D1));
+		assert_ohlcv_data_eq(ohlcvData, test.get_last_candle(pair, interval));
 	}
 
 	TEST(ExchangeWebsocketStream, InitialiseOrderBookCreatesOrderBook)
 	{
-		std::string subId{ "testSubId" };
+		tradable_pair pair{ "test", "test" };
 
 		ask_cache asks
 		{
@@ -69,16 +66,15 @@ namespace mb::test
 		};
 
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_initialise_order_book(subId, order_book_cache{asks, bids});
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{asks, bids});
 
-		assert_order_book_state_eq(expectedState, test.get_order_book(tradable_pair{"test", "test"}));
+		assert_order_book_state_eq(expectedState, test.get_order_book(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, UpdateOrderBookUpdatesCache)
 	{
-		std::string subId{ "testSubId" };
+		tradable_pair pair{ "test", "test" };
 
 		ask_cache asks
 		{
@@ -92,12 +88,11 @@ namespace mb::test
 		};
 
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_initialise_order_book(subId, order_book_cache{ asks, bids });
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{asks, bids});
 
 		order_book_entry newEntry{ 1.0, 0.0, order_book_side::ASK };
-		test.expose_update_order_book(subId, newEntry);
+		test.expose_update_order_book(pair.to_string(), newEntry);
 
 		order_book_state expectedState
 		{
@@ -105,15 +100,13 @@ namespace mb::test
 			{ bids.begin(), bids.end() }
 		};
 
-		assert_order_book_state_eq(expectedState, test.get_order_book(tradable_pair{ "test", "test" }));
+		assert_order_book_state_eq(expectedState, test.get_order_book(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, CallingUpdateOrderBookBeforeInitialiseCreatesEmptyBook)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
 		order_book_entry newEntry{ 1.0, 2.0, order_book_side::ASK };
 		
@@ -123,97 +116,85 @@ namespace mb::test
 			{}
 		};
 
-		test.expose_update_order_book(subId, newEntry);
+		test.expose_update_order_book(pair.to_string(), newEntry);
 
-		assert_order_book_state_eq(expectedState, test.get_order_book(tradable_pair{ "test", "test" }));
+		assert_order_book_state_eq(expectedState, test.get_order_book(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, SubscriptionStatusIsInitiallyUnsubscribed)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
 		EXPECT_EQ(
 			subscription_status::UNSUBSCRIBED,
-			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(tradable_pair{ "test", "test" })));
+			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(pair)));
 	}
 
 	TEST(ExchangeWebsocketStream, UpdateTradeSetsSubscribedStatus)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_trade(subId, trade_update{ 1, 2.0, 3.0 });
+		test.expose_update_trade(pair.to_string(), trade_update{1, 2.0, 3.0});
 
 		EXPECT_EQ(
 			subscription_status::SUBSCRIBED,
-			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(tradable_pair{ "test", "test" })));
+			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(pair)));
 	}
 
 	TEST(ExchangeWebsocketStream, UpdateOhlcvSetsSubscribedStatus)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
+		ohlcv_interval interval{ ohlcv_interval::D1 };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_ohlcv(subId, ohlcv_data{1, 2, 3, 4, 5, 6});
+		test.expose_update_ohlcv(pair.to_string(), interval, ohlcv_data{1, 2, 3, 4, 5, 6});
 
 		EXPECT_EQ(
 			subscription_status::SUBSCRIBED,
-			test.get_subscription_status(unique_websocket_subscription::create_ohlcv_sub(tradable_pair{ "test", "test" }, ohlcv_interval::D1)));
+			test.get_subscription_status(unique_websocket_subscription::create_ohlcv_sub(pair, interval)));
 	}
 
 	TEST(ExchangeWebsocketStream, InitialiseOrderBookSetsSubscribedStatus)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_initialise_order_book(subId, order_book_cache{ {},{} });
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{{},{}});
 
 		EXPECT_EQ(
 			subscription_status::SUBSCRIBED,
-			test.get_subscription_status(unique_websocket_subscription::create_order_book_sub(tradable_pair{ "test", "test" })));
+			test.get_subscription_status(unique_websocket_subscription::create_order_book_sub(pair)));
 	}
 
 	TEST(ExchangeWebsocketStream, SetUnsubscribedClearsCachedTrade)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_trade(subId, trade_update{ 1, 2.0, 3.0 });
-		test.expose_set_unsubscribed(subId, websocket_channel::TRADE);
+		test.expose_update_trade(pair.to_string(), trade_update{ 1, 2.0, 3.0 });
+		test.expose_set_unsubscribed(named_subscription::create_trade_sub(pair.to_string()));
 
-		assert_trade_update_eq(trade_update{0,0,0}, test.get_last_trade(tradable_pair{"test", "test"}));
+		assert_trade_update_eq(trade_update{0,0,0}, test.get_last_trade(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, SetUnsubscribedClearsCachedOhlcvValue)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
+		ohlcv_interval interval{ ohlcv_interval::D1 };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_ohlcv(subId, ohlcv_data{ 1, 2, 3, 4, 5, 6 });
-		test.expose_set_unsubscribed(subId, websocket_channel::OHLCV);
+		test.expose_update_ohlcv(pair.to_string(), interval, ohlcv_data{1, 2, 3, 4, 5, 6});
+		test.expose_set_unsubscribed(named_subscription::create_ohlcv_sub(pair.to_string(), interval));
 
 		assert_ohlcv_data_eq(ohlcv_data{}, test.get_last_candle(tradable_pair{"test", "test"}, ohlcv_interval::D1));
 	}
 
 	TEST(ExchangeWebsocketStream, SetUnsubscribedClearsCachedOrderBook)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
 		ask_cache asks
 		{
@@ -226,24 +207,22 @@ namespace mb::test
 			order_book_entry{0.8, 5.0, order_book_side::BID}
 		};
 
-		test.expose_initialise_order_book(subId, order_book_cache{ asks, bids });
-		test.expose_set_unsubscribed(subId, websocket_channel::ORDER_BOOK);
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{asks, bids});
+		test.expose_set_unsubscribed(named_subscription::create_order_book_sub(pair.to_string()));
 
-		assert_order_book_state_eq(order_book_state{ {},{} }, test.get_order_book(tradable_pair{ "test", "test" }));
+		assert_order_book_state_eq(order_book_state{ {},{} }, test.get_order_book(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, SetUnsubscribedSetsUnsubscribedStatus)
 	{
-		std::string subId{ "testSubId" };
-
+		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
-		EXPECT_CALL(test, generate_subscription_id(_)).WillRepeatedly(Return(subId));
 
-		test.expose_update_trade(subId, trade_update{1, 2.0, 3.0});
-		test.expose_set_unsubscribed(subId, websocket_channel::TRADE);
+		test.expose_update_trade(pair.to_string(), trade_update{1, 2.0, 3.0});
+		test.expose_set_unsubscribed(named_subscription::create_trade_sub(pair.to_string()));
 
 		EXPECT_EQ(
 			subscription_status::UNSUBSCRIBED,
-			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(tradable_pair{ "test", "test" })));
+			test.get_subscription_status(unique_websocket_subscription::create_trade_sub(pair)));
 	}
 }

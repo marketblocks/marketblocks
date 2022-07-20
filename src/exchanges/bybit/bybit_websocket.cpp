@@ -12,27 +12,10 @@ namespace
 
 	std::string get_kline_topic(ohlcv_interval interval)
 	{
-		switch (interval)
-		{
-		case ohlcv_interval::M1:
-			return "kline_1m";
-		case ohlcv_interval::M5:
-			return "kline_5m";
-		case ohlcv_interval::M15:
-			return "kline_15m";
-		case ohlcv_interval::H1:
-			return "kline_1h";
-		case ohlcv_interval::D1:
-			return "kline_1d";
-		case ohlcv_interval::W1:
-			return "kline_1w";
-		default:
-			throw mb_exception{ std::format("OHLCV interval not supported on ByBit") };
-		}
+		return "kline_" + to_string(interval);
 	}
 
-	template<typename Subscription>
-	std::string get_topic(const Subscription& subscription)
+	std::string get_topic(const websocket_subscription& subscription)
 	{
 		switch (subscription.channel())
 		{
@@ -71,25 +54,20 @@ namespace
 			.add("params", paramsJson.to_json())
 			.to_string();
 	}
-
-	std::string generate_subscription_id(std::string symbol, std::string topic)
-	{
-		return std::move(symbol) + std::move(topic);
-	}
 }
 
 namespace mb::internal
 {
 	bybit_websocket_stream::bybit_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::BYBIT, "wss://stream.bybit.com/spot/quote/ws/v1", std::move(connectionFactory)}
+		: 
+		exchange_websocket_stream
+		{ 
+			exchange_ids::BYBIT, 
+			"wss://stream.bybit.com/spot/quote/ws/v1",
+			'\0',
+			std::move(connectionFactory)
+		}
 	{}
-
-	std::string bybit_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
-	{
-		std::string symbol{ subscription.pair_item().to_string() };
-		std::string topic{ get_topic(subscription) };
-		return ::generate_subscription_id(std::move(symbol), std::move(topic));
-	}
 
 	void bybit_websocket_stream::on_message(std::string_view message)
 	{
@@ -112,18 +90,15 @@ namespace mb::internal
 
 		if (topic == "trade")
 		{
-			std::string subscriptionId{ ::generate_subscription_id(symbol, topic) };
-			process_trade_message(std::move(subscriptionId), json);
+			process_trade_message(std::move(symbol), json);
 		}
 		else if (topic.contains("kline"))
 		{
-			topic += "_" + json.element("params").get<std::string>("klineType");
-			std::string subscriptionId{ ::generate_subscription_id(symbol, topic) };
-			process_ohlcv_message(std::move(subscriptionId), json);
+			process_ohlcv_message(std::move(symbol), json);
 		}
 	}
 
-	void bybit_websocket_stream::process_trade_message(std::string subscriptionId, const json_document& json)
+	void bybit_websocket_stream::process_trade_message(std::string pairName, const json_document& json)
 	{
 		json_element dataElement{ json.element("data").begin().value() };
 		
@@ -131,10 +106,10 @@ namespace mb::internal
 		double volume{ std::stod(dataElement.get<std::string>("q")) };
 		std::time_t time{ dataElement.get<std::time_t>("t") / 1000 };
 		
-		update_trade(std::move(subscriptionId), trade_update{time, price, volume});
+		update_trade(std::move(pairName), trade_update{time, price, volume});
 	}
 
-	void bybit_websocket_stream::process_ohlcv_message(std::string subscriptionId, const json_document& json)
+	void bybit_websocket_stream::process_ohlcv_message(std::string pairName, const json_document& json)
 	{
 		json_element dataElement{ json.element("data").begin().value() };
 
@@ -148,10 +123,11 @@ namespace mb::internal
 			std::stod(dataElement.get<std::string>("v"))
 		};
 
-		update_ohlcv(std::move(subscriptionId), std::move(data));
+		ohlcv_interval interval{ parse_ohlcv_interval(json.element("params").get<std::string>("klineType")) };
+		update_ohlcv(std::move(pairName), interval, std::move(data));
 	}
 
-	void bybit_websocket_stream::subscribe(const websocket_subscription& subscription)
+	void bybit_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
 		std::string topic{ get_topic(subscription) };
 		std::string message{ create_message(topic, "sub", subscription.pair_item()) };
@@ -159,7 +135,7 @@ namespace mb::internal
 		_connection->send_message(message);
 	}
 
-	void bybit_websocket_stream::unsubscribe(const websocket_subscription& subscription)
+	void bybit_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
 		std::string topic{ get_topic(subscription) };
 		std::string message{ create_message(topic, "cancel", subscription.pair_item()) };

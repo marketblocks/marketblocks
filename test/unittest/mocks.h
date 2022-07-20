@@ -42,37 +42,36 @@ namespace mb::test
 			std::string_view id,
 			std::string url,
 			std::unique_ptr<websocket_connection_factory> connectionFactory)
-			: exchange_websocket_stream{ id, std::move(url), std::move(connectionFactory) }
+			: exchange_websocket_stream{ id, std::move(url), '\0', std::move(connectionFactory)}
 		{}
 
 		MOCK_METHOD(void, on_message, (std::string_view message), (override));
-		MOCK_METHOD(std::string, generate_subscription_id, (const unique_websocket_subscription& subscription), (const, override));
-		MOCK_METHOD(void, subscribe, (const websocket_subscription& subscription), (override));
-		MOCK_METHOD(void, unsubscribe, (const websocket_subscription& subscription), (override));
+		MOCK_METHOD(void, send_subscribe, (const websocket_subscription& subscription), (override));
+		MOCK_METHOD(void, send_unsubscribe, (const websocket_subscription& subscription), (override));
 
-		void expose_update_trade(std::string subId, trade_update trade)
+		void expose_update_trade(std::string pairName, trade_update trade)
 		{
-			update_trade(std::move(subId), std::move(trade));
+			update_trade(std::move(pairName), std::move(trade));
 		}
 
-		void expose_update_ohlcv(std::string subId, ohlcv_data data)
+		void expose_update_ohlcv(std::string pairName, ohlcv_interval interval, ohlcv_data data)
 		{
-			update_ohlcv(std::move(subId), std::move(data));
+			update_ohlcv(std::move(pairName), interval, std::move(data));
 		}
 
-		void expose_initialise_order_book(std::string subId, order_book_cache cache)
+		void expose_initialise_order_book(std::string pairName, order_book_cache cache)
 		{
-			initialise_order_book(std::move(subId), std::move(cache));
+			initialise_order_book(std::move(pairName), std::move(cache));
 		}
 
-		void expose_update_order_book(std::string subId, order_book_entry entry)
+		void expose_update_order_book(std::string pairName, order_book_entry entry)
 		{
-			update_order_book(std::move(subId), std::move(entry));
+			update_order_book(std::move(pairName), std::move(entry));
 		}
 
-		void expose_set_unsubscribed(std::string subscriptionId, websocket_channel channel)
+		void expose_set_unsubscribed(const named_subscription& subscription)
 		{
-			set_unsubscribed(std::move(subscriptionId), channel);
+			set_unsubscribed(subscription);
 		}
 	};
 
