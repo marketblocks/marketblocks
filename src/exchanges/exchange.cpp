@@ -20,4 +20,18 @@ namespace mb
 
 		return _websocketStream;
 	}
+
+	std::unordered_map<tradable_pair, double> market_api::get_prices(const std::vector<tradable_pair>& pairs) const
+	{
+		std::unordered_map<tradable_pair, double> prices;
+		prices.reserve(pairs.size());
+
+		for (auto& pair : pairs)
+		{
+			prices.emplace(pair, get_price(pair));
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+
+		return prices;
+	}
 }

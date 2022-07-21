@@ -112,8 +112,6 @@ namespace mb::internal
 				return;
 			}
 		}
-
-		logger::instance().info("Binance message: {}", message);
 	}
 
 	void binance_websocket_stream::send_subscribe(const websocket_subscription& subscription)

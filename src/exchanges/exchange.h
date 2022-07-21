@@ -25,6 +25,7 @@ namespace mb
 		virtual std::vector<tradable_pair> get_tradable_pairs() const = 0;
 		virtual std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const = 0;
 		virtual double get_price(const tradable_pair& tradablePair) const = 0;
+		virtual std::unordered_map<tradable_pair, double> get_prices(const std::vector<tradable_pair>& pairs) const;
 		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
 	};
 

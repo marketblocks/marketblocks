@@ -4,6 +4,7 @@
 #include "common/security/hash.h"
 #include "common/security/encoding.h"
 #include "common/file/config_file_reader.h"
+#include "common/utils/containerutils.h"
 
 #include "common/exceptions/not_implemented_exception.h"
 
@@ -93,6 +94,40 @@ namespace mb
 			.to_string();
 
 		return send_public_request<double>("/api/v3/ticker/price", binance::read_price, query);
+	}
+
+	std::unordered_map<tradable_pair, double> binance_api::get_prices(const std::vector<tradable_pair>& pairs) const
+	{
+		std::string symbols{ "[" };
+
+		for (auto& pair : pairs)
+		{
+			symbols.append("\"" + pair.to_string() + "\"" + ",");
+		}
+
+		symbols.pop_back();
+		symbols.append("]");
+
+		std::string query = url_query_builder{}
+			.add_parameter("symbols", std::move(symbols))
+			.to_string();
+
+		std::unordered_map<std::string, tradable_pair> pairLookup{ to_unordered_map<std::string, tradable_pair>(
+			pairs,
+			[](const tradable_pair& pair) { return pair.to_string(); },
+			[](const tradable_pair& pair) { return pair; }) };
+
+		std::unordered_map<std::string, double> namedPrices{ send_public_request<std::unordered_map<std::string, double>>("/api/v3/ticker/price", binance::read_prices, query) };
+
+		std::unordered_map<tradable_pair, double> prices;
+		prices.reserve(namedPrices.size());
+
+		for (auto& [pairName, price] : namedPrices)
+		{
+			prices.emplace(pairLookup.at(pairName), price);
+		}
+
+		return prices;
 	}
 
 	order_book_state binance_api::get_order_book(const tradable_pair& tradablePair, int depth) const

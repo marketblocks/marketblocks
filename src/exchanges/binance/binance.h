@@ -55,6 +55,7 @@ namespace mb
 		std::vector<tradable_pair> get_tradable_pairs() const override;
 		std::vector<ohlcv_data> get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const override;
 		double get_price(const tradable_pair& tradablePair) const override;
+		std::unordered_map<tradable_pair, double> get_prices(const std::vector<tradable_pair>& pairs) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;
 		unordered_string_map<double> get_balances() const override;

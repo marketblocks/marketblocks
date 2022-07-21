@@ -134,6 +134,26 @@ namespace mb::binance
 		});
 	}
 
+	result<std::unordered_map<std::string, double>> read_prices(std::string_view jsonResult)
+	{
+		return read_result<std::unordered_map<std::string, double>>(jsonResult, [](const json_document& json)
+		{
+			std::unordered_map<std::string, double> prices;
+			prices.reserve(json.size());
+
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				json_element priceElement{ it.value() };
+
+				prices.emplace(
+					priceElement.get<std::string>("symbol"), 
+					std::stod(priceElement.get<std::string>("price")));
+			}
+
+			return prices;
+		});
+	}
+
 	result<order_book_state> read_order_book(std::string_view jsonResult)
 	{
 		return read_result<order_book_state>(jsonResult, [](const json_document& json)
