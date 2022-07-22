@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
 #include <fmt/format.h>
 
 namespace mb
@@ -15,6 +16,6 @@ namespace mb
 			: _message{ fmt::format("Function: '{}' not implemented", functionName) }
 		{}
 
-		const char* what() const override { return _message.c_str(); }
+		const char* what() const noexcept override { return _message.c_str(); }
 	};
 }

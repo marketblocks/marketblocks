@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
 
 namespace mb
 {
@@ -14,6 +15,6 @@ namespace mb
 			: _message{ std::move(message) }
 		{}
 
-		const char* what() const override { return _message.c_str(); }
+		const char* what() const noexcept override { return _message.c_str(); }
 	};
 }
