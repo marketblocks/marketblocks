@@ -2,7 +2,6 @@
 
 #include "websocket_stream.h"
 #include "order_book_cache.h"
-#include "common/types/unordered_string_map.h"
 #include "common/types/concurrent_wrapper.h"
 
 #include "common/exceptions/not_implemented_exception.h"
@@ -18,10 +17,10 @@ namespace mb
 		std::string _url;
 		char _pairSeparator;
 
-		concurrent_wrapper<unordered_string_map<tradable_pair>> _pairs;
-		concurrent_wrapper<unordered_string_map<trade_update>> _trades;
-		concurrent_wrapper<unordered_string_map<ohlcv_data>> _ohlcv;
-		concurrent_wrapper<unordered_string_map<order_book_cache>> _orderBooks;
+		concurrent_wrapper<std::unordered_map<std::string, tradable_pair>> _pairs;
+		concurrent_wrapper<std::unordered_map<std::string, trade_update>> _trades;
+		concurrent_wrapper<std::unordered_map<std::string, ohlcv_data>> _ohlcv;
+		concurrent_wrapper<std::unordered_map<std::string, order_book_cache>> _orderBooks;
 
 		void initialise_connection_factory();
 		void clear_subscriptions();

@@ -15,7 +15,7 @@ namespace mb
 		: _fee{}, _balances{}
 	{}
 
-	paper_trading_config::paper_trading_config(double fee, unordered_string_map<double> balances)
+	paper_trading_config::paper_trading_config(double fee, std::unordered_map<std::string,double> balances)
 		: _fee{ fee }, _balances{ std::move(balances) }
 	{}
 
@@ -23,7 +23,7 @@ namespace mb
 	paper_trading_config from_json<paper_trading_config>(const json_document& json)
 	{
 		double fee{ json.get<double>(json_property_names::FEE) };
-		unordered_string_map<double> balances{ json.get<unordered_string_map<double>>(json_property_names::BALANCES) };
+		std::unordered_map<std::string,double> balances{ json.get<std::unordered_map<std::string,double>>(json_property_names::BALANCES) };
 
 		return paper_trading_config{ std::move(fee), std::move(balances) };
 	}

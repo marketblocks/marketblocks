@@ -21,36 +21,35 @@ namespace mb
 		result_variant _result;
 		bool _isSuccess;
 
-		constexpr result(result_variant value, bool isSuccess)
+		result(result_variant value, bool isSuccess)
 			: _result{ std::move(value) }, _isSuccess{ isSuccess }
 		{}
 
 	public:
-		static constexpr result<Value> success(Value&& value) noexcept
+		static result<Value> success(Value&& value) noexcept
 		{
 			return result<Value>{ result_variant{ std::in_place_index<VALUE_INDEX>, std::forward<Value>(value) }, true };
 		}
 
-		static constexpr result<Value> fail(std::string error) noexcept
+		static result<Value> fail(std::string error) noexcept
 		{
 			return result<Value>{ result_variant{ std::in_place_index<ERROR_INDEX>, std::move(error) }, false };
 		}
 
-		constexpr const Value& value() const
+		const Value& value() const
 		{
 			assert(is_success());
 			return std::get<VALUE_INDEX>(_result);
 		}
 
-		constexpr const std::string& error() const
+		const std::string& error() const
 		{ 
 			assert(is_failure());
 			return std::get<ERROR_INDEX>(_result);
 		}
 
-		constexpr bool is_success() const noexcept { return _isSuccess; }
-
-		constexpr bool is_failure() const noexcept { return !is_success(); }
+		bool is_success() const noexcept { return _isSuccess; }
+		bool is_failure() const noexcept { return !is_success(); }
 	};
 
 	template<>
@@ -59,35 +58,34 @@ namespace mb
 	private:
 		std::optional<std::string> _error;
 
-		explicit constexpr result(std::string error)
+		explicit result(std::string error)
 			: _error{ std::move(error) }
 		{}
 
-		constexpr result()
+		result()
 			: _error{ std::nullopt }
 		{}
 
 	public:
-		static constexpr result<void> success() noexcept
+		static result<void> success() noexcept
 		{
 			return result<void>{};
 		}
 
-		static constexpr result<void> fail(std::string error) noexcept
+		static result<void> fail(std::string error) noexcept
 		{
 			return result<void>{ std::move(error) };
 		}
 
-		constexpr void value() const noexcept {}
+		void value() const noexcept {}
 
-		constexpr const std::string& error() const
+		const std::string& error() const
 		{
 			assert(is_failure());
 			return _error.value();
 		}
 
-		constexpr bool is_failure() const noexcept { return _error.has_value(); }
-
-		constexpr bool is_success() const noexcept { return !is_failure(); }
+		bool is_failure() const noexcept { return _error.has_value(); }
+		bool is_success() const noexcept { return !is_failure(); }
 	};
 }

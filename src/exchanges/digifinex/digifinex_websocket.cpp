@@ -16,7 +16,7 @@ namespace
 			return "trades";
 		case websocket_channel::ORDER_BOOK:
 		default:
-			throw mb_exception{ std::format("Websocket channel not supported on Digfinex") };
+			throw mb_exception{ fmt::format("Websocket channel not supported on Digfinex") };
 		}
 	}
 

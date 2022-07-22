@@ -85,7 +85,7 @@ namespace mb::test
 		MOCK_METHOD(std::vector<ohlcv_data>, get_ohlcv, (const tradable_pair& tradablePair, ohlcv_interval interval, int count), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& tradablePair, int depth), (const, override));
-		MOCK_METHOD(unordered_string_map<double>, get_balances, (), (const, override));
+		MOCK_METHOD((std::unordered_map<std::string,double>), get_balances, (), (const, override));
 		MOCK_METHOD(double, get_fee, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(std::vector<order_description>, get_open_orders, (), (const, override));
 		MOCK_METHOD(std::vector<order_description>, get_closed_orders, (), (const, override));

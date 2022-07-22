@@ -13,6 +13,10 @@ namespace
 
 namespace mb
 {
+	kraken_config::kraken_config()
+		: _publicKey{}, _privateKey{}
+	{}
+
 	kraken_config::kraken_config(std::string publicKey, std::string privateKey)
 		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
 	{

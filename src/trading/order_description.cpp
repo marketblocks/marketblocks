@@ -2,6 +2,22 @@
 
 namespace mb
 {
+	order_description::order_description(
+		std::time_t timeStamp,
+		std::string orderId,
+		std::string pairName,
+		trade_action action,
+		double price,
+		double volume)
+		:
+		_timeStamp{ timeStamp },
+		_orderId{ std::move(orderId) },
+		_pairName{ std::move(pairName) },
+		_action{ action },
+		_price{ price },
+		_volume{ volume }
+	{}
+
 	template<>
 	csv_row to_csv_row(const order_description& data)
 	{

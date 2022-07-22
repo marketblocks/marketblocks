@@ -135,7 +135,7 @@ namespace mb::test
 
 	TYPED_TEST_P(ExchangeReaderTests, ReadBalances)
 	{
-		unordered_string_map<double> expectedBalances
+		std::unordered_map<std::string,double> expectedBalances
 		{
 			{ "USD", 171288.6158 },
 			{ "BTC", 1011.1908877900 },
@@ -143,7 +143,7 @@ namespace mb::test
 		};
 
 		this->set_http_response("get_balances");
-		unordered_string_map<double> actualBalances{ this->_api->get_balances() };
+		std::unordered_map<std::string,double> actualBalances{ this->_api->get_balances() };
 
 		ASSERT_EQ(expectedBalances, actualBalances);
 	}

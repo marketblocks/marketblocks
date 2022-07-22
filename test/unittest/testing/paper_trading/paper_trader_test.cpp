@@ -35,7 +35,7 @@ namespace
 		double fee,
 		const get_prices& getPrices)
 	{
-		unordered_string_map<double> initialBalances
+		std::unordered_map<std::string,double> initialBalances
 		{
 			{ "GBP", initialGbpBalance },
 			{ "BTC", initialBtcBalance }
@@ -78,7 +78,7 @@ namespace mb::test
 
 		std::string orderId = trader.add_order(orderRequest);
 
-		unordered_string_map<double> balances = trader.get_balances();
+		std::unordered_map<std::string,double> balances = trader.get_balances();
 
 		EXPECT_EQ(orderId, "1");
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), expectedBtcBalance);
@@ -112,7 +112,7 @@ namespace mb::test
 
 		std::string orderId = trader.add_order(orderRequest);
 
-		unordered_string_map<double> balances = trader.get_balances();
+		std::unordered_map<std::string,double> balances = trader.get_balances();
 
 		EXPECT_EQ(orderId, "1");
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), expectedBtcBalance);
@@ -194,7 +194,7 @@ namespace mb::test
 
 		trader.add_order(orderRequest);
 
-		unordered_string_map<double> balances = trader.get_balances();
+		std::unordered_map<std::string,double> balances = trader.get_balances();
 
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), initialBtcBalance);
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), initialGbpBalance);
@@ -241,7 +241,7 @@ namespace mb::test
 		constexpr double expectedGbpBalance = 59.96;
 		constexpr double expectedBtcBalance = 3.5;
 
-		unordered_string_map<double> balances = trader.get_balances();
+		std::unordered_map<std::string,double> balances = trader.get_balances();
 
 		EXPECT_DOUBLE_EQ(balances.at(pair.asset()), expectedBtcBalance);
 		EXPECT_DOUBLE_EQ(balances.at(pair.price_unit()), expectedGbpBalance);

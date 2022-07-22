@@ -64,9 +64,9 @@ namespace mb
 	}
 
 	template<typename T, typename Container>
-	constexpr bool contains(const Container& source, T element)
+	bool contains(const Container& source, const T& element)
 	{
-		return std::find(source.begin(), source.end(), element) != source.end();
+		return source.find(element) != source.end();
 	}
 
 	template<typename Key, typename Value, typename Container>

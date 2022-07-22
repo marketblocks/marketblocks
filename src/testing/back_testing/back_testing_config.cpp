@@ -14,6 +14,15 @@ namespace
 
 namespace mb
 {
+	back_testing_config::back_testing_config()
+		:
+		_startTime{ 0 },
+		_endTime{ 0 },
+		_stepSize{ 60 },
+		_dataDirectory{ "back_test_data" },
+		_dynamicLoad{ false }
+	{}
+
 	back_testing_config::back_testing_config(
 		std::time_t startTime,
 		std::time_t endTime,

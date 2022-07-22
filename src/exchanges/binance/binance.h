@@ -58,7 +58,7 @@ namespace mb
 		std::unordered_map<tradable_pair, double> get_prices(const std::vector<tradable_pair>& pairs) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;
-		unordered_string_map<double> get_balances() const override;
+		std::unordered_map<std::string, double> get_balances() const override;
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
 		std::string add_order(const order_request& description) override;

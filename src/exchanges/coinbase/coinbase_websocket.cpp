@@ -34,7 +34,7 @@ namespace
 			return "ticker";
 		case websocket_channel::ORDER_BOOK:
 		default:
-			throw mb_exception{ std::format("Websocket channel not supported on Coinbase") };
+			throw mb_exception{ fmt::format("Websocket channel not supported on Coinbase") };
 		}
 	}
 

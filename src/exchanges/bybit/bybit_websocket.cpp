@@ -25,7 +25,7 @@ namespace
 			return get_kline_topic(subscription.get_ohlcv_interval());
 		case websocket_channel::ORDER_BOOK:
 		default:
-			throw mb_exception{ std::format("Websocket channel not supported on ByBit") };
+			throw mb_exception{ fmt::format("Websocket channel not supported on ByBit") };
 		}
 	}
 
@@ -51,7 +51,7 @@ namespace
 			.add("symbol", tradablePairsList)
 			.add("topic", topic)
 			.add("event", eventName)
-			.add("params", paramsJson.to_json())
+			.add("params", paramsJson)
 			.to_string();
 	}
 }
@@ -92,7 +92,7 @@ namespace mb::internal
 		{
 			process_trade_message(std::move(symbol), json);
 		}
-		else if (topic.contains("kline"))
+		else if (topic.find("kline") != std::string::npos)
 		{
 			process_ohlcv_message(std::move(symbol), json);
 		}

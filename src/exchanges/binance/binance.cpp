@@ -145,9 +145,9 @@ namespace mb
 		return send_private_request<double>(http_verb::GET, "/api/v3/account", binance::read_fee);
 	}
 
-	unordered_string_map<double> binance_api::get_balances() const
+	std::unordered_map<std::string, double> binance_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>(http_verb::GET, "/api/v3/account", binance::read_balances);
+		return send_private_request<std::unordered_map<std::string, double>>(http_verb::GET, "/api/v3/account", binance::read_balances);
 	}
 
 	std::vector<order_description> binance_api::get_open_orders() const

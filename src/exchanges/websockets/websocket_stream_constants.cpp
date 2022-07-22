@@ -1,12 +1,11 @@
 #include "websocket_stream_constants.h"
-#include "common/types/unordered_string_map.h"
 #include "common/utils/containerutils.h"
 
 namespace mb
 {
 	ohlcv_interval parse_ohlcv_interval(std::string_view string)
 	{
-		static unordered_string_map<ohlcv_interval> ohlcvIntervalLookup
+		static std::unordered_map<std::string,ohlcv_interval> ohlcvIntervalLookup
 		{
 			{ "1m", ohlcv_interval::M1 },
 			{ "5m", ohlcv_interval::M5 },
@@ -16,7 +15,7 @@ namespace mb
 			{ "1w", ohlcv_interval::W1 }
 		};
 
-		return find_or_default(ohlcvIntervalLookup, string, ohlcv_interval::UNKNOWN);
+		return find_or_default(ohlcvIntervalLookup, string.data(), ohlcv_interval::UNKNOWN);
 	}
 
 	std::string to_string(ohlcv_interval interval)

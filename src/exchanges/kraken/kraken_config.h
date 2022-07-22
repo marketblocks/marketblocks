@@ -15,16 +15,13 @@ namespace mb
 		void validate();
 
 	public:
-		constexpr kraken_config()
-			: _publicKey{}, _privateKey{}
-		{}
-
+		kraken_config();
 		kraken_config(std::string publicKey, std::string privateKey);
 
-		static constexpr std::string name() noexcept { return "kraken"; }
+		static std::string name() noexcept { return "kraken"; }
 
-		constexpr const std::string& public_key() const noexcept { return _publicKey; }
-		constexpr const std::string& private_key() const noexcept { return _privateKey; }
+		const std::string& public_key() const noexcept { return _publicKey; }
+		const std::string& private_key() const noexcept { return _privateKey; }
 	};
 
 	template<>

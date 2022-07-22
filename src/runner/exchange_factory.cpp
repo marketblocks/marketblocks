@@ -66,7 +66,7 @@ namespace
 			log.info("{} API created successfully. Testing connection...", exchangeId);
 
 			exchange_status status = api->get_status();
-			std::string status_string = to_string(status);
+			std::string status_string{ to_string(status) };
 
 			if (status == exchange_status::ONLINE)
 			{

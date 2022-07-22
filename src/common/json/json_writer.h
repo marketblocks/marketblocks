@@ -1,14 +1,16 @@
-#pragma once
-
 #include <nlohmann/json.hpp>
 
 #include "json_constants.h"
+#include "json_iterator.h"
 
 namespace mb
 {
 	class json_writer
 	{
 	private:
+		template <typename T>
+		friend json_document to_json(const T& t);
+
 		nlohmann::json _document;
 
 	public:
@@ -21,10 +23,16 @@ namespace mb
 		}
 
 		template<>
-		json_writer& add(std::string_view propertyName, json_document value);
+		json_writer& add(std::string_view propertyName, json_writer value)
+		{
+			_document[propertyName.data()] = value._document;
 
-		std::string to_string() const;
+			return *this;
+		}
 
-		json_document to_json() const;
+		std::string to_string() const
+		{
+			return _document.dump();
+		}
 	};
 }

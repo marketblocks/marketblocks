@@ -198,12 +198,12 @@ namespace mb::binance
 		});
 	}
 
-	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
+	result<std::unordered_map<std::string, double>> read_balances(std::string_view jsonResult)
 	{
-		return read_result<unordered_string_map<double>>(jsonResult, [](const json_document& json)
+		return read_result<std::unordered_map<std::string, double>>(jsonResult, [](const json_document& json)
 		{
 			json_element balancesElement{ json.element("balances") };
-			unordered_string_map<double> balances;
+			std::unordered_map<std::string, double> balances;
 			balances.reserve(balancesElement.size());
 
 			for (auto it = balancesElement.begin(); it != balancesElement.end(); ++it)

@@ -1,4 +1,5 @@
 #include "ohlcv_subscription_service.h"
+#include "common/utils/containerutils.h"
 
 namespace mb
 {
@@ -12,7 +13,7 @@ namespace mb
 
 	bool ohlcv_subscription_service::is_subscribed(std::string_view pairName) const
 	{
-		return _subscriptions.contains(pairName);
+		return contains(_subscriptions, pairName.data());
 	}
 
 	void ohlcv_subscription_service::add_subscription(const websocket_subscription& subscription)
@@ -51,11 +52,11 @@ namespace mb
 
 	void ohlcv_subscription_service::update_ohlcv(std::string_view pairName, std::time_t time, double price, double volume)
 	{
-		auto it = _subscriptions.find(pairName);
+		auto it = _subscriptions.find(pairName.data());
 
 		if (it == _subscriptions.end())
 		{
-			throw mb_exception{ std::format("OHLCV is not subscribed for pair {}", pairName) };
+			throw mb_exception{ fmt::format("OHLCV is not subscribed for pair {}", pairName) };
 		}
 
 		std::unordered_map<ohlcv_interval, ohlcv_from_trades>& ohlcvFromTrades{ it->second };

@@ -11,6 +11,14 @@ namespace
 
 namespace mb
 {
+	digifinex_config::digifinex_config()
+		: _apiKey{}, _apiSecret{}
+	{}
+
+	digifinex_config::digifinex_config(std::string apiKey, std::string apiSecret)
+		: _apiKey{ std::move(apiKey) }, _apiSecret{ std::move(apiSecret) }
+	{}
+
 	template<>
 	digifinex_config from_json<digifinex_config>(const json_document& json)
 	{

@@ -27,9 +27,9 @@ namespace mb::read_template
 		return result<order_book_state>::success(order_book_state{ {},{} });
 	}
 
-	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
+	result<std::unordered_map<std::string,double>> read_balances(std::string_view jsonResult)
 	{
-		return result<unordered_string_map<double>>::success({});
+		return result<std::unordered_map<std::string,double>>::success({});
 	}
 
 	result<double> read_fee(std::string_view jsonResult)

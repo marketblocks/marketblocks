@@ -36,7 +36,7 @@ namespace
 		try
 		{
 			size_t start = 0;
-			while (expected.contains(escape))
+			while (expected.find(escape) != std::string::npos)
 			{
 				start = expected.find_first_of(escape, start);
 				size_t end = expected.find_first_of(close, start);

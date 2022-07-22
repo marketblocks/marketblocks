@@ -4,7 +4,6 @@
 #include <functional>
 
 #include "exchanges/exchange.h"
-#include "common/types/unordered_string_map.h"
 #include "trading/ohlcv_from_trades.h"
 
 namespace mb
@@ -14,7 +13,7 @@ namespace mb
 	private:
 		using update_ohlcv_function = std::function<void(std::string, ohlcv_interval, ohlcv_data)>;
 
-		unordered_string_map<std::unordered_map<ohlcv_interval, ohlcv_from_trades>> _subscriptions;
+		std::unordered_map<std::string,std::unordered_map<ohlcv_interval, ohlcv_from_trades>> _subscriptions;
 		std::unique_ptr<market_api> _marketApi;
 		update_ohlcv_function _updateOhlcv;
 		char _pairSeparator;

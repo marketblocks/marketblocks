@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <vector>
 
 namespace mb
 {
@@ -15,17 +16,6 @@ namespace mb
 		static constexpr std::string_view DEXTRADE = "dextrade";
 		static constexpr std::string_view BINANCE = "binance";
 
-		constexpr std::vector<std::string_view> all()
-		{
-			return std::vector<std::string_view>
-			{
-				exchange_ids::KRAKEN,
-				exchange_ids::COINBASE,
-				exchange_ids::BYBIT,
-				exchange_ids::DIGIFINEX,
-				exchange_ids::DEXTRADE,
-				exchange_ids::BINANCE
-			};
-		}
+		std::vector<std::string_view> all();
 	}
 }

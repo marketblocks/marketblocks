@@ -1,3 +1,5 @@
+#include <fmt/format.h>
+
 #include "paper_trade_api.h"
 #include "common/utils/financeutils.h"
 #include "common/utils/containerutils.h"
@@ -79,7 +81,7 @@ namespace mb
 
 		if (!has_sufficient_funds(soldAsset, soldValue))
 		{
-			throw mb_exception{ std::format("Insufficient funds ({0})", soldAsset) };
+			throw mb_exception{ fmt::format("Insufficient funds ({0})", soldAsset) };
 		}
 
 		_balances[gainedAsset] += gainValue;
@@ -95,7 +97,7 @@ namespace mb
 
 		for (auto& [orderId, trade] : _openTrades)
 		{
-			if (!prices.contains(trade.pair()))
+			if (!contains(prices, trade.pair()))
 			{
 				prices[trade.pair()] = _getPrice(trade.pair());
 			}
@@ -120,7 +122,7 @@ namespace mb
 		return _fee;
 	}
 
-	unordered_string_map<double> paper_trade_api::get_balances() const
+	std::unordered_map<std::string,double> paper_trade_api::get_balances() const
 	{
 		return _balances;
 	}
@@ -169,11 +171,11 @@ namespace mb
 
 	void paper_trade_api::cancel_order(std::string_view orderId)
 	{
-		auto it = _openTrades.find(orderId);
+		auto it = _openTrades.find(orderId.data());
 
 		if (it == _openTrades.end())
 		{
-			throw mb_exception{ std::format("Could not find order with id = {}", orderId) };
+			throw mb_exception{ fmt::format("Could not find order with id = {}", orderId) };
 		}
 
 		_openTrades.erase(it);

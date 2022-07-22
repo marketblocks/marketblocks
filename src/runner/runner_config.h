@@ -37,7 +37,7 @@ namespace mb
 			int runInterval,
 			bool syncTime);
 			
-		static constexpr std::string name() noexcept { return "runner"; }
+		static std::string name() noexcept { return "runner"; }
 		
 		constexpr const std::vector<std::string>& exchange_ids() const noexcept { return _exchangeIds; }
 		constexpr run_mode runmode() const noexcept { return _runMode; }

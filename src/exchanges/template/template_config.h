@@ -11,15 +11,10 @@ namespace mb
 		std::string _privateKey;
 
 	public:
-		constexpr template_config()
-			: _publicKey{}, _privateKey{}
-		{};
+		template_config();
+		template_config(std::string publicKey, std::string privateKey);
 
-		constexpr template_config(std::string publicKey, std::string privateKey)
-			: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
-		{}
-
-		static constexpr std::string name() noexcept { return "template"; }
+		static std::string name() noexcept { return "template"; }
 
 		constexpr const std::string& public_key() const noexcept { return _publicKey; }
 		constexpr const std::string& private_key() const noexcept { return _privateKey; }

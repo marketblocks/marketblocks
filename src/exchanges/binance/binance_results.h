@@ -11,7 +11,6 @@
 #include "trading/order_description.h"
 #include "common/types/result.h"
 #include "common/types/partial_data_result.h"
-#include "common/types/unordered_string_map.h"
 
 namespace mb::binance
 {
@@ -21,7 +20,7 @@ namespace mb::binance
 	result<double> read_price(std::string_view jsonResult);
 	result<std::unordered_map<std::string, double>> read_prices(std::string_view jsonResult);
 	result<order_book_state> read_order_book(std::string_view jsonResult);
-	result<unordered_string_map<double>> read_balances(std::string_view jsonResult);
+	result<std::unordered_map<std::string, double>> read_balances(std::string_view jsonResult);
 	result<double> read_fee(std::string_view jsonResult);
 	result<std::vector<order_description>> read_open_orders(std::string_view jsonResult);
 	result<std::vector<order_description>> read_closed_orders(std::string_view jsonResult);

@@ -11,11 +11,11 @@ namespace mb
 		std::string _message;
 
 	public:
-		constexpr http_response(int responseCode, std::string message)
+		http_response(int responseCode, std::string message)
 			: _responseCode{ responseCode }, _message{ std::move(message) }
 		{}
 
-		constexpr int response_code() const noexcept { return _responseCode; }
-		constexpr const std::string& message() const noexcept { return _message; }
+		int response_code() const noexcept { return _responseCode; }
+		const std::string& message() const noexcept { return _message; }
 	};
 }

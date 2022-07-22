@@ -6,7 +6,6 @@
 
 #include "exchange_status.h"
 #include "websockets/websocket_stream.h"
-#include "common/types/unordered_string_map.h"
 #include "trading/tradable_pair.h"
 #include "trading/trading_constants.h"
 #include "trading/order_book.h"
@@ -34,7 +33,7 @@ namespace mb
 	public:
 		virtual ~trade_api() = default;
 
-		virtual unordered_string_map<double> get_balances() const = 0;
+		virtual std::unordered_map<std::string, double> get_balances() const = 0;
 		virtual double get_fee(const tradable_pair& tradablePair) const = 0;
 		virtual std::vector<order_description> get_open_orders() const = 0;
 		virtual std::vector<order_description> get_closed_orders() const = 0;

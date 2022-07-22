@@ -14,7 +14,7 @@ namespace mb
 		OFFLINE
 	};
 
-	constexpr std::string to_string(exchange_status status) noexcept
+	constexpr std::string_view to_string(exchange_status status) noexcept
 	{
 		switch (status)
 		{

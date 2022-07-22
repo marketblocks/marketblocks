@@ -11,6 +11,14 @@ namespace
 
 namespace mb
 {
+	dextrade_config::dextrade_config()
+		: _publicKey{}, _privateKey{}
+	{};
+
+	dextrade_config::dextrade_config(std::string publicKey, std::string privateKey)
+		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
+	{}
+
 	template<>
 	dextrade_config from_json<dextrade_config>(const json_document& json)
 	{

@@ -96,7 +96,7 @@ namespace mb
 
 		if (_runMode == run_mode::UNKNOWN)
 		{
-			throw mb_exception{ std::format("Run mode not recognized. Options are: {0}, {1}, {2}", run_mode_strings::LIVE, run_mode_strings::LIVE_TEST, run_mode_strings::BACK_TEST) };
+			throw mb_exception{ fmt::format("Run mode not recognized. Options are: {0}, {1}, {2}", run_mode_strings::LIVE, run_mode_strings::LIVE_TEST, run_mode_strings::BACK_TEST) };
 		}
 
 		if (_runInterval < 0)

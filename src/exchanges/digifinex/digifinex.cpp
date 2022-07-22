@@ -38,7 +38,7 @@ namespace
 		throw mb_exception{ "Order type not supported" };
 	}
 
-	constexpr double get_amount(const order_request& orderRequest)
+	double get_amount(const order_request& orderRequest)
 	{
 		if (orderRequest.order_type() == order_type::LIMIT)
 		{
@@ -116,9 +116,9 @@ namespace mb
 		return 0.2;
 	}
 
-	unordered_string_map<double> digifinex_api::get_balances() const
+	std::unordered_map<std::string,double> digifinex_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>(http_verb::GET, "spot/assets", digifinex::read_balances);
+		return send_private_request<std::unordered_map<std::string,double>>(http_verb::GET, "spot/assets", digifinex::read_balances);
 	}
 
 	std::vector<order_description> digifinex_api::get_open_orders() const

@@ -1,3 +1,5 @@
+#include <optional>
+
 #include "back_testing_data.h"
 #include "common/utils/containerutils.h"
 #include "common/utils/mathutils.h"

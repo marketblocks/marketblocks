@@ -11,15 +11,10 @@ namespace mb
 		std::string _secretKey;
 
 	public:
-		constexpr binance_config()
-			: _apiKey{}, _secretKey{}
-		{};
+		binance_config();
+		binance_config(std::string publicKey, std::string privateKey);
 
-		constexpr binance_config(std::string publicKey, std::string privateKey)
-			: _apiKey{ std::move(publicKey) }, _secretKey{ std::move(privateKey) }
-		{}
-
-		static constexpr std::string name() noexcept { return "binance"; }
+		static std::string name() noexcept { return "binance"; }
 
 		constexpr const std::string& api_key() const noexcept { return _apiKey; }
 		constexpr const std::string& secret_key() const noexcept { return _secretKey; }

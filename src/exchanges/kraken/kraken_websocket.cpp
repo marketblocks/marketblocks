@@ -34,7 +34,7 @@ namespace
 		return json_writer{}
 			.add("event", eventName)
 			.add("pair", std::move(tradablePairList))
-			.add("subscription", subscriptionJson.to_json())
+			.add("subscription", subscriptionJson)
 			.to_string();
 	}
 
@@ -197,7 +197,7 @@ namespace mb::internal
 			{
 				process_trade_message(std::move(pairName), json);
 			}
-			else if (channelName.contains("ohlc"))
+			else if (channelName.find("ohlc") != std::string::npos)
 			{
 				process_ohlcv_message(std::move(pairName), std::move(channelName), json);
 			}

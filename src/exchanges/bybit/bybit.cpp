@@ -20,7 +20,7 @@ namespace
 		return LIVE_BASE_URL;
 	}
 
-	constexpr double get_order_quantity(const order_request& orderRequest)
+	double get_order_quantity(const order_request& orderRequest)
 	{
 		if (orderRequest.order_type() == order_type::MARKET && orderRequest.action() == trade_action::BUY)
 		{
@@ -30,13 +30,13 @@ namespace
 		return orderRequest.volume();
 	}
 
-	constexpr std::string to_side_string(trade_action action)
+	std::string to_side_string(trade_action action)
 	{
 		return action == trade_action::BUY
 			? "Buy" : "Sell";
 	}
 
-	constexpr std::string to_type_string(order_type orderType)
+	std::string to_type_string(order_type orderType)
 	{
 		return orderType == order_type::MARKET
 			? "MARKET" : "LIMIT";
@@ -115,9 +115,9 @@ namespace mb
 		return _fee;
 	}
 
-	unordered_string_map<double> bybit_api::get_balances() const
+	std::unordered_map<std::string,double> bybit_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>(http_verb::GET, "spot/v1/account", bybit::read_balances);
+		return send_private_request<std::unordered_map<std::string,double>>(http_verb::GET, "spot/v1/account", bybit::read_balances);
 	}
 
 	std::vector<order_description> bybit_api::get_open_orders() const

@@ -86,15 +86,17 @@ namespace mb
 
 	void exchange_websocket_stream::subscribe(const websocket_subscription& subscription)
 	{
-		auto lockedPairs = _pairs.unique_lock();
-
-		for (auto& pair : subscription.pair_item())
 		{
-			std::string pairName{ pair.to_string(_pairSeparator) };
+			auto lockedPairs = _pairs.unique_lock();
 
-			if (!lockedPairs->contains(pairName))
+			for (auto& pair : subscription.pair_item())
 			{
-				lockedPairs->emplace(std::move(pairName), pair);
+				std::string pairName{ pair.to_string(_pairSeparator) };
+
+				if (!contains(*lockedPairs, pairName))
+				{
+					lockedPairs->emplace(std::move(pairName), pair);
+				}
 			}
 		}
 
@@ -180,7 +182,7 @@ namespace mb
 	{
 		auto lockedOrderBooks = _orderBooks.unique_lock();
 
-		if (!lockedOrderBooks->contains(pairName))
+		if (!contains(*lockedOrderBooks, pairName))
 		{
 			lockedOrderBooks->insert_or_assign(pairName, order_book_cache{ {}, {} });
 		}
@@ -206,17 +208,17 @@ namespace mb
 		{
 		case websocket_channel::TRADE:
 		{
-			subscribed = _trades.shared_lock()->contains(pairName);
+			subscribed = contains(*_trades.shared_lock(), pairName);
 			break;
 		}
 		case websocket_channel::OHLCV:
 		{
-			subscribed = _ohlcv.shared_lock()->contains(create_ohlcv_sub_id(std::move(pairName), subscription.get_ohlcv_interval()));
+			subscribed = contains(*_ohlcv.shared_lock(), create_ohlcv_sub_id(std::move(pairName), subscription.get_ohlcv_interval()));
 			break;
 		}
 		case websocket_channel::ORDER_BOOK:
 		{
-			subscribed = _orderBooks.shared_lock()->contains(pairName);
+			subscribed = contains(*_orderBooks.shared_lock(), pairName);
 			break;
 		}
 		default:

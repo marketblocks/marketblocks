@@ -5,9 +5,9 @@ namespace mb
 {
 	double get_balance(std::shared_ptr<exchange> exchange, std::string_view tickerId)
 	{
-		unordered_string_map<double> balances{ exchange->get_balances() };
+		std::unordered_map<std::string,double> balances{ exchange->get_balances() };
 
-		auto it = balances.find(tickerId);
+		auto it = balances.find(tickerId.data());
 		if (it != balances.end())
 		{
 			return it->second;

@@ -12,6 +12,10 @@ namespace
 
 namespace mb
 {
+	coinbase_config::coinbase_config()
+		: _apiKey{}, _apiSecret{}, _apiPassphrase{}
+	{};
+
 	coinbase_config::coinbase_config(std::string apiKey, std::string apiSecret, std::string apiPassphrase)
 		: 
 		_apiKey{ std::move(apiKey) }, 

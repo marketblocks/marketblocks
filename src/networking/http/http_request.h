@@ -18,26 +18,18 @@ namespace mb
 		std::vector<http_header> _headers;
 
 	public:
-		explicit constexpr http_request(http_verb verb, std::string uri)
-			: _verb{ verb }, _url{ std::move(uri) }, _content{}, _headers{}
-		{}
+		http_request(http_verb verb, std::string uri);
 
 		friend std::ostream& operator<<(std::ostream& stream, const http_request& request);
 
-		constexpr http_verb verb() const noexcept { return _verb; }
-		constexpr const std::string& url() const noexcept { return _url; }
-		constexpr const std::string& content() const noexcept { return _content; }
-		constexpr const std::vector<http_header>& headers() const noexcept { return _headers; }
+		http_verb verb() const noexcept { return _verb; }
+		const std::string& url() const noexcept { return _url; }
+		const std::string& content() const noexcept { return _content; }
+		const std::vector<http_header>& headers() const noexcept { return _headers; }
 
-		constexpr void set_content(std::string_view content) noexcept
-		{
-			_content = content;
-		}
+		void set_content(std::string_view content) noexcept	{ _content = content; }
 
-		constexpr void add_header(std::string_view key, std::string_view value)
-		{
-			_headers.emplace_back(std::string{ key }, std::string{ value });
-		}
+		void add_header(std::string_view key, std::string_view value);
 	};
 
 	std::ostream& operator<<(std::ostream& stream, const http_request& request);

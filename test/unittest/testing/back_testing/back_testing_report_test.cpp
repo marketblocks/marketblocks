@@ -44,7 +44,7 @@
 //	TEST(BackTestingReport, GeneratingReportCreatesCorrectAssetReports)
 //	{
 //		back_testing_data data{ {}, {}, 0, 63072000, 0, 0 };
-//		unordered_string_map<double> initialBalances{ {"GBP", 1000} };
+//		std::unordered_map<std::string,double> initialBalances{ {"GBP", 1000} };
 //
 //		auto paperTradeApi = std::make_shared<paper_trade_api>(paper_trading_config{0, initialBalances});
 //		paperTradeApi->add_order(trade_description{ order_type::LIMIT, tradable_pair{"BTC", "GBP"}, trade_action::BUY, 100.0, 1.0 });

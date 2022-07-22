@@ -12,17 +12,14 @@ namespace mb
 		std::string _apiPassphrase;
 
 	public:
-		constexpr coinbase_config()
-			: _apiKey{}, _apiSecret{}, _apiPassphrase{}
-		{};
-
+		coinbase_config();
 		coinbase_config(std::string apiKey, std::string apiSecret, std::string apiPassphrase);
 
-		static constexpr std::string name() noexcept { return "coinbase"; }
+		static std::string name() noexcept { return "coinbase"; }
 
-		constexpr const std::string& api_key() const noexcept { return _apiKey; }
-		constexpr const std::string& api_secret() const noexcept { return _apiSecret; }
-		constexpr const std::string& api_passphrase() const noexcept { return _apiPassphrase; }
+		const std::string& api_key() const noexcept { return _apiKey; }
+		const std::string& api_secret() const noexcept { return _apiSecret; }
+		const std::string& api_passphrase() const noexcept { return _apiPassphrase; }
 	};
 
 	template<>

@@ -24,8 +24,8 @@ namespace mb
 		get_time_function _getTime;
 		std::string_view _exchangeId;
 		double _fee;
-		unordered_string_map<double> _balances;
-		unordered_string_map<order_request> _openTrades;
+		std::unordered_map<std::string,double> _balances;
+		std::unordered_map<std::string,order_request> _openTrades;
 		std::vector<order_description> _closedOrders;
 		int _nextOrderNumber;
 
@@ -44,7 +44,7 @@ namespace mb
 		std::string_view exchange_id() const noexcept { return _exchangeId; }
 
 		double get_fee(const tradable_pair& tradablePair) const override;
-		unordered_string_map<double> get_balances() const override;
+		std::unordered_map<std::string,double> get_balances() const override;
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
 		std::string add_order(const order_request& description) override;
