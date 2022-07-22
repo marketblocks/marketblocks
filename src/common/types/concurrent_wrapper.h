@@ -12,32 +12,32 @@ namespace mb
 		mutable std::shared_mutex _mutex;
 
 	public:
-		template<typename T, typename Lock>
+		template<typename TObject, typename Lock>
 		class locked_object
 		{
 		private:
-			T& _item;
+			TObject& _item;
 			Lock _lock;
 
 		public:
-			locked_object(T& item, Lock lock)
+			locked_object(TObject& item, Lock lock)
 				: _item{ item }, _lock{ std::move(lock) }
 			{}
 
-			const T* operator->() const { return &_item; }
+			const TObject* operator->() const { return &_item; }
 
-			T* operator->() { return &_item; }
+			TObject* operator->() { return &_item; }
 
-			const T& operator*() const { return _item; }
+			const TObject& operator*() const { return _item; }
 
-			T& operator*() { return _item; }
+			TObject& operator*() { return _item; }
 		};
 
-		template<typename T>
-		using unique_locked_object = locked_object<T, std::unique_lock<std::shared_mutex>>;
+		template<typename TObject>
+		using unique_locked_object = locked_object<TObject, std::unique_lock<std::shared_mutex>>;
 
-		template<typename T>
-		using shared_locked_object = locked_object<const T, std::shared_lock<std::shared_mutex>>;
+		template<typename TObject>
+		using shared_locked_object = locked_object<const TObject, std::shared_lock<std::shared_mutex>>;
 
 		concurrent_wrapper()
 			: _item{}, _mutex{}
