@@ -65,6 +65,7 @@ namespace mb
             while (connecting)
             {
                 connecting = connectionPtr->get_state() == websocketpp::session::state::connecting;
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
         catch (const std::exception& e)

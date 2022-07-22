@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "websocket_stream.h"
 #include "order_book_cache.h"
 #include "common/types/concurrent_wrapper.h"

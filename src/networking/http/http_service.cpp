@@ -111,6 +111,6 @@ namespace mb
 		long responseCode;
 		curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);
 
-		return http_response{ responseCode, readBuffer };
+		return http_response{ static_cast<int>(responseCode), readBuffer };
 	}
 }

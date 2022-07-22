@@ -32,12 +32,12 @@ namespace
 	{
 		return order_description
 		{
-			orderElement.get<std::time_t>("time") / 1000,
-			std::to_string(orderElement.get<long long>("orderId")),
-			orderElement.get<std::string>("symbol"),
-			to_trade_action(orderElement.get<std::string>("side")),
-			std::stod(orderElement.get<std::string>("price")),
-			std::stod(orderElement.get<std::string>("origQty"))
+			orderElement.template get<std::time_t>("time") / 1000,
+			std::to_string(orderElement.template get<long long>("orderId")),
+			orderElement.template get<std::string>("symbol"),
+			to_trade_action(orderElement.template get<std::string>("side")),
+			std::stod(orderElement.template get<std::string>("price")),
+			std::stod(orderElement.template get<std::string>("origQty"))
 		};
 	}
 
