@@ -23,7 +23,7 @@ namespace mb
 	bool double_greater_than(double a, double b);
 
 	template<typename T>
-	constexpr std::string to_string(T number, int precision)
+	std::string to_string(T number, int precision)
 	{
 		std::stringstream stream;
 		stream << std::fixed << std::setprecision(precision) << number;
