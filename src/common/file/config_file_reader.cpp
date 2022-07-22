@@ -1,4 +1,6 @@
+#if __APPLE__
 #include <mach-o/dyld.h>
+#endif
 
 #include "config_file_reader.h"
 
