@@ -21,7 +21,7 @@ namespace mb
 	std::string build_url(std::string_view baseUrl, std::string_view path, std::string_view _query = "");
 
 	template<typename PathComponents>
-	constexpr std::string build_url_path(const PathComponents& pathComponents)
+	std::string build_url_path(const PathComponents& pathComponents)
 	{
 		std::string path{"/"};
 
