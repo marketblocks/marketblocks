@@ -1,4 +1,7 @@
+#if _WIN32
 #include <windows.h>
+#endif
+
 #include <cstring>
 
 #include "time_synchronization.h"
@@ -6,6 +9,7 @@
 
 namespace
 {
+#if _WIN32
 	bool sync_time()
 	{
         STARTUPINFO startupInfo;
@@ -32,6 +36,12 @@ namespace
 
 		return error == 0 ? true : false;
 	}
+#else
+	bool sync_time()
+	{
+		return false;
+	}
+#endif
 
 	void run_on_interval()
 	{

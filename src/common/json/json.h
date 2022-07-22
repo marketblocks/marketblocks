@@ -28,19 +28,19 @@ namespace mb
 		template<typename T>
 		T get(std::string_view paramName) const
 		{
-			return _json[paramName.data()].get<T>();
+			return _json[paramName.data()].template get<T>();
 		}
 
 		template<typename T>
 		T get(int index) const
 		{
-			return _json[index].get<T>();
+			return _json[index].template get<T>();
 		}
 
 		template<typename T>
 		T get() const
 		{
-			return _json.get<T>();
+			return _json.template get<T>();
 		}
 
 		const json_element element(std::string_view paramName) const
