@@ -1,4 +1,5 @@
 #include "test_logger.h"
+#include "common/file/local_directory.h"
 #include "common/utils/timeutils.h"
 #include "common/utils/mathutils.h"
 #include "common/utils/containerutils.h"
@@ -10,12 +11,11 @@ namespace
 
 	std::filesystem::path get_output_path()
 	{
-		static constexpr std::string_view outputDirectory = "test_results";
-
 		std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		std::string resultsFolderName = to_string(time, "%d%m%Y_%H%M%S");
 
-		std::filesystem::path path{ outputDirectory };
+		std::filesystem::path path{ get_local_directory() };
+		path /= "test_results";
 		path /= resultsFolderName;
 
 		return path;
