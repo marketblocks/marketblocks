@@ -187,12 +187,13 @@ namespace mb
 
 		if (!iterator.has_value())
 		{
-			return order_book_state{ {},{} };
+			return order_book_state{ 0, {},{} };
 		}
 
 		const ohlcv_data& ohlcvData = *iterator.value();
 		return order_book_state
 		{
+			ohlcvData.time_stamp(),
 			{
 				order_book_entry{ ohlcvData.high(), ohlcvData.volume(), order_book_side::ASK }
 			},

@@ -38,6 +38,7 @@ namespace
 		case websocket_channel::OHLCV:
 			return get_kline_channel_name(to_string(subscription.get_ohlcv_interval()));
 		case websocket_channel::ORDER_BOOK:
+			return "depth@100ms";
 		default:
 			throw mb_exception{ "Websocket channel not supported on Binance" };
 		}
@@ -46,7 +47,9 @@ namespace
 
 namespace mb::internal
 {
-	binance_websocket_stream::binance_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
+	binance_websocket_stream::binance_websocket_stream(
+		std::unique_ptr<websocket_connection_factory> connectionFactory,
+		std::unique_ptr<market_api> marketApi)
 		: 
 		exchange_websocket_stream
 		{ 
@@ -54,7 +57,8 @@ namespace mb::internal
 			"wss://stream.binance.com:9443/ws",
 			'\0',
 			std::move(connectionFactory) 
-		}
+		},
+		_marketApi{ std::move(marketApi) }
 	{}
 
 	void binance_websocket_stream::process_trade_message(const json_document& json)
@@ -87,6 +91,11 @@ namespace mb::internal
 		update_ohlcv(std::move(symbol), parse_ohlcv_interval(interval), std::move(ohlcv));
 	}
 
+	void binance_websocket_stream::process_order_book_message(const json_document& json)
+	{
+		logger::instance().info(json.to_string());
+	}
+
 	void binance_websocket_stream::on_message(std::string_view message)
 	{
 		json_document json{ parse_json(message) };
@@ -109,6 +118,11 @@ namespace mb::internal
 			else if (channel == "kline")
 			{
 				process_ohlcv_message(json);
+				return;
+			}
+			else if (channel == "depthUpdate")
+			{
+				process_order_book_message(json);
 				return;
 			}
 		}

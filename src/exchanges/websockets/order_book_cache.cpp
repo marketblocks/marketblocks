@@ -42,12 +42,14 @@ namespace mb
 		}
 	}
 
-	order_book_cache::order_book_cache(ask_cache asks, bid_cache bids)
-		: _asks{ std::move(asks) }, _bids{ std::move(bids) }
+	order_book_cache::order_book_cache(std::time_t timeStamp, ask_cache asks, bid_cache bids)
+		: _lastUpdate{ timeStamp }, _asks{ std::move(asks) }, _bids{std::move(bids)}
 	{}
 
-	void order_book_cache::update_cache(order_book_entry entry)
+	void order_book_cache::update_cache(std::time_t timeStamp, order_book_entry entry)
 	{
+		_lastUpdate = timeStamp;
+
 		entry.side() == order_book_side::ASK
 			? ::update_cache(_asks, std::move(entry))
 			: ::update_cache(_bids, std::move(entry));
@@ -68,6 +70,7 @@ namespace mb
 
 		return order_book_state
 		{
+			_lastUpdate,
 			std::move(asks),
 			std::move(bids)
 		};

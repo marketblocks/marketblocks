@@ -175,7 +175,7 @@ namespace mb::bybit
 				}
 			}
 
-			return order_book_state{ std::move(askEntries), std::move(bidEntries) };
+			return order_book_state{ resultElement.get<std::time_t>("time") / 1000, std::move(askEntries), std::move(bidEntries)};
 		});
 	}
 

@@ -184,6 +184,7 @@ namespace mb::kraken
 			std::vector<order_book_entry> bidEntries;
 			bidEntries.reserve(depth);
 
+			std::time_t time = 0;
 			for (int i = 0; i < depth; i++)
 			{
 				json_element asks_i{ asks.element(i) };
@@ -197,9 +198,11 @@ namespace mb::kraken
 					std::stod(bids_i.element(0).get<std::string>()),
 					std::stod(bids_i.element(1).get<std::string>()),
 					order_book_side::BID);
+
+				time = std::max(time, std::max(asks_i.get<std::time_t>(2), bids_i.get<std::time_t>(2)));
 			}
 
-			return order_book_state{ std::move(askEntries), std::move(bidEntries) };
+			return order_book_state{ time, std::move(askEntries), std::move(bidEntries) };
 		});
 	}
 

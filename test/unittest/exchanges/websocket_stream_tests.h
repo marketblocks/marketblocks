@@ -127,6 +127,7 @@ namespace mb::test
 
 		order_book_state expectedBook
 		{
+			1,
 			{
 				order_book_entry{ 1, 2, order_book_side::ASK }
 			},
@@ -162,7 +163,12 @@ namespace mb::test
 	REGISTER_TYPED_TEST_SUITE_P(WebsocketStreamTests,
 		TradeSubscriptionMessageSent,
 		OhlcvSubscriptionMessageSent,
+		OrderBookSubscriptionMessageSent,
 		UnsubscriptionMessageSent,
 		TradeUpdateOnMessage,
-		OhlcvUpdateOnMessage);
+		OhlcvUpdateOnMessage,
+		OrderBookInitialiseOnMessage,
+		OrderBookUpdateOnMessage,
+		OrderBookInsertOnMessage,
+		OrderBookRemoveOnMessage);
 }

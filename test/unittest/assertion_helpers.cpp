@@ -12,6 +12,7 @@ namespace mb::test
 	{
 		ASSERT_EQ(lhs.asks().size(), rhs.asks().size());
 		ASSERT_EQ(lhs.bids().size(), rhs.bids().size());
+		EXPECT_EQ(lhs.time_stamp(), rhs.time_stamp());
 
 		for (int i = 0; i < lhs.asks().size(); ++i)
 		{

@@ -122,7 +122,7 @@ namespace mb::test
 
 		order_book_state expectedBook
 		{
-			{}, {}
+			0, {}, {}
 		};
 
 		order_book_state actualBook{ backTestingData.get_order_book(TEST_PAIR) };
@@ -144,6 +144,7 @@ namespace mb::test
 
 		order_book_state expectedBook
 		{
+			100,
 			{ order_book_entry{ 5, 3, order_book_side::ASK } },
 			{ order_book_entry{ 1, 3, order_book_side::BID } }
 		};

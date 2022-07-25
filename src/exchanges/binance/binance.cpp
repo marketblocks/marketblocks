@@ -203,6 +203,20 @@ namespace mb
 	}
 
 	template<>
+	std::unique_ptr<websocket_stream> create_exchange_websocket_stream<internal::binance_websocket_stream>()
+	{
+		std::unique_ptr<binance_api> marketApi{ std::make_unique<binance_api>(
+			binance_config{},
+			std::make_unique<http_service>(),
+			nullptr,
+			false) };
+
+		return std::make_unique<internal::binance_websocket_stream>(
+			std::make_unique<websocket_connection_factory>(),
+			std::move(marketApi));
+	}
+
+	template<>
 	std::unique_ptr<exchange> create_exchange_api<binance_api>(bool testing)
 	{
 		return std::make_unique<binance_api>(

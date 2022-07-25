@@ -28,13 +28,14 @@ namespace mb
 	class order_book_cache
 	{
 	private:
+		std::time_t _lastUpdate;
 		ask_cache _asks;
 		bid_cache _bids;
 
 	public:
-		order_book_cache(ask_cache asks, bid_cache bids);
+		order_book_cache(std::time_t timeStamp, ask_cache asks, bid_cache bids);
 
-		void update_cache(order_book_entry entry);
+		void update_cache(std::time_t timeStamp, order_book_entry entry);
 		order_book_state snapshot(int depth = 0) const;
 	};
 }

@@ -41,7 +41,7 @@ namespace mb
 		void update_trade(std::string pairName, trade_update trade);
 		void update_ohlcv(std::string pairName, ohlcv_interval interval, ohlcv_data ohlcvData);
 		void initialise_order_book(std::string pairName, order_book_cache cache);
-		void update_order_book(std::string pairName, order_book_entry entry);
+		void update_order_book(std::string pairName, std::time_t timeStamp, order_book_entry entry);
 
 	public:
 		exchange_websocket_stream(

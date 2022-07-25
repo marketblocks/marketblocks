@@ -61,13 +61,14 @@ namespace mb::test
 
 		order_book_state expectedState
 		{
+			1,
 			{ asks.begin(), asks.end() },
 			{ bids.begin(), bids.end() }
 		};
 
 		mock_exchange_websocket_stream test{ create_mock_stream() };
 
-		test.expose_initialise_order_book(pair.to_string(), order_book_cache{asks, bids});
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{1, asks, bids});
 
 		assert_order_book_state_eq(expectedState, test.get_order_book(pair));
 	}
@@ -89,13 +90,14 @@ namespace mb::test
 
 		mock_exchange_websocket_stream test{ create_mock_stream() };
 
-		test.expose_initialise_order_book(pair.to_string(), order_book_cache{asks, bids});
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{1, asks, bids});
 
 		order_book_entry newEntry{ 1.0, 0.0, order_book_side::ASK };
-		test.expose_update_order_book(pair.to_string(), newEntry);
+		test.expose_update_order_book(pair.to_string(), 2, newEntry);
 
 		order_book_state expectedState
 		{
+			2,
 			{ order_book_entry{1.1, 3.0, order_book_side::ASK} },
 			{ bids.begin(), bids.end() }
 		};
@@ -112,11 +114,12 @@ namespace mb::test
 		
 		order_book_state expectedState
 		{
+			1,
 			{ newEntry },
 			{}
 		};
 
-		test.expose_update_order_book(pair.to_string(), newEntry);
+		test.expose_update_order_book(pair.to_string(), 1, newEntry);
 
 		assert_order_book_state_eq(expectedState, test.get_order_book(pair));
 	}
@@ -161,7 +164,7 @@ namespace mb::test
 		tradable_pair pair{ "test", "test" };
 		mock_exchange_websocket_stream test{ create_mock_stream() };
 
-		test.expose_initialise_order_book(pair.to_string(), order_book_cache{{},{}});
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{0,{},{}});
 
 		EXPECT_EQ(
 			subscription_status::SUBSCRIBED,
@@ -207,10 +210,10 @@ namespace mb::test
 			order_book_entry{0.8, 5.0, order_book_side::BID}
 		};
 
-		test.expose_initialise_order_book(pair.to_string(), order_book_cache{asks, bids});
+		test.expose_initialise_order_book(pair.to_string(), order_book_cache{1, asks, bids});
 		test.expose_set_unsubscribed(named_subscription::create_order_book_sub(pair.to_string()));
 
-		assert_order_book_state_eq(order_book_state{ {},{} }, test.get_order_book(pair));
+		assert_order_book_state_eq(order_book_state{0, {},{} }, test.get_order_book(pair));
 	}
 
 	TEST(ExchangeWebsocketStream, SetUnsubscribedSetsUnsubscribedStatus)

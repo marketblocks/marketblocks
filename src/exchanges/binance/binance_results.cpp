@@ -186,7 +186,7 @@ namespace mb::binance
 				}
 			}
 
-			return order_book_state{ std::move(asks), std::move(bids) };
+			return order_book_state{ json.get<std::time_t>("lastUpdateId"), std::move(asks), std::move(bids)};
 		});
 	}
 

@@ -2,8 +2,11 @@
 
 namespace mb
 {
-	order_book_state::order_book_state(std::vector<order_book_entry> asks, std::vector<order_book_entry> bids)
-		: _asks{ std::move(asks) }, _bids{ std::move(bids) }
+	order_book_state::order_book_state(
+		std::time_t timeStamp,
+		std::vector<order_book_entry> asks,
+		std::vector<order_book_entry> bids)
+		: _timeStamp{ timeStamp }, _asks { std::move(asks) }, _bids{ std::move(bids) }
 	{
 	}
 

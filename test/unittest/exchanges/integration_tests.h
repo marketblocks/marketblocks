@@ -175,5 +175,6 @@ namespace mb::test
 		AddBuyMarketOrder,
 		AddSellMarketOrder,
 		WebsocketFeedUpdatesTrade,
-		WebsocketFeedUpdatesOhlcv);
+		WebsocketFeedUpdatesOhlcv,
+		WebsocketFeedUpdatesOrderBook);
 }

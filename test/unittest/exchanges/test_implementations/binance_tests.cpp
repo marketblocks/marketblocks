@@ -21,6 +21,14 @@ namespace mb::test
 		return create_exchange_api<binance_api, binance_config>(std::move(httpService), websocketStream);
 	}
 
+	template<>
+	std::unique_ptr<internal::binance_websocket_stream> create_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
+	{
+		std::unique_ptr<mock_exchange> mockMarketApi{ std::make_unique<mock_exchange>() };
+
+		return std::make_unique<internal::binance_websocket_stream>(std::move(connectionFactory), std::move(mockMarketApi));
+	}
+
 	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, ExchangeIntegrationTests, binance_api);
 	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, ExchangeReaderTests, binance_api);
 	INSTANTIATE_TYPED_TEST_SUITE_P(Binance, ExchangeRequestTests, binance_api);

@@ -109,6 +109,7 @@ namespace mb::test
 	{
 		order_book_state expectedOrderBook
 		{
+			1616663113,
 			{
 				order_book_entry{ 52523.0, 1.199, order_book_side::ASK },
 				order_book_entry{ 52536.0, 0.30, order_book_side::ASK }

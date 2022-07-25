@@ -51,7 +51,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		order_book_cache cache{ asks, bids };
+		order_book_cache cache{ 1, asks, bids };
 
 		assert_snapshot_equal_to_maps(asks, bids, cache.snapshot());
 	}
@@ -71,7 +71,7 @@ namespace mb::test
 			order_book_entry{ 30944.65, 0.03, order_book_side::BID },
 		};
 
-		order_book_cache cache{ asks, bids };
+		order_book_cache cache{ 1, asks, bids };
 
 		assert_snapshot_equal_to_maps(asks, bids, cache.snapshot());
 	}
@@ -92,7 +92,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		order_book_cache cache{ asks, bids };
+		order_book_cache cache{ 1, asks, bids };
 
 		ask_cache expectedAsks
 		{
@@ -123,7 +123,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		order_book_cache cache{ asks, bids };
+		order_book_cache cache{ 1, asks, bids };
 
 		order_book_entry newEntry{ 30948.32, 0.025, order_book_side::BID };
 
@@ -135,7 +135,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		cache.update_cache(newEntry);
+		cache.update_cache(2, newEntry);
 
 		assert_snapshot_equal_to_maps(asks, expectedBids, cache.snapshot());
 	}
@@ -156,7 +156,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		order_book_cache cache{ asks, bids };
+		order_book_cache cache{ 1, asks, bids };
 
 		order_book_entry newEntry{ 30944.65, 0.025, order_book_side::BID };
 
@@ -167,7 +167,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		cache.update_cache(newEntry);
+		cache.update_cache(2, newEntry);
 
 		assert_snapshot_equal_to_maps(asks, expectedBids, cache.snapshot());
 	}
@@ -188,7 +188,7 @@ namespace mb::test
 			order_book_entry{ 30926.01, 0.171, order_book_side::BID }
 		};
 
-		order_book_cache cache{ asks, bids };
+		order_book_cache cache{ 1, asks, bids };
 
 		order_book_entry newEntry{ 30995.72, 0.0, order_book_side::ASK };
 
@@ -198,8 +198,29 @@ namespace mb::test
 			order_book_entry{ 30986.75, 0.03, order_book_side::ASK }
 		};
 
-		cache.update_cache(newEntry);
+		cache.update_cache(2, newEntry);
 
 		assert_snapshot_equal_to_maps(expectedAsks, bids, cache.snapshot());
+	}
+
+	TEST(OrderBookCache, CachingNewEntrtUpdatesTimeStamp)
+	{
+		ask_cache asks
+		{
+			order_book_entry{ 30964.51, 0.105, order_book_side::ASK },
+		};
+
+		bid_cache bids
+		{
+			order_book_entry{ 30956.20, 0.105, order_book_side::BID },
+		};
+
+		order_book_cache cache{ 1, asks, bids };
+
+		order_book_entry newEntry{ 30948.32, 0.025, order_book_side::BID };
+
+		cache.update_cache(2, newEntry);
+
+		ASSERT_EQ(2, cache.snapshot().time_stamp());
 	}
 }

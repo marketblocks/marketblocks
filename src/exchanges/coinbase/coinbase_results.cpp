@@ -141,7 +141,7 @@ namespace mb::coinbase
 				}
 			}
 
-			return order_book_state{ std::move(askEntries), std::move(bidEntries) };
+			return order_book_state{ json.get<std::time_t>("sequence"), std::move(askEntries), std::move(bidEntries)};
 		});
 	}
 

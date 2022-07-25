@@ -62,9 +62,9 @@ namespace mb::test
 			initialise_order_book(std::move(pairName), std::move(cache));
 		}
 
-		void expose_update_order_book(std::string pairName, order_book_entry entry)
+		void expose_update_order_book(std::string pairName, std::time_t timeStamp, order_book_entry entry)
 		{
-			update_order_book(std::move(pairName), std::move(entry));
+			update_order_book(std::move(pairName), timeStamp, std::move(entry));
 		}
 
 		void expose_set_unsubscribed(const named_subscription& subscription)

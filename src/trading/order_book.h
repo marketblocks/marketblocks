@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cassert>
+#include <ctime>
 
 #include "trading/trading_constants.h"
 #include "common/exceptions/mb_exception.h"
@@ -34,12 +35,17 @@ namespace mb
 	class order_book_state
 	{
 	private:
+		std::time_t _timeStamp;
 		std::vector<order_book_entry> _asks;
 		std::vector<order_book_entry> _bids;
 
 	public:
-		order_book_state(std::vector<order_book_entry> asks, std::vector<order_book_entry> bids);
+		order_book_state(
+			std::time_t timeStamp,
+			std::vector<order_book_entry> asks,
+			std::vector<order_book_entry> bids);
 
+		time_t time_stamp() const noexcept { return _timeStamp; }
 		const std::vector<order_book_entry>& asks() const noexcept { return _asks; }
 		const std::vector<order_book_entry>& bids() const noexcept { return _bids; }
 

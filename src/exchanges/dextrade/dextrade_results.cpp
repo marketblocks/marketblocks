@@ -110,7 +110,7 @@ namespace mb::dextrade
 				}
 			}
 
-			return order_book_state{ std::move(asks), std::move(bids) };
+			return order_book_state{ 0, std::move(asks), std::move(bids) };
 		});
 	}
 

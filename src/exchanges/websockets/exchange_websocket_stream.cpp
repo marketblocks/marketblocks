@@ -178,17 +178,17 @@ namespace mb
 		}
 	}
 
-	void exchange_websocket_stream::update_order_book(std::string pairName, order_book_entry entry)
+	void exchange_websocket_stream::update_order_book(std::string pairName, std::time_t timeStamp, order_book_entry entry)
 	{
 		auto lockedOrderBooks = _orderBooks.unique_lock();
 
 		if (!contains(*lockedOrderBooks, pairName))
 		{
-			lockedOrderBooks->insert_or_assign(pairName, order_book_cache{ {}, {} });
+			lockedOrderBooks->insert_or_assign(pairName, order_book_cache{ 0, {}, {} });
 		}
 
 		auto cacheIt = lockedOrderBooks->find(pairName);
-		cacheIt->second.update_cache(std::move(entry));
+		cacheIt->second.update_cache(timeStamp, std::move(entry));
 
 		auto lockedPairs = _pairs.shared_lock();
 		auto pairIt = lockedPairs->find(pairName);
@@ -240,7 +240,7 @@ namespace mb
 			return it->second.snapshot(depth);
 		}
 
-		return order_book_state{ {}, {} };
+		return order_book_state{ 0, {}, {} };
 	}
 
 	trade_update exchange_websocket_stream::get_last_trade(const tradable_pair& pair) const
