@@ -16,7 +16,7 @@ namespace mb::test
 
 		std::vector<concurrent_wrapper<int>::shared_locked_object<int>> lockedObjects;
 
-		auto read_task = [&readerCount, &wrapper, &lockedObjects]() {
+		auto read_task = [&readerCount, &wrapper, &lockedObjects, value]() {
 			auto lockedValue = wrapper.shared_lock();
 			readerCount++;
 			EXPECT_EQ(value, *lockedValue);

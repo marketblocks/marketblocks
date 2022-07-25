@@ -11,6 +11,14 @@ namespace
 
 namespace mb
 {
+	template_config::template_config()
+		: _publicKey{}, _privateKey{}
+	{};
+
+	template_config::template_config(std::string publicKey, std::string privateKey)
+		: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
+	{}
+
 	template<>
 	template_config from_json<template_config>(const json_document& json)
 	{

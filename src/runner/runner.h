@@ -32,7 +32,7 @@ namespace mb
 			case run_mode::BACKTEST:
 				return create_back_test_runner<Strategy>();
 			default:
-				throw std::invalid_argument{ std::format("Run mode '{}' is not supported") };
+				throw std::invalid_argument{ "Run mode is not supported" };
 			}
 		}
 	}

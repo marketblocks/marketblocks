@@ -124,9 +124,9 @@ namespace mb
 		return send_private_request<double>("TradeVolume", kraken::read_fee, query);
 	}
 
-	unordered_string_map<double> kraken_api::get_balances() const
+	std::unordered_map<std::string,double> kraken_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>("Balance", kraken::read_balances);
+		return send_private_request<std::unordered_map<std::string,double>>("Balance", kraken::read_balances);
 	}
 
 	std::vector<order_description> kraken_api::get_open_orders() const

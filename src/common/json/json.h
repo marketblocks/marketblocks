@@ -4,7 +4,7 @@
 #include <string_view>
 #include <vector>
 #include <unordered_map>
-#include <format>
+#include <fmt/format.h>
 
 #include "json_constants.h"
 #include "json_iterator.h"
@@ -17,7 +17,6 @@ namespace mb
 	{
 	private:
 		friend json_iterator;
-		friend json_writer;
 
 		json_object _json;
 
@@ -29,19 +28,19 @@ namespace mb
 		template<typename T>
 		T get(std::string_view paramName) const
 		{
-			return _json[paramName.data()].get<T>();
+			return _json[paramName.data()].template get<T>();
 		}
 
 		template<typename T>
 		T get(int index) const
 		{
-			return _json[index].get<T>();
+			return _json[index].template get<T>();
 		}
 
 		template<typename T>
 		T get() const
 		{
-			return _json.get<T>();
+			return _json.template get<T>();
 		}
 
 		const json_element element(std::string_view paramName) const
@@ -129,6 +128,12 @@ namespace mb
 	{
 		json_writer writer;
 		to_json<T>(t, writer);
-		return writer.to_json();
+		return json_document{ std::move(writer._document) };
+	}
+
+	template<>
+	inline json_document to_json(const json_writer& writer)
+	{
+		return json_document{ nlohmann::json{ writer._document } };
 	}
 }

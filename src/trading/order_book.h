@@ -38,27 +38,14 @@ namespace mb
 		std::vector<order_book_entry> _bids;
 
 	public:
-		constexpr order_book_state(std::vector<order_book_entry> asks, std::vector<order_book_entry> bids)
-			: _asks{ std::move(asks) }, _bids{ std::move(bids) }
-		{
-		}
+		order_book_state(std::vector<order_book_entry> asks, std::vector<order_book_entry> bids);
 
-		constexpr const std::vector<order_book_entry>& asks() const noexcept { return _asks; }
-		constexpr const std::vector<order_book_entry>& bids() const noexcept { return _bids; }
+		const std::vector<order_book_entry>& asks() const noexcept { return _asks; }
+		const std::vector<order_book_entry>& bids() const noexcept { return _bids; }
 
 		constexpr int depth() const { return std::max(_asks.size(), _bids.size()); }
 	};
 	
-	constexpr const order_book_entry& get_best_entry(const std::vector<order_book_entry>& entries)
-	{
-		assert(!entries.empty());
-		return entries[0];
-	}
-
-	constexpr const order_book_entry& select_best_entry(const order_book_state& orderBook, trade_action action)
-	{
-		return action == trade_action::BUY
-			? get_best_entry(orderBook.asks())
-			: get_best_entry(orderBook.bids());
-	}
+	const order_book_entry& get_best_entry(const std::vector<order_book_entry>& entries);
+	const order_book_entry& select_best_entry(const order_book_state& orderBook, trade_action action);
 }

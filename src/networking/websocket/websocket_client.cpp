@@ -1,4 +1,5 @@
 #include <memory>
+#include <fmt/format.h>
 
 #include "websocket_client.h"
 #include "websocket_error.h"
@@ -21,7 +22,7 @@ namespace
         }
         catch (std::exception& e)
         {
-            throw websocket_error{ std::format("Initialising TLS: {}", e.what()) };
+            throw websocket_error{ fmt::format("Initialising TLS: {}", e.what()) };
         }
 
         return context;
@@ -64,6 +65,7 @@ namespace mb
             while (connecting)
             {
                 connecting = connectionPtr->get_state() == websocketpp::session::state::connecting;
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
         catch (const std::exception& e)
@@ -73,7 +75,7 @@ namespace mb
 
         if (connectionPtr->get_state() != websocketpp::session::state::open)
         {
-            throw websocket_error{ std::format("Connection Failed. Reason: {}", connectionPtr->get_ec().message()) };
+            throw websocket_error{ fmt::format("Connection Failed. Reason: {}", connectionPtr->get_ec().message()) };
         }
     }
 
@@ -100,7 +102,7 @@ namespace mb
 
         if (errorCode)
         {
-            throw websocket_error{ std::format("Closing connection: {}", errorCode.message()) };
+            throw websocket_error{ fmt::format("Closing connection: {}", errorCode.message()) };
         }
 
         volatile bool closing = true;
@@ -142,7 +144,7 @@ namespace mb
 
         if (errorCode)
         {
-            throw websocket_error{ std::format("Sending message: {}", errorCode.message()) };
+            throw websocket_error{ fmt::format("Sending message: {}", errorCode.message()) };
         }
     }
 }

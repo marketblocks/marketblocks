@@ -107,9 +107,9 @@ namespace mb
 		return 0.2;
 	}
 
-	unordered_string_map<double> dextrade_api::get_balances() const
+	std::unordered_map<std::string,double> dextrade_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>("balances", dextrade::read_balances);
+		return send_private_request<std::unordered_map<std::string,double>>("balances", dextrade::read_balances);
 	}
 
 	std::vector<order_description> dextrade_api::get_open_orders() const

@@ -70,7 +70,7 @@ add_library(marketblocks_lib
  "trading/ohlcv_data.h"
  "trading/order_description.h"
  "trading/order_type.h"
- "common/types/unordered_string_map.h"
+ 
  "exchanges/coinbase/coinbase.h"
  "exchanges/coinbase/coinbase.cpp"
  "exchanges/coinbase/coinbase_websocket.h"
@@ -83,8 +83,8 @@ add_library(marketblocks_lib
  "testing/paper_trading/paper_trading_config.h"
  "testing/paper_trading/paper_trading_config.cpp"
  "common/json/json_constants.h"
- "common/json/json_writer.h"
- "common/json/json_writer.cpp"
+ 
+ 
  "testing/back_testing/back_test_market_api.h"
  "testing/back_testing/back_test_market_api.cpp"
  "testing/back_testing/back_testing_config.h"
@@ -177,7 +177,7 @@ add_library(marketblocks_lib
  "exchanges/binance/binance_config.h" 
  "exchanges/binance/binance_config.cpp" 
  "exchanges/binance/binance_websocket.cpp"
- "exchanges/binance/binance_websocket.h"   "trading/trade_update.h")
+ "exchanges/binance/binance_websocket.h"   "trading/trade_update.h" "exchanges/websockets/websocket_update_messages.h" "exchanges/websockets/websocket_stream.cpp" "trading/moving_candle.h" "trading/moving_candle.cpp" "networking/url.cpp" "trading/order_request.cpp" "trading/order_book.cpp" "testing/reporting/asset_report.cpp" "common/json/json_writer.h"  "exchanges/exchange_ids.cpp")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
@@ -193,6 +193,9 @@ target_link_libraries(marketblocks_lib PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PUBLIC spdlog::spdlog spdlog::spdlog_header_only)
+
+find_package(fmt CONFIG REQUIRED)
+target_link_libraries(marketblocks_lib PRIVATE fmt::fmt)
 
 target_include_directories (marketblocks_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(marketblocks_lib PRIVATE ${CMAKE_BINARY_DIR}/generated)

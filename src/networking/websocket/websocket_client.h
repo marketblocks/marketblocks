@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fmt/format.h>
+
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 #include "websocket_error.h"
@@ -44,7 +46,7 @@ namespace mb
 
 			if (errorCode)
 			{
-				throw websocket_error{ std::format("Getting connection for {0}: {1}", url, errorCode.message()) };
+				throw websocket_error{ fmt::format("Getting connection for {0}: {1}", url, errorCode.message()) };
 			}
 
 			connectionPtr->set_open_handler(

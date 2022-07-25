@@ -56,4 +56,5 @@ namespace mb
 
 	using websocket_subscription = basic_websocket_subscription<std::vector<tradable_pair>>;
 	using unique_websocket_subscription = basic_websocket_subscription<tradable_pair>;
+	using named_subscription = basic_websocket_subscription<std::string>;
 }

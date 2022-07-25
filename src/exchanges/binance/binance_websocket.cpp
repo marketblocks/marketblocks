@@ -29,8 +29,7 @@ namespace
 		return "kline_" + std::move(interval);
 	}
 
-	template<typename Subscription>
-	std::string get_channel_name(const Subscription& subscription)
+	std::string get_channel_name(const websocket_subscription& subscription)
 	{
 		switch (subscription.channel())
 		{
@@ -43,37 +42,30 @@ namespace
 			throw mb_exception{ "Websocket channel not supported on Binance" };
 		}
 	}
-
-	std::string generate_subscription_id(std::string symbol, std::string channel)
-	{
-		return std::move(symbol) + std::move(channel);
-	}
 }
 
 namespace mb::internal
 {
 	binance_websocket_stream::binance_websocket_stream(std::unique_ptr<websocket_connection_factory> connectionFactory)
-		: exchange_websocket_stream{ exchange_ids::BINANCE, "wss://stream.binance.com:9443/ws", std::move(connectionFactory) }
+		: 
+		exchange_websocket_stream
+		{ 
+			exchange_ids::BINANCE, 
+			"wss://stream.binance.com:9443/ws",
+			'\0',
+			std::move(connectionFactory) 
+		}
 	{}
-
-	std::string binance_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
-	{
-		std::string pair{ subscription.pair_item().to_string() };
-		std::string channel{ get_channel_name(subscription) };
-
-		return ::generate_subscription_id(std::move(pair), std::move(channel));
-	}
 
 	void binance_websocket_stream::process_trade_message(const json_document& json)
 	{
 		std::string symbol{ json.get<std::string>("s") };
-		std::string subId{ ::generate_subscription_id(std::move(symbol), "trade") };
 
 		double price{ std::stod(json.get<std::string>("p")) };
 		double volume{ std::stod(json.get<std::string>("q")) };
 		std::time_t time{ json.get<std::time_t>("T") / 1000 };
 
-		update_trade(std::move(subId), trade_update{time, price, volume});
+		update_trade(std::move(symbol), trade_update{time, price, volume});
 	}
 
 	void binance_websocket_stream::process_ohlcv_message(const json_document& json)
@@ -81,7 +73,6 @@ namespace mb::internal
 		std::string symbol{ json.get<std::string>("s") };
 		json_element klineElement{ json.element("k") };
 		std::string interval{ klineElement.get<std::string>("i") };
-		std::string subId{ ::generate_subscription_id(std::move(symbol), get_kline_channel_name(std::move(interval))) };
 
 		ohlcv_data ohlcv
 		{
@@ -93,7 +84,7 @@ namespace mb::internal
 			std::stod(klineElement.get<std::string>("v"))
 		};
 
-		update_ohlcv(std::move(subId), std::move(ohlcv));
+		update_ohlcv(std::move(symbol), parse_ohlcv_interval(interval), std::move(ohlcv));
 	}
 
 	void binance_websocket_stream::on_message(std::string_view message)
@@ -121,17 +112,15 @@ namespace mb::internal
 				return;
 			}
 		}
-
-		logger::instance().info("Binance message: {}", message);
 	}
 
-	void binance_websocket_stream::subscribe(const websocket_subscription& subscription)
+	void binance_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
 		std::string message{ create_message("SUBSCRIBE", get_channel_name(subscription), subscription.pair_item()) };
 		_connection->send_message(std::move(message));
 	}
 
-	void binance_websocket_stream::unsubscribe(const websocket_subscription& subscription)
+	void binance_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
 		std::string message{ create_message("UNSUBSCRIBE", get_channel_name(subscription), subscription.pair_item()) };
 		_connection->send_message(std::move(message));

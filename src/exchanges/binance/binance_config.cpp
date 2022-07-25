@@ -11,6 +11,14 @@ namespace
 
 namespace mb
 {
+	binance_config::binance_config()
+		: _apiKey{}, _secretKey{}
+	{};
+
+	binance_config::binance_config(std::string publicKey, std::string privateKey)
+		: _apiKey{ std::move(publicKey) }, _secretKey{ std::move(privateKey) }
+	{}
+
 	template<>
 	binance_config from_json<binance_config>(const json_document& json)
 	{

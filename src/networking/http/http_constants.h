@@ -25,7 +25,7 @@ namespace mb
 		HTTP_DELETE
 	};
 
-	constexpr std::string to_string(http_verb verb)
+	constexpr std::string_view to_string(http_verb verb)
 	{
 		switch (verb)
 		{

@@ -46,7 +46,7 @@ namespace mb
 
 			request.set_content(queryJson.to_string());
 
-			std::string apiSign{ compute_api_sign(queryJson.to_json()) };
+			std::string apiSign{ compute_api_sign(to_json(queryJson)) };
 			request.add_header("content-type", "application/json");
 			request.add_header("login-token", _publicKey);
 			request.add_header("X-Auth-Sign", apiSign);
@@ -73,7 +73,7 @@ namespace mb
 		double get_price(const tradable_pair& tradablePair) const override;
 		order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const override;
 		double get_fee(const tradable_pair& tradablePair) const override;
-		unordered_string_map<double> get_balances() const override;
+		std::unordered_map<std::string,double> get_balances() const override;
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
 		std::string add_order(const order_request& description) override;

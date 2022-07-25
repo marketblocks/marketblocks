@@ -62,7 +62,7 @@ namespace mb
 			return _marketApi->get_order_book(tradablePair, depth);
 		}
 
-		unordered_string_map<double> get_balances() const override
+		std::unordered_map<std::string,double> get_balances() const override
 		{
 			return _tradeApi->get_balances();
 		}

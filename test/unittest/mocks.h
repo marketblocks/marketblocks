@@ -31,8 +31,6 @@ namespace mb::test
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& pair, int depth), (const, override));
 		MOCK_METHOD(trade_update, get_last_trade, (const tradable_pair& pair), (const, override));
 		MOCK_METHOD(ohlcv_data, get_last_candle, (const tradable_pair& pair, ohlcv_interval interval), (const, override));
-
-		MOCK_METHOD(set_queue<tradable_pair>&, get_order_book_message_queue, (), (noexcept, override));
 	};
 
 	class mock_exchange_websocket_stream : public exchange_websocket_stream
@@ -42,37 +40,36 @@ namespace mb::test
 			std::string_view id,
 			std::string url,
 			std::unique_ptr<websocket_connection_factory> connectionFactory)
-			: exchange_websocket_stream{ id, std::move(url), std::move(connectionFactory) }
+			: exchange_websocket_stream{ id, std::move(url), '\0', std::move(connectionFactory)}
 		{}
 
 		MOCK_METHOD(void, on_message, (std::string_view message), (override));
-		MOCK_METHOD(std::string, generate_subscription_id, (const unique_websocket_subscription& subscription), (const, override));
-		MOCK_METHOD(void, subscribe, (const websocket_subscription& subscription), (override));
-		MOCK_METHOD(void, unsubscribe, (const websocket_subscription& subscription), (override));
+		MOCK_METHOD(void, send_subscribe, (const websocket_subscription& subscription), (override));
+		MOCK_METHOD(void, send_unsubscribe, (const websocket_subscription& subscription), (override));
 
-		void expose_update_trade(std::string subId, trade_update trade)
+		void expose_update_trade(std::string pairName, trade_update trade)
 		{
-			update_trade(std::move(subId), std::move(trade));
+			update_trade(std::move(pairName), std::move(trade));
 		}
 
-		void expose_update_ohlcv(std::string subId, ohlcv_data data)
+		void expose_update_ohlcv(std::string pairName, ohlcv_interval interval, ohlcv_data data)
 		{
-			update_ohlcv(std::move(subId), std::move(data));
+			update_ohlcv(std::move(pairName), interval, std::move(data));
 		}
 
-		void expose_initialise_order_book(std::string subId, order_book_cache cache)
+		void expose_initialise_order_book(std::string pairName, order_book_cache cache)
 		{
-			initialise_order_book(std::move(subId), std::move(cache));
+			initialise_order_book(std::move(pairName), std::move(cache));
 		}
 
-		void expose_update_order_book(std::string subId, order_book_entry entry)
+		void expose_update_order_book(std::string pairName, order_book_entry entry)
 		{
-			update_order_book(std::move(subId), std::move(entry));
+			update_order_book(std::move(pairName), std::move(entry));
 		}
 
-		void expose_set_unsubscribed(std::string subscriptionId, websocket_channel channel)
+		void expose_set_unsubscribed(const named_subscription& subscription)
 		{
-			set_unsubscribed(std::move(subscriptionId), channel);
+			set_unsubscribed(subscription);
 		}
 	};
 
@@ -88,7 +85,7 @@ namespace mb::test
 		MOCK_METHOD(std::vector<ohlcv_data>, get_ohlcv, (const tradable_pair& tradablePair, ohlcv_interval interval, int count), (const, override));
 		MOCK_METHOD(double, get_price, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(order_book_state, get_order_book, (const tradable_pair& tradablePair, int depth), (const, override));
-		MOCK_METHOD(unordered_string_map<double>, get_balances, (), (const, override));
+		MOCK_METHOD((std::unordered_map<std::string,double>), get_balances, (), (const, override));
 		MOCK_METHOD(double, get_fee, (const tradable_pair& tradablePair), (const, override));
 		MOCK_METHOD(std::vector<order_description>, get_open_orders, (), (const, override));
 		MOCK_METHOD(std::vector<order_description>, get_closed_orders, (), (const, override));

@@ -11,18 +11,13 @@ namespace mb
 		std::string _privateKey;
 
 	public:
-		constexpr dextrade_config()
-			: _publicKey{}, _privateKey{}
-		{};
+		dextrade_config();
+		dextrade_config(std::string publicKey, std::string privateKey);
 
-		constexpr dextrade_config(std::string publicKey, std::string privateKey)
-			: _publicKey{ std::move(publicKey) }, _privateKey{ std::move(privateKey) }
-		{}
+		static std::string name() noexcept { return "dextrade"; }
 
-		static constexpr std::string name() noexcept { return "dextrade"; }
-
-		constexpr const std::string& public_key() const noexcept { return _publicKey; }
-		constexpr const std::string& private_key() const noexcept { return _privateKey; }
+		const std::string& public_key() const noexcept { return _publicKey; }
+		const std::string& private_key() const noexcept { return _privateKey; }
 	};
 
 	template<>

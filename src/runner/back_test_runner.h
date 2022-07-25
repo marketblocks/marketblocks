@@ -38,7 +38,7 @@ namespace mb::internal
 			
 			_paperTradeApi = create_paper_trade_api(
 				exchange_ids::BACK_TEST, 
-				[this](const tradable_pair& pair) { return _backTestingData->get_price(pair); },
+				[this](const tradable_pair& pair) { return _backTestingData->get_trade(pair).price(); },
 				[this]() { return _backTestingData->data_time(); });
 
 			return

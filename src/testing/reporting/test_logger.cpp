@@ -58,8 +58,8 @@ namespace
 		constexpr int PRECISION = 8;
 
 		std::unordered_set<std::string> uniqueAssets;
-		unordered_string_map<double> initialBalances;
-		unordered_string_map<double> finalBalances;
+		std::unordered_map<std::string,double> initialBalances;
+		std::unordered_map<std::string,double> finalBalances;
 
 		for (auto& exchange : exchangeData)
 		{

@@ -1,3 +1,6 @@
+#include <cmath>
+#include <limits>
+
 #include "mathutils.h"
 
 namespace mb
@@ -14,7 +17,7 @@ namespace mb
 		}
 
 		double diff = std::abs(a - b);
-		if (diff <= 4 * DBL_EPSILON)
+		if (diff <= 4 * std::numeric_limits<double>::epsilon())
 		{
 			return true;
 		}
@@ -24,7 +27,7 @@ namespace mb
 
 		double largest = (b > a) ? b : a;
 
-		return diff <= largest * DBL_EPSILON;
+		return diff <= largest * std::numeric_limits<double>::epsilon();
 	}
 
 	bool double_less_than(double a, double b)

@@ -1,3 +1,6 @@
+#include <sstream>
+#include <iomanip>
+
 #include "timeutils.h"
 
 namespace mb

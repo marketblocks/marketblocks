@@ -12,6 +12,14 @@ namespace
 
 namespace mb
 {
+	bybit_config::bybit_config()
+		: _apiKey{}, _apiSecret{}, _fee{ 0.1 }
+	{};
+
+	bybit_config::bybit_config(std::string apiKey, std::string apiSecret, double fee)
+		: _apiKey{ std::move(apiKey) }, _apiSecret{ std::move(apiSecret) }, _fee{ fee }
+	{}
+
 	template<>
 	bybit_config from_json<bybit_config>(const json_document& json)
 	{

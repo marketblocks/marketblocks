@@ -45,7 +45,7 @@ namespace mb
 		return mb::read_template::read_fee("").value();
 	}
 
-	unordered_string_map<double> template_api::get_balances() const
+	std::unordered_map<std::string,double> template_api::get_balances() const
 	{
 		return mb::read_template::read_balances("").value();
 	}

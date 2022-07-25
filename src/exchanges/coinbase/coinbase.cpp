@@ -22,7 +22,7 @@ namespace
 		return LIVE_BASE_URL;
 	}
 
-	constexpr std::string to_string(order_type orderType)
+	std::string to_string(order_type orderType)
 	{
 		switch (orderType)
 		{
@@ -135,9 +135,9 @@ namespace mb
 		return send_private_request<double>(http_verb::GET, "/fees", coinbase::read_fee);
 	}
 
-	unordered_string_map<double> coinbase_api::get_balances() const
+	std::unordered_map<std::string,double> coinbase_api::get_balances() const
 	{
-		return send_private_request<unordered_string_map<double>>(http_verb::GET, "/coinbase-accounts", coinbase::read_balances);
+		return send_private_request<std::unordered_map<std::string,double>>(http_verb::GET, "/coinbase-accounts", coinbase::read_balances);
 	}
 
 	std::vector<order_description> coinbase_api::get_open_orders() const

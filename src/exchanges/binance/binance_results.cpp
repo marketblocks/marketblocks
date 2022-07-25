@@ -32,12 +32,12 @@ namespace
 	{
 		return order_description
 		{
-			orderElement.get<std::time_t>("time") / 1000,
-			std::to_string(orderElement.get<long long>("orderId")),
-			orderElement.get<std::string>("symbol"),
-			to_trade_action(orderElement.get<std::string>("side")),
-			std::stod(orderElement.get<std::string>("price")),
-			std::stod(orderElement.get<std::string>("origQty"))
+			orderElement.template get<std::time_t>("time") / 1000,
+			std::to_string(orderElement.template get<long long>("orderId")),
+			orderElement.template get<std::string>("symbol"),
+			to_trade_action(orderElement.template get<std::string>("side")),
+			std::stod(orderElement.template get<std::string>("price")),
+			std::stod(orderElement.template get<std::string>("origQty"))
 		};
 	}
 
@@ -134,6 +134,26 @@ namespace mb::binance
 		});
 	}
 
+	result<std::unordered_map<std::string, double>> read_prices(std::string_view jsonResult)
+	{
+		return read_result<std::unordered_map<std::string, double>>(jsonResult, [](const json_document& json)
+		{
+			std::unordered_map<std::string, double> prices;
+			prices.reserve(json.size());
+
+			for (auto it = json.begin(); it != json.end(); ++it)
+			{
+				json_element priceElement{ it.value() };
+
+				prices.emplace(
+					priceElement.get<std::string>("symbol"), 
+					std::stod(priceElement.get<std::string>("price")));
+			}
+
+			return prices;
+		});
+	}
+
 	result<order_book_state> read_order_book(std::string_view jsonResult)
 	{
 		return read_result<order_book_state>(jsonResult, [](const json_document& json)
@@ -178,12 +198,12 @@ namespace mb::binance
 		});
 	}
 
-	result<unordered_string_map<double>> read_balances(std::string_view jsonResult)
+	result<std::unordered_map<std::string, double>> read_balances(std::string_view jsonResult)
 	{
-		return read_result<unordered_string_map<double>>(jsonResult, [](const json_document& json)
+		return read_result<std::unordered_map<std::string, double>>(jsonResult, [](const json_document& json)
 		{
 			json_element balancesElement{ json.element("balances") };
-			unordered_string_map<double> balances;
+			std::unordered_map<std::string, double> balances;
 			balances.reserve(balancesElement.size());
 
 			for (auto it = balancesElement.begin(); it != balancesElement.end(); ++it)

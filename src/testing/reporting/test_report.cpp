@@ -4,6 +4,22 @@
 
 namespace mb
 {
+	test_report::test_report(
+		std::string elapsedTime,
+		std::string startTime,
+		std::string endTime,
+		std::string tradesCount,
+		std::vector<asset_report> assetReports,
+		report_result_list additionalResults)
+		:
+		_elapsedTime{ std::move(elapsedTime) },
+		_startTime{ std::move(startTime) },
+		_endTime{ std::move(endTime) },
+		_tradesCount{ std::move(tradesCount) },
+		_assetReports{ std::move(assetReports) },
+		_additionalResults{ std::move(additionalResults) }
+	{}
+
 	std::string generate_report_string(const test_report& report)
 	{
 		static constexpr std::string_view INDENT = "    ";

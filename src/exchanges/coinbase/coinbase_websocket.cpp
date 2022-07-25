@@ -34,13 +34,8 @@ namespace
 			return "ticker";
 		case websocket_channel::ORDER_BOOK:
 		default:
-			throw mb_exception{ std::format("Websocket channel not supported on Coinbase") };
+			throw mb_exception{ fmt::format("Websocket channel not supported on Coinbase") };
 		}
-	}
-
-	std::string generate_subscription_id(std::string symbol, std::string channel)
-	{
-		return std::move(symbol) + std::move(channel);
 	}
 
 	/*tradable_pair get_pair_from_id(std::string_view productId)
@@ -134,38 +129,30 @@ namespace mb::internal
 		std::unique_ptr<websocket_connection_factory> connectionFactory,
 		std::unique_ptr<market_api> marketApi)
 		: 
-		exchange_websocket_stream{ exchange_ids::COINBASE, "wss://ws-feed.exchange.coinbase.com", std::move(connectionFactory) },
+		exchange_websocket_stream
+		{ 
+			exchange_ids::COINBASE, 
+			"wss://ws-feed.exchange.coinbase.com", 
+			PAIR_SEPARATOR,
+			std::move(connectionFactory) 
+		},
 		_ohlcvSubscriptionService{ ohlcv_subscription_service
 			{
 				std::move(marketApi),
-				[this](std::string id, ohlcv_data ohlcv) { update_ohlcv(std::move(id), std::move(ohlcv)); },
+				[this](std::string pairName, ohlcv_interval interval, ohlcv_data ohlcv) { update_ohlcv(std::move(pairName), interval, std::move(ohlcv)); },
 				PAIR_SEPARATOR
 			}}
 	{}
 
-	std::string coinbase_websocket_stream::generate_subscription_id(const unique_websocket_subscription& subscription) const
-	{
-		std::string symbol{ subscription.pair_item().to_string(PAIR_SEPARATOR) };
-
-		if (subscription.channel() == websocket_channel::OHLCV)
-		{
-			return _ohlcvSubscriptionService.shared_lock()->generate_subscription_id(std::move(symbol), subscription.get_ohlcv_interval());
-		}
-
-		std::string topic{ get_channel(subscription.channel()) };
-		return ::generate_subscription_id(std::move(symbol), std::move(topic));
-	}
-
 	void coinbase_websocket_stream::process_trade_message(const json_document& json)
 	{
 		std::string pairName{ json.get<std::string>("product_id") };
-		std::string subId{ ::generate_subscription_id(pairName, "ticker") };
 
 		double price{ std::stod(json.get<std::string>("price")) };
 		double volume{ std::stod(json.get<std::string>("last_size")) };
 		std::time_t time{ to_time_t(json.get<std::string>("time"), "%Y-%m-%dT%T") };
 
-		update_trade(std::move(subId), trade_update{time, price, volume});
+		update_trade(pairName, trade_update{time, price, volume});
 
 		auto lockedOhlcvSubscriptions = _ohlcvSubscriptionService.unique_lock();
 
@@ -196,11 +183,11 @@ namespace mb::internal
 		}*/
 	}
 
-	void coinbase_websocket_stream::subscribe(const websocket_subscription& subscription)
+	void coinbase_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{
-			subscribe(websocket_subscription::create_trade_sub(subscription.pair_item()));
+			send_subscribe(websocket_subscription::create_trade_sub(subscription.pair_item()));
 			_ohlcvSubscriptionService.unique_lock()->add_subscription(subscription);
 			return;
 		}
@@ -211,7 +198,7 @@ namespace mb::internal
 		_connection->send_message(message);
 	}
 
-	void coinbase_websocket_stream::unsubscribe(const websocket_subscription& subscription)
+	void coinbase_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
 		if (subscription.channel() == websocket_channel::OHLCV)
 		{

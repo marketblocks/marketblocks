@@ -12,14 +12,14 @@ namespace mb
 	{
 	private:
 		std::shared_ptr<paper_trade_api> _tradeApi;
-		unordered_string_map<double> _initialBalances;
+		std::unordered_map<std::string,double> _initialBalances;
 		int _closedOrderIndex;
 
 	public:
 		test_logger_exchange_data(std::shared_ptr<paper_trade_api> tradeApi);
 
 		std::shared_ptr<paper_trade_api> trade_api() const noexcept { return _tradeApi; }
-		const unordered_string_map<double>& initial_balances() const noexcept { return _initialBalances; }
+		const std::unordered_map<std::string,double>& initial_balances() const noexcept { return _initialBalances; }
 		int closed_order_index() const noexcept { return _closedOrderIndex; }
 		void set_closed_order_index(int index) noexcept { _closedOrderIndex = index; }
 		std::string_view exchange_id() const noexcept { return _tradeApi->exchange_id(); }

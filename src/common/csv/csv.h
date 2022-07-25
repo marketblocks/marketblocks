@@ -18,30 +18,12 @@ namespace mb
 		std::vector<csv_row> _rows;
 
 	public:
-		constexpr explicit csv_document(std::vector<csv_row> rows)
-			: _rows{ std::move(rows) }
-		{}
+		csv_document(std::vector<csv_row> rows);
 
-		constexpr const csv_row& get_row(int index) const
-		{
-			assert(index < _rows.size());
-			return _rows.at(index);
-		}
-
-		constexpr size_t row_count() const noexcept
-		{
-			return _rows.size();
-		}
-
-		constexpr csv_iterator begin() const
-		{
-			return csv_iterator{ _rows.begin() };
-		}
-
-		constexpr csv_iterator end() const
-		{
-			return csv_iterator{ _rows.end() };
-		}
+		const csv_row& get_row(int index) const;
+		size_t row_count() const noexcept;
+		csv_iterator begin() const;
+		csv_iterator end() const;
 	};
 
 	csv_document parse_csv(std::string_view csvString);

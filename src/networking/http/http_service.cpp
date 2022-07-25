@@ -95,7 +95,7 @@ namespace mb
 		std::string readBuffer;
 
 		set_option(easyHandle, CURLOPT_URL, request.url().c_str());
-		set_option(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).c_str());
+		set_option(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).data());
 		set_option(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
 		set_option(easyHandle, CURLOPT_POSTFIELDS, request.content().c_str());
 
@@ -111,6 +111,6 @@ namespace mb
 		long responseCode;
 		curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);
 
-		return http_response{ responseCode, readBuffer };
+		return http_response{ static_cast<int>(responseCode), readBuffer };
 	}
 }

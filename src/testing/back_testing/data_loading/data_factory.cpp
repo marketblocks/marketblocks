@@ -1,4 +1,5 @@
 #include <string_view>
+#include <limits>
 
 #include "data_factory.h"
 #include "back_testing_data_source.h"
@@ -25,7 +26,7 @@ namespace
 		std::time_t& startTime,
 		std::time_t& endTime)
 	{
-		startTime = MAXLONGLONG;
+		startTime = std::numeric_limits<long long>::max();
 		endTime = 0;
 
 		for (auto& pair : pairs)

@@ -9,7 +9,6 @@ namespace mb
 	{
 	private:
 		std::shared_ptr<back_testing_data> _backTestingData;
-		set_queue<tradable_pair> _messageQueue;
 
 	public:
 		backtest_websocket_stream(std::shared_ptr<back_testing_data> backTestingData);
@@ -25,10 +24,5 @@ namespace mb
 		order_book_state get_order_book(const tradable_pair& pair, int depth = 0) const override;
 		trade_update get_last_trade(const tradable_pair& pair) const override;
 		ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const override;
-
-		set_queue<tradable_pair>& get_order_book_message_queue() override
-		{
-			return _messageQueue;
-		}
 	};
 }

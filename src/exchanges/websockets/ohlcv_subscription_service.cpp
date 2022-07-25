@@ -1,4 +1,5 @@
 #include "ohlcv_subscription_service.h"
+#include "common/utils/containerutils.h"
 
 namespace mb
 {
@@ -10,14 +11,9 @@ namespace mb
 		_subscriptions{}
 	{}
 
-	std::string ohlcv_subscription_service::generate_subscription_id(std::string pairName, ohlcv_interval interval) const
-	{
-		return std::move(pairName) + "ohlcv" + std::to_string(to_seconds(interval));
-	}
-
 	bool ohlcv_subscription_service::is_subscribed(std::string_view pairName) const
 	{
-		return _subscriptions.contains(pairName);
+		return contains(_subscriptions, pairName.data());
 	}
 
 	void ohlcv_subscription_service::add_subscription(const websocket_subscription& subscription)
@@ -33,7 +29,7 @@ namespace mb
 			std::string pairName{ pair.to_string(_pairSeparator) };
 
 			_subscriptions[pairName].emplace(ohlcvInterval, ohlcv_from_trades{ latestOhlcv, interval });
-			_updateOhlcv(std::move(pairName), std::move(latestOhlcv));
+			_updateOhlcv(std::move(pairName), ohlcvInterval, std::move(latestOhlcv));
 		}
 	}
 
@@ -54,13 +50,13 @@ namespace mb
 		}
 	}
 
-	void ohlcv_subscription_service::update_ohlcv(std::string pairName, std::time_t time, double price, double volume)
+	void ohlcv_subscription_service::update_ohlcv(std::string_view pairName, std::time_t time, double price, double volume)
 	{
-		auto it = _subscriptions.find(pairName);
+		auto it = _subscriptions.find(pairName.data());
 
 		if (it == _subscriptions.end())
 		{
-			throw mb_exception{ std::format("OHLCV is not subscribed for pair {}", pairName) };
+			throw mb_exception{ fmt::format("OHLCV is not subscribed for pair {}", pairName) };
 		}
 
 		std::unordered_map<ohlcv_interval, ohlcv_from_trades>& ohlcvFromTrades{ it->second };
@@ -68,8 +64,7 @@ namespace mb
 		for (auto& [interval, oft] : ohlcvFromTrades)
 		{
 			oft.add_trade(time, price, volume);
-			std::string subId{ generate_subscription_id(pairName, interval) };
-			_updateOhlcv(std::move(subId), oft.get_ohlcv(time));
+			_updateOhlcv(std::string{ pairName }, interval, oft.get_ohlcv(time));
 		}
 	}
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "trading/fee_schedule.h"
-#include "common/types/unordered_string_map.h"
 #include "common/json/json.h"
 
 namespace mb
@@ -10,16 +9,16 @@ namespace mb
 	{
 	private:
 		double _fee;
-		unordered_string_map<double> _balances;
+		std::unordered_map<std::string,double> _balances;
 
 	public:
 		paper_trading_config();
-		paper_trading_config(double fee, unordered_string_map<double> balances);
+		paper_trading_config(double fee, std::unordered_map<std::string,double> balances);
 		
-		static constexpr std::string name() noexcept { return "paper_trading"; }
+		static std::string name() noexcept { return "paper_trading"; }
 
 		double fee() const noexcept { return _fee; }
-		const unordered_string_map<double>& balances() const noexcept { return _balances; }
+		const std::unordered_map<std::string,double>& balances() const noexcept { return _balances; }
 	};
 
 	template<>
