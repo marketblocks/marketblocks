@@ -177,7 +177,7 @@ add_library(marketblocks_lib
  "exchanges/binance/binance_config.h" 
  "exchanges/binance/binance_config.cpp" 
  "exchanges/binance/binance_websocket.cpp"
- "exchanges/binance/binance_websocket.h"   "trading/trade_update.h" "exchanges/websockets/websocket_update_messages.h" "exchanges/websockets/websocket_stream.cpp" "trading/moving_candle.h" "trading/moving_candle.cpp" "networking/url.cpp" "trading/order_request.cpp" "trading/order_book.cpp" "testing/reporting/asset_report.cpp" "common/json/json_writer.h"  "exchanges/exchange_ids.cpp")
+ "exchanges/binance/binance_websocket.h"   "trading/trade_update.h" "exchanges/websockets/websocket_update_messages.h" "exchanges/websockets/websocket_stream.cpp" "trading/moving_candle.h" "trading/moving_candle.cpp" "networking/url.cpp" "trading/order_request.cpp" "trading/order_book.cpp" "testing/reporting/asset_report.cpp" "common/json/json_writer.h"  "exchanges/exchange_ids.cpp" "common/file/local_directory.h" "common/file/local_directory.cpp")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(marketblocks_lib PRIVATE nlohmann_json nlohmann_json::nlohmann_json)

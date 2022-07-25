@@ -1,34 +1,19 @@
-#if __APPLE__
-#include <mach-o/dyld.h>
-#endif
-
 #include "config_file_reader.h"
+#include "local_directory.h"
 
 namespace
 {
+	using namespace mb;
+
 	constexpr std::string_view CONFIG_DIRECTORY = "configs";
 
-#if _WIN32
     std::filesystem::path get_config_directory()
     {
-        return CONFIG_DIRECTORY;
-    }
-#else
-    std::filesystem::path get_config_directory()
-    {
-        std::filesystem::path directory;
-        char path[1024];
-        uint32_t size = sizeof(path);
-        if (_NSGetExecutablePath(path, &size) == 0)
-            directory.append(path);
-        else
-            return "";
-        
-        directory.remove_filename();
+		std::filesystem::path directory{ get_local_directory() };
         directory.append(CONFIG_DIRECTORY);
-        return directory;
+
+		return directory;
     }
-#endif
 }
 
 namespace mb
