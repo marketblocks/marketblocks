@@ -145,6 +145,21 @@ namespace mb::test
 		EXPECT_TRUE(isOhlcvUpdated);
 	}
 
+	TYPED_TEST_P(ExchangeIntegrationTests, WebsocketFeedUpdatesOrderBook)
+	{
+		auto websocketStream{ this->_api->get_websocket_stream() };
+		websocketStream->subscribe(websocket_subscription::create_order_book_sub({ this->_testingPair }));
+
+		bool isOrderBookUpdated = wait_for_condition(
+			[websocketStream, this]()
+			{
+				return websocketStream->get_order_book(this->_testingPair).depth() > 0;
+			},
+			10000);
+
+		EXPECT_TRUE(isOrderBookUpdated);
+	}
+
 	REGISTER_TYPED_TEST_SUITE_P(ExchangeIntegrationTests,
 		GetStatus,
 		GetTradablePairs,
