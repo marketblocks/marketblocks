@@ -1,4 +1,5 @@
 #include "logger.h"
+#include "common/file/local_directory.h"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -7,10 +8,15 @@
 
 namespace
 {
+	using namespace mb;
+
 	std::shared_ptr<spdlog::logger> init_logger()
 	{
 		auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
+
+		std::filesystem::path logPath{ get_local_directory() };
+		logPath /= "log.txt";
+		auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logPath.string(), true);
 		fileSink->set_level(spdlog::level::err);
 
 		constexpr int QUEUE_SIZE = 8192;
