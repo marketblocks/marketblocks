@@ -14,15 +14,11 @@ namespace
 		if (it != cache.end())
 		{
 			cache.erase(it);
-
-			if (entry.volume() != 0.0)
-			{
-				cache.insert(std::move(entry));
-			}
 		}
-		else
+
+		if (entry.volume() > 0.0)
 		{
-			cache.emplace(std::move(entry));
+			cache.insert(std::move(entry));
 		}
 	}
 }

@@ -26,6 +26,7 @@ namespace mb
 		virtual double get_price(const tradable_pair& tradablePair) const = 0;
 		virtual std::unordered_map<tradable_pair, double> get_prices(const std::vector<tradable_pair>& pairs) const;
 		virtual order_book_state get_order_book(const tradable_pair& tradablePair, int depth) const = 0;
+		virtual std::unordered_map<tradable_pair, order_book_state> get_order_books(const std::vector<tradable_pair>& pairs, int depth) const;
 	};
 
 	class trade_api

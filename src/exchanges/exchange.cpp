@@ -34,4 +34,18 @@ namespace mb
 
 		return prices;
 	}
+
+	std::unordered_map<tradable_pair, order_book_state> market_api::get_order_books(const std::vector<tradable_pair>& pairs, int depth) const
+	{
+		std::unordered_map<tradable_pair, order_book_state> books;
+		books.reserve(pairs.size());
+
+		for (auto& pair : pairs)
+		{
+			books.emplace(pair, get_order_book(pair, depth));
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+
+		return books;
+	}
 }

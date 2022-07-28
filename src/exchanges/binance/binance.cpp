@@ -44,6 +44,19 @@ namespace
 			throw mb_exception{ "Order type not supported" };
 		}
 	}
+
+	std::string create_symbols_list(const std::vector<tradable_pair>& pairs)
+	{
+		std::string symbols{ "[" };
+
+		for (auto& pair : pairs)
+		{
+			symbols.append("\"" + pair.to_string() + "\"" + ",");
+		}
+
+		symbols.pop_back();
+		symbols.append("]");
+	}
 }
 
 namespace mb
@@ -98,18 +111,8 @@ namespace mb
 
 	std::unordered_map<tradable_pair, double> binance_api::get_prices(const std::vector<tradable_pair>& pairs) const
 	{
-		std::string symbols{ "[" };
-
-		for (auto& pair : pairs)
-		{
-			symbols.append("\"" + pair.to_string() + "\"" + ",");
-		}
-
-		symbols.pop_back();
-		symbols.append("]");
-
 		std::string query = url_query_builder{}
-			.add_parameter("symbols", std::move(symbols))
+			.add_parameter("symbols", create_symbols_list(pairs))
 			.to_string();
 
 		std::unordered_map<std::string, tradable_pair> pairLookup{ to_unordered_map<std::string, tradable_pair>(
@@ -138,6 +141,11 @@ namespace mb
 			.to_string();
 
 		return send_public_request<order_book_state>("/api/v3/depth", binance::read_order_book, query);
+	}
+
+	std::unordered_map<tradable_pair, order_book_state> binance_api::get_order_books(const std::vector<tradable_pair>& pairs, int depth) const
+	{
+		return std::unordered_map<tradable_pair, order_book_state>{};
 	}
 
 	double binance_api::get_fee(const tradable_pair& tradablePair) const

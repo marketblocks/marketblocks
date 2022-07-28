@@ -1,13 +1,14 @@
 #include "binance_websocket.h"
 #include "exchanges/exchange_ids.h"
 #include "common/utils/containerutils.h"
+#include "common/utils/timeutils.h"
 #include "logging/logger.h"
 
 namespace
 {
 	using namespace mb;
 
-	std::string create_message(std::string method, std::string channel, const std::vector<tradable_pair>& pairs)
+	std::string create_message(std::string method, std::string channel, std::time_t id, const std::vector<tradable_pair>& pairs)
 	{
 		std::vector<std::string> params{ to_vector<std::string>(pairs, [&channel](const tradable_pair& pair)
 			{
@@ -19,7 +20,7 @@ namespace
 		json_writer json;
 		json.add("method", std::move(method));
 		json.add("params", std::move(params));
-		json.add("id", 1);
+		json.add("id", id);
 
 		return json.to_string();
 	}
@@ -61,6 +62,37 @@ namespace mb::internal
 		_marketApi{ std::move(marketApi) }
 	{}
 
+	void binance_websocket_stream::add_confirmation_action(std::time_t id, const websocket_subscription& subscription)
+	{
+		switch (subscription.channel())
+		{
+		case websocket_channel::ORDER_BOOK:
+		{
+			_subscriptionConfirmedActions.emplace(id, [this, subscription]()
+			{
+				std::unordered_map<tradable_pair, order_book_state> orderBooks{ _marketApi->get_order_books(subscription.pair_item(), 5000) };
+
+				for (auto& [pair, book] : orderBooks)
+				{
+					std::string pairName{ pair.to_string() };
+					_orderBookIds.emplace(pairName, book.time_stamp());
+
+					initialise_order_book(std::move(pairName),
+						order_book_cache
+						{
+							book.time_stamp(),
+							ask_cache{ book.asks().begin(), book.asks().end() },
+							bid_cache{ book.bids().begin(), book.bids().end() }
+						});
+				}
+			});
+			break;
+		}
+		default:
+			break;
+		}
+	}
+
 	void binance_websocket_stream::process_trade_message(const json_document& json)
 	{
 		std::string symbol{ json.get<std::string>("s") };
@@ -93,7 +125,33 @@ namespace mb::internal
 
 	void binance_websocket_stream::process_order_book_message(const json_document& json)
 	{
-		logger::instance().info(json.to_string());
+		std::string symbol{ json.get<std::string>("s") };
+		std::time_t lastUpdate{ _orderBookIds[symbol] };
+		std::time_t finalUpdateId{ json.get<std::time_t>("u") };
+
+		if (finalUpdateId <= lastUpdate)
+		{
+			return;
+		}
+
+		process_order_book_element(order_book_side::ASK, symbol, finalUpdateId, json.element("a"));
+		process_order_book_element(order_book_side::BID, symbol, finalUpdateId, json.element("b"));
+
+		_orderBookIds[symbol] = finalUpdateId;
+	}
+
+	void binance_websocket_stream::process_order_book_element(order_book_side side, std::string_view pair, std::time_t id, const json_element& element)
+	{
+		for (auto it = element.begin(); it != element.end(); ++it)
+		{
+			json_element entryElement{ it.value() };
+			update_order_book(std::string{ pair }, id, order_book_entry
+				{
+					std::stod(entryElement.get<std::string>(0)),
+					std::stod(entryElement.get<std::string>(1)),
+					side
+				});
+		}
 	}
 
 	void binance_websocket_stream::on_message(std::string_view message)
@@ -103,6 +161,18 @@ namespace mb::internal
 		if (json.has_member("msg"))
 		{
 			logger::instance().error("Binance websocket: {}", json.get<std::string>("msg"));
+			return;
+		}
+
+		if (json.has_member("id"))
+		{
+			std::time_t id{ json.get<std::time_t>("id") };
+
+			if (contains(_subscriptionConfirmedActions, id))
+			{
+				_subscriptionConfirmedActions[id]();
+			}
+
 			return;
 		}
 
@@ -130,13 +200,16 @@ namespace mb::internal
 
 	void binance_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
-		std::string message{ create_message("SUBSCRIBE", get_channel_name(subscription), subscription.pair_item()) };
+		std::time_t id{ now_t() };
+		add_confirmation_action(id, subscription);
+
+		std::string message{ create_message("SUBSCRIBE", get_channel_name(subscription), id, subscription.pair_item()) };
 		_connection->send_message(std::move(message));
 	}
 
 	void binance_websocket_stream::send_unsubscribe(const websocket_subscription& subscription)
 	{
-		std::string message{ create_message("UNSUBSCRIBE", get_channel_name(subscription), subscription.pair_item()) };
+		std::string message{ create_message("UNSUBSCRIBE", get_channel_name(subscription), now_t(), subscription.pair_item()) };
 		_connection->send_message(std::move(message));
 	}
 }
