@@ -10,6 +10,12 @@ namespace mb
 	void to_upper(std::string& source);
 	void to_lower(std::string& source);
 
+	template<typename String>
+	bool contains(const std::string& source, const String& what)
+	{
+		return source.find(what) != std::string::npos;
+	}
+
 	struct numeric_string_less
 	{
 		bool operator()(const std::string& l, const std::string& r) const;

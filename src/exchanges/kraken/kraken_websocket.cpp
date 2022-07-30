@@ -30,19 +30,16 @@ namespace
 		{
 			subscriptionJson.add("interval", to_minutes(subscription.get_ohlcv_interval()));
 		}
+		else if (subscription.channel() == websocket_channel::ORDER_BOOK)
+		{
+			subscriptionJson.add("depth", 100);
+		}
 		
 		return json_writer{}
 			.add("event", eventName)
 			.add("pair", std::move(tradablePairList))
 			.add("subscription", subscriptionJson)
 			.to_string();
-	}
-
-	/*order_book_side get_order_book_side(const std::string sideId)
-	{
-		return sideId.contains("a") 
-			? order_book_side::ASK
-			: order_book_side::BID;
 	}
 
 	order_book_entry create_order_book_entry(order_book_side side, const json_element& json)
@@ -55,57 +52,43 @@ namespace
 		};
 	}
 
+	std::time_t get_order_book_update_timestamp(const json_element& entryElement)
+	{
+		return std::time_t{ std::stoll(entryElement.get<std::string>(2)) };
+	}
+
 	order_book_cache create_order_book_cache(const json_element& json)
 	{
 		json_element asks = json.element("as");
 		json_element bids = json.element("bs");
 
-		int depth = asks.size();
+		int depth = std::max<int>(asks.size(), bids.size());
 
 		ask_cache askCache;
 		bid_cache bidCache;
+		std::time_t timeStamp = 0;
 
 		for (int i = 0; i < depth; ++i)
 		{
-			askCache.emplace(create_order_book_entry(order_book_side::ASK, asks.element(i)));
-			bidCache.emplace(create_order_book_entry(order_book_side::BID, bids.element(i)));
+			if (i < asks.size())
+			{
+				json_element askElement{ asks.element(i) };
+				askCache.emplace(create_order_book_entry(order_book_side::ASK, askElement));
+
+				timeStamp = std::max(timeStamp, get_order_book_update_timestamp(askElement));
+			}
+
+			if (i < bids.size())
+			{
+				json_element bidElement{ bids.element(i) };
+				bidCache.emplace(create_order_book_entry(order_book_side::BID, bidElement));
+
+				timeStamp = std::max(timeStamp, get_order_book_update_timestamp(bidElement));
+			}
 		}
 
-		return order_book_cache{ std::move(askCache), std::move(bidCache) };
+		return order_book_cache{ timeStamp, std::move(askCache), std::move(bidCache) };
 	}
-
-	std::vector<order_book_entry> create_order_book_entries(const json_element& json)
-	{
-		json_iterator first = json.begin();
-		std::string entrySideId = first.key();
-		json_element element = first.value();
-
-		order_book_side side = get_order_book_side(entrySideId);
-		bool replace = false;
-		std::string priceToReplace;
-
-		for (auto entryIterator = element.begin(); entryIterator != element.end(); ++entryIterator)
-		{
-			json_element entryJson{ entryIterator.value() };
-			order_book_cache_entry cacheEntry{ create_order_book_cache_entry(side, entryJson) };
-
-			if (cacheEntry.entry.volume() == 0.0)
-			{
-				replace = true;
-				priceToReplace = std::move(cacheEntry.price);
-				continue;
-			}
-
-			if (replace)
-			{
-				localOrderBook.replace_in_book(pair, std::move(priceToReplace), std::move(cacheEntry));
-			}
-			else
-			{
-				localOrderBook.update_book(pair, std::move(cacheEntry));
-			}
-		}
-	}*/
 }
 
 namespace mb::internal
@@ -159,7 +142,7 @@ namespace mb::internal
 			});
 	}
 
-	/*void kraken_websocket_stream::process_order_book_message(std::string subscriptionId, const json_document& json)
+	void kraken_websocket_stream::process_order_book_message(std::string pairName, const json_document& json)
 	{
 		if (json.size() == 4)
 		{
@@ -167,21 +150,48 @@ namespace mb::internal
 
 			if (entryObject.has_member("as"))
 			{
-				order_book_cache cache = create_order_book_cache(entryObject);
-				initialise_order_book(std::move(subscriptionId), std::move(cache));
+				order_book_cache cache{ create_order_book_cache(entryObject) };
+				initialise_order_book(std::move(pairName), std::move(cache));
 			}
 			else
 			{
-				std::vector<order_book_entry> entries{ create_order_book_entries(std::move(entryObject)) };
+				process_order_book_updates(std::move(pairName), entryObject);
 			}
 		}
 		else
 		{
-			std::vector<order_book_entry> entries{ create_order_book_entries(std::move(entryObject)) };
-			process_order_book_object(pair, localOrderBook, json.element(1));
-			process_order_book_object(pair, localOrderBook, json.element(2));
+			process_order_book_updates(pairName, json.element(1));
+			process_order_book_updates(std::move(pairName), json.element(2));
 		}
-	}*/
+	}
+
+	void kraken_websocket_stream::process_order_book_updates(std::string pairName, const json_element& updateObject)
+	{
+		order_book_side side;
+		std::string name;
+
+		if (updateObject.has_member("a"))
+		{
+			side = order_book_side::ASK;
+			name = "a";
+		}
+		else
+		{
+			side = order_book_side::BID;
+			name = "b";
+		}
+
+		json_element updateElement{ updateObject.element(name) };
+
+		for (auto it = updateElement.begin(); it != updateElement.end(); ++it)
+		{
+			json_element entryElement{ it.value() };
+			order_book_entry entry{ create_order_book_entry(side, entryElement) };
+			std::time_t timeStamp{ get_order_book_update_timestamp(entryElement) };
+
+			update_order_book(pairName, timeStamp, std::move(entry));
+		}
+	}
 
 	void kraken_websocket_stream::on_message(std::string_view message)
 	{
@@ -197,14 +207,14 @@ namespace mb::internal
 			{
 				process_trade_message(std::move(pairName), json);
 			}
-			else if (channelName.find("ohlc") != std::string::npos)
+			else if (contains(channelName, "ohlc"))
 			{
 				process_ohlcv_message(std::move(pairName), std::move(channelName), json);
 			}
-			/*if (channelName.contains("book"))
+			else if (contains(channelName, "book"))
 			{
-				process_order_book_message(std::move(subscriptionId), json);
-			}*/
+				process_order_book_message(std::move(pairName), json);
+			}
 		}
 		else
 		{

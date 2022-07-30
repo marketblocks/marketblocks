@@ -149,7 +149,7 @@ namespace mb
 	void exchange_websocket_stream::initialise_order_book(std::string pairName, order_book_cache cache)
 	{
 		auto lockedOrderBooks = _orderBooks.unique_lock();
-		lockedOrderBooks->insert_or_assign(std::move(pairName), std::move(cache));
+		lockedOrderBooks->insert_or_assign(pairName, std::move(cache));
 
 		fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cache.snapshot() });
 	}

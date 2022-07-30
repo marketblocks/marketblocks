@@ -11,7 +11,8 @@ namespace mb::internal
 		void process_event_message(const json_document& json);
 		void process_trade_message(std::string pairName, const json_document& json);
 		void process_ohlcv_message(std::string pairName, std::string channelName, const json_document& json);
-		//void process_order_book_message(std::string subscriptionId, const json_document& json);
+		void process_order_book_message(std::string pairName, const json_document& json);
+		void process_order_book_updates(std::string pairName, const json_element& updateElement);
 
 		void on_message(std::string_view message) override;
 		void send_subscribe(const websocket_subscription& subscription) override;
