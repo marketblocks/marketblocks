@@ -14,6 +14,8 @@ namespace mb::internal
 		concurrent_wrapper<ohlcv_subscription_service> _ohlcvSubscriptionService;
 
 		void process_trade_message(const json_document& json);
+		void process_order_book_initialisation(const json_document& json);
+		void process_order_book_update(const json_document& json);
 
 		void on_message(std::string_view message) override;
 		void send_subscribe(const websocket_subscription& subscription) override;
