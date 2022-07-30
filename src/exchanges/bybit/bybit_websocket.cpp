@@ -24,6 +24,7 @@ namespace
 		case websocket_channel::OHLCV:
 			return get_kline_topic(subscription.get_ohlcv_interval());
 		case websocket_channel::ORDER_BOOK:
+			return "diffDepth";
 		default:
 			throw mb_exception{ fmt::format("Websocket channel not supported on ByBit") };
 		}
@@ -53,6 +54,37 @@ namespace
 			.add("event", eventName)
 			.add("params", paramsJson)
 			.to_string();
+	}
+
+	order_book_entry create_order_book_entry(order_book_side side, const json_element& entryElement)
+	{
+		return order_book_entry
+		{
+			std::stod(entryElement.get<std::string>(0)),
+			std::stod(entryElement.get<std::string>(1)),
+			side
+		};
+	}
+
+	order_book_cache create_order_book_cache(std::time_t timeStamp, int depth, const json_element& asksElement, const json_element& bidsElement)
+	{
+		ask_cache askCache;
+		bid_cache bidCache;
+		
+		for (int i = 0; i < depth; ++i)
+		{
+			if (i < asksElement.size())
+			{
+				askCache.emplace(create_order_book_entry(order_book_side::ASK, asksElement.element(i)));
+			}
+
+			if (i < bidsElement.size())
+			{
+				bidCache.emplace(create_order_book_entry(order_book_side::BID, bidsElement.element(i)));
+			}
+		}
+
+		return order_book_cache{ timeStamp, std::move(askCache), std::move(bidCache) };
 	}
 }
 
@@ -92,9 +124,13 @@ namespace mb::internal
 		{
 			process_trade_message(std::move(symbol), json);
 		}
-		else if (topic.find("kline") != std::string::npos)
+		else if (topic == "kline")
 		{
 			process_ohlcv_message(std::move(symbol), json);
+		}
+		else if (topic == "diffDepth")
+		{
+			process_order_book_message(std::move(symbol), json);
 		}
 	}
 
@@ -125,6 +161,36 @@ namespace mb::internal
 
 		ohlcv_interval interval{ parse_ohlcv_interval(json.element("params").get<std::string>("klineType")) };
 		update_ohlcv(std::move(pairName), interval, std::move(data));
+	}
+
+	void bybit_websocket_stream::process_order_book_message(std::string pairName, const json_document& json)
+	{
+		json_element dataElement{ json.element("data").begin().value() };
+		std::time_t timeStamp{ dataElement.get<std::time_t>("t") };
+
+		json_element asksElement{ dataElement.element("a") };
+		json_element bidsElement{ dataElement.element("b") };
+		int depth = std::max<int>(asksElement.size(), bidsElement.size());
+
+		if (json.get<bool>("f"))
+		{
+			order_book_cache orderBook{ create_order_book_cache(timeStamp, depth, asksElement, bidsElement) };
+			initialise_order_book(std::move(pairName), std::move(orderBook));
+			return;
+		}
+
+		for (int i = 0; i < depth; ++i)
+		{
+			if (i < asksElement.size())
+			{
+				update_order_book(pairName, timeStamp, create_order_book_entry(order_book_side::ASK, asksElement.element(i)));
+			}
+
+			if (i < bidsElement.size())
+			{
+				update_order_book(pairName, timeStamp, create_order_book_entry(order_book_side::BID, bidsElement.element(i)));
+			}
+		}
 	}
 
 	void bybit_websocket_stream::send_subscribe(const websocket_subscription& subscription)

@@ -10,6 +10,7 @@ namespace mb::internal
 	private:
 		void process_trade_message(std::string pairName, const json_document& json);
 		void process_ohlcv_message(std::string pairName, const json_document& json);
+		void process_order_book_message(std::string pairName, const json_document& json);
 
 		void on_message(std::string_view message) override;
 		void send_subscribe(const websocket_subscription& subscription) override;
