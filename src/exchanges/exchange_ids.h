@@ -13,7 +13,6 @@ namespace mb
 		static constexpr std::string_view COINBASE = "coinbase";
 		static constexpr std::string_view BYBIT = "bybit";
 		static constexpr std::string_view DIGIFINEX = "digifinex";
-		static constexpr std::string_view DEXTRADE = "dextrade";
 		static constexpr std::string_view BINANCE = "binance";
 
 		std::vector<std::string_view> all();

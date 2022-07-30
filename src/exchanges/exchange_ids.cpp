@@ -10,7 +10,6 @@ namespace mb::exchange_ids
 			exchange_ids::COINBASE,
 			exchange_ids::BYBIT,
 			exchange_ids::DIGIFINEX,
-			exchange_ids::DEXTRADE,
 			exchange_ids::BINANCE
 		};
 	}
