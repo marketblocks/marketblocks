@@ -29,7 +29,6 @@ namespace mb
 		for (auto& pair : pairs)
 		{
 			prices.emplace(pair, get_price(pair));
-			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 
 		return prices;
@@ -43,7 +42,6 @@ namespace mb
 		for (auto& pair : pairs)
 		{
 			books.emplace(pair, get_order_book(pair, depth));
-			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 
 		return books;

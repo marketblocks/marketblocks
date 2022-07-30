@@ -71,4 +71,14 @@ namespace mb
 			std::move(bids)
 		};
 	}
+
+	order_book_cache from_snapshot(const order_book_state& snapshot)
+	{
+		return order_book_cache
+		{
+			snapshot.time_stamp(),
+			ask_cache{ snapshot.asks().begin(), snapshot.asks().end() },
+			bid_cache{ snapshot.bids().begin(), snapshot.bids().end() }
+		};
+	}
 }

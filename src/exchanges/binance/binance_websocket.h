@@ -10,10 +10,8 @@ namespace mb::internal
 	{
 	private:
 		std::unique_ptr<market_api> _marketApi;
-		std::unordered_map<std::time_t, std::function<void()>> _subscriptionConfirmedActions;
 		std::unordered_map<std::string, std::time_t> _orderBookIds;
-
-		void add_confirmation_action(std::time_t id, const websocket_subscription& subscription);
+		std::unordered_map<std::string, tradable_pair> _pairLookup;
 
 		void process_trade_message(const json_document& json);
 		void process_ohlcv_message(const json_document& json);

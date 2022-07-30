@@ -38,4 +38,6 @@ namespace mb
 		void update_cache(std::time_t timeStamp, order_book_entry entry);
 		order_book_state snapshot(int depth = 0) const;
 	};
+
+	order_book_cache from_snapshot(const order_book_state& snapshot);
 }
