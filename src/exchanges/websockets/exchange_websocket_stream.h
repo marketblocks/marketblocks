@@ -19,7 +19,6 @@ namespace mb
 		std::string _url;
 		char _pairSeparator;
 
-		concurrent_wrapper<std::unordered_map<std::string, tradable_pair>> _pairs;
 		concurrent_wrapper<std::unordered_map<std::string, trade_update>> _trades;
 		concurrent_wrapper<std::unordered_map<std::string, ohlcv_data>> _ohlcv;
 		concurrent_wrapper<std::unordered_map<std::string, order_book_cache>> _orderBooks;
@@ -35,6 +34,7 @@ namespace mb
 		virtual void send_unsubscribe(const websocket_subscription& subscription) = 0;
 
 	protected:
+		concurrent_wrapper<std::unordered_map<std::string, tradable_pair>> _pairs;
 		std::unique_ptr<websocket_connection> _connection;
 
 		void set_unsubscribed(const named_subscription& subscription);

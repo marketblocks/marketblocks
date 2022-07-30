@@ -98,7 +98,7 @@ namespace mb::internal
 
 		if (!contains(_orderBookIds, symbol))
 		{
-			order_book_state snapshot{ _marketApi->get_order_book(_pairLookup.at(symbol), 100) };
+			order_book_state snapshot{ _marketApi->get_order_book(_pairs.shared_lock()->at(symbol), 100)};
 			_orderBookIds[symbol] = snapshot.time_stamp();
 			initialise_order_book(symbol, from_snapshot(snapshot));
 			return;
@@ -166,11 +166,6 @@ namespace mb::internal
 
 	void binance_websocket_stream::send_subscribe(const websocket_subscription& subscription)
 	{
-		for (auto& pair : subscription.pair_item())
-		{
-			_pairLookup.try_emplace(pair.to_string(), pair);
-		}
-
 		std::string message{ create_message("SUBSCRIBE", get_channel_name(subscription), subscription.pair_item()) };
 		_connection->send_message(std::move(message));
 	}
