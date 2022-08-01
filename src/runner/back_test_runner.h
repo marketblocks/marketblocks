@@ -20,6 +20,7 @@ namespace mb::internal
 	private:
 		back_testing_config _config;
 		std::shared_ptr<back_testing_data> _backTestingData;
+		std::shared_ptr<backtest_websocket_stream> _websocketStream;
 		std::shared_ptr<paper_trade_api> _paperTradeApi;
 
 	public:
@@ -33,7 +34,7 @@ namespace mb::internal
 				create_data_source(_config.data_directory()),
 				_config);
 
-			auto websocketStream{ std::make_shared<backtest_websocket_stream>(_backTestingData) };
+			_websocketStream = std::make_shared<backtest_websocket_stream>(_backTestingData);
 			auto marketApi{ std::make_shared<back_test_market_api>(_backTestingData) };
 			
 			_paperTradeApi = create_paper_trade_api(
@@ -66,6 +67,8 @@ namespace mb::internal
 					logger::instance().info("Running back test {}% complete", percentageComplete);
 					lastLoggedPercentage = percentageComplete;
 				}
+
+				_websocketStream->notify();
 
 				try
 				{

@@ -135,7 +135,10 @@ namespace mb
 		auto lockedTrades = _trades.unique_lock();
 		lockedTrades->insert_or_assign(pairName, trade);
 		
-		fire_trade_update(trade_update_message{ _pairs.shared_lock()->at(pairName), std::move(trade)});
+		if (has_trade_update_handler())
+		{
+			fire_trade_update(trade_update_message{ _pairs.shared_lock()->at(pairName), std::move(trade)});
+		}
 	}
 
 	void exchange_websocket_stream::update_ohlcv(std::string pairName, ohlcv_interval interval, ohlcv_data ohlcvData)
@@ -143,7 +146,10 @@ namespace mb
 		auto lockedOhlcv = _ohlcv.unique_lock();
 		lockedOhlcv->insert_or_assign(create_ohlcv_sub_id(pairName, interval), ohlcvData);
 
-		fire_ohlcv_update(ohlcv_update_message{ _pairs.shared_lock()->at(pairName), interval, std::move(ohlcvData) });
+		if (has_ohlcv_update_handler())
+		{
+			fire_ohlcv_update(ohlcv_update_message{ _pairs.shared_lock()->at(pairName), interval, std::move(ohlcvData) });
+		}
 	}
 
 	void exchange_websocket_stream::initialise_order_book(std::string pairName, order_book_cache cache)
@@ -151,7 +157,10 @@ namespace mb
 		auto lockedOrderBooks = _orderBooks.unique_lock();
 		lockedOrderBooks->insert_or_assign(pairName, std::move(cache));
 
-		fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cache.snapshot() });
+		if (has_order_book_update_handler())
+		{
+			fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cache.snapshot() });
+		}
 	}
 
 	void exchange_websocket_stream::update_order_book(std::string pairName, std::time_t timeStamp, order_book_entry entry)

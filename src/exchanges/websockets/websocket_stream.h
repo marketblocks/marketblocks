@@ -37,6 +37,10 @@ namespace mb
 		void set_order_book_update_handler(order_book_update_handler handler);
 
 	protected:
+		bool has_trade_update_handler();
+		bool has_ohlcv_update_handler();
+		bool has_order_book_update_handler();
+
 		void fire_trade_update(trade_update_message message);
 		void fire_ohlcv_update(ohlcv_update_message message);
 		void fire_order_book_update(order_book_update_message message);

@@ -17,6 +17,21 @@ namespace mb
 		_orderBookUpdateHandler = std::move(handler);
 	}
 
+	bool websocket_stream::has_trade_update_handler()
+	{
+		return _tradeUpdateHandler.operator bool();
+	}
+
+	bool websocket_stream::has_ohlcv_update_handler()
+	{
+		return _ohlcvUpdateHandler.operator bool();
+	}
+
+	bool websocket_stream::has_order_book_update_handler()
+	{
+		return _orderBookUpdateHandler.operator bool();
+	}
+
 	void websocket_stream::fire_trade_update(trade_update_message message)
 	{
 		if (_tradeUpdateHandler)

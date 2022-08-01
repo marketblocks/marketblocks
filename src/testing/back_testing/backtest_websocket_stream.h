@@ -9,9 +9,12 @@ namespace mb
 	{
 	private:
 		std::shared_ptr<back_testing_data> _backTestingData;
+		std::unordered_set<unique_websocket_subscription> _subscriptions;
 
 	public:
 		backtest_websocket_stream(std::shared_ptr<back_testing_data> backTestingData);
+
+		void notify();
 
 		void reset() override {}
 		void disconnect()  override {}

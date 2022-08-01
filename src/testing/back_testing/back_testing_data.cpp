@@ -112,8 +112,13 @@ namespace mb
 	std::vector<ohlcv_data> back_testing_data::get_ohlcv(const tradable_pair& pair, int interval, int count)
 	{
 		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
+
+		if (pairData.empty())
+		{
+			return {};
+		}
+
 		std::optional<data_iterator> optionalIterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
-		
 		std::time_t startTime = pairData.begin()->time_stamp();
 
 		if (!optionalIterator.has_value() ||
@@ -159,6 +164,7 @@ namespace mb
 	trade_update back_testing_data::get_trade(const tradable_pair& pair)
 	{
 		const std::vector<ohlcv_data>& pairData{ get_or_load_data(pair) };
+
 		std::optional<data_iterator> iterator = get_iterator(pairData, pair, _dataTime, _iteratorCache);
 
 		if (!iterator.has_value())
