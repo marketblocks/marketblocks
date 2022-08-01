@@ -37,6 +37,20 @@ namespace
 	{
 		return tradeAction == trade_action::BUY ? "buy" : "sell";
 	}
+
+	std::string create_pair_list(const std::vector<tradable_pair>& pairs)
+	{
+		std::string pairList;
+
+		for (auto& pair : pairs)
+		{
+			pairList.append(pair.to_string());
+			pairList.append(",");
+		}
+
+		pairList.pop_back();
+		return pairList;
+	}
 }
 
 namespace mb
@@ -103,6 +117,16 @@ namespace mb
 			.to_string();
 
 		return send_public_request<double>("Ticker", kraken::read_price, query);
+	}
+
+	std::unordered_map<tradable_pair, double> kraken_api::get_prices(const std::vector<tradable_pair>& pairs) const
+	{
+		std::string query = url_query_builder{}
+			.add_parameter("pair", create_pair_list(pairs))
+			.to_string();
+
+		std::unordered_map<std::string, double> namedPrices{ send_public_request<std::unordered_map<std::string, double>>("Ticker", kraken::read_prices, query) };
+		return internal::create_pair_result_map(pairs, namedPrices);
 	}
 
 	order_book_state kraken_api::get_order_book(const tradable_pair& tradablePair, int depth) const

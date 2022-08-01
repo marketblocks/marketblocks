@@ -14,6 +14,12 @@ namespace mb::test
 	}
 
 	template<>
+	tradable_pair get_testing_pair_2<digifinex_api>()
+	{
+		return tradable_pair{ "ETH", "USDT" };
+	}
+
+	template<>
 	std::unique_ptr<exchange> create_exchange_api<digifinex_api>(
 		std::unique_ptr<http_service> httpService,
 		std::shared_ptr<websocket_stream> websocketStream)

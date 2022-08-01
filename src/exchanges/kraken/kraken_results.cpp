@@ -17,6 +17,11 @@ namespace
 			: messages[0];
 	}
 
+	double read_ticker_price(const json_element& tickerElement)
+	{
+		return std::stod(tickerElement.get<std::vector<std::string>>("c")[0]);
+	}
+
 	template<typename T, typename Reader> 
 	result<T> read_result(std::string_view jsonResult, const Reader& reader)
 	{
@@ -162,8 +167,23 @@ namespace mb::kraken
 	{
 		return read_result<double>(jsonResult, [](const json_element& resultElement)
 		{
-			json_element dataElement{ resultElement.begin().value() };
-			return std::stod(dataElement.get<std::vector<std::string>>("c")[0]);
+			return read_ticker_price(resultElement.begin().value());
+		});
+	}
+
+	result<std::unordered_map<std::string, double>> read_prices(std::string_view jsonResult)
+	{
+		return read_result<std::unordered_map<std::string, double>>(jsonResult, [](const json_element& resultElement)
+		{
+			std::unordered_map<std::string, double> prices;
+			prices.reserve(resultElement.size());
+
+			for (auto it = resultElement.begin(); it != resultElement.end(); ++it)
+			{
+				prices.emplace(it.key(), read_ticker_price(it.value()));
+			}
+
+			return prices;
 		});
 	}
 

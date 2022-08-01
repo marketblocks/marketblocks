@@ -20,6 +20,12 @@ namespace mb::test
 	}
 
 	template<typename Api>
+	tradable_pair get_testing_pair_2()
+	{
+		static_assert(sizeof(Api) == 0, "No specialization for get_testing_pair_2 exists");
+	}
+
+	template<typename Api>
 	std::unique_ptr<exchange> create_exchange_api(
 		std::unique_ptr<http_service> httpService,
 		std::shared_ptr<websocket_stream> websocketStream)

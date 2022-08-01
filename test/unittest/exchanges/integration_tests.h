@@ -31,15 +31,14 @@ namespace mb::test
 	protected:
 		std::unique_ptr<exchange> _api;
 		tradable_pair _testingPair;
+		tradable_pair _testingPair2;
 
 		ExchangeIntegrationTests()
-			: _api{ mb::create_exchange_api<Api>(true) }, _testingPair{ get_testing_pair<Api>() }
+			: 
+			_api{ mb::create_exchange_api<Api>(true) }, 
+			_testingPair{ get_testing_pair<Api>() },
+			_testingPair2{ get_testing_pair_2<Api>() }
 		{}
-
-		void TearDown() override
-		{
-			//_api->get_websocket_stream()->disconnect();
-		}
 	};
 
 	TYPED_TEST_SUITE_P(ExchangeIntegrationTests);
@@ -68,10 +67,33 @@ namespace mb::test
 		ASSERT_GT(price, 0.0);
 	}
 
+	TYPED_TEST_P(ExchangeIntegrationTests, GetPrices)
+	{
+		std::unordered_map<tradable_pair, double> prices{ this->_api->get_prices(
+			{
+				this->_testingPair,
+				this->_testingPair2
+			}) };
+
+		ASSERT_FALSE(prices.empty());
+	}
+
 	TYPED_TEST_P(ExchangeIntegrationTests, GetOrderBook)
 	{
 		order_book_state orderBook{ this->_api->get_order_book(this->_testingPair, 5) };
 		ASSERT_GT(orderBook.depth(), 0);
+	}
+
+	TYPED_TEST_P(ExchangeIntegrationTests, GetOrderBooks)
+	{
+		std::unordered_map<tradable_pair, order_book_state> orderBooks{ this->_api->get_order_books(
+			{
+				this->_testingPair,
+				this->_testingPair2
+			},
+			5) };
+
+		ASSERT_FALSE(orderBooks.empty());
 	}
 
 	TYPED_TEST_P(ExchangeIntegrationTests, GetBalances)
@@ -165,7 +187,9 @@ namespace mb::test
 		GetTradablePairs,
 		GetOhlcv,
 		GetPrice,
+		GetPrices,
 		GetOrderBook,
+		GetOrderBooks,
 		GetBalances,
 		GetFee,
 		GetOpenOrders,
