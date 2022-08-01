@@ -84,8 +84,8 @@ namespace
 
 		for (auto& asset : uniqueAssets)
 		{
-			double startBalance = find_or_default(initialBalances, asset, 0.0);
-			double finalBalance = find_or_default(finalBalances, asset, 0.0);
+			double startBalance = find_or_default<double>(initialBalances, asset);
+			double finalBalance = find_or_default<double>(finalBalances, asset);
 			double change = finalBalance - startBalance;
 
 			if (startBalance == 0.0)

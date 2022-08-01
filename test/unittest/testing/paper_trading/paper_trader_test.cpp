@@ -25,7 +25,7 @@ namespace
 
 		double get_price(const tradable_pair& pair) const
 		{
-			return find_or_default(_prices, pair, 0.0);
+			return find_or_default<double>(_prices, pair);
 		}
 	};
 

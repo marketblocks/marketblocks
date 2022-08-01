@@ -225,7 +225,7 @@ namespace mb
 	trade_update exchange_websocket_stream::get_last_trade(const tradable_pair& pair) const
 	{
 		auto lockedTrades = _trades.shared_lock();
-		return find_or_default(*lockedTrades, pair.to_string(_pairSeparator), trade_update{0, 0, 0});
+		return find_or_default<trade_update>(*lockedTrades, pair.to_string(_pairSeparator));
 	}
 
 	ohlcv_data exchange_websocket_stream::get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const
@@ -233,6 +233,6 @@ namespace mb
 		std::string subId{ create_ohlcv_sub_id(pair.to_string(_pairSeparator), interval) };
 		
 		auto lockedOhlcv = _ohlcv.shared_lock();
-		return find_or_default(*lockedOhlcv, subId, ohlcv_data{});
+		return find_or_default<ohlcv_data>(*lockedOhlcv, subId);
 	}
 }

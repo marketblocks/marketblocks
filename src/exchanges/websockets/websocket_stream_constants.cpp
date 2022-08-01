@@ -15,7 +15,13 @@ namespace mb
 			{ "1w", ohlcv_interval::W1 }
 		};
 
-		return find_or_default(ohlcvIntervalLookup, string.data(), ohlcv_interval::UNKNOWN);
+		auto it = ohlcvIntervalLookup.find(string.data());
+		if (it == ohlcvIntervalLookup.end())
+		{
+			return ohlcv_interval::UNKNOWN;
+		}
+
+		return it->second;
 	}
 
 	std::string to_string(ohlcv_interval interval)
@@ -30,7 +36,7 @@ namespace mb
 			{ ohlcv_interval::W1, "1w" }
 		};
 
-		return find_or_default(ohlcvIntervalLookup, interval, std::string{});
+		return find_or_default<std::string>(ohlcvIntervalLookup, interval);
 	}
 
 	int to_seconds(ohlcv_interval interval)

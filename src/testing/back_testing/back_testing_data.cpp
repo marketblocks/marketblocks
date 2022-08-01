@@ -42,7 +42,10 @@ namespace
 			return std::prev(data.end());
 		}
 
-		auto it = find_or_default(cache, pair, data.begin());
+		auto cacheIt = cache.find(pair);
+		auto it = cacheIt == cache.end()
+			? data.begin()
+			: cacheIt->second;
 
 		for (it; it != data.end(); ++it)
 		{

@@ -69,8 +69,8 @@ namespace mb
 		return source.find(element) != source.end();
 	}
 
-	template<typename Key, typename Value, typename Container>
-	constexpr Value find_or_default(const Container& source, Key key, Value defaultValue)
+	template<typename Value, typename Key, typename Container>
+	constexpr Value find_or_default(const Container& source, const Key& key)
 	{
 		auto it = source.find(key);
 
@@ -79,6 +79,6 @@ namespace mb
 			return it->second;
 		}
 
-		return defaultValue;
+		return Value{};
 	}
 }

@@ -12,6 +12,10 @@ namespace mb
 		double _volume;
 
 	public:
+		constexpr trade_update()
+			: _timeStamp{ 0 }, _price{ 0 }, _volume{ 0 }
+		{}
+
 		constexpr trade_update(std::time_t timeStamp, double price, double volume)
 			: _timeStamp{ timeStamp }, _price{ price }, _volume{ volume }
 		{}
