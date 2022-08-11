@@ -163,23 +163,12 @@ namespace mb
 		json_writer json = json_writer{}
 			.add("side", to_string(description.action()))
 			.add("product_id", description.pair().to_string(_pairSeparator))
-			.add("size", std::to_string(description.volume()));
+			.add("size", std::to_string(description.get(order_request_parameter::VOLUME)))
+			.add("type", ::to_string(description.order_type()));
 
-		if (is_stop_order(description.order_type()))
+		if (description.order_type() != order_type::MARKET)
 		{
-			json.add("type", ::to_string(order_type::LIMIT));
-			json.add("price", std::to_string(description.asset_price()));
-			json.add("stop", ::to_string(description.order_type()));
-			json.add("stop_price", std::to_string(description.asset_price()));
-		}
-		else
-		{
-			json.add("type", ::to_string(description.order_type()));
-
-			if (description.order_type() != order_type::MARKET)
-			{
-				json.add("price", std::to_string(description.asset_price()));
-			}
+			json.add("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)));
 		}
 
 		std::string content{ json.to_string() };

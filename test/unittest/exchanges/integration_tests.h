@@ -11,10 +11,12 @@ namespace
 
 	void execute_add_cancel_order_test(exchange& api, const tradable_pair& pair, double price, order_type orderType, trade_action action, bool cancel = true)
 	{
-		order_request trade{ orderType, pair, action, price, 0.01 };
+		order_request request = orderType == order_type::LIMIT
+			? create_limit_order(pair, action, price, 0.01)
+			: create_market_order(pair, action, 0.01);
 
 		std::string orderId;
-		ASSERT_NO_THROW(orderId = api.add_order(trade));
+		ASSERT_NO_THROW(orderId = api.add_order(request));
 
 		if (cancel)
 		{

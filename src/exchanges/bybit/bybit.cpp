@@ -20,14 +20,17 @@ namespace
 		return LIVE_BASE_URL;
 	}
 
-	double get_order_quantity(const order_request& orderRequest)
+	template<typename GetPrice>
+	double get_order_quantity(const order_request& orderRequest, GetPrice getPrice)
 	{
+		double volume{ orderRequest.get(order_request_parameter::VOLUME) };
+
 		if (orderRequest.order_type() == order_type::MARKET && orderRequest.action() == trade_action::BUY)
 		{
-			return calculate_cost(orderRequest.asset_price(), orderRequest.volume());
+			return calculate_cost(getPrice(), volume);
 		}
 
-		return orderRequest.volume();
+		return volume;
 	}
 
 	std::string to_side_string(trade_action action)
@@ -135,10 +138,10 @@ namespace mb
 		std::map<std::string, std::string> queryParams
 		{
 			{ "symbol", description.pair().to_string() },
-			{ "qty", std::to_string(get_order_quantity(description)) },
+			{ "qty", std::to_string(get_order_quantity(description, [this, description]() { return get_price(description.pair()); })) },
 			{ "side", to_side_string(description.action()) },
 			{ "type", to_type_string(description.order_type()) },
-			{ "price", std::to_string(description.asset_price()) }
+			{ "price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)) }
 		};
 				
 		return send_private_request<std::string>(http_verb::POST, "spot/v1/order", bybit::read_add_order, queryParams);

@@ -38,14 +38,17 @@ namespace
 		throw mb_exception{ "Order type not supported" };
 	}
 
-	double get_amount(const order_request& orderRequest)
+	template<typename GetPrice>
+	double get_amount(const order_request& orderRequest, GetPrice getPrice)
 	{
-		if (orderRequest.order_type() == order_type::LIMIT)
+		double volume{ orderRequest.get(order_request_parameter::VOLUME) };
+
+		if (orderRequest.order_type() == order_type::MARKET)
 		{
-			return orderRequest.volume();
+			return calculate_cost(getPrice(), volume);
 		}
 
-		return calculate_cost(orderRequest.asset_price(), orderRequest.volume());
+		return volume;
 	}
 }
 
@@ -137,8 +140,8 @@ namespace mb
 			.add_parameter("market", "spot")
 			.add_parameter("symbol", description.pair().to_string('_'))
 			.add_parameter("type", get_order_type(description.order_type(), description.action()))
-			.add_parameter("amount", std::to_string(get_amount(description)))
-			.add_parameter("price", std::to_string(description.asset_price()))
+			.add_parameter("amount", std::to_string(get_amount(description, [this, &description]() { return get_price(description.pair()); })))
+			.add_parameter("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)))
 			.to_string();				
 
 		return send_private_request<std::string>(http_verb::POST, "spot/order/new", digifinex::read_add_order, query);

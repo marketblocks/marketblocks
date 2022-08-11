@@ -46,7 +46,7 @@ namespace mb::internal
 			{
 				std::make_shared<back_test_exchange>(
 					exchange_ids::BACK_TEST,
-					websocketStream,
+					_websocketStream,
 					marketApi,
 					_paperTradeApi)
 			};

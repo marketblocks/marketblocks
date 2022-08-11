@@ -7,6 +7,7 @@ namespace mb
 		MARKET,
 		LIMIT,
 		STOP_LOSS,
+		TRAILING_STOP_LOSS,
 		TAKE_PROFIT
 	};
 }

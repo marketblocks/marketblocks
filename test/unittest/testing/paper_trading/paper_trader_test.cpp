@@ -64,14 +64,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		order_request orderRequest
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::BUY,
-			assetPrice,
-			volume
-		};
+		order_request orderRequest{ create_market_order(pair, trade_action::BUY, volume) };
 
 		constexpr double expectedGbpBalance = 59.96;
 		constexpr double expectedBtcBalance = 3.5;
@@ -98,14 +91,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		order_request orderRequest
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::SELL,
-			assetPrice,
-			volume
-		};
+		order_request orderRequest{ create_market_order(pair, trade_action::SELL, volume) };
 
 		constexpr double expectedGbpBalance = 119.98;
 		constexpr double expectedBtcBalance = 0.5;
@@ -132,14 +118,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		order_request orderRequest
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::BUY,
-			assetPrice,
-			volume
-		};
+		order_request orderRequest{ create_market_order(pair, trade_action::BUY, volume) };
 
 		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
 	}
@@ -157,14 +136,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		order_request orderRequest
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::SELL,
-			assetPrice,
-			volume
-		};
+		order_request orderRequest{ create_market_order(pair, trade_action::SELL, volume) };
 
 		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
 	}
@@ -183,14 +155,7 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		order_request orderRequest
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::BUY,
-			orderPrice,
-			volume
-		};
+		order_request orderRequest{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
 
 		trader.add_order(orderRequest);
 
@@ -214,23 +179,8 @@ namespace mb::test
 
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
 
-		order_request orderRequest1
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::BUY,
-			orderPrice,
-			volume
-		};
-
-		order_request orderRequest2
-		{
-			order_type::LIMIT,
-			pair,
-			trade_action::BUY,
-			orderPrice / 2,
-			volume
-		};
+		order_request orderRequest1{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
+		order_request orderRequest2{ create_limit_order(pair, trade_action::BUY, orderPrice / 2, volume) };
 
 		trader.add_order(orderRequest1);
 		trader.add_order(orderRequest2);

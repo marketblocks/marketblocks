@@ -166,15 +166,11 @@ namespace mb::test
 	TYPED_TEST_P(ExchangeRequestTests, AddOrder)
 	{
 		this->set_http_service_behaviour("add_order");
-		this->_api->add_order(
-			order_request
-			{
-				order_type::LIMIT,
-				tradable_pair{ "BTC", "USD" },
-				trade_action::BUY,
-				1234.56,
-				0.789
-			});
+		this->_api->add_order(create_limit_order(
+			tradable_pair{ "BTC", "USD" }, 
+			trade_action::BUY, 
+			1234.56,
+			0.789));
 	}
 
 	TYPED_TEST_P(ExchangeRequestTests, CancelOrder)

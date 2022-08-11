@@ -9,22 +9,24 @@ namespace
 {
 	using namespace mb;
 
-	bool should_close_limit_order(const order_request& trade, double currentPrice)
+	bool should_close_limit_order(const order_request& request, double currentPrice)
 	{
+		double price{ request.get(order_request_parameter::ASSET_PRICE) };
+
 		return 
-			(trade.action() == trade_action::BUY && currentPrice <= trade.asset_price()) ||
-			(trade.action() == trade_action::SELL && currentPrice >= trade.asset_price());
+			(request.action() == trade_action::BUY && currentPrice <= price) ||
+			(request.action() == trade_action::SELL && currentPrice >= price);
 	}
 
-	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const order_request& trade)
+	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const order_request& request)
 	{
 		return order_description{
 			time,
 			std::move(orderId),
-			trade.pair().to_string('/'),
-			trade.action(),
+			request.pair().to_string('/'),
+			request.action(),
 			fillPrice,
-			trade.volume() };
+			request.get(order_request_parameter::VOLUME) };
 	}
 }
 
@@ -55,28 +57,29 @@ namespace mb
 		return balanceIt->second >= amount;
 	}
 
-	void paper_trade_api::execute_order(std::string orderId, const order_request& description, double fillPrice)
+	void paper_trade_api::execute_order(std::string orderId, const order_request& request, double fillPrice)
 	{
-		double cost = calculate_cost(fillPrice, description.volume());
+		double volume{ request.get(order_request_parameter::VOLUME) };
+		double cost = calculate_cost(fillPrice, volume);
 		double fee = cost * _fee * 0.01;
 		std::string gainedAsset;
 		std::string soldAsset;
 		double gainValue;
 		double soldValue;
 
-		if (description.action() == trade_action::BUY)
+		if (request.action() == trade_action::BUY)
 		{
-			gainedAsset = description.pair().asset();
-			soldAsset = description.pair().price_unit();
-			gainValue = description.volume();
+			gainedAsset = request.pair().asset();
+			soldAsset = request.pair().price_unit();
+			gainValue = volume;
 			soldValue =	cost + fee;
 		}
 		else
 		{
-			gainedAsset = description.pair().price_unit();
-			soldAsset = description.pair().asset();
+			gainedAsset = request.pair().price_unit();
+			soldAsset = request.pair().asset();
 			gainValue = cost - fee;
-			soldValue = description.volume();
+			soldValue = volume;
 		}
 
 		if (!has_sufficient_funds(soldAsset, soldValue))
@@ -87,7 +90,7 @@ namespace mb
 		_balances[gainedAsset] += gainValue;
 		_balances[soldAsset] -= soldValue;
 
-		_closedOrders.emplace_back(to_order_description(std::move(orderId), fillPrice, _getTime(), description));
+		_closedOrders.emplace_back(to_order_description(std::move(orderId), fillPrice, _getTime(), request));
 	}
 
 	void paper_trade_api::fill_open_orders()
@@ -95,25 +98,25 @@ namespace mb
 		std::unordered_map<tradable_pair, double> prices;
 		std::vector<std::string> closedOrders;
 
-		for (auto& [orderId, trade] : _openTrades)
+		for (auto& [orderId, request] : _openOrders)
 		{
-			if (!contains(prices, trade.pair()))
+			if (!contains(prices, request.pair()))
 			{
-				prices[trade.pair()] = _getPrice(trade.pair());
+				prices[request.pair()] = _getPrice(request.pair());
 			}
 
-			double price = prices[trade.pair()];
+			double price = prices[request.pair()];
 
-			if (should_close_limit_order(trade, price))
+			if (should_close_limit_order(request, price))
 			{
-				execute_order(orderId, trade, trade.asset_price());
+				execute_order(orderId, request, request.get(order_request_parameter::ASSET_PRICE));
 				closedOrders.emplace_back(orderId);
 			}
 		}
 
 		for (auto& id : closedOrders)
 		{
-			_openTrades.erase(id);
+			_openOrders.erase(id);
 		}
 	}
 
@@ -130,11 +133,11 @@ namespace mb
 	std::vector<order_description> paper_trade_api::get_open_orders() const
 	{
 		std::vector<order_description> orders;
-		orders.reserve(_openTrades.size());
+		orders.reserve(_openOrders.size());
 
-		for (auto& [orderId, trade] : _openTrades)
+		for (auto& [orderId, trade] : _openOrders)
 		{
-			orders.emplace_back(to_order_description(orderId, trade.asset_price(), _getTime(), trade));
+			orders.emplace_back(to_order_description(orderId, trade.get(order_request_parameter::ASSET_PRICE), _getTime(), trade));
 		}
 
 		return orders;
@@ -145,24 +148,24 @@ namespace mb
 		return _closedOrders;
 	}
 
-	std::string paper_trade_api::add_order(const order_request& description)
+	std::string paper_trade_api::add_order(const order_request& request)
 	{
 		std::string orderId = std::to_string(_nextOrderNumber++);
-		double price = _getPrice(description.pair());
+		double price = _getPrice(request.pair());
 		
-		if (description.order_type() == order_type::MARKET)
+		if (request.order_type() == order_type::MARKET)
 		{
-			execute_order(orderId, description, price);
+			execute_order(orderId, request, price);
 		}
 		else
 		{
-			if (should_close_limit_order(description, price))
+			if (should_close_limit_order(request, price))
 			{
-				execute_order(orderId, description, description.asset_price());
+				execute_order(orderId, request, request.get(order_request_parameter::ASSET_PRICE));
 			}
 			else
 			{
-				_openTrades.emplace(orderId, description);
+				_openOrders.emplace(orderId, request);
 			}
 		}
 		
@@ -171,13 +174,13 @@ namespace mb
 
 	void paper_trade_api::cancel_order(std::string_view orderId)
 	{
-		auto it = _openTrades.find(orderId.data());
+		auto it = _openOrders.find(orderId.data());
 
-		if (it == _openTrades.end())
+		if (it == _openOrders.end())
 		{
 			throw mb_exception{ fmt::format("Could not find order with id = {}", orderId) };
 		}
 
-		_openTrades.erase(it);
+		_openOrders.erase(it);
 	}
 }

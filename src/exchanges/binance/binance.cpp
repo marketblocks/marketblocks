@@ -157,11 +157,11 @@ namespace mb
 			.add_parameter("symbol", description.pair().to_string())
 			.add_parameter("side", to_order_side(description.action()))
 			.add_parameter("type", to_order_type_str(description.order_type()))
-			.add_parameter("quantity", std::to_string(description.volume()));
+			.add_parameter("quantity", std::to_string(description.get(order_request_parameter::VOLUME)));
 
 		if (description.order_type() != order_type::MARKET)
 		{
-			query.add_parameter("price", std::to_string(description.asset_price()));
+			query.add_parameter("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)));
 			query.add_parameter("timeInForce", "GTC");
 		}
 

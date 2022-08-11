@@ -169,8 +169,8 @@ namespace mb
 			.add_parameter("pair", description.pair().to_string())
 			.add_parameter("type", ::to_string(description.action()))
 			.add_parameter("ordertype", ::to_string(description.order_type()))
-			.add_parameter("price", std::to_string(description.asset_price()))
-			.add_parameter("volume", std::to_string(description.volume()))
+			.add_parameter("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)))
+			.add_parameter("volume", std::to_string(description.get(order_request_parameter::VOLUME)))
 			.to_string();
 
 		return send_private_request<std::string>("AddOrder", kraken::read_add_order, query);

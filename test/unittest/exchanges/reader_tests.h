@@ -179,12 +179,11 @@ namespace mb::test
 	TYPED_TEST_P(ExchangeReaderTests, ReadAddOrder)
 	{
 		this->set_http_response("add_order");
-		std::string orderId{ this->_api->add_order(order_request{
-			order_type::LIMIT,
+		std::string orderId{ this->_api->add_order(create_limit_order(
 			this->_testingPair,
 			trade_action::BUY,
 			1.0,
-			1.0})};
+			1.0)) };
 
 		ASSERT_EQ("7886252369684", orderId);
 	}
