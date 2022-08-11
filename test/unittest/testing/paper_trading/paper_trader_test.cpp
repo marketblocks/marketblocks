@@ -61,21 +61,14 @@ namespace mb::test
 
 		tradable_pair pair{ "BTC", "GBP" };
 		get_prices prices{{ { pair, assetPrice } }};
-
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-
 		order_request orderRequest{ create_market_order(pair, trade_action::BUY, volume) };
 
-		constexpr double expectedGbpBalance = 59.96;
-		constexpr double expectedBtcBalance = 3.5;
-
-		std::string orderId = trader.add_order(orderRequest);
+		trader.add_order(orderRequest);
 
 		std::unordered_map<std::string,double> balances = trader.get_balances();
-
-		EXPECT_EQ(orderId, "1");
-		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), expectedBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), expectedGbpBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), 3.5);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), 59.96);
 	}
 
 	TEST(PaperTrader, AddSellOrderCorrectlyAdjustsBalances)
@@ -88,21 +81,14 @@ namespace mb::test
 
 		tradable_pair pair{ "BTC", "GBP" };
 		get_prices prices{ { { pair, assetPrice } } };
-
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-
 		order_request orderRequest{ create_market_order(pair, trade_action::SELL, volume) };
 
-		constexpr double expectedGbpBalance = 119.98;
-		constexpr double expectedBtcBalance = 0.5;
-
-		std::string orderId = trader.add_order(orderRequest);
+		trader.add_order(orderRequest);
 
 		std::unordered_map<std::string,double> balances = trader.get_balances();
-
-		EXPECT_EQ(orderId, "1");
-		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), expectedBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), expectedGbpBalance);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), 0.5);
+		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), 119.98);
 	}
 
 	TEST(PaperTrader, AddBuyOrderThrowsIfInsufficientFunds)
@@ -115,9 +101,7 @@ namespace mb::test
 
 		tradable_pair pair{ "BTC", "GBP" };
 		get_prices prices{ { { pair, assetPrice } } };
-
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-
 		order_request orderRequest{ create_market_order(pair, trade_action::BUY, volume) };
 
 		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
@@ -133,15 +117,13 @@ namespace mb::test
 
 		tradable_pair pair{ "BTC", "GBP" };
 		get_prices prices{ { { pair, assetPrice } } };
-
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-
 		order_request orderRequest{ create_market_order(pair, trade_action::SELL, volume) };
 
 		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
 	}
 
-	TEST(PaperTrader, AddLimitOrderDoesNotExecuteIfPriceNotReached)
+	TEST(PaperTrade, BuyLimitOrderDoesNotExecuteIfPriceGreaterThanLimitPrice)
 	{
 		constexpr double initialGbpBalance = 100.0;
 		constexpr double initialBtcBalance = 1.5;
@@ -152,20 +134,38 @@ namespace mb::test
 
 		tradable_pair pair{ "BTC", "GBP" };
 		get_prices prices{ { { pair, assetPrice } } };
-
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-
 		order_request orderRequest{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
 
-		trader.add_order(orderRequest);
+		std::string orderId{ trader.add_order(orderRequest) };
 
-		std::unordered_map<std::string,double> balances = trader.get_balances();
-
-		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), initialBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), initialGbpBalance);
+		std::vector<order_description> openOrders{ trader.get_open_orders() };
+		ASSERT_TRUE(openOrders.size() == 1);
+		ASSERT_EQ(orderId, openOrders.front().order_id());
 	}
 
-	TEST(PaperTrader, CloseOpenOrdersClosesOrders)
+	TEST(PaperTrade, SellLimitOrderDoesNotExecuteIfPriceLessThanLimitPrice)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 20.0;
+		constexpr double volume = 2.0;
+		constexpr double orderPrice = 40.0;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_limit_order(pair, trade_action::SELL, orderPrice, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		std::vector<order_description> openOrders{ trader.get_open_orders() };
+		ASSERT_TRUE(openOrders.size() == 1);
+		ASSERT_EQ(orderId, openOrders.front().order_id());
+	}
+
+	TEST(PaperTrader, BuyLimitOrderExecutesWhenPriceLessThanLimitPrice)
 	{
 		constexpr double initialGbpBalance = 100.0;
 		constexpr double initialBtcBalance = 1.5;
@@ -176,24 +176,134 @@ namespace mb::test
 
 		tradable_pair pair{ "BTC", "GBP" };
 		get_prices prices{ { { pair, assetPrice } } };
-
 		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
 
-		order_request orderRequest1{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
-		order_request orderRequest2{ create_limit_order(pair, trade_action::BUY, orderPrice / 2, volume) };
+		std::string orderId{ trader.add_order(orderRequest) };
 
-		trader.add_order(orderRequest1);
-		trader.add_order(orderRequest2);
+		prices.set_price(pair, 19.0);
+		trader.try_fill_open_orders();
 
-		prices.set_price(pair, orderPrice);
-		trader.fill_open_orders();
+		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
+		ASSERT_TRUE(closedOrders.size() == 1);
+		ASSERT_EQ(orderId, closedOrders.front().order_id());
+	}
 
-		constexpr double expectedGbpBalance = 59.96;
-		constexpr double expectedBtcBalance = 3.5;
+	TEST(PaperTrader, SellLimitOrderExecutesWhenPriceGreaterThanLimitPrice)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 20.0;
+		constexpr double volume = 1.0;
+		constexpr double orderPrice = 40.0;
 
-		std::unordered_map<std::string,double> balances = trader.get_balances();
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_limit_order(pair, trade_action::SELL, orderPrice, volume) };
 
-		EXPECT_DOUBLE_EQ(balances.at(pair.asset()), expectedBtcBalance);
-		EXPECT_DOUBLE_EQ(balances.at(pair.price_unit()), expectedGbpBalance);
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		prices.set_price(pair, 41.0);
+		trader.try_fill_open_orders();
+
+		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
+		ASSERT_TRUE(closedOrders.size() == 1);
+		ASSERT_EQ(orderId, closedOrders.front().order_id());
+	}
+
+	TEST(PaperTrader, StopLossSellOrderDoesNotExecuteWhenPriceGreaterThanStopPrice)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 40.0;
+		constexpr double volume = 1.0;
+		constexpr double stopPrice = 20.0;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_stop_loss_order(pair, trade_action::SELL, stopPrice, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		std::vector<order_description> openOrders{ trader.get_open_orders() };
+		ASSERT_TRUE(openOrders.size() == 1);
+		ASSERT_EQ(orderId, openOrders.front().order_id());
+	}
+
+	TEST(PaperTrader, StopLossSellOrderExecutesWhenPriceLessThanStopPrice)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 40.0;
+		constexpr double volume = 1.0;
+		constexpr double stopPrice = 20.0;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_stop_loss_order(pair, trade_action::SELL, stopPrice, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 19.0);
+		trader.try_fill_open_orders();
+
+		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
+		ASSERT_TRUE(closedOrders.size() == 1);
+		ASSERT_EQ(orderId, closedOrders.front().order_id());
+	}
+
+	TEST(PaperTrader, StopLossBuyOrderDoesNotExecuteWhenPriceLessThanStopPrice)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 20.0;
+		constexpr double volume = 1.0;
+		constexpr double stopPrice = 40.0;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_stop_loss_order(pair, trade_action::BUY, stopPrice, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		std::vector<order_description> openOrders{ trader.get_open_orders() };
+		ASSERT_TRUE(openOrders.size() == 1);
+		ASSERT_EQ(orderId, openOrders.front().order_id());
+	}
+
+	TEST(PaperTrader, StopLossBuyOrderExecutesWhenPriceGreaterThanStopPrice)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 20.0;
+		constexpr double volume = 1.0;
+		constexpr double stopPrice = 40.0;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_stop_loss_order(pair, trade_action::BUY, stopPrice, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 41.0);
+		trader.try_fill_open_orders();
+
+		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
+		ASSERT_TRUE(closedOrders.size() == 1);
+		ASSERT_EQ(orderId, closedOrders.front().order_id());
 	}
 }

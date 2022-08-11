@@ -30,7 +30,8 @@ namespace mb
 		int _nextOrderNumber;
 
 		bool has_sufficient_funds(const std::string& asset, double amount) const;
-		void execute_order(std::string orderId, const order_request& description, double fillPrice);
+		void execute_order(std::string_view orderId, order_request& request, double fillPrice);
+		bool try_fill_order(std::string_view orderId);
 
 	public:
 		explicit paper_trade_api(
@@ -39,7 +40,7 @@ namespace mb
 			get_price_function getPrice,
 			get_time_function getTime);
 
-		void fill_open_orders();
+		void try_fill_open_orders();
 
 		std::string_view exchange_id() const noexcept { return _exchangeId; }
 

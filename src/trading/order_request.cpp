@@ -42,7 +42,7 @@ namespace mb
 		return order_request{ order_type::MARKET, std::move(pair), action, std::move(parameters) };
 	}
 
-	order_request create_stop_loss_order(tradable_pair pair, trade_action action, double volume, double stopPrice)
+	order_request create_stop_loss_order(tradable_pair pair, trade_action action, double stopPrice, double volume)
 	{
 		std::unordered_map<order_request_parameter, double> parameters
 		{
@@ -53,7 +53,7 @@ namespace mb
 		return order_request{ order_type::STOP_LOSS, std::move(pair), action, std::move(parameters) };
 	}
 
-	order_request create_trailing_stop_loss_order(tradable_pair pair, trade_action action, double volume, double delta)
+	order_request create_trailing_stop_loss_order(tradable_pair pair, trade_action action, double delta, double volume)
 	{
 		std::unordered_map<order_request_parameter, double> parameters
 		{

@@ -41,7 +41,7 @@ namespace mb
 
 	order_request create_limit_order(tradable_pair pair, trade_action action, double assetPrice, double volume);
 	order_request create_market_order(tradable_pair pair, trade_action action, double volume);
-	order_request create_stop_loss_order(tradable_pair pair, trade_action action, double volume, double stopPrice);
-	order_request create_trailing_stop_loss_order(tradable_pair pair, trade_action action, double volume, double delta);
+	order_request create_stop_loss_order(tradable_pair pair, trade_action action, double stopPrice, double volume);
+	order_request create_trailing_stop_loss_order(tradable_pair pair, trade_action action, double delta, double volume);
 }
 

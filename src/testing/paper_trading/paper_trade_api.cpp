@@ -11,11 +11,20 @@ namespace
 
 	bool should_close_limit_order(const order_request& request, double currentPrice)
 	{
-		double price{ request.get(order_request_parameter::ASSET_PRICE) };
+		double orderPrice{ request.get(order_request_parameter::ASSET_PRICE) };
 
 		return 
-			(request.action() == trade_action::BUY && currentPrice <= price) ||
-			(request.action() == trade_action::SELL && currentPrice >= price);
+			(request.action() == trade_action::BUY && currentPrice <= orderPrice) ||
+			(request.action() == trade_action::SELL && currentPrice >= orderPrice);
+	}
+
+	bool should_close_stop_loss_order(const order_request& request, double currentPrice)
+	{
+		double orderPrice{ request.get(order_request_parameter::STOP_PRICE) };
+
+		return
+			(request.action() == trade_action::BUY && currentPrice >= orderPrice) ||
+			(request.action() == trade_action::SELL && currentPrice <= orderPrice);
 	}
 
 	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const order_request& request)
@@ -57,7 +66,7 @@ namespace mb
 		return balanceIt->second >= amount;
 	}
 
-	void paper_trade_api::execute_order(std::string orderId, const order_request& request, double fillPrice)
+	void paper_trade_api::execute_order(std::string_view orderId, order_request& request, double fillPrice)
 	{
 		double volume{ request.get(order_request_parameter::VOLUME) };
 		double cost = calculate_cost(fillPrice, volume);
@@ -90,34 +99,70 @@ namespace mb
 		_balances[gainedAsset] += gainValue;
 		_balances[soldAsset] -= soldValue;
 
-		_closedOrders.emplace_back(to_order_description(std::move(orderId), fillPrice, _getTime(), request));
+		_closedOrders.emplace_back(to_order_description(orderId.data(), fillPrice, _getTime(), std::move(request)));
+		_openOrders.erase(orderId.data());
 	}
 
-	void paper_trade_api::fill_open_orders()
+	void paper_trade_api::try_fill_open_orders()
 	{
-		std::unordered_map<tradable_pair, double> prices;
-		std::vector<std::string> closedOrders;
+		std::vector<std::string> openOrderIds{ to_vector<std::string>(
+			_openOrders,
+			[](std::pair<std::string, order_request> pair) { return pair.first; }) };
 
-		for (auto& [orderId, request] : _openOrders)
+		for (auto& id : openOrderIds)
 		{
-			if (!contains(prices, request.pair()))
+			try_fill_order(id);
+		}
+	}
+
+	bool paper_trade_api::try_fill_order(std::string_view orderId)
+	{
+		order_request& request{ _openOrders.at(orderId.data()) };
+		double price{ _getPrice(request.pair()) };
+		double fillPrice;
+		bool fill = false;
+
+		switch (request.order_type())
+		{
+			case order_type::MARKET:
 			{
-				prices[request.pair()] = _getPrice(request.pair());
+				fillPrice = price;
+				fill = true;
+				break;
 			}
-
-			double price = prices[request.pair()];
-
-			if (should_close_limit_order(request, price))
+			case order_type::LIMIT:
 			{
-				execute_order(orderId, request, request.get(order_request_parameter::ASSET_PRICE));
-				closedOrders.emplace_back(orderId);
+				fill = should_close_limit_order(request, price);
+				if (fill)
+				{
+					fillPrice = request.get(order_request_parameter::ASSET_PRICE);
+				}
+
+				break;
+			}
+			case order_type::STOP_LOSS:
+			{
+				fill = should_close_stop_loss_order(request, price);
+				if (fill)
+				{
+					fillPrice = request.get(order_request_parameter::STOP_PRICE);
+				}
+
+				break;
+			}
+			default:
+			{
+				fill = false;
+				break;
 			}
 		}
 
-		for (auto& id : closedOrders)
+		if (fill)
 		{
-			_openOrders.erase(id);
+			execute_order(orderId.data(), request, fillPrice);
 		}
+
+		return fill;
 	}
 
 	double paper_trade_api::get_fee(const tradable_pair& tradablePair) const
@@ -151,23 +196,9 @@ namespace mb
 	std::string paper_trade_api::add_order(const order_request& request)
 	{
 		std::string orderId = std::to_string(_nextOrderNumber++);
-		double price = _getPrice(request.pair());
-		
-		if (request.order_type() == order_type::MARKET)
-		{
-			execute_order(orderId, request, price);
-		}
-		else
-		{
-			if (should_close_limit_order(request, price))
-			{
-				execute_order(orderId, request, request.get(order_request_parameter::ASSET_PRICE));
-			}
-			else
-			{
-				_openOrders.emplace(orderId, request);
-			}
-		}
+		_openOrders.emplace(orderId, request);
+
+		try_fill_order(orderId);
 		
 		return orderId;
 	}
