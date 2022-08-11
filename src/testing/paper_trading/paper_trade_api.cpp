@@ -27,6 +27,22 @@ namespace
 			(request.action() == trade_action::SELL && currentPrice <= orderPrice);
 	}
 
+	bool should_close_trailing_stop_loss_order(const order_request& request, double currentPrice, double& maxOrMin)
+	{
+		double delta{ request.get(order_request_parameter::TRAILING_DELTA) };
+
+		if (request.action() == trade_action::BUY)
+		{
+			maxOrMin = std::min(maxOrMin, currentPrice);
+			return currentPrice >= maxOrMin * (1 + delta);
+		}
+		else
+		{
+			maxOrMin = std::max(maxOrMin, currentPrice);
+			return currentPrice <= maxOrMin * (1 - delta);
+		}
+	}
+
 	order_description to_order_description(std::string orderId, double fillPrice, std::time_t time, const order_request& request)
 	{
 		return order_description{
@@ -146,6 +162,22 @@ namespace mb
 				if (fill)
 				{
 					fillPrice = request.get(order_request_parameter::STOP_PRICE);
+				}
+
+				break;
+			}
+			case order_type::TRAILING_STOP_LOSS:
+			{
+				if (_trailingOrderLimits.find(orderId.data()) == _trailingOrderLimits.end())
+				{
+					_trailingOrderLimits.emplace(orderId.data(), price);
+				}
+
+				fill = should_close_trailing_stop_loss_order(request, price, _trailingOrderLimits[orderId.data()]);
+				if (fill)
+				{
+					fillPrice = request.get(order_request_parameter::STOP_PRICE);
+					_trailingOrderLimits.erase(orderId.data());
 				}
 
 				break;

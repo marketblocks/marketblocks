@@ -306,4 +306,76 @@ namespace mb::test
 		ASSERT_TRUE(closedOrders.size() == 1);
 		ASSERT_EQ(orderId, closedOrders.front().order_id());
 	}
+
+	TEST(PaperTrader, TrailingStopLossBuyOrderExecutesWhenPriceGreaterThanMinPlusDelta)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 20.0;
+		constexpr double volume = 1.0;
+		constexpr double delta = 0.10;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_trailing_stop_loss_order(pair, trade_action::BUY, delta, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 21.0);
+		trader.try_fill_open_orders();
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 15.0);
+		trader.try_fill_open_orders();
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 17.0);
+		trader.try_fill_open_orders();
+
+		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
+		ASSERT_TRUE(closedOrders.size() == 1);
+		ASSERT_EQ(orderId, closedOrders.front().order_id());
+	}
+
+	TEST(PaperTrader, TrailingStopLossSellOrderExecutesWhenPriceLessThanMaxMinusDelta)
+	{
+		constexpr double initialGbpBalance = 100.0;
+		constexpr double initialBtcBalance = 1.5;
+		constexpr double fee = 0.1;
+		constexpr double assetPrice = 20.0;
+		constexpr double volume = 1.0;
+		constexpr double delta = 0.10;
+
+		tradable_pair pair{ "BTC", "GBP" };
+		get_prices prices{ { { pair, assetPrice } } };
+		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
+		order_request orderRequest{ create_trailing_stop_loss_order(pair, trade_action::SELL, delta, volume) };
+
+		std::string orderId{ trader.add_order(orderRequest) };
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 19.0);
+		trader.try_fill_open_orders();
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 25.0);
+		trader.try_fill_open_orders();
+
+		ASSERT_TRUE(trader.get_closed_orders().empty());
+
+		prices.set_price(pair, 22.0);
+		trader.try_fill_open_orders();
+
+		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
+		ASSERT_TRUE(closedOrders.size() == 1);
+		ASSERT_EQ(orderId, closedOrders.front().order_id());
+	}
 }

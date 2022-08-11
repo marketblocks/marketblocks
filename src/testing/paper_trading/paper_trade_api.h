@@ -24,8 +24,9 @@ namespace mb
 		get_time_function _getTime;
 		std::string_view _exchangeId;
 		double _fee;
-		std::unordered_map<std::string,double> _balances;
-		std::unordered_map<std::string,order_request> _openOrders;
+		std::unordered_map<std::string, double> _balances;
+		std::unordered_map<std::string, order_request> _openOrders;
+		std::unordered_map<std::string, double> _trailingOrderLimits;
 		std::vector<order_description> _closedOrders;
 		int _nextOrderNumber;
 
