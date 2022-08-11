@@ -40,6 +40,9 @@ namespace
 			return "LIMIT";
 		case order_type::MARKET:
 			return "MARKET";
+		case order_type::STOP_LOSS:
+		case order_type::TRAILING_STOP_LOSS:
+			return "STOP_LOSS";
 		default:
 			throw mb_exception{ "Order type not supported" };
 		}
@@ -159,10 +162,26 @@ namespace mb
 			.add_parameter("type", to_order_type_str(description.order_type()))
 			.add_parameter("quantity", std::to_string(description.get(order_request_parameter::VOLUME)));
 
-		if (description.order_type() != order_type::MARKET)
+		switch (description.order_type())
+		{
+		case order_type::LIMIT:
 		{
 			query.add_parameter("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)));
 			query.add_parameter("timeInForce", "GTC");
+			break;
+		}
+		case order_type::STOP_LOSS:
+		{
+			query.add_parameter("stopPrice", std::to_string(description.get(order_request_parameter::STOP_PRICE)));
+			break;
+		}
+		case order_type::TRAILING_STOP_LOSS:
+		{
+			query.add_parameter("trailingDelta", std::to_string(description.get(order_request_parameter::TRAILING_DELTA)));
+			break;
+		}
+		default:
+			break;
 		}
 
 		return send_private_request<std::string>(http_verb::POST, "/api/v3/order", binance::read_add_order, query);
