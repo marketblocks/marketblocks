@@ -42,23 +42,25 @@ namespace mb
 		return order_request{ order_type::MARKET, std::move(pair), action, std::move(parameters) };
 	}
 
-	order_request create_stop_loss_order(tradable_pair pair, trade_action action, double stopPrice, double volume)
+	order_request create_stop_loss_order(tradable_pair pair, trade_action action, double stopPrice, double volume, double limitPrice)
 	{
 		std::unordered_map<order_request_parameter, double> parameters
 		{
 			{ order_request_parameter::VOLUME, volume },
 			{ order_request_parameter::STOP_PRICE, stopPrice },
+			{ order_request_parameter::ASSET_PRICE, limitPrice }
 		};
 
 		return order_request{ order_type::STOP_LOSS, std::move(pair), action, std::move(parameters) };
 	}
 
-	order_request create_trailing_stop_loss_order(tradable_pair pair, trade_action action, double delta, double volume)
+	order_request create_trailing_stop_loss_order(tradable_pair pair, trade_action action, double delta, double volume, double limitPrice)
 	{
 		std::unordered_map<order_request_parameter, double> parameters
 		{
 			{ order_request_parameter::VOLUME, volume },
 			{ order_request_parameter::TRAILING_DELTA, delta },
+			{ order_request_parameter::ASSET_PRICE, limitPrice }
 		};
 
 		return order_request{ order_type::TRAILING_STOP_LOSS, std::move(pair), action, std::move(parameters) };

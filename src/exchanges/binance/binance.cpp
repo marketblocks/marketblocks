@@ -42,7 +42,7 @@ namespace
 			return "MARKET";
 		case order_type::STOP_LOSS:
 		case order_type::TRAILING_STOP_LOSS:
-			return "STOP_LOSS";
+			return "STOP_LOSS_LIMIT";
 		default:
 			throw mb_exception{ "Order type not supported" };
 		}
@@ -61,6 +61,13 @@ namespace
 		symbols.append("]");
 
 		return symbols;
+	}
+
+	bool is_limit_order(order_type orderType)
+	{
+		return orderType == order_type::LIMIT ||
+			orderType == order_type::STOP_LOSS ||
+			orderType == order_type::TRAILING_STOP_LOSS;
 	}
 }
 
@@ -162,14 +169,14 @@ namespace mb
 			.add_parameter("type", to_order_type_str(description.order_type()))
 			.add_parameter("quantity", std::to_string(description.get(order_request_parameter::VOLUME)));
 
-		switch (description.order_type())
-		{
-		case order_type::LIMIT:
+		if (is_limit_order(description.order_type()))
 		{
 			query.add_parameter("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)));
 			query.add_parameter("timeInForce", "GTC");
-			break;
 		}
+
+		switch (description.order_type())
+		{
 		case order_type::STOP_LOSS:
 		{
 			query.add_parameter("stopPrice", std::to_string(description.get(order_request_parameter::STOP_PRICE)));
@@ -177,7 +184,8 @@ namespace mb
 		}
 		case order_type::TRAILING_STOP_LOSS:
 		{
-			query.add_parameter("trailingDelta", std::to_string(description.get(order_request_parameter::TRAILING_DELTA)));
+			int delta{ static_cast<int>(description.get(order_request_parameter::TRAILING_DELTA) * 10000) };
+			query.add_parameter("trailingDelta", std::to_string(delta));
 			break;
 		}
 		default:
