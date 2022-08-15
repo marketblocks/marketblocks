@@ -36,8 +36,8 @@ namespace mb::internal
 			{
 				auto paperTradeApi{ std::make_shared<paper_trade_api>(
 					paperTradingConfig, 
+					exchange->get_websocket_stream(),
 					exchange->id(),
-					[exchange](const tradable_pair& pair) { return exchange->get_price(pair); },
 					now_t)};
 
 				_liveTestExchanges.emplace_back(
@@ -63,7 +63,7 @@ namespace mb::internal
 				try
 				{
 					strategy.run_iteration();
-					testLogger.flush_trades();
+					//testLogger.flush_trades();
 				}
 				catch (const mb_exception& e)
 				{
@@ -80,6 +80,7 @@ namespace mb::internal
 
 			logger::instance().info("Live test complete. Generating report...");
 
+			testLogger.flush_trades();
 			test_report report{ testLogger.generate_test_report(0, strategy.get_test_results()) };
 			testLogger.log_test_report(report);
 		}

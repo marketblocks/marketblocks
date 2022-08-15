@@ -11,6 +11,12 @@ namespace mb
 		BUY = 1
 	};
 
+	enum class order_status
+	{
+		OPEN,
+		CLOSED
+	};
+
 	constexpr std::string_view to_string(trade_action tradeAction)
 	{
 		constexpr std::string_view BUY = "buy";

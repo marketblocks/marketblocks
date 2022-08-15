@@ -1,6 +1,7 @@
 #include <fmt/format.h>
 
 #include "paper_trade_api.h"
+#include "common/utils/mathutils.h"
 #include "common/utils/financeutils.h"
 #include "common/utils/containerutils.h"
 #include "common/exceptions/mb_exception.h"
@@ -8,6 +9,9 @@
 namespace
 {
 	using namespace mb;
+
+	static constexpr int VolumePrecision = 10;
+	static double VolumeModifier = std::pow(10, VolumePrecision);
 
 	bool should_close_limit_order(const order_request& request, double currentPrice)
 	{
@@ -53,25 +57,41 @@ namespace
 			fillPrice,
 			request.get(order_request_parameter::VOLUME) };
 	}
+
+	volume_t to_integer_volume(double volume)
+	{
+		return static_cast<volume_t>(volume * VolumeModifier);
+	}
+
+	std::unordered_map<std::string, volume_t> create_initialised_balances(const std::unordered_map<std::string, double>& initialBalances)
+	{
+		return to_unordered_map<std::string, volume_t>(
+			initialBalances,
+			[](const std::pair<std::string, double>& pair) { return pair.first; },
+			[](const std::pair<std::string, double>& pair) { return to_integer_volume(pair.second); });
+	}
 }
 
 namespace mb
 {
 	paper_trade_api::paper_trade_api(
 		paper_trading_config config,
+		std::shared_ptr<websocket_stream> websocketStream,
 		std::string_view exchangeId,
-		get_price_function getPrice,
 		get_time_function getTime)
-		: 
-		_getPrice{ std::move(getPrice) },
+		:
+		_websocketStream{ std::move(websocketStream) },
 		_getTime{ std::move(getTime) },
-		_exchangeId{ exchangeId }, 
+		_exchangeId{ exchangeId },
 		_fee{ config.fee() },
-		_balances{std::move(config.balances())}, 
-		_nextOrderNumber{1}
-	{}
+		_balances{ create_initialised_balances(config.balances()) },
+		_nextOrderNumber{ 1 },
+		_tradingMutex{}
+	{
+		_websocketStream->add_trade_update_handler([this](trade_update_message message) { trade_update_handler(std::move(message)); });
+	}
 
-	bool paper_trade_api::has_sufficient_funds(const std::string& asset, double amount) const
+	bool paper_trade_api::has_sufficient_funds(const std::string& asset, volume_t amount) const
 	{
 		auto balanceIt = _balances.find(asset);
 		if (balanceIt == _balances.end())
@@ -80,6 +100,78 @@ namespace mb
 		}
 
 		return balanceIt->second >= amount;
+	}
+
+	bool paper_trade_api::try_fill_order(std::string_view orderId)
+	{
+		order_request& request{ _openOrders.at(orderId.data()) };
+		double price{ _websocketStream->get_last_trade(request.pair()).price() };
+
+		if (price == 0.0)
+		{
+			return false;
+		}
+
+		double fillPrice;
+		bool fill = false;
+
+		switch (request.order_type())
+		{
+		case order_type::MARKET:
+		{
+			fillPrice = price;
+			fill = true;
+			break;
+		}
+		case order_type::LIMIT:
+		{
+			fill = should_close_limit_order(request, price);
+			if (fill)
+			{
+				fillPrice = request.get(order_request_parameter::ASSET_PRICE);
+			}
+
+			break;
+		}
+		case order_type::STOP_LOSS:
+		{
+			fill = should_close_stop_loss_order(request, price);
+			if (fill)
+			{
+				fillPrice = request.get(order_request_parameter::STOP_PRICE);
+			}
+
+			break;
+		}
+		case order_type::TRAILING_STOP_LOSS:
+		{
+			if (_trailingOrderLimits.find(orderId.data()) == _trailingOrderLimits.end())
+			{
+				_trailingOrderLimits.emplace(orderId.data(), price);
+			}
+
+			fill = should_close_trailing_stop_loss_order(request, price, _trailingOrderLimits[orderId.data()]);
+			if (fill)
+			{
+				fillPrice = price;
+				_trailingOrderLimits.erase(orderId.data());
+			}
+
+			break;
+		}
+		default:
+		{
+			fill = false;
+			break;
+		}
+		}
+
+		if (fill)
+		{
+			execute_order(orderId.data(), request, fillPrice);
+		}
+
+		return fill;
 	}
 
 	void paper_trade_api::execute_order(std::string_view orderId, order_request& request, double fillPrice)
@@ -107,94 +199,42 @@ namespace mb
 			soldValue = volume;
 		}
 
-		if (!has_sufficient_funds(soldAsset, soldValue))
+		volume_t gainVolume{ to_integer_volume(gainValue) };
+		volume_t soldVolume{ to_integer_volume(soldValue) };
+
+		if (!has_sufficient_funds(soldAsset, soldVolume))
 		{
 			throw mb_exception{ fmt::format("Insufficient funds ({0})", soldAsset) };
 		}
 
-		_balances[gainedAsset] += gainValue;
-		_balances[soldAsset] -= soldValue;
+		_balances[gainedAsset] += gainVolume;
+		_balances[soldAsset] -= soldVolume;
 
 		_closedOrders.emplace_back(to_order_description(orderId.data(), fillPrice, _getTime(), std::move(request)));
 		_openOrders.erase(orderId.data());
 	}
 
-	void paper_trade_api::try_fill_open_orders()
+	void paper_trade_api::trade_update_handler(trade_update_message message)
 	{
-		std::vector<std::string> openOrderIds{ to_vector<std::string>(
-			_openOrders,
-			[](std::pair<std::string, order_request> pair) { return pair.first; }) };
+		std::lock_guard lock{ _tradingMutex };
 
-		for (auto& id : openOrderIds)
+		std::vector<std::string>& orderIds{ _openOrdersByPair[message.pair()] };
+		size_t orderCount = orderIds.size();
+		int index = 0;
+		
+		for (int i = 0; i < orderCount; ++i)
 		{
-			try_fill_order(id);
-		}
-	}
+			auto it = orderIds.begin() + index;
 
-	bool paper_trade_api::try_fill_order(std::string_view orderId)
-	{
-		order_request& request{ _openOrders.at(orderId.data()) };
-		double price{ _getPrice(request.pair()) };
-		double fillPrice;
-		bool fill = false;
-
-		switch (request.order_type())
-		{
-			case order_type::MARKET:
+			if (!contains(_openOrders, *it) || try_fill_order(*it))
 			{
-				fillPrice = price;
-				fill = true;
-				break;
+				orderIds.erase(it);
 			}
-			case order_type::LIMIT:
+			else
 			{
-				fill = should_close_limit_order(request, price);
-				if (fill)
-				{
-					fillPrice = request.get(order_request_parameter::ASSET_PRICE);
-				}
-
-				break;
-			}
-			case order_type::STOP_LOSS:
-			{
-				fill = should_close_stop_loss_order(request, price);
-				if (fill)
-				{
-					fillPrice = request.get(order_request_parameter::STOP_PRICE);
-				}
-
-				break;
-			}
-			case order_type::TRAILING_STOP_LOSS:
-			{
-				if (_trailingOrderLimits.find(orderId.data()) == _trailingOrderLimits.end())
-				{
-					_trailingOrderLimits.emplace(orderId.data(), price);
-				}
-
-				fill = should_close_trailing_stop_loss_order(request, price, _trailingOrderLimits[orderId.data()]);
-				if (fill)
-				{
-					fillPrice = request.get(order_request_parameter::STOP_PRICE);
-					_trailingOrderLimits.erase(orderId.data());
-				}
-
-				break;
-			}
-			default:
-			{
-				fill = false;
-				break;
+				++index;
 			}
 		}
-
-		if (fill)
-		{
-			execute_order(orderId.data(), request, fillPrice);
-		}
-
-		return fill;
 	}
 
 	double paper_trade_api::get_fee(const tradable_pair& tradablePair) const
@@ -204,11 +244,17 @@ namespace mb
 
 	std::unordered_map<std::string,double> paper_trade_api::get_balances() const
 	{
-		return _balances;
+		std::lock_guard lock{ _tradingMutex };
+		return to_unordered_map<std::string, double>(
+			_balances,
+			[](const std::pair<std::string, volume_t>& pair) { return pair.first; },
+			[](const std::pair<std::string, volume_t>& pair) { return static_cast<double>(pair.second) / VolumeModifier; });
 	}
 
 	std::vector<order_description> paper_trade_api::get_open_orders() const
 	{
+		std::lock_guard lock{ _tradingMutex };
+
 		std::vector<order_description> orders;
 		orders.reserve(_openOrders.size());
 
@@ -222,13 +268,22 @@ namespace mb
 
 	std::vector<order_description> paper_trade_api::get_closed_orders() const
 	{
+		std::lock_guard lock{ _tradingMutex };
 		return _closedOrders;
 	}
 
 	std::string paper_trade_api::add_order(const order_request& request)
 	{
-		std::string orderId = std::to_string(_nextOrderNumber++);
+		std::lock_guard lock{ _tradingMutex };
+
+		std::string orderId{ std::to_string(_nextOrderNumber++) };
 		_openOrders.emplace(orderId, request);
+		_openOrdersByPair[request.pair()].emplace_back(orderId);
+		
+		if (_websocketStream->get_subscription_status(unique_websocket_subscription::create_trade_sub(request.pair())) == subscription_status::UNSUBSCRIBED)
+		{
+			_websocketStream->subscribe(websocket_subscription::create_trade_sub({ request.pair() }));
+		}
 
 		try_fill_order(orderId);
 		
@@ -237,6 +292,8 @@ namespace mb
 
 	void paper_trade_api::cancel_order(std::string_view orderId)
 	{
+		std::lock_guard lock{ _tradingMutex };
+
 		auto it = _openOrders.find(orderId.data());
 
 		if (it == _openOrders.end())
@@ -245,5 +302,17 @@ namespace mb
 		}
 
 		_openOrders.erase(it);
+	}
+
+	order_status paper_trade_api::get_order_status(std::string_view orderId) const
+	{
+		std::lock_guard lock{ _tradingMutex };
+
+		if (contains(_openOrders, orderId.data()))
+		{
+			return order_status::OPEN;
+		}
+
+		return order_status::CLOSED;
 	}
 }

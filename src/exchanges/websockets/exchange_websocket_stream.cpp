@@ -132,8 +132,10 @@ namespace mb
 
 	void exchange_websocket_stream::update_trade(std::string pairName, trade_update trade)
 	{
-		auto lockedTrades = _trades.unique_lock();
-		lockedTrades->insert_or_assign(pairName, trade);
+		{
+			auto lockedTrades = _trades.unique_lock();
+			lockedTrades->insert_or_assign(pairName, trade);
+		}
 		
 		if (has_trade_update_handler())
 		{
@@ -143,8 +145,10 @@ namespace mb
 
 	void exchange_websocket_stream::update_ohlcv(std::string pairName, ohlcv_interval interval, ohlcv_data ohlcvData)
 	{
-		auto lockedOhlcv = _ohlcv.unique_lock();
-		lockedOhlcv->insert_or_assign(create_ohlcv_sub_id(pairName, interval), ohlcvData);
+		{
+			auto lockedOhlcv = _ohlcv.unique_lock();
+			lockedOhlcv->insert_or_assign(create_ohlcv_sub_id(pairName, interval), ohlcvData);
+		}
 
 		if (has_ohlcv_update_handler())
 		{
@@ -154,8 +158,10 @@ namespace mb
 
 	void exchange_websocket_stream::initialise_order_book(std::string pairName, order_book_cache cache)
 	{
-		auto lockedOrderBooks = _orderBooks.unique_lock();
-		lockedOrderBooks->insert_or_assign(pairName, std::move(cache));
+		{
+			auto lockedOrderBooks = _orderBooks.unique_lock();
+			lockedOrderBooks->insert_or_assign(pairName, std::move(cache));
+		}
 
 		if (has_order_book_update_handler())
 		{
@@ -165,17 +171,22 @@ namespace mb
 
 	void exchange_websocket_stream::update_order_book(std::string pairName, std::time_t timeStamp, order_book_entry entry)
 	{
-		auto lockedOrderBooks = _orderBooks.unique_lock();
-
-		if (!contains(*lockedOrderBooks, pairName))
 		{
-			lockedOrderBooks->insert_or_assign(pairName, order_book_cache{ 0, {}, {} });
+			auto lockedOrderBooks = _orderBooks.unique_lock();
+
+			if (!contains(*lockedOrderBooks, pairName))
+			{
+				lockedOrderBooks->insert_or_assign(pairName, order_book_cache{ 0, {}, {} });
+			}
+
+			auto cacheIt = lockedOrderBooks->find(pairName);
+			cacheIt->second.update_cache(timeStamp, std::move(entry));
 		}
 
-		auto cacheIt = lockedOrderBooks->find(pairName);
-		cacheIt->second.update_cache(timeStamp, std::move(entry));
-
-		fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cacheIt->second.snapshot() });
+		if (has_order_book_update_handler())
+		{
+			//fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cacheIt->second.snapshot() });
+		}
 	}
 
 	subscription_status exchange_websocket_stream::get_subscription_status(const unique_websocket_subscription& subscription) const

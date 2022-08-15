@@ -35,11 +35,10 @@ namespace mb::internal
 				_config);
 
 			_websocketStream = std::make_shared<backtest_websocket_stream>(_backTestingData);
-			auto marketApi{ std::make_shared<back_test_market_api>(_backTestingData) };
 			
 			_paperTradeApi = create_paper_trade_api(
 				exchange_ids::BACK_TEST, 
-				[this](const tradable_pair& pair) { return _backTestingData->get_trade(pair).price(); },
+				_websocketStream,
 				[this]() { return _backTestingData->data_time(); });
 
 			return
@@ -47,7 +46,7 @@ namespace mb::internal
 				std::make_shared<back_test_exchange>(
 					exchange_ids::BACK_TEST,
 					_websocketStream,
-					marketApi,
+					std::make_shared<back_test_market_api>(_backTestingData),
 					_paperTradeApi)
 			};
 		}

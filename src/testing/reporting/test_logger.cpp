@@ -135,10 +135,7 @@ namespace mb
 	{
 		for (auto& exchange : _exchangeData)
 		{
-			auto tradeApi = exchange.trade_api();
-
-			tradeApi->try_fill_open_orders();
-			std::vector<order_description> closedOrders{ tradeApi->get_closed_orders() };
+			std::vector<order_description> closedOrders{ exchange.trade_api()->get_closed_orders() };
 
 			if (closedOrders.empty())
 			{

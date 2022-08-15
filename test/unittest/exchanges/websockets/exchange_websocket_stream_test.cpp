@@ -236,7 +236,7 @@ namespace mb::test
 		mock_exchange_websocket_stream test{ create_mock_stream() };
 
 		bool eventFired = false;
-		test.set_trade_update_handler([&eventFired](trade_update_message) { eventFired = true; });
+		test.add_trade_update_handler([&eventFired](trade_update_message) { eventFired = true; });
 
 		test.subscribe(websocket_subscription::create_trade_sub({ pair }));
 		test.expose_update_trade(pair.to_string(), trade);

@@ -18,6 +18,14 @@ namespace mb
 		return (t - a) * 100.0 / (b - a);
 	}
 
+	template<typename T>
+	constexpr T round(T value, int dp)
+	{
+		T shift{ std::pow(static_cast<T>(10.0), dp) };
+		double rounded{ std::round(value * shift) };
+		return rounded / shift;
+	}
+
 	bool double_equal(double a, double b);
 	bool double_less_than(double a, double b);
 	bool double_greater_than(double a, double b);

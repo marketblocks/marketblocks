@@ -127,9 +127,9 @@ namespace mb::test
 		bool ohlcvHandlerCalled = false;
 		bool orderBookHandlerCalled = false;
 
-		stream.set_trade_update_handler([&tradeHandlerCalled](trade_update_message) { tradeHandlerCalled = true; });
-		stream.set_ohlcv_update_handler([&ohlcvHandlerCalled](ohlcv_update_message) { ohlcvHandlerCalled = true; });
-		stream.set_order_book_update_handler([&orderBookHandlerCalled](order_book_update_message) { orderBookHandlerCalled = true; });
+		stream.add_trade_update_handler([&tradeHandlerCalled](trade_update_message) { tradeHandlerCalled = true; });
+		stream.add_ohlcv_update_handler([&ohlcvHandlerCalled](ohlcv_update_message) { ohlcvHandlerCalled = true; });
+		stream.add_order_book_update_handler([&orderBookHandlerCalled](order_book_update_message) { orderBookHandlerCalled = true; });
 
 		stream.notify();
 

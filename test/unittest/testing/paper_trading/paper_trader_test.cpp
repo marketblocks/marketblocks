@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "unittest/mocks.h"
 #include "testing/paper_trading/paper_trade_api.h"
 #include "common/exceptions/mb_exception.h"
 #include "common/utils/containerutils.h"
@@ -7,375 +8,175 @@
 namespace
 {
 	using namespace mb;
+	using namespace mb::test;
 
-	class get_prices
+	using ::testing::Return;
+
+	class PaperTradeApiTest : public testing::Test
 	{
-	private:
-		std::unordered_map<tradable_pair, double> _prices;
+	protected:
+		static constexpr double InitialGbpBalance = 100.0;
+		static constexpr double InitialBtcBalance = 1.5;
+		static constexpr double DefaultPrice = 20.0;
+		static constexpr double Fee = 0.1;
+		
+		tradable_pair _pair;
+		mock_websocket_stream* _mockWebsocketStream;
+		std::unique_ptr<paper_trade_api> _paperTradeApi;
 
-	public:
-		get_prices(std::unordered_map<tradable_pair, double> prices)
-			: _prices{ std::move(prices) }
-		{}
-
-		void set_price(tradable_pair pair, double price)
+		void set_price(double price, bool fireHandler)
 		{
-			_prices.insert_or_assign(std::move(pair), price);
-		}
+			trade_update update{ now_t(), price, 1.0 };
 
-		double get_price(const tradable_pair& pair) const
-		{
-			return find_or_default<double>(_prices, pair);
-		}
-	};
+			ON_CALL(*_mockWebsocketStream, get_last_trade)
+				.WillByDefault(Return(update));
 
-	paper_trade_api create_paper_trade_api(
-		double initialGbpBalance,
-		double initialBtcBalance,
-		double fee,
-		const get_prices& getPrices)
-	{
-		std::unordered_map<std::string,double> initialBalances
-		{
-			{ "GBP", initialGbpBalance },
-			{ "BTC", initialBtcBalance }
+			if (fireHandler)
+			{
+				_mockWebsocketStream->expose_fire_trade_update(trade_update_message{ _pair, std::move(update) });
+			}
 		};
 
-		return paper_trade_api{
-			paper_trading_config{ fee, std::move(initialBalances) },
-			"",
-			[&getPrices](const tradable_pair& pair) {return getPrices.get_price(pair); },
-			now_t};
-	}
+	public:
+		PaperTradeApiTest()
+			: _pair{ "BTC", "GBP" }
+		{}
+
+		void SetUp() override
+		{
+			std::unique_ptr<mock_websocket_stream> mockWebsocketStream{ std::make_unique<mock_websocket_stream>() };
+			_mockWebsocketStream = mockWebsocketStream.get();
+
+			set_price(DefaultPrice, false);
+
+			std::unordered_map<std::string, double> initialBalances
+			{
+				{ "GBP", InitialGbpBalance },
+				{ "BTC", InitialBtcBalance }
+			};
+
+			_paperTradeApi = std::make_unique<paper_trade_api>(
+				paper_trading_config{ Fee, std::move(initialBalances) },
+				std::move(mockWebsocketStream),
+				"",
+				now_t);
+		};
+	};
 }
 
 namespace mb::test
 {
-	TEST(PaperTrader, AddBuyOrderCorrectlyAdjustsBalances)
+	TEST_F(PaperTradeApiTest, AddBuyOrderCorrectlyAdjustsBalances)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 2.0;
+		order_request orderRequest{ create_market_order(this->_pair, trade_action::BUY, 2.0) };
+		this->_paperTradeApi->add_order(orderRequest);
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{{ { pair, assetPrice } }};
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_market_order(pair, trade_action::BUY, volume) };
-
-		trader.add_order(orderRequest);
-
-		std::unordered_map<std::string,double> balances = trader.get_balances();
+		std::unordered_map<std::string,double> balances = this->_paperTradeApi->get_balances();
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), 3.5);
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), 59.96);
 	}
 
-	TEST(PaperTrader, AddSellOrderCorrectlyAdjustsBalances)
+	TEST_F(PaperTradeApiTest, AddSellOrderCorrectlyAdjustsBalances)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 1.0;
+		order_request orderRequest{ create_market_order(this->_pair, trade_action::SELL, 1.0) };
+		this->_paperTradeApi->add_order(orderRequest);
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_market_order(pair, trade_action::SELL, volume) };
-
-		trader.add_order(orderRequest);
-
-		std::unordered_map<std::string,double> balances = trader.get_balances();
+		std::unordered_map<std::string,double> balances = this->_paperTradeApi->get_balances();
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().asset()), 0.5);
 		EXPECT_DOUBLE_EQ(balances.at(orderRequest.pair().price_unit()), 119.98);
 	}
 
-	TEST(PaperTrader, AddBuyOrderThrowsIfInsufficientFunds)
+	TEST_F(PaperTradeApiTest, AddBuyOrderThrowsIfInsufficientFunds)
 	{
-		constexpr double initialGbpBalance = 20.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 50.0;
-		constexpr double volume = 1.0;
-
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_market_order(pair, trade_action::BUY, volume) };
-
-		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
+		order_request orderRequest{ create_market_order(this->_pair, trade_action::BUY, 10) };
+		EXPECT_THROW(this->_paperTradeApi->add_order(orderRequest), mb_exception);
 	}
 
-	TEST(PaperTrader, AddSellOrderThrowsIfInsufficientFunds)
+	TEST_F(PaperTradeApiTest, AddSellOrderThrowsIfInsufficientFunds)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 0.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 50.0;
-		constexpr double volume = 1.0;
-
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_market_order(pair, trade_action::SELL, volume) };
-
-		EXPECT_THROW(trader.add_order(orderRequest), mb_exception);
+		order_request orderRequest{ create_market_order(this->_pair, trade_action::SELL, 10) };
+		EXPECT_THROW(this->_paperTradeApi->add_order(orderRequest), mb_exception);
 	}
 
-	TEST(PaperTrade, BuyLimitOrderDoesNotExecuteIfPriceGreaterThanLimitPrice)
+	TEST_F(PaperTradeApiTest, BuyLimitOrderExecutesWhenPriceLessThanLimitPrice)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 40.0;
-		constexpr double volume = 2.0;
-		constexpr double orderPrice = 20.0;
+		order_request orderRequest{ create_limit_order(this->_pair, trade_action::BUY, 10.0, 1.0) };
+		std::string orderId{ this->_paperTradeApi->add_order(orderRequest) };
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::string orderId{ trader.add_order(orderRequest) };
+		set_price(5.0, true);
 
-		std::vector<order_description> openOrders{ trader.get_open_orders() };
-		ASSERT_TRUE(openOrders.size() == 1);
-		ASSERT_EQ(orderId, openOrders.front().order_id());
+		ASSERT_EQ(order_status::CLOSED, this->_paperTradeApi->get_order_status(orderId));
 	}
 
-	TEST(PaperTrade, SellLimitOrderDoesNotExecuteIfPriceLessThanLimitPrice)
+	TEST_F(PaperTradeApiTest, SellLimitOrderExecutesWhenPriceGreaterThanLimitPrice)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 2.0;
-		constexpr double orderPrice = 40.0;
+		order_request orderRequest{ create_limit_order(this->_pair, trade_action::SELL, 40.0, 1.0) };
+		std::string orderId{ this->_paperTradeApi->add_order(orderRequest) };
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_limit_order(pair, trade_action::SELL, orderPrice, volume) };
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::string orderId{ trader.add_order(orderRequest) };
+		set_price(50.0, true);
 
-		std::vector<order_description> openOrders{ trader.get_open_orders() };
-		ASSERT_TRUE(openOrders.size() == 1);
-		ASSERT_EQ(orderId, openOrders.front().order_id());
+		ASSERT_EQ(order_status::CLOSED, this->_paperTradeApi->get_order_status(orderId));
 	}
 
-	TEST(PaperTrader, BuyLimitOrderExecutesWhenPriceLessThanLimitPrice)
+	TEST_F(PaperTradeApiTest, StopLossSellOrderExecutesWhenPriceLessThanStopPrice)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 40.0;
-		constexpr double volume = 2.0;
-		constexpr double orderPrice = 20.0;
+		order_request orderRequest{ create_stop_loss_order(this->_pair, trade_action::SELL, 10.0, 1.0) };
+		std::string orderId{ this->_paperTradeApi->add_order(orderRequest) };
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_limit_order(pair, trade_action::BUY, orderPrice, volume) };
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::string orderId{ trader.add_order(orderRequest) };
+		set_price(9.0, true);
 
-		prices.set_price(pair, 19.0);
-		trader.try_fill_open_orders();
-
-		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
-		ASSERT_TRUE(closedOrders.size() == 1);
-		ASSERT_EQ(orderId, closedOrders.front().order_id());
+		ASSERT_EQ(order_status::CLOSED, this->_paperTradeApi->get_order_status(orderId));
 	}
 
-	TEST(PaperTrader, SellLimitOrderExecutesWhenPriceGreaterThanLimitPrice)
+	TEST_F(PaperTradeApiTest, StopLossBuyOrderExecutesWhenPriceGreaterThanStopPrice)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 1.0;
-		constexpr double orderPrice = 40.0;
+		order_request orderRequest{ create_stop_loss_order(this->_pair, trade_action::BUY, 40.0, 1.0) };
+		std::string orderId{ this->_paperTradeApi->add_order(orderRequest) };
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_limit_order(pair, trade_action::SELL, orderPrice, volume) };
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::string orderId{ trader.add_order(orderRequest) };
+		set_price(50.0, true);
 
-		prices.set_price(pair, 41.0);
-		trader.try_fill_open_orders();
-
-		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
-		ASSERT_TRUE(closedOrders.size() == 1);
-		ASSERT_EQ(orderId, closedOrders.front().order_id());
+		ASSERT_EQ(order_status::CLOSED, this->_paperTradeApi->get_order_status(orderId));
 	}
 
-	TEST(PaperTrader, StopLossSellOrderDoesNotExecuteWhenPriceGreaterThanStopPrice)
+	TEST_F(PaperTradeApiTest, TrailingStopLossBuyOrderExecutesWhenPriceGreaterThanMinPlusDelta)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 40.0;
-		constexpr double volume = 1.0;
-		constexpr double stopPrice = 20.0;
+		order_request orderRequest{ create_trailing_stop_loss_order(this->_pair, trade_action::BUY, 0.1, 1.0) };
+		std::string orderId{ this->_paperTradeApi->add_order(orderRequest) };
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_stop_loss_order(pair, trade_action::SELL, stopPrice, volume) };
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::string orderId{ trader.add_order(orderRequest) };
+		set_price(21.0, true);
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::vector<order_description> openOrders{ trader.get_open_orders() };
-		ASSERT_TRUE(openOrders.size() == 1);
-		ASSERT_EQ(orderId, openOrders.front().order_id());
+		set_price(15.0, true);
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
+
+		set_price(17.0, true);
+		ASSERT_EQ(order_status::CLOSED, this->_paperTradeApi->get_order_status(orderId));
 	}
 
-	TEST(PaperTrader, StopLossSellOrderExecutesWhenPriceLessThanStopPrice)
+	TEST_F(PaperTradeApiTest, TrailingStopLossSellOrderExecutesWhenPriceLessThanMaxMinusDelta)
 	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 40.0;
-		constexpr double volume = 1.0;
-		constexpr double stopPrice = 20.0;
+		order_request orderRequest{ create_trailing_stop_loss_order(this->_pair, trade_action::SELL, 0.1, 1.0) };
+		std::string orderId{ this->_paperTradeApi->add_order(orderRequest) };
 
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_stop_loss_order(pair, trade_action::SELL, stopPrice, volume) };
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		std::string orderId{ trader.add_order(orderRequest) };
+		set_price(19.0, true);
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		ASSERT_TRUE(trader.get_closed_orders().empty());
+		set_price(25.0, true);
+		ASSERT_EQ(order_status::OPEN, this->_paperTradeApi->get_order_status(orderId));
 
-		prices.set_price(pair, 19.0);
-		trader.try_fill_open_orders();
-
-		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
-		ASSERT_TRUE(closedOrders.size() == 1);
-		ASSERT_EQ(orderId, closedOrders.front().order_id());
-	}
-
-	TEST(PaperTrader, StopLossBuyOrderDoesNotExecuteWhenPriceLessThanStopPrice)
-	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 1.0;
-		constexpr double stopPrice = 40.0;
-
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_stop_loss_order(pair, trade_action::BUY, stopPrice, volume) };
-
-		std::string orderId{ trader.add_order(orderRequest) };
-
-		std::vector<order_description> openOrders{ trader.get_open_orders() };
-		ASSERT_TRUE(openOrders.size() == 1);
-		ASSERT_EQ(orderId, openOrders.front().order_id());
-	}
-
-	TEST(PaperTrader, StopLossBuyOrderExecutesWhenPriceGreaterThanStopPrice)
-	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 1.0;
-		constexpr double stopPrice = 40.0;
-
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_stop_loss_order(pair, trade_action::BUY, stopPrice, volume) };
-
-		std::string orderId{ trader.add_order(orderRequest) };
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 41.0);
-		trader.try_fill_open_orders();
-
-		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
-		ASSERT_TRUE(closedOrders.size() == 1);
-		ASSERT_EQ(orderId, closedOrders.front().order_id());
-	}
-
-	TEST(PaperTrader, TrailingStopLossBuyOrderExecutesWhenPriceGreaterThanMinPlusDelta)
-	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 1.0;
-		constexpr double delta = 0.10;
-
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_trailing_stop_loss_order(pair, trade_action::BUY, delta, volume) };
-
-		std::string orderId{ trader.add_order(orderRequest) };
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 21.0);
-		trader.try_fill_open_orders();
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 15.0);
-		trader.try_fill_open_orders();
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 17.0);
-		trader.try_fill_open_orders();
-
-		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
-		ASSERT_TRUE(closedOrders.size() == 1);
-		ASSERT_EQ(orderId, closedOrders.front().order_id());
-	}
-
-	TEST(PaperTrader, TrailingStopLossSellOrderExecutesWhenPriceLessThanMaxMinusDelta)
-	{
-		constexpr double initialGbpBalance = 100.0;
-		constexpr double initialBtcBalance = 1.5;
-		constexpr double fee = 0.1;
-		constexpr double assetPrice = 20.0;
-		constexpr double volume = 1.0;
-		constexpr double delta = 0.10;
-
-		tradable_pair pair{ "BTC", "GBP" };
-		get_prices prices{ { { pair, assetPrice } } };
-		paper_trade_api trader{ create_paper_trade_api(initialGbpBalance, initialBtcBalance, fee, prices) };
-		order_request orderRequest{ create_trailing_stop_loss_order(pair, trade_action::SELL, delta, volume) };
-
-		std::string orderId{ trader.add_order(orderRequest) };
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 19.0);
-		trader.try_fill_open_orders();
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 25.0);
-		trader.try_fill_open_orders();
-
-		ASSERT_TRUE(trader.get_closed_orders().empty());
-
-		prices.set_price(pair, 22.0);
-		trader.try_fill_open_orders();
-
-		std::vector<order_description> closedOrders{ trader.get_closed_orders() };
-		ASSERT_TRUE(closedOrders.size() == 1);
-		ASSERT_EQ(orderId, closedOrders.front().order_id());
+		set_price(22.0, true);
+		ASSERT_EQ(order_status::CLOSED, this->_paperTradeApi->get_order_status(orderId));
 	}
 }

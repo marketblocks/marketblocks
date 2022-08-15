@@ -32,9 +32,9 @@ namespace mb
 		virtual trade_update get_last_trade(const tradable_pair& pair) const = 0;
 		virtual ohlcv_data get_last_candle(const tradable_pair& pair, ohlcv_interval interval) const = 0;
 
-		void set_trade_update_handler(trade_update_handler handler);
-		void set_ohlcv_update_handler(ohlcv_update_handler handler);
-		void set_order_book_update_handler(order_book_update_handler handler);
+		void add_trade_update_handler(trade_update_handler handler);
+		void add_ohlcv_update_handler(ohlcv_update_handler handler);
+		void add_order_book_update_handler(order_book_update_handler handler);
 
 	protected:
 		bool has_trade_update_handler();
@@ -46,8 +46,8 @@ namespace mb
 		void fire_order_book_update(order_book_update_message message);
 
 	private:
-		trade_update_handler _tradeUpdateHandler;
-		ohlcv_update_handler _ohlcvUpdateHandler;
-		order_book_update_handler _orderBookUpdateHandler;
+		std::vector<trade_update_handler> _tradeUpdateHandlers;
+		std::vector<ohlcv_update_handler> _ohlcvUpdateHandlers;
+		std::vector<order_book_update_handler> _orderBookUpdateHandlers;
 	};
 }
