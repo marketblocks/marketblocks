@@ -14,7 +14,7 @@ namespace mb
 	class http_service
 	{
 	private:
-		CURL* easyHandle;
+		CURL* _easyHandle;
 		inline static int _timeout;
 
 	public:

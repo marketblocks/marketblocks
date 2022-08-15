@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <mutex>
 
 #include "http_service.h"
 #include "http_constants.h"
@@ -7,6 +8,22 @@
 namespace
 {
 	using namespace mb;
+
+	CURL* create_easy_handle()
+	{
+		static bool hasGlobalInit = false;
+		static std::mutex mutex;
+
+		std::lock_guard<std::mutex>lock{ mutex };
+
+		if (!hasGlobalInit)
+		{
+			curl_global_init(CURL_GLOBAL_ALL);
+			hasGlobalInit = true;
+		}
+
+		return curl_easy_init();
+	}
 
 	size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
 	{
@@ -47,45 +64,45 @@ namespace
 namespace mb
 {
 	http_service::http_service()
-		: easyHandle{ curl_easy_init() }
+		: _easyHandle{ create_easy_handle() }
 	{
-		if (!easyHandle)
+		if (!_easyHandle)
 		{
 			throw http_error{ "Could not create HTTP service" };
 		}
 
-		set_option(easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
-		set_option(easyHandle, CURLOPT_TIMEOUT_MS, _timeout);
+		set_option(_easyHandle, CURLOPT_WRITEFUNCTION, write_callback);
+		set_option(_easyHandle, CURLOPT_TIMEOUT_MS, _timeout);
 	}
 
 	http_service::~http_service()
 	{
-		curl_easy_cleanup(easyHandle);
+		curl_easy_cleanup(_easyHandle);
 	}
 
 	http_service::http_service(const http_service& other)
-		: easyHandle{ other.easyHandle }
+		: _easyHandle{ other._easyHandle }
 	{
 	}
 
 	http_service::http_service(http_service&& other) noexcept
-		: easyHandle{ other.easyHandle }
+		: _easyHandle{ other._easyHandle }
 	{
-		other.easyHandle = nullptr;
+		other._easyHandle = nullptr;
 	}
 
 	http_service& http_service::operator=(const http_service& other)
 	{
-		easyHandle = other.easyHandle;
+		_easyHandle = other._easyHandle;
 
 		return *this;
 	}
 
 	http_service& http_service::operator=(http_service&& other) noexcept
 	{
-		easyHandle = other.easyHandle;
+		_easyHandle = other._easyHandle;
 
-		other.easyHandle = nullptr;
+		other._easyHandle = nullptr;
 
 		return *this;
 	}
@@ -94,22 +111,22 @@ namespace mb
 	{
 		std::string readBuffer;
 
-		set_option(easyHandle, CURLOPT_URL, request.url().c_str());
-		set_option(easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).data());
-		set_option(easyHandle, CURLOPT_WRITEDATA, &readBuffer);
-		set_option(easyHandle, CURLOPT_POSTFIELDS, request.content().c_str());
+		set_option(_easyHandle, CURLOPT_URL, request.url().c_str());
+		set_option(_easyHandle, CURLOPT_CUSTOMREQUEST, to_string(request.verb()).data());
+		set_option(_easyHandle, CURLOPT_WRITEDATA, &readBuffer);
+		set_option(_easyHandle, CURLOPT_POSTFIELDS, request.content().c_str());
 
 		curl_slist* chunk = append_headers(NULL, request.headers());
-		set_option(easyHandle, CURLOPT_HTTPHEADER, chunk);
+		set_option(_easyHandle, CURLOPT_HTTPHEADER, chunk);
 
-		CURLcode result = curl_easy_perform(easyHandle);
+		CURLcode result = curl_easy_perform(_easyHandle);
 
 		curl_slist_free_all(chunk);
 
 		throw_if_error(result);
 
 		long responseCode;
-		curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);
+		curl_easy_getinfo(_easyHandle, CURLINFO_RESPONSE_CODE, &responseCode);
 
 		return http_response{ static_cast<int>(responseCode), readBuffer };
 	}
