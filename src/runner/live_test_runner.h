@@ -63,7 +63,7 @@ namespace mb::internal
 				try
 				{
 					strategy.run_iteration();
-					//testLogger.flush_trades();
+					testLogger.flush_trades();
 				}
 				catch (const mb_exception& e)
 				{

@@ -8,7 +8,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(marketblocks_test 
-"unittest/mocks.h" 
+"mbtest/mocks.h" 
 "unittest/common/utils/stringutils_test.cpp" 
 "unittest/common/utils/mathutils_test.cpp" 
 "unittest/common/utils/financeutils_test.cpp" 
@@ -17,13 +17,13 @@ add_executable(marketblocks_test
 "unittest/common/security/hash_test.cpp"
 
 
-"unittest/assertion_helpers.h" 
+"mbtest/assertion_helpers.h" 
 
 "test_data/test_data_constants.h"
  
  
 
-"unittest/assertion_helpers.cpp" 
+"mbtest/assertion_helpers.cpp" 
  
 "unittest/exchanges/websockets/order_book_cache_test.cpp"
 "unittest/common/types/set_queue_test.cpp"

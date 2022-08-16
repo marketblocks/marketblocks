@@ -6,8 +6,8 @@
 #include "common/file/config_file_reader.h"
 #include "common/utils/timeutils.h"
 #include "test_data/test_data_constants.h"
-#include "unittest/assertion_helpers.h"
-#include "unittest/mocks.h"
+#include "mbtest/assertion_helpers.h"
+#include "mbtest/mocks.h"
 
 namespace mb::test
 {
