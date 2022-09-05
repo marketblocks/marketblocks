@@ -54,7 +54,7 @@ namespace mb
 					fire_order_book_update(order_book_update_message
 						{ 
 							subscription.pair_item(), 
-							_backTestingData->get_order_book(subscription.pair_item()) 
+							_backTestingData->get_order_book(subscription.pair_item()).asks().front()
 						});
 				}
 

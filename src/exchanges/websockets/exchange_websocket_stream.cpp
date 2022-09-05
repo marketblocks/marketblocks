@@ -165,7 +165,7 @@ namespace mb
 
 		if (has_order_book_update_handler())
 		{
-			fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cache.snapshot() });
+			fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), order_book_entry{ 0, 0, order_book_side::ASK } });
 		}
 	}
 
@@ -180,12 +180,12 @@ namespace mb
 			}
 
 			auto cacheIt = lockedOrderBooks->find(pairName);
-			cacheIt->second.update_cache(timeStamp, std::move(entry));
+			cacheIt->second.update_cache(timeStamp, entry);
 		}
-
+		
 		if (has_order_book_update_handler())
 		{
-			//fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), cacheIt->second.snapshot() });
+			fire_order_book_update(order_book_update_message{ _pairs.shared_lock()->at(pairName), std::move(entry) });
 		}
 	}
 

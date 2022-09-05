@@ -44,14 +44,14 @@ namespace mb
 	{
 	private:
 		tradable_pair _pair;
-		order_book_state _orderBook;
+		order_book_entry _entry;
 
 	public:
-		order_book_update_message(tradable_pair pair, order_book_state orderBook)
-			: _pair{ std::move(pair) }, _orderBook{ std::move(orderBook) }
+		order_book_update_message(tradable_pair pair, order_book_entry entry)
+			: _pair{ std::move(pair) }, _entry{ std::move(entry) }
 		{}
 
 		const tradable_pair& pair() const noexcept { return _pair; }
-		const order_book_state& order_book() const noexcept { return _orderBook; }
+		const order_book_entry& entry() const noexcept { return _entry; }
 	};
 }

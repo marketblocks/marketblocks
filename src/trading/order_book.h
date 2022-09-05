@@ -51,7 +51,7 @@ namespace mb
 
 		constexpr int depth() const { return std::max(_asks.size(), _bids.size()); }
 	};
-	
+
 	const order_book_entry& get_best_entry(const std::vector<order_book_entry>& entries);
 	const order_book_entry& select_best_entry(const order_book_state& orderBook, trade_action action);
 }
