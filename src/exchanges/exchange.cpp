@@ -1,4 +1,5 @@
 #include "exchange.h"
+#include "common/exceptions/not_implemented_exception.h"
 
 namespace mb
 {
@@ -45,5 +46,10 @@ namespace mb
 		}
 
 		return books;
+	}
+
+	order_confirmation trade_api::add_order_confirm(const order_request& description)
+	{
+		throw not_implemented_exception{ "exchange::add_order_confirm" };
 	}
 }

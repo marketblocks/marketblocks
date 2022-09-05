@@ -6,7 +6,7 @@
     "product_id": "BTCUSD",
     "profile_id": "8058d771-2d88-4f0f-ab6e-299c153d4308",
     "side": "buy",
-    "type": "limit",
+    "type": "market",
     "time_in_force": "GTC",
     "post_only": true,
     "created_at": "2021-03-25T10:02:39.622052Z",

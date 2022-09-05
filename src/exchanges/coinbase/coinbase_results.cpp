@@ -45,6 +45,22 @@ namespace
 
 		return trade_action::SELL;
 	}
+
+	order_type to_order_type(std::string_view orderTypeString)
+	{
+		if (orderTypeString == "limit")
+		{
+			return order_type::LIMIT;
+		}
+		if (orderTypeString == "market")
+		{
+			return order_type::MARKET;
+		}
+		if (orderTypeString == "stop")
+		{
+			return order_type::STOP_LOSS;
+		}
+	}
 }
 
 namespace mb::coinbase
@@ -205,6 +221,7 @@ namespace mb::coinbase
 				orders.emplace_back(
 					time,
 					orderElement.get<std::string>("id"),
+					to_order_type(orderElement.get<std::string>("type")),
 					orderElement.get<std::string>("product_id"),
 					to_trade_action(orderElement.get<std::string>("side")),
 					price,

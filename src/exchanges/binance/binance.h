@@ -2,6 +2,7 @@
 
 #include "binance_config.h"
 #include "binance_websocket.h"
+#include "binance_order_filters.h"
 #include "exchanges/exchange.h"
 #include "exchanges/exchange_common.h"
 #include "networking/http/http_service.h"
@@ -19,7 +20,7 @@ namespace mb
 		std::string _apiKey;
 		std::string _secretKey;
 		std::unique_ptr<http_service> _httpService;
-
+		mutable std::unordered_map<tradable_pair, internal::binance_order_filters> _orderFilters;
 
 		template<typename Value, typename ResponseReader>
 		Value send_public_request(std::string_view path, const ResponseReader& reader, std::string_view query = "") const
@@ -62,6 +63,7 @@ namespace mb
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
 		std::string add_order(const order_request& description) override;
+		order_confirmation add_order_confirm(const order_request& description) override;
 		void cancel_order(std::string_view orderId) override;
 	};
 

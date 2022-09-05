@@ -5,6 +5,7 @@
 #include "common/security/encoding.h"
 #include "common/file/config_file_reader.h"
 #include "common/utils/containerutils.h"
+#include "common/utils/mathutils.h"
 
 #include "common/exceptions/not_implemented_exception.h"
 
@@ -69,6 +70,40 @@ namespace
 			orderType == order_type::STOP_LOSS ||
 			orderType == order_type::TRAILING_STOP_LOSS;
 	}
+
+	url_query_builder create_order_query(const order_request& request, const internal::binance_order_filters& filters)
+	{
+		url_query_builder query = url_query_builder{}
+			.add_parameter("symbol", request.pair().to_string())
+			.add_parameter("side", to_order_side(request.action()))
+			.add_parameter("type", to_order_type_str(request.order_type()))
+			.add_parameter("quantity", to_string(request.get(order_request_parameter::VOLUME), filters.qty_precision()));
+
+		if (is_limit_order(request.order_type()))
+		{
+			query.add_parameter("price", to_string(request.get(order_request_parameter::ASSET_PRICE), filters.price_precision()));
+			query.add_parameter("timeInForce", "GTC");
+		}
+
+		switch (request.order_type())
+		{
+		case order_type::STOP_LOSS:
+		{
+			query.add_parameter("stopPrice", to_string(request.get(order_request_parameter::STOP_PRICE), filters.price_precision()));
+			break;
+		}
+		case order_type::TRAILING_STOP_LOSS:
+		{
+			int delta{ static_cast<int>(request.get(order_request_parameter::TRAILING_DELTA) * 10000) };
+			query.add_parameter("trailingDelta", std::to_string(delta));
+			break;
+		}
+		default:
+			break;
+		}
+
+		return query;
+	}
 }
 
 namespace mb
@@ -98,7 +133,24 @@ namespace mb
 
 	std::vector<tradable_pair> binance_api::get_tradable_pairs() const
 	{
-		return send_public_request<std::vector<tradable_pair>>("/api/v3/exchangeInfo", binance::read_tradable_pairs);
+		_orderFilters = send_public_request<std::unordered_map<tradable_pair, internal::binance_order_filters>>("/api/v3/exchangeInfo", binance::read_tradable_pairs);
+
+		std::vector<tradable_pair> pairs;
+		pairs.reserve(_orderFilters.size());
+
+		double minValue = 0.0;
+
+		for (auto& [pair, filter] : _orderFilters)
+		{
+			pairs.emplace_back(pair);
+
+			if (pair.price_unit() == "USDT")
+			{
+				minValue = std::max(minValue, filter.min_value());
+			}
+		}
+
+		return pairs;
 	}
 
 	std::vector<ohlcv_data> binance_api::get_ohlcv(const tradable_pair& tradablePair, ohlcv_interval interval, int count) const
@@ -161,38 +213,16 @@ namespace mb
 		throw not_implemented_exception{ "binance::get_closed_orders" };
 	}
 
-	std::string binance_api::add_order(const order_request& description)
+	std::string binance_api::add_order(const order_request& request)
 	{
-		url_query_builder query = url_query_builder{}
-			.add_parameter("symbol", description.pair().to_string())
-			.add_parameter("side", to_order_side(description.action()))
-			.add_parameter("type", to_order_type_str(description.order_type()))
-			.add_parameter("quantity", std::to_string(description.get(order_request_parameter::VOLUME)));
-
-		if (is_limit_order(description.order_type()))
-		{
-			query.add_parameter("price", std::to_string(description.get(order_request_parameter::ASSET_PRICE)));
-			query.add_parameter("timeInForce", "GTC");
-		}
-
-		switch (description.order_type())
-		{
-		case order_type::STOP_LOSS:
-		{
-			query.add_parameter("stopPrice", std::to_string(description.get(order_request_parameter::STOP_PRICE)));
-			break;
-		}
-		case order_type::TRAILING_STOP_LOSS:
-		{
-			int delta{ static_cast<int>(description.get(order_request_parameter::TRAILING_DELTA) * 10000) };
-			query.add_parameter("trailingDelta", std::to_string(delta));
-			break;
-		}
-		default:
-			break;
-		}
-
+		url_query_builder query{ create_order_query(request, _orderFilters[request.pair()])};
 		return send_private_request<std::string>(http_verb::POST, "/api/v3/order", binance::read_add_order, query);
+	}
+
+	order_confirmation binance_api::add_order_confirm(const order_request& request)
+	{
+		url_query_builder query{ create_order_query(request, _orderFilters[request.pair()]) };
+		return send_private_request<order_confirmation>(http_verb::POST, "/api/v3/order", binance::read_add_order_confirm, query);
 	}
 
 	void binance_api::cancel_order(std::string_view orderId)

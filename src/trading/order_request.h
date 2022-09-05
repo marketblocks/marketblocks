@@ -4,7 +4,6 @@
 
 #include "tradable_pair.h"
 #include "trading_constants.h"
-#include "order_type.h"
 #include "common/utils/financeutils.h"
 
 namespace mb

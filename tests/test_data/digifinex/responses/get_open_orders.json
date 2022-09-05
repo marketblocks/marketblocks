@@ -13,7 +13,7 @@
       "avg_price": 0,
       "status": 1,
       "type": "sell",
-      "kind": "spot"
+      "kind": "spot",
     },
     {
       "symbol": "BTCUSD",
@@ -26,7 +26,7 @@
       "executed_amount": 0,
       "avg_price": 0,
       "status": 1,
-      "type": "buy",
+      "type": "buy_market",
       "kind": "spot"
     }
   ]

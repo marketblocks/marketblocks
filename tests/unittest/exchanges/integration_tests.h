@@ -4,6 +4,7 @@
 
 #include "exchange_test_common.h"
 #include "exchanges/exchange.h"
+#include "mbtest/common.h"
 
 namespace
 {

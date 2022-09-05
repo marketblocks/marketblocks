@@ -82,7 +82,11 @@ namespace mb::test
 	{
 	public:
 		mock_exchange()
-			: exchange{ "TEST", nullptr }
+			: mock_exchange(nullptr)
+		{}
+
+		mock_exchange(std::shared_ptr<websocket_stream> websocketStream)
+			: exchange{ "TEST", websocketStream }
 		{}
 
 		MOCK_METHOD(exchange_status, get_status, (), (const, override));

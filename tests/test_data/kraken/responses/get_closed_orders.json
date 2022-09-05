@@ -12,7 +12,7 @@
         "descr": {
           "pair": "BTCUSD",
           "type": "buy",
-          "ordertype": "limit",
+          "ordertype": "market",
           "price": "30010.0",
           "price2": "0",
           "leverage": "none",

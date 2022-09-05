@@ -67,6 +67,7 @@ namespace
 		{
 			std::stoll(orderElement.get<std::string>("time")) / 1000,
 			orderElement.get<std::string>("orderId"),
+			orderElement.get<std::string>("type") == "LIMIT" ? order_type::LIMIT : order_type::MARKET,
 			orderElement.get<std::string>("symbol"),
 			action,
 			price,

@@ -97,6 +97,11 @@ namespace mb
 			return _tradeApi->add_order(description);
 		}
 
+		order_confirmation add_order_confirm(const order_request& description) override
+		{
+			return _tradeApi->add_order_confirm(description);
+		}
+
 		void cancel_order(std::string_view orderId) override
 		{
 			return _tradeApi->cancel_order(orderId);

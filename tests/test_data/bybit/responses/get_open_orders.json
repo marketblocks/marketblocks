@@ -40,7 +40,7 @@
       "avgPrice": "0",
       "status": "NEW",
       "timeInForce": "GTC",
-      "type": "LIMIT",
+      "type": "MARKET",
       "side": "BUY",
       "stopPrice": "0.0",
       "icebergQty": "0.0",

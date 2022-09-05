@@ -52,7 +52,8 @@ namespace
 		return order_description{
 			time,
 			std::move(orderId),
-			request.pair().to_string('/'),
+			request.order_type(),
+			request.pair().to_string(),
 			request.action(),
 			fillPrice,
 			request.get(order_request_parameter::VOLUME) };
@@ -288,6 +289,20 @@ namespace mb
 		try_fill_order(orderId);
 		
 		return orderId;
+	}
+
+	order_confirmation paper_trade_api::add_order_confirm(const order_request& request)
+	{
+		std::string orderId{ add_order(request) };
+
+		return order_confirmation
+		{
+			std::move(orderId),
+			order_status::CLOSED,
+			request.get(order_request_parameter::VOLUME),
+			request.get(order_request_parameter::VOLUME),
+			_websocketStream->get_last_trade(request.pair()).price()
+		};
 	}
 
 	void paper_trade_api::cancel_order(std::string_view orderId)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/json/json.h"
-#include "exchanges/exchange.h"/
+#include "exchanges/exchange.h"
 #include "exchanges/websockets/exchange_websocket_stream.h"
 
 namespace mb::internal

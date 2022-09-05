@@ -3,6 +3,7 @@
 #include "digifinex_results.h"
 #include "common/json/json.h"
 #include "common/exceptions/not_implemented_exception.h"
+#include "common/utils/stringutils.h"
 
 namespace
 {
@@ -71,12 +72,15 @@ namespace
 
 	order_description read_order_description(const json_element& orderElement)
 	{
+		std::string orderType{ orderElement.get<std::string>("type") };
+
 		return order_description
 		{
 			orderElement.get<std::time_t>("created_date"),
 			orderElement.get<std::string>("order_id"),
+			mb::contains(orderType, "market") ? order_type::MARKET : order_type::LIMIT,
 			orderElement.get<std::string>("symbol"),
-			orderElement.get<std::string>("type") == "buy" ? trade_action::BUY : trade_action::SELL,
+			mb::contains(orderType, "buy") ? trade_action::BUY : trade_action::SELL,
 			orderElement.get<double>("price"),
 			orderElement.get<double>("amount")
 		};

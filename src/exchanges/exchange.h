@@ -12,6 +12,7 @@
 #include "trading/order_request.h"
 #include "trading/ohlcv_data.h"
 #include "trading/order_description.h"
+#include "trading/order_confirmation.h"
 
 namespace mb
 {
@@ -40,6 +41,8 @@ namespace mb
 		virtual std::vector<order_description> get_closed_orders() const = 0;
 		virtual std::string add_order(const order_request& description) = 0;
 		virtual void cancel_order(std::string_view orderId) = 0;
+
+		virtual order_confirmation add_order_confirm(const order_request& description);
 	};
 
 	class exchange : public market_api, public trade_api

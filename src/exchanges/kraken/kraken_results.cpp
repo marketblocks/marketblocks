@@ -50,6 +50,28 @@ namespace
 		}
 	}
 
+	order_type to_order_type(std::string_view orderTypeString)
+	{
+		if (orderTypeString == "limit")
+		{
+			return order_type::LIMIT;
+		}
+		if (orderTypeString == "market")
+		{
+			return order_type::MARKET;
+		}
+		if (mb::contains(orderTypeString.data(), "stop-loss"))
+		{
+			return order_type::STOP_LOSS;
+		}
+		if (mb::contains(orderTypeString.data(), "take-profit"))
+		{
+			return order_type::TAKE_PROFIT;
+		}
+
+		throw std::invalid_argument{ "Unknown order type" };
+	}
+
 	result<std::vector<order_description>> read_open_closed_orders(std::string_view jsonResult, std::string_view orderStatus)
 	{
 		return read_result<std::vector<order_description>>(jsonResult, [&orderStatus](const json_element& resultElement)
@@ -82,6 +104,7 @@ namespace
 					orderDescriptions.emplace_back(
 						time,
 						std::move(orderId), 
+						to_order_type(order.get<std::string>("ordertype")),
 						std::move(pairName), 
 						action, 
 						price, 

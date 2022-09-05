@@ -1,5 +1,6 @@
 #include "binance_results.h"
 #include "common/json/json.h"
+#include "common/utils/stringutils.h"
 
 #include "common/exceptions/not_implemented_exception.h"
 
@@ -27,6 +28,28 @@ namespace
 		return trade_action::SELL;
 	}
 
+	order_type to_order_type(std::string_view orderTypeString)
+	{
+		if (orderTypeString == "LIMIT")
+		{
+			return order_type::LIMIT;
+		}
+		if (orderTypeString == "MARKET")
+		{
+			return order_type::MARKET;
+		}
+		if (mb::contains(orderTypeString.data(), "STOP_LOSS"))
+		{
+			return order_type::STOP_LOSS;
+		}
+		if (mb::contains(orderTypeString.data(), "TAKE_PROFIT"))
+		{
+			return order_type::TAKE_PROFIT;
+		}
+
+		throw std::invalid_argument{ "Unknown order type" };
+	}
+
 	template<typename Json>
 	order_description read_order_description(const Json& orderElement)
 	{
@@ -34,6 +57,7 @@ namespace
 		{
 			orderElement.template get<std::time_t>("time") / 1000,
 			std::to_string(orderElement.template get<long long>("orderId")),
+			to_order_type(orderElement.template get<std::string>("type")),
 			orderElement.template get<std::string>("symbol"),
 			to_trade_action(orderElement.template get<std::string>("side")),
 			std::stod(orderElement.template get<std::string>("price")),
@@ -67,6 +91,24 @@ namespace
 			return result<T>::fail(e.what());
 		}
 	}
+
+	order_status to_order_status(std::string_view statusString)
+	{
+		if (statusString == "NEW")
+		{
+			return order_status::OPEN;
+		}
+		if (statusString == "PARTIALLY_FILLED")
+		{
+			return order_status::PARTIALLY_FILLED;
+		}
+		if (statusString == "FILLED")
+		{
+			return order_status::CLOSED;
+		}
+
+		return order_status::CANCELLED;
+	}
 }
 
 namespace mb::binance
@@ -79,12 +121,12 @@ namespace mb::binance
 		});
 	}
 
-	result<std::vector<tradable_pair>> read_tradable_pairs(std::string_view jsonResult)
+	result<std::unordered_map<tradable_pair, internal::binance_order_filters>> read_tradable_pairs(std::string_view jsonResult)
 	{
-		return read_result<std::vector<tradable_pair>>(jsonResult, [](const json_document& json)
+		return read_result<std::unordered_map<tradable_pair, internal::binance_order_filters>>(jsonResult, [](const json_document& json)
 		{
 			json_element symbolsElement{ json.element("symbols") };
-			std::vector<tradable_pair> pairs;
+			std::unordered_map<tradable_pair, internal::binance_order_filters> pairs;
 			pairs.reserve(symbolsElement.size());
 
 			for (auto it = symbolsElement.begin(); it != symbolsElement.end(); ++it)
@@ -93,8 +135,41 @@ namespace mb::binance
 
 				std::string asset{ pairElement.get<std::string>("baseAsset") };
 				std::string priceUnit{ pairElement.get<std::string>("quoteAsset") };
-				
-				pairs.emplace_back(std::move(asset), std::move(priceUnit));
+				tradable_pair pair{ std::move(asset), std::move(priceUnit) };
+
+				double tickSize = 0.0;
+				double minQty = 0.0;
+				double qtyStepSize = 0.0;
+				double minValue = 0.0;
+				json_element filtersElement{ pairElement.element("filters") };
+
+				for (auto filterIt = filtersElement.begin(); filterIt != filtersElement.end(); ++filterIt)
+				{
+					json_element filter{ filterIt.value() };
+					std::string filterType{ filter.get<std::string>("filterType") };
+
+					if (filterType == "PRICE_FILTER")
+					{
+						tickSize = std::stod(filter.get<std::string>("tickSize"));
+					}
+					else if (filterType == "LOT_SIZE")
+					{
+						minQty = std::stod(filter.get<std::string>("minQty"));
+						qtyStepSize = std::stod(filter.get<std::string>("stepSize"));
+					}
+					else if (filterType == "MIN_NOTIONAL")
+					{
+						minValue = std::stod(filter.get<std::string>("minNotional"));
+					}
+				}
+
+				pairs.emplace(std::move(pair), internal::binance_order_filters
+					{
+						static_cast<int>(-std::log10(tickSize)),
+						static_cast<int>(-std::log10(qtyStepSize)),
+						minQty,
+						minValue
+					});
 			}
 
 			return pairs;
@@ -245,6 +320,36 @@ namespace mb::binance
 		return read_result<std::string>(jsonResult, [](const json_document& json)
 			{
 				return std::to_string(json.get<long long>("orderId"));
+			});
+	}
+
+	result<order_confirmation> read_add_order_confirm(std::string_view jsonResult)
+	{
+		return read_result<order_confirmation>(jsonResult, [](const json_document& json)
+			{
+				json_element fillsElement{ json.element("fills") };
+				double avgPrice = 0.0;
+				double filledQty = 0.0;
+
+				for (auto it = fillsElement.begin(); it != fillsElement.end(); ++it)
+				{
+					json_element fill{ it.value() };
+					double price{ std::stod(fill.get<std::string>("price")) };
+					double qty{ std::stod(fill.get<std::string>("qty")) };
+					avgPrice += price * qty;
+					filledQty += qty;
+				}
+
+				avgPrice /= filledQty;
+
+				return order_confirmation
+				{
+					std::to_string(json.get<long long>("orderId")),
+					to_order_status(json.get<std::string>("status")),
+					std::stod(json.get<std::string>("origQty")),
+					std::stod(json.get<std::string>("executedQty")),
+					avgPrice
+				};
 			});
 	}
 

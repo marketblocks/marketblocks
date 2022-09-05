@@ -53,6 +53,7 @@ namespace mb
 		std::vector<order_description> get_open_orders() const override;
 		std::vector<order_description> get_closed_orders() const override;
 		std::string add_order(const order_request& description) override;
+		order_confirmation add_order_confirm(const order_request& description) override;
 		void cancel_order(std::string_view orderId) override;
 
 		order_status get_order_status(std::string_view orderId) const;

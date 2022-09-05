@@ -26,7 +26,7 @@
       "executed_amount": 1.25,
       "avg_price": 30010.0,
       "status": 2,
-      "type": "buy",
+      "type": "buy_market",
       "kind": "spot"
     }
   ]
